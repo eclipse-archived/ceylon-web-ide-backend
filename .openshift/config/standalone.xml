@@ -42,7 +42,7 @@
     </extensions>
 
     <system-properties>
-        <property name="ceylon.home" value="${user.home}/xxxyyyzzz" />
+        <property name="ceylon.home" value="/var/lib/libra/05a5b190e6854e029fc71ac39b5fa1ee/repl/repo/ceylon-home" />
     </system-properties>
 
     <profile>
