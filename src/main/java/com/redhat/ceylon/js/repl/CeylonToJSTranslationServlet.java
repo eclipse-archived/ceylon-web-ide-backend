@@ -1,7 +1,9 @@
 package com.redhat.ceylon.js.repl;
 
+import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.io.StringBufferInputStream;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -18,6 +20,8 @@ import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.TypeCheckerBuilder;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
 import com.redhat.ceylon.compiler.typechecker.io.VirtualFile;
+import com.redhat.ceylon.compiler.typechecker.tree.Message;
+import com.redhat.ceylon.compiler.typechecker.tree.UnexpectedError;
 
 /**
  * Servlet implementation class CeylonToJSTranslationServlet
@@ -43,7 +47,7 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
                 .addSrcDirectory(src)
                 .getTypeChecker();
         typeChecker.process();
-        final Writer out = response.getWriter();
+        final CharArrayWriter out = new CharArrayWriter();
         JsCompiler compiler = new JsCompiler(typeChecker) {
             @Override
             protected Writer getWriter(PhasedUnit pu) {
@@ -52,6 +56,30 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
         }.optimize(true);
         compiler.generate();
         out.flush();
+        out.close();
+        
+        List<? extends Message> errors = compiler.listErrors();
+        if (errors.size() == 0) {
+            PrintWriter writer = response.getWriter();
+            char[] buf = out.toCharArray();
+            writer.write(buf, 0, buf.length);
+            writer.flush();
+        } else {
+            response.setStatus(500);
+            PrintWriter writer = response.getWriter();
+            boolean first = true;
+            writer.print("[");
+            for (Message err : errors) {
+                if (!first) {
+                    writer.print(",");
+                }
+                writer.print("\"");
+                writer.print(err.getMessage().replace('"', '\''));
+                writer.print("\"");
+                first = false;
+            }
+            writer.print("]");
+        }
 	}
 
 }

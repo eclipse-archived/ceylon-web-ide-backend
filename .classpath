@@ -14,6 +14,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jscompiler-0.1.jar" sourcepath="/ceylon-js"/>
-	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/typechecker-0.1.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/typechecker-0.1.jar" sourcepath="/ceylon-spec"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

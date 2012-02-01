@@ -17,12 +17,14 @@ require(["ceylon/language/0.1/ceylon.language"],
     }
 );
 
-function remoteTranslate(src, successHandler) {
+function remoteTranslate(src, successHandler, errorHandler) {
 	var timeoutHandle;
 	
-	function errorHandler() {
-		alert("error");
-	};
+	if (!errorHandler) {
+		errorHandler = function(err) {
+			alert("error: " + err);
+		};
+	}
 	
 	var url = "translate";
 	var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
@@ -34,7 +36,7 @@ function remoteTranslate(src, successHandler) {
 			if (xhr.status == 200) {
 				successHandler(xhr.responseText);
 			} else {
-				errorHandler();
+				errorHandler(xhr.responseText);
 			}
 		}
 	};
