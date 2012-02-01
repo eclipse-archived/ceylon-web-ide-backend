@@ -42,7 +42,7 @@
     </extensions>
 
     <system-properties>
-        <property name="ceylon.home" value="xxxyyyzzz" />
+        <property name="ceylon.home" value="${user.home}/xxxyyyzzz" />
     </system-properties>
 
     <profile>
