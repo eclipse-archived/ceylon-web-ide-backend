@@ -203,4 +203,8 @@
         <socket-binding name="txn-status-manager" port="4713"/>
     </socket-binding-group>
 
+    <system-properties>
+        <property name="ceylon.home" value="xxxyyyzzz" />
+    </system-properties>
+
 </server>
