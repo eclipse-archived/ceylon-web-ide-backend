@@ -43,20 +43,26 @@
 </head>
 <body>
     <h1>Ceylon Script Runner</h1>
+    <form>
     <table>
         <tr>
-            <td><form>
+            <td>
                 <div id="ceylon">print("Hello World");</div><br>
-                <input type="hidden" name="ceylon" value="">
-                <input type="button" value="Translate" onClick="translate()" class="code">
-                <input type="button" value="Run" onClick="run()">
-            </form></td>
+            </td>
             <td>
                 <li><a href="#" onClick="return editCode(helloWorld)">Hello World</a></li>
                 <li><a href="#" onClick="return editCode(forTen)">For 1 to 10</a></li>
             </td>
         </tr>
+        <tr>
+            <td colspan="2">
+                <input type="hidden" name="ceylon" value="">
+                <input type="button" value="Translate" onClick="translate()" class="code">
+                <input type="button" value="Run" onClick="run()">
+            </td>
+        </tr>
     </table>
+    </form>
     <hr class="code">
     <pre id="result" class="code">
     </pre>

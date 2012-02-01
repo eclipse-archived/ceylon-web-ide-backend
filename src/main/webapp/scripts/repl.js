@@ -46,16 +46,19 @@ function remoteTranslate(src, successHandler, errorHandler) {
 	xhr.send("ceylon=" + escape(src));
 };
 
-var oldcode;
+var oldcode, transok;
 
 function translate(onTranslation) {
     var code = "class Ceylon_Script_Runner() {" + getEditCode() + "}";
     if (code != oldcode) {
+    	clearOutput();
     	oldcode = code;
+        transok = false;
         remoteTranslate(code, function(translatedcode) {
         	showCode(translatedcode);
             try {
 	            globalEval(translatedcode);
+	            transok = true;
 	            if (onTranslation) {
 	            	onTranslation();
 	            }
@@ -64,6 +67,7 @@ function translate(onTranslation) {
             	printError("--- " + err);
             }
         }, function(errcodes) {
+            transok = false;
         	printError("Code contains errors:");
         	var errors = JSON.parse(errcodes);
         	for (var idx in errors) {
@@ -76,19 +80,20 @@ function translate(onTranslation) {
 }
 
 function run() {
-	clearOutput();
 	translate(afterTranslate);
 }
 
 function afterTranslate() {
-	printSystem("// Script start at " + (new Date()));
-    try {
-		Ceylon_Script_Runner();
-    } catch(err) {
-    	printError("Runtime error:");
-    	printError("--- " + err);
-    }
-	printSystem("// Script end at " + (new Date()));
+	if (transok == true) {
+		printSystem("// Script start at " + (new Date()));
+	    try {
+			Ceylon_Script_Runner();
+	    } catch(err) {
+	    	printError("Runtime error:");
+	    	printError("--- " + err);
+	    }
+		printSystem("// Script end at " + (new Date()));
+	}
 }
 
 function editCode(code) {
