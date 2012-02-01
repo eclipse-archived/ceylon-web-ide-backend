@@ -41,6 +41,10 @@
         <extension module="org.jboss.as.weld" />
     </extensions>
 
+    <system-properties>
+        <property name="ceylon.home" value="xxxyyyzzz" />
+    </system-properties>
+
     <profile>
         <subsystem xmlns="urn:jboss:domain:logging:1.0">
             <!--console-handler name="CONSOLE">
@@ -202,9 +206,5 @@
         <socket-binding name="txn-recovery-environment" port="4712"/>
         <socket-binding name="txn-status-manager" port="4713"/>
     </socket-binding-group>
-
-    <system-properties>
-        <property name="ceylon.home" value="xxxyyyzzz" />
-    </system-properties>
 
 </server>
