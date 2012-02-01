@@ -41,45 +41,55 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-	    String script = request.getParameter("ceylon");
-	    ScriptFile src = new ScriptFile(script);
-        TypeChecker typeChecker = new TypeCheckerBuilder()
-                .addSrcDirectory(src)
-                .getTypeChecker();
-        typeChecker.process();
-        final CharArrayWriter out = new CharArrayWriter();
-        JsCompiler compiler = new JsCompiler(typeChecker) {
-            @Override
-            protected Writer getWriter(PhasedUnit pu) {
-                return out;
+	    try {
+    	    String script = request.getParameter("ceylon");
+    	    ScriptFile src = new ScriptFile(script);
+            TypeChecker typeChecker = new TypeCheckerBuilder()
+                    .addSrcDirectory(src)
+                    .getTypeChecker();
+            typeChecker.process();
+            final CharArrayWriter out = new CharArrayWriter();
+            JsCompiler compiler = new JsCompiler(typeChecker) {
+                @Override
+                protected Writer getWriter(PhasedUnit pu) {
+                    return out;
+                }
+            }.optimize(true);
+            compiler.generate();
+            out.flush();
+            out.close();
+            
+            List<? extends Message> errors = compiler.listErrors();
+            if (errors.size() == 0) {
+                PrintWriter writer = response.getWriter();
+                char[] buf = out.toCharArray();
+                writer.write(buf, 0, buf.length);
+                writer.flush();
+            } else {
+                response.setStatus(500);
+                PrintWriter writer = response.getWriter();
+                boolean first = true;
+                writer.print("[");
+                for (Message err : errors) {
+                    if (!first) {
+                        writer.print(",");
+                    }
+                    writer.print("\"");
+                    writer.print(err.getMessage().replace('"', '\''));
+                    writer.print("\"");
+                    first = false;
+                }
+                writer.print("]");
             }
-        }.optimize(true);
-        compiler.generate();
-        out.flush();
-        out.close();
-        
-        List<? extends Message> errors = compiler.listErrors();
-        if (errors.size() == 0) {
-            PrintWriter writer = response.getWriter();
-            char[] buf = out.toCharArray();
-            writer.write(buf, 0, buf.length);
-            writer.flush();
-        } else {
+	    } catch (Exception ex) {
             response.setStatus(500);
             PrintWriter writer = response.getWriter();
-            boolean first = true;
             writer.print("[");
-            for (Message err : errors) {
-                if (!first) {
-                    writer.print(",");
-                }
-                writer.print("\"");
-                writer.print(err.getMessage().replace('"', '\''));
-                writer.print("\"");
-                first = false;
-            }
+            writer.print("\"Service error: ");
+            writer.print(ex.getMessage().replace('"', '\''));
+            writer.print("\"");
             writer.print("]");
-        }
+	    }
 	}
 
 }

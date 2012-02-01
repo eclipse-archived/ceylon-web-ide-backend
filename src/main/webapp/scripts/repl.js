@@ -64,6 +64,12 @@ function translate(onTranslation) {
             	printError("Translated code could not be parsed:");
             	printError("--- " + err);
             }
+        }, function(errcodes) {
+        	printError("Code contains errors:");
+        	var errors = JSON.parse(errcodes);
+        	for (var idx in errors) {
+            	printError("--- " + errors[idx]);
+        	}
         });
     } else {
     	onTranslation();
