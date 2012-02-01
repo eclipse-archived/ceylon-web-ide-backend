@@ -49,8 +49,7 @@ function remoteTranslate(src, successHandler, errorHandler) {
 var oldcode;
 
 function translate(onTranslation) {
-    var ceylon = document.getElementById("ceylon");
-    var code = "class Ceylon_Script_Runner() {" + ceylon.value + "}";
+    var code = "class Ceylon_Script_Runner() {" + getEditCode() + "}";
     if (code != oldcode) {
     	oldcode = code;
         remoteTranslate(code, function(translatedcode) {
@@ -93,9 +92,12 @@ function afterTranslate() {
 }
 
 function editCode(code) {
-	var editor = document.getElementById("ceylon");
-    editor.value = code;
+    editor.getSession().setValue(code);
     return false;
+}
+
+function getEditCode() {
+    return editor.getSession().getValue();
 }
 
 function showCode(code) {

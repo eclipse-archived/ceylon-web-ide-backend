@@ -5,6 +5,11 @@
     <title>Ceylon Script Runner</title>
     <style type="text/css">
         #ceylon {
+            border-width: 1px;
+            border-style: solid;
+            width: 600px;
+            height: 200px;
+            position: relative;
         }
         #result {
         }
@@ -28,14 +33,21 @@
         }
     </style>
     <script type="text/javascript" src="scripts/require.js" data-main="scripts/repl.js"></script>
+    <script type="text/javascript" src="scripts/ace.js" charset="utf-8"></script>
+    <script>
+        var editor;
+	    window.onload = function() {
+	        editor = ace.edit("ceylon");
+	    };
+    </script>
 </head>
 <body>
     <h1>Ceylon Script Runner</h1>
     <table>
         <tr>
             <td><form>
-                <textarea id="ceylon" name="ceylon" cols="80" rows="20">print("Hello World");
-                </textarea><br>
+                <div id="ceylon">print("Hello World");</div><br>
+                <input type="hidden" name="ceylon" value="">
                 <input type="button" value="Translate" onClick="translate()" class="code">
                 <input type="button" value="Run" onClick="run()">
             </form></td>
