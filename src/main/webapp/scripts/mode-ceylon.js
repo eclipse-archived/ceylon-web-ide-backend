@@ -1,7 +1,7 @@
-define('ace/mode/ceylon', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/mode/javascript', 'ace/tokenizer', 'ace/mode/ceylon_highlight_rules'], function(require, exports, module) {
+define('ace/mode/ceylon', ['require', 'exports', 'module' , 'pilot/oop', 'ace/mode/javascript', 'ace/tokenizer', 'ace/mode/ceylon_highlight_rules'], function(require, exports, module) {
 "use strict";
 
-var oop = require("ace/lib/oop");
+var oop = require("pilot/oop");
 var JavaScriptMode = require("ace/mode/javascript").Mode;
 var Tokenizer = require("ace/tokenizer").Tokenizer;
 var CeylonHighlightRules = require("ace/mode/ceylon_highlight_rules").CeylonHighlightRules;
@@ -24,11 +24,11 @@ oop.inherits(Mode, JavaScriptMode);
 exports.Mode = Mode;
 });
 
-define('ace/mode/ceylon_highlight_rules', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/lib/lang', 'ace/mode/doc_comment_highlight_rules', 'ace/mode/text_highlight_rules'], function(require, exports, module) {
+define('ace/mode/ceylon_highlight_rules', ['require', 'exports', 'module' , 'pilot/oop', 'pilot/lang', 'ace/mode/doc_comment_highlight_rules', 'ace/mode/text_highlight_rules'], function(require, exports, module) {
 "use strict";
 
-var oop = require("ace/lib/oop");
-var lang = require("ace/lib/lang");
+var oop = require("pilot/oop");
+var lang = require("pilot/lang");
 var DocCommentHighlightRules = require("ace/mode/doc_comment_highlight_rules").DocCommentHighlightRules;
 var TextHighlightRules = require("ace/mode/text_highlight_rules").TextHighlightRules;
 
