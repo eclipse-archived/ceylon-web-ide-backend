@@ -34,11 +34,15 @@
     </style>
     <script type="text/javascript" src="scripts/require.js" data-main="scripts/repl.js"></script>
     <script type="text/javascript" src="scripts/ace.js" charset="utf-8"></script>
+    <script type="text/javascript" src="scripts/mode-javascript.js" charset="utf-8"></script>
+    <script type="text/javascript" src="scripts/mode-ceylon.js" charset="utf-8"></script>
     <script>
         var editor;
-	    window.onload = function() {
-	        editor = ace.edit("ceylon");
-	    };
+        window.onload = function() {
+            editor = ace.edit("ceylon");
+            var CeylonMode = require("ace/mode/ceylon").Mode;
+            editor.getSession().setMode(new CeylonMode());
+        };
     </script>
 </head>
 <body>
