@@ -1,7 +1,7 @@
 
 var helloWorld = 'print("Hello World");';
 var forTen = 'for (Integer i in 1..10) {\n\
-	print(i);\n\
+    print(i);\n\
 }';
 
 require.config({
@@ -11,39 +11,39 @@ require.config({
 
 require(["ceylon/language/0.1/ceylon.language"],
     function(mod) {
-		console.log("Ceylon language module loaded OK")
-		mod.print = printOutput;
-		console.log("ceylon.language.print() patched OK")
+        console && console.log("Ceylon language module loaded OK")
+        mod.print = printOutput;
+        console && console.log("ceylon.language.print() patched OK")
     }
 );
 
 function remoteTranslate(src, successHandler, errorHandler) {
-	var timeoutHandle;
-	
-	if (!errorHandler) {
-		errorHandler = function(err) {
-			alert("error: " + err);
-		};
-	}
-	
-	var url = "translate";
-	var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
-	xhr.open('POST', url, true);
-	xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-	xhr.onreadystatechange = function() {
-		if (xhr.readyState === 4) {
-			clearTimeout(timeoutHandle);
-			if (xhr.status == 200) {
-				successHandler(xhr.responseText);
-			} else {
-				errorHandler(xhr.responseText);
-			}
-		}
-	};
-	
-	timeoutHandle = setTimeout(errorHandler, 10000);
-	
-	xhr.send("ceylon=" + escape(src));
+    var timeoutHandle;
+    
+    if (!errorHandler) {
+        errorHandler = function(err) {
+            alert("error: " + err);
+        };
+    }
+    
+    var url = "translate";
+    var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+    xhr.open('POST', url, true);
+    xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            clearTimeout(timeoutHandle);
+            if (xhr.status == 200) {
+                successHandler(xhr.responseText);
+            } else {
+                errorHandler(xhr.responseText);
+            }
+        }
+    };
+    
+    timeoutHandle = setTimeout(errorHandler, 10000);
+    
+    xhr.send("ceylon=" + escape(src));
 };
 
 var oldcode, transok;
@@ -51,49 +51,49 @@ var oldcode, transok;
 function translate(onTranslation) {
     var code = "class Ceylon_Script_Runner() {" + getEditCode() + "}";
     if (code != oldcode) {
-    	clearOutput();
-    	oldcode = code;
+        clearOutput();
+        oldcode = code;
         transok = false;
         remoteTranslate(code, function(translatedcode) {
-        	showCode(translatedcode);
+            showCode(translatedcode);
             try {
-	            globalEval(translatedcode);
-	            transok = true;
-	            if (onTranslation) {
-	            	onTranslation();
-	            }
+                globalEval(translatedcode);
+                transok = true;
+                if (onTranslation) {
+                    onTranslation();
+                }
             } catch(err) {
-            	printError("Translated code could not be parsed:");
-            	printError("--- " + err);
+                printError("Translated code could not be parsed:");
+                printError("--- " + err);
             }
         }, function(errcodes) {
             transok = false;
-        	printError("Code contains errors:");
-        	var errors = JSON.parse(errcodes);
-        	for (var idx in errors) {
-            	printError("--- " + errors[idx]);
-        	}
+            printError("Code contains errors:");
+            var errors = JSON.parse(errcodes);
+            for (var idx in errors) {
+                printError("--- " + errors[idx]);
+            }
         });
     } else {
-    	onTranslation();
+        onTranslation();
     }
 }
 
 function run() {
-	translate(afterTranslate);
+    translate(afterTranslate);
 }
 
 function afterTranslate() {
-	if (transok == true) {
-		printSystem("// Script start at " + (new Date()));
-	    try {
-			Ceylon_Script_Runner();
-	    } catch(err) {
-	    	printError("Runtime error:");
-	    	printError("--- " + err);
-	    }
-		printSystem("// Script end at " + (new Date()));
-	}
+    if (transok == true) {
+        printSystem("// Script start at " + (new Date()));
+        try {
+            Ceylon_Script_Runner();
+        } catch(err) {
+            printError("Runtime error:");
+            printError("--- " + err);
+        }
+        printSystem("// Script end at " + (new Date()));
+    }
 }
 
 function editCode(code) {
@@ -106,33 +106,33 @@ function getEditCode() {
 }
 
 function showCode(code) {
-	var result = document.getElementById("result");
+    var result = document.getElementById("result");
     result.innerText = code;
     return false;
 }
 
 function clearOutput() {
-	var output = document.getElementById("output");
-	output.innerHTML = "";
+    var output = document.getElementById("output");
+    output.innerHTML = "";
 }
 
 function printOutput(txt) {
-	var output = document.getElementById("output");
-	output.innerHTML = output.innerHTML + escapeHtml(txt) + "<br>";
+    var output = document.getElementById("output");
+    output.innerHTML = output.innerHTML + escapeHtml(txt) + "<br>";
 }
 
 function printSystem(txt) {
-	var output = document.getElementById("output");
-	output.innerHTML = output.innerHTML + "<span class='system'>" + txt + "</span><br>";
+    var output = document.getElementById("output");
+    output.innerHTML = output.innerHTML + "<span class='system'>" + txt + "</span><br>";
 }
 
 function printError(txt) {
-	var output = document.getElementById("output");
-	output.innerHTML = output.innerHTML + "<span class='error'>" + txt + "</span><br>";
+    var output = document.getElementById("output");
+    output.innerHTML = output.innerHTML + "<span class='error'>" + txt + "</span><br>";
 }
 
 function escapeHtml(html) {
-	return html;
+    return html;
 }
 
 function globalEval(src) {
