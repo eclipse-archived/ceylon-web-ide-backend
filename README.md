@@ -13,3 +13,11 @@ simply by pushing any updated fils to the application's Git repository on OpenSh
 Right now this can only be done by Tako (@quintesse), or you need to supply him with
 an SSH public key to give you push access to the application's Git repository.
 
+## License
+
+The content of this repository is released under the ASL v2.0
+as provided in the LICENSE file that accompanied this code.
+
+By submitting a "pull request" or otherwise contributing to this repository, you
+agree to license your contribution under the license mentioned above.
+
