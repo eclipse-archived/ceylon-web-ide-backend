@@ -1,8 +1,47 @@
 
-var helloWorld = 'print("Hello World");';
-var forTen = 'for (Integer i in 1..10) {\n\
+var sample_helloWorld = 'print("Hello World");';
+var sample_forTen = 'for (Integer i in 1..10) {\n\
     print(i);\n\
 }';
+var sample_stringInterp='String interp = " interpolation ";\n\
+String s2 = "to START and END with";\n\
+String s3 = "siht ekil ,";\n\
+print("String" interp.uppercased " needs "\n\
+      s2.lowercased " by string literals"\n\
+      s3.reversed "");';
+var sample_null1='void printIf1(String? s) {\n\
+    if (exists s) {\n\
+        print(s);\n\
+    } else {\n\
+        print("Nothing to print.");\n\
+    }\n\
+}\n\
+String? s1 = null;\n\
+String? s2 = "I do exist";\n\
+printIf1(s1);\n\
+printIf1(s2);\n\
+print(s1 else "Nothing here...");\n\
+print(s2 else "Nothing here...");';
+var sample_null2='void greet(String? name) {\n\
+    print("Hello, " name ? "World" "!");\n\
+}\n\
+void shout(String? name) {\n\
+    greet(name?.uppercased);\n\
+}\n\
+greet(null);\n\
+greet("yourself");\n\
+shout(null);\n\
+shout("yourself");';
+var sample_defparms='void greet(String name="World") {\n\
+    print("Hello, " name "!");\n\
+}\n\
+void shout(String? name) {\n\
+    greet( (name ? "world" ).uppercased);\n\
+}\n\
+greet();\n\
+greet("yourself");\n\
+shout(null);\n\
+shout("yourself");';
 
 require.config({
     baseUrl: "scripts/modules",
