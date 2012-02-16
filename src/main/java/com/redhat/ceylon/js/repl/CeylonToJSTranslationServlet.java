@@ -20,7 +20,7 @@ import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.TypeCheckerBuilder;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
 import com.redhat.ceylon.compiler.typechecker.io.VirtualFile;
-import com.redhat.ceylon.compiler.typechecker.tree.Message;
+import com.redhat.ceylon.compiler.typechecker.tree.AnalysisMessage;
 import com.redhat.ceylon.compiler.typechecker.tree.UnexpectedError;
 
 /**
@@ -59,7 +59,7 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             out.flush();
             out.close();
             
-            List<? extends Message> errors = compiler.listErrors();
+            List<AnalysisMessage> errors = compiler.listErrors();
             if (errors.size() == 0) {
                 PrintWriter writer = response.getWriter();
                 char[] buf = out.toCharArray();
@@ -70,13 +70,15 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
                 PrintWriter writer = response.getWriter();
                 boolean first = true;
                 writer.print("[");
-                for (Message err : errors) {
+                for (AnalysisMessage err : errors) {
                     if (!first) {
                         writer.print(",");
                     }
                     writer.print("\"");
                     writer.print(err.getMessage().replace('"', '\''));
-                    writer.print("\"");
+                    writer.print(" (at ");
+                    writer.print(err.getTreeNode().getLocation());
+                    writer.print(")\"");
                     first = false;
                 }
                 writer.print("]");

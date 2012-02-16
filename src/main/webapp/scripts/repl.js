@@ -123,12 +123,12 @@ function printOutput(txt) {
 
 function printSystem(txt) {
     var output = document.getElementById("output");
-    output.innerHTML = output.innerHTML + "<span class='system'>" + txt + "</span><br>";
+    output.innerHTML = output.innerHTML + "<span class='jsc_msg'>" + txt + "</span><br>";
 }
 
 function printError(txt) {
     var output = document.getElementById("output");
-    output.innerHTML = output.innerHTML + "<span class='error'>" + txt + "</span><br>";
+    output.innerHTML = output.innerHTML + "<span class='jsc_error'>" + txt + "</span><br>";
 }
 
 function escapeHtml(html) {
