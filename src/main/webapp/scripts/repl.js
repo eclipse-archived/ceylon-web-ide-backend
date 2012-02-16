@@ -11,9 +11,9 @@ require.config({
 
 require(["ceylon/language/0.1/ceylon.language"],
     function(mod) {
-        console && console.log("Ceylon language module loaded OK")
+        console && console.log("Ceylon language module loaded OK");
         mod.print = printOutput;
-        console && console.log("ceylon.language.print() patched OK")
+        console && console.log("ceylon.language.print() patched OK");
     }
 );
 
@@ -52,6 +52,7 @@ function translate(onTranslation) {
     var code = "class Ceylon_Script_Runner() {" + getEditCode() + "}";
     if (code != oldcode) {
         clearOutput();
+        clearEditMarkers();
         oldcode = code;
         transok = false;
         remoteTranslate(code, function(translatedcode) {
@@ -68,11 +69,25 @@ function translate(onTranslation) {
             }
         }, function(errcodes) {
             transok = false;
+            
+            // FIXME
+            var AceRange = require("ace/range").Range;
+            
             printError("Code contains errors:");
+            var annotations = [];
             var errors = JSON.parse(errcodes);
             for (var idx in errors) {
-                printError("--- " + errors[idx]);
+            	var err = errors[idx];
+                printError("--- " + err.msg);
+                annotations[idx] = {
+                	row:err.start.line-1,
+                	column:1,
+                	text:err.msg,
+                	type:"error"
+                }
+                var markerId = editor.getSession().addMarker(new AceRange(err.start.line-1, err.start.pos, err.end.line-1, err.end.pos+1), "editerror", "text");
             }
+            editor.getSession().setAnnotations(annotations);
         });
     } else {
         onTranslation();
@@ -109,6 +124,14 @@ function showCode(code) {
     var result = document.getElementById("result");
     result.innerText = code;
     return false;
+}
+
+function clearEditMarkers() {
+    editor.getSession().setAnnotations([]);
+    var markers = editor.getSession().getMarkers();
+    for (var idx in markers) {
+    	editor.getSession().removeMarker(idx);
+    }
 }
 
 function clearOutput() {

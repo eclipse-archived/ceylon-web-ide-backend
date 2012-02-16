@@ -20,8 +20,9 @@ import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.TypeCheckerBuilder;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
 import com.redhat.ceylon.compiler.typechecker.io.VirtualFile;
+import com.redhat.ceylon.compiler.typechecker.parser.RecognitionError;
+import com.redhat.ceylon.compiler.typechecker.tree.AnalysisMessage;
 import com.redhat.ceylon.compiler.typechecker.tree.Message;
-import com.redhat.ceylon.compiler.typechecker.tree.UnexpectedError;
 
 /**
  * Servlet implementation class CeylonToJSTranslationServlet
@@ -74,9 +75,7 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
                     if (!first) {
                         writer.print(",");
                     }
-                    writer.print("\"");
-                    writer.print(err.getMessage().replace('"', '\''));
-                    writer.print("\"");
+                    writeError(writer, err);
                     first = false;
                 }
                 writer.print("]");
@@ -91,6 +90,44 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             writer.print("]");
 	    }
 	}
+
+    private void writeError(PrintWriter writer, Message err) {
+        writer.print("{\"msg\":\"");
+        writer.print(err.getMessage().replace('"', '\''));
+        writer.print("\",\"code\":");
+        writer.print(err.getCode());
+        writer.print(",");
+        if (err instanceof AnalysisMessage) {
+            AnalysisMessage msg = (AnalysisMessage)err;
+            String loc = msg.getTreeNode().getLocation();
+            String[] locs = loc.split("-");
+            if (locs.length == 2) {
+                writer.print("\"start\":");
+                writeErrPos(writer, locs[0]);
+                writer.print(",\"end\":");
+                writeErrPos(writer, locs[1]);
+            }
+        } else if (err instanceof RecognitionError) {
+            RecognitionError rec = (RecognitionError)err;
+            writer.print("\"start\":{\"line\":");
+            writer.print(rec.getLine());
+            writer.print(",\"pos\":");
+            writer.print(rec.getCharacterInLine());
+            writer.print("}");
+        }
+        writer.print("}");
+    }
+
+    private void writeErrPos(PrintWriter writer, String loc) {
+        String[] pos = loc.split(":");
+        if (pos.length == 2) {
+            writer.print("{\"line\":");
+            writer.print(pos[0]);
+            writer.print(",\"pos\":");
+            writer.print(pos[1]);
+            writer.print("}");
+        }
+    }
 
 }
 
