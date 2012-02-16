@@ -36,10 +36,10 @@ function Object$(wat) {
 return wat;
 }
 initType(Object$, 'ceylon.language.Object', Void);
-var $Object = Object$.$$;
-$Object.prototype.getString=function() { String$(Object.prototype.toString.apply(this)) };
-$Object.prototype.toString=function() { return this.getString().value };
-$Object.prototype.equals = function(other) { return Boolean$(this===other) } //TODO: is this correct?
+var Object$proto = Object$.$$.prototype;
+Object$proto.getString=function() { String$(Object.prototype.toString.apply(this)) };
+Object$proto.toString=function() { return this.getString().value };
+Object$proto.equals = function(other) { return Boolean$(this===other) } //TODO: is this correct?
 function IdentifiableObject(obj) {
 return obj;
 }
@@ -58,33 +58,23 @@ initType(Callable, 'ceylon.language.Callable');
 exports.Callable=Callable;
 //This is used for plain method references
 function JsCallable(o,f) {
-var that = new JsCallable.$$;
-that.o=o;
-that.f = f;
-return that;
-}
-initType(JsCallable, 'ceylon.language.JsCallable', Callable);
-var $JsCallable = JsCallable.$$;
-$JsCallable.prototype.getString = function() { return String$('ceylon.language.JsCallable'); }
-$JsCallable.prototype.call = function() {
+var c = function() {
+if (o === null) return null;
 var al=[];
 if (arguments !== undefined && arguments.length > 0) {
 for (var i=0; i<arguments.length;i++) {
 al.push(arguments[i]);
 }
 }
-return this.f.apply(this.o,al);
+return f.apply(o,al);
+};
+c.getString = function() { return String$('ceylon.language.JsCallable'); }
+initType(c, 'ceylon.language.JsCallable', Callable);
+return c;
 }
 //This is used for spread method references
 function JsCallableList(value) {
-var that = new JsCallableList.$$;
-that.value=value;
-return that;
-}
-initType(JsCallableList, 'ceylon.language.JsCallableList', Callable);
-inheritProto(JsCallableList, Object$, '$Object$');
-var $JsCallableList = JsCallableList.$$;
-$JsCallableList.prototype.call = function() {
+var c = function() {
 var al=[];
 if (arguments !== undefined && arguments.length > 0) {
 for (var i=0; i<arguments.length;i++) {
@@ -92,11 +82,15 @@ al.push(arguments[i]);
 }
 }
 var rval = [];
-for (var i = 0; i < this.value.length; i++) {
-var c = this.value[i];
+for (var i = 0; i < value.length; i++) {
+var c = value[i];
 rval.push(c.f.apply(c.o, al));
 }
 return ArraySequence(rval);
+};
+c.getString = function() { return String$('ceylon.language.JsCallable'); }
+initType(c, 'ceylon.language.JsCallableList', Callable);
+return c;
 }
 exports.JsCallableList=JsCallableList;
 exports.JsCallable=JsCallable;
@@ -216,16 +210,16 @@ return wat;
 initType(Set, 'ceylon.language.Set', Collection, Cloneable);
 exports.Set=Set;
 //Interface methods
-var $FixedSized = FixedSized.$$;
-$FixedSized.prototype.getFirst = function() {
+var FixedSized$proto = FixedSized.$$.prototype;
+FixedSized$proto.getFirst = function() {
 var e = this.getIterator().next();
 return e === $finished ? null : e;
 }
-var $None = None.$$;
-$None.prototype.getFirst = function() { return null; }
-$None.prototype.getIterator = function() { return emptyIterator; }
-$None.prototype.getSize = function() { return Integer(0); }
-$None.prototype.getEmpty = function() { return $true; }
+var None$proto = None.$$.prototype;
+None$proto.getFirst = function() { return null; }
+None$proto.getIterator = function() { return emptyIterator; }
+None$proto.getSize = function() { return Integer(0); }
+None$proto.getEmpty = function() { return $true; }
 var $Some = Some.$$;
 $Some.prototype.getFirst = function() {
 var e = this.getIterator().next();
@@ -234,20 +228,20 @@ return e;
 }
 $Some.prototype.getEmpty = function() { return $false; }
 function Exception(description, cause, wat) {
-if (wat===undefined) {wat=new $Exception}
+if (wat===undefined) {wat=new Exception.$$}
 wat.description = description;
 wat.cause = cause;
 return wat;
 }
 initType(Exception, 'ceylon.language.Exception', IdentifiableObject);
 inheritProto(Exception, IdentifiableObject, '$IdentifiableObject$');
-var $Exception = Exception.$$;
-$Exception.prototype.getCause = function() {return this.cause}
-$Exception.prototype.getMessage = function() {
+var Exception$proto = Exception.$$.prototype;
+Exception$proto.getCause = function() {return this.cause}
+Exception$proto.getMessage = function() {
 return this.description!==null ? this.description
 : (this.cause!==null ? this.cause.getMessage() : String$("", 0));
 }
-$Exception.prototype.getString = function() {
+Exception$proto.getString = function() {
 return String$('Exception "' + this.getMessage().value + '"');
 }
 function Integer(value) {
@@ -257,38 +251,38 @@ return that;
 }
 initType(Integer, 'ceylon.language.Integer', Object$, Castable, Integral, Numeric);
 inheritProto(Integer, Object$, '$Object$');
-var $Integer = Integer.$$;
-$Integer.prototype.getString = function() { return String$(this.value.toString()) }
-$Integer.prototype.plus = function(other) { return Integer(this.value+other.value) }
-$Integer.prototype.minus = function(other) { return Integer(this.value-other.value) }
-$Integer.prototype.times = function(other) { return Integer(this.value*other.value) }
-$Integer.prototype.divided = function(other) {
+var Integer$proto = Integer.$$.prototype;
+Integer$proto.getString = function() { return String$(this.value.toString()) }
+Integer$proto.plus = function(other) { return Integer(this.value+other.value) }
+Integer$proto.minus = function(other) { return Integer(this.value-other.value) }
+Integer$proto.times = function(other) { return Integer(this.value*other.value) }
+Integer$proto.divided = function(other) {
 var exact = this.value/other.value;
 return Integer((exact<0) ? Math.ceil(exact) : Math.floor(exact));
 }
-$Integer.prototype.remainder = function(other) { return Integer(this.value%other.value) }
-$Integer.prototype.power = function(other) {
+Integer$proto.remainder = function(other) { return Integer(this.value%other.value) }
+Integer$proto.power = function(other) {
 var exact = Math.pow(this.value, other.value);
 return Integer((exact<0) ? Math.ceil(exact) : Math.floor(exact));
 }
-$Integer.prototype.getNegativeValue = function() { return Integer(-this.value) }
-$Integer.prototype.getPositiveValue = function() { return this }
-$Integer.prototype.equals = function(other) { return Boolean$(other && other.value===this.value) }
-$Integer.prototype.compare = function(other) {
+Integer$proto.getNegativeValue = function() { return Integer(-this.value) }
+Integer$proto.getPositiveValue = function() { return this }
+Integer$proto.equals = function(other) { return Boolean$(other && other.value===this.value) }
+Integer$proto.compare = function(other) {
 return this.value===other.value ? equal
 : (this.value<other.value ? smaller:larger);
 }
-$Integer.prototype.getFloat = function() { return Float(this.value) }
-$Integer.prototype.getInteger = function() { return this }
-$Integer.prototype.getCharacter = function() { return Character(this.value); }
-$Integer.prototype.getSuccessor = function() { return Integer(this.value+1) }
-$Integer.prototype.getPredecessor = function() { return Integer(this.value-1) }
-$Integer.prototype.getUnit = function() { return Boolean$(this.value === 1) }
-$Integer.prototype.getZero = function() { return Boolean$(this.value === 0) }
-$Integer.prototype.getFractionalPart = function() { return Integer(0); }
-$Integer.prototype.getWholePart = function() { return this; }
-$Integer.prototype.getSign = function() { return this.value > 0 ? Integer(1) : this.value < 0 ? Integer(-1) : Integer(0); }
-$Integer.prototype.getHash = function() { return this; }
+Integer$proto.getFloat = function() { return Float(this.value) }
+Integer$proto.getInteger = function() { return this }
+Integer$proto.getCharacter = function() { return Character(this.value); }
+Integer$proto.getSuccessor = function() { return Integer(this.value+1) }
+Integer$proto.getPredecessor = function() { return Integer(this.value-1) }
+Integer$proto.getUnit = function() { return Boolean$(this.value === 1) }
+Integer$proto.getZero = function() { return Boolean$(this.value === 0) }
+Integer$proto.getFractionalPart = function() { return Integer(0); }
+Integer$proto.getWholePart = function() { return this; }
+Integer$proto.getSign = function() { return this.value > 0 ? Integer(1) : this.value < 0 ? Integer(-1) : Integer(0); }
+Integer$proto.getHash = function() { return this; }
 function $parseInteger(s) {
 var x = s.value;
 //xkcd.com/208/
@@ -320,38 +314,38 @@ return that;
 }
 initType(Float, 'ceylon.language.Float', Object$, Castable, Numeric);
 inheritProto(Float, Object$, '$Object$');
-var $Float = Float.$$;
-$Float.prototype.getString = function() { return String$(this.value.toString()) }
-$Float.prototype.plus = function(other) { return Float(this.value+other.value) }
-$Float.prototype.minus = function(other) { return Float(this.value-other.value) }
-$Float.prototype.times = function(other) { return Float(this.value*other.value) }
-$Float.prototype.divided = function(other) { return Float(this.value/other.value) }
-$Float.prototype.power = function(other) { return Float(Math.pow(this.value, other.value)) }
-$Float.prototype.getNegativeValue = function() { return Float(-this.value) }
-$Float.prototype.getPositiveValue = function() { return this }
-$Float.prototype.equals = function(other) { return Boolean$(other && other.value===this.value) }
-$Float.prototype.compare = function(other) {
+var Float$proto = Float.$$.prototype;
+Float$proto.getString = function() { return String$(this.value.toString()) }
+Float$proto.plus = function(other) { return Float(this.value+other.value) }
+Float$proto.minus = function(other) { return Float(this.value-other.value) }
+Float$proto.times = function(other) { return Float(this.value*other.value) }
+Float$proto.divided = function(other) { return Float(this.value/other.value) }
+Float$proto.power = function(other) { return Float(Math.pow(this.value, other.value)) }
+Float$proto.getNegativeValue = function() { return Float(-this.value) }
+Float$proto.getPositiveValue = function() { return this }
+Float$proto.equals = function(other) { return Boolean$(other && other.value===this.value) }
+Float$proto.compare = function(other) {
 if (other === null || other === undefined) { return larger; }
 return this.value===other.value ? equal
 : (this.value<other.value ? smaller:larger);
 }
-$Float.prototype.getFloat = function() { return this }
-$Float.prototype.getInteger = function() { return Integer(parseInt(this.value.toFixed())); }
-$Float.prototype.getWholePart = function() {
+Float$proto.getFloat = function() { return this }
+Float$proto.getInteger = function() { return Integer(parseInt(this.value.toFixed())); }
+Float$proto.getWholePart = function() {
 var _p = this.value.toPrecision();
 var dot = _p.indexOf('.');
 return dot >= 0 ? Float(parseFloat(_p.slice(0, dot))) : this;
 }
-$Float.prototype.getFractionalPart = function() {
+Float$proto.getFractionalPart = function() {
 var _p = this.value.toPrecision();
 var dot = _p.indexOf('.');
 return dot >= 0 ? Float(parseFloat(_p.slice(dot))) : Float(0.0);
 }
-$Float.prototype.getSign = function() { return this.value > 0 ? Integer(1) : this.value < 0 ? Integer(-1) : Integer(0); }
-$Float.prototype.getHash = function() { return String$(this.value.toPrecision()).getHash(); }
-$Float.prototype.getUndefined = function() { return isNaN(this.value) ? $true : $false; }
-$Float.prototype.getFinite = function() { return this.value!==Infinity && this.value!==-Infinity && !isNaN(this.value) ? $true : $false; }
-$Float.prototype.getInfinite = function() { return this.value===Infinity || this.value===-Infinity ? $true : $false; }
+Float$proto.getSign = function() { return this.value > 0 ? Integer(1) : this.value < 0 ? Integer(-1) : Integer(0); }
+Float$proto.getHash = function() { return String$(this.value.toPrecision()).getHash(); }
+Float$proto.getUndefined = function() { return isNaN(this.value) ? $true : $false; }
+Float$proto.getFinite = function() { return this.value!==Infinity && this.value!==-Infinity && !isNaN(this.value) ? $true : $false; }
+Float$proto.getInfinite = function() { return this.value===Infinity || this.value===-Infinity ? $true : $false; }
 function getInfinity() { return Float(Infinity); }
 //function getNegativeInfinity() { return Float(-Infinity); }
 exports.Integer=Integer;
@@ -368,28 +362,28 @@ return that;
 initType(String$, 'ceylon.language.String', Object$, List, Comparable, Ranged, FixedSized,
 Summable, Castable, Cloneable);
 inheritProto(String$, Object$, '$Object$');
-var $String = String$.$$;
-$String.prototype.getString = function() { return this }
-$String.prototype.toString = function() { return this.value }
-$String.prototype.plus = function(other) {
+var String$proto = String$.$$.prototype;
+String$proto.getString = function() { return this }
+String$proto.toString = function() { return this.value }
+String$proto.plus = function(other) {
 var size = this.codePoints + other.codePoints;
 return String$(this.value+other.value, isNaN(size)?undefined:size);
 }
-$String.prototype.equals = function(other) { return Boolean$(other && other.value===this.value) }
-$String.prototype.compare = function(other) {
+String$proto.equals = function(other) { return Boolean$(other && other.value===this.value) }
+String$proto.compare = function(other) {
 var cmp = this.value.localeCompare(other.value);
 return cmp===0 ? equal : (cmp<0 ? smaller:larger);
 }
-$String.prototype.getUppercased = function() { return String$(this.value.toUpperCase()) }
-$String.prototype.getLowercased = function() { return String$(this.value.toLowerCase()) }
-$String.prototype.getSize = function() {
+String$proto.getUppercased = function() { return String$(this.value.toUpperCase()) }
+String$proto.getLowercased = function() { return String$(this.value.toLowerCase()) }
+String$proto.getSize = function() {
 if (this.codePoints===undefined) {
 this.codePoints = countCodepoints(this.value);
 }
 return Integer(this.codePoints);
 }
-$String.prototype.getLastIndex = function() { return this.getSize().equals(Integer(0)) === $true ? null : this.getSize().getPredecessor(); }
-$String.prototype.span = function(from, to) {
+String$proto.getLastIndex = function() { return this.getSize().equals(Integer(0)) === $true ? null : this.getSize().getPredecessor(); }
+String$proto.span = function(from, to) {
 var lastIndex = this.getLastIndex();
 if (!lastIndex) return this; //it's empty
 var fromIndex = largest(Integer(0),from).value;
@@ -414,7 +408,7 @@ if (x !== null) s = s.plus(x.getString());
 return s;
 }
 }
-$String.prototype.segment = function(from, len) {
+String$proto.segment = function(from, len) {
 //TODO optimize
 var s = String$("");
 if (len.compare(Integer(0)) === larger) {
@@ -426,25 +420,25 @@ if (x !== getNull()) { s = s.plus(x.getString()); }
 }
 return s;
 }
-$String.prototype.getEmpty = function() {
+String$proto.getEmpty = function() {
 return Boolean$(this.value.length===0);
 }
-$String.prototype.longerThan = function(length) {
+String$proto.longerThan = function(length) {
 if (this.codePoints!==undefined) {return Boolean$(this.codePoints>length.value)}
 if (this.value.length <= length.value) {return $false}
 if (this.value.length<<1 > length.value) {return $true}
 this.codePoints = countCodepoints(this.value);
 return Boolean$(this.codePoints>length.value);
 }
-$String.prototype.shorterThan = function(length) {
+String$proto.shorterThan = function(length) {
 if (this.codePoints!==undefined) {return Boolean$(this.codePoints<length.value)}
 if (this.value.length < length.value) {return $true}
 if (this.value.length<<1 >= length.value) {return $false}
 this.codePoints = countCodepoints(this.value);
 return Boolean$(this.codePoints<length.value);
 }
-$String.prototype.getIterator = function() { return StringIterator(this.value) }
-$String.prototype.item = function(index) {
+String$proto.getIterator = function() { return StringIterator(this.value) }
+String$proto.item = function(index) {
 if (index<0 || index>=this.value.length) {return null}
 var i = 0;
 for (var count=0; count<index; count++) {
@@ -453,7 +447,7 @@ if (++i >= this.value.length) {return null}
 }
 return Character(codepointFromString(this.value, i));
 }
-$String.prototype.getTrimmed = function() {
+String$proto.getTrimmed = function() {
 // make use of the fact that all WS characters are single UTF-16 code units
 var from = 0;
 while (from<this.value.length && (this.value.charCodeAt(from) in $WS)) {++from}
@@ -469,7 +463,7 @@ result.codePoints = this.codePoints - from - this.value.length + to;
 }
 return result;
 }
-$String.prototype.initial = function(length) {
+String$proto.initial = function(length) {
 if (length.value >= this.codePoints) {return this}
 var count = 0;
 var i = 0;
@@ -482,7 +476,7 @@ return this;
 }
 return String$(this.value.substr(0, i), count);
 }
-$String.prototype.terminal = function(length) {
+String$proto.terminal = function(length) {
 if (length.value >= this.codePoints) {return this}
 var count = 0;
 var i = this.value.length;
@@ -495,7 +489,7 @@ return this;
 }
 return String$(this.value.substr(i), count);
 }
-$String.prototype.getHash = function() {
+String$proto.getHash = function() {
 if (this._hash === undefined) {
 for (var i = 0; i < this.value.length; i++) {
 var c = this.value.charCodeAt(i);
@@ -509,7 +503,7 @@ this._hash = this._hash & ((1 << 29) - 1);
 }
 return Integer(this._hash);
 }
-$String.prototype.getFirst = function() {
+String$proto.getFirst = function() {
 return this.item(Integer(0));
 }
 function cmpSubString(str, subStr, offset) {
@@ -518,23 +512,23 @@ if (str.charCodeAt(offset+i)!==subStr.charCodeAt(i)) {return $false}
 }
 return $true;
 }
-$String.prototype.startsWith = function(str) {
+String$proto.startsWith = function(str) {
 if (str.value.length > this.value.length) {return $false}
 return cmpSubString(this.value, str.value, 0);
 }
-$String.prototype.endsWith = function(str) {
+String$proto.endsWith = function(str) {
 var start = this.value.length - str.value.length
 if (start < 0) {return $false}
 return cmpSubString(this.value, str.value, start);
 }
-$String.prototype.contains = function(sub) {
+String$proto.contains = function(sub) {
 var str;
-if (sub.constructor === $String) {str = sub.value}
-else if (sub.constructor !== $Character) {return $false}
+if (sub.constructor === String.$$) {str = sub.value}
+else if (sub.constructor !== Character.$$) {return $false}
 else {str = codepointToString(sub.value)}
 return Boolean$(this.value.indexOf(str) >= 0);
 }
-$String.prototype.getNormalized = function() {
+String$proto.getNormalized = function() {
 // make use of the fact that all WS characters are single UTF-16 code units
 var result = "";
 var len = 0;
@@ -562,7 +556,7 @@ i1 = i2+1;
 }
 return String$(result, len);
 }
-$String.prototype.firstOccurrence = function(sub) {
+String$proto.firstOccurrence = function(sub) {
 if (sub.value.length == 0) {return Integer(0)}
 var bound = this.value.length - sub.value.length;
 for (var i=0, count=0; i<=bound; ++count) {
@@ -571,7 +565,7 @@ if ((this.value.charCodeAt(i++)&0xfc00) === 0xd800) {++i}
 }
 return null;
 }
-$String.prototype.lastOccurrence = function(sub) {
+String$proto.lastOccurrence = function(sub) {
 if (sub.value.length == 0) {return Integer(this.value.length>0 ? this.value.length-1 : 0)}
 for (var i=this.value.length-sub.value.length; i>=0; --i) {
 if (cmpSubString(this.value, sub.value, i) === $true) {
@@ -583,7 +577,7 @@ return Integer(count);
 }
 return null;
 }
-$String.prototype.firstCharacterOccurrence = function(subc) {
+String$proto.firstCharacterOccurrence = function(subc) {
 for (var i=0, count=0; i<this.value.length; count++) {
 var cp = this.value.charCodeAt(i++);
 if (((cp&0xfc00) === 0xd800) && i<this.value.length) {
@@ -594,7 +588,7 @@ if (cp === subc.value) {return Integer(count)}
 this.codePoints = count;
 return null;
 }
-$String.prototype.lastCharacterOccurrence = function(subc) {
+String$proto.lastCharacterOccurrence = function(subc) {
 for (var i=this.value.length-1, count=0; i>=0; count++) {
 var cp = this.value.charCodeAt(i--);
 if (((cp%0xfc00) === 0xdc00) && i>=0) {
@@ -608,19 +602,19 @@ return Integer(this.codePoints - count - 1);
 this.codePoints = count;
 return null;
 }
-$String.prototype.getCharacters = function() {
+String$proto.getCharacters = function() {
 //we can cheat and add the required behavior to String, avoiding the need to create a Sequence...
 //TODO: this probably doesn't work completely because String doesn't satisfy
 //      all required interfaces, so "if(is ...)" will be false when it shouldn't.
 return this.value.length>0 ? this:$empty;
 }
-$String.prototype.getFirst = function() { return this.getSize().value>0?this.item(Integer(0)):null; }
-$String.prototype.getLast = function() { return this.getSize().value>0?this.item(Integer(this.getSize().getPredecessor())):null; }
-$String.prototype.getKeys = function() {
+String$proto.getFirst = function() { return this.getSize().value>0?this.item(Integer(0)):null; }
+String$proto.getLast = function() { return this.getSize().value>0?this.item(Integer(this.getSize().getPredecessor())):null; }
+String$proto.getKeys = function() {
 //TODO implement!!!
 return this.getSize().value > 0 ? Range(Integer(0), this.getSize().getPredecessor()) : $empty;
 }
-$String.prototype.join = function(strings) {
+String$proto.join = function(strings) {
 if (strings===undefined || strings.value.length===0) {return String$("", 0)}
 if (this.codePoints === undefined) {this.codePoints = countCodepoints(this.value)}
 var str = strings.value[0];
@@ -634,7 +628,7 @@ len += this.codePoints + str.codePoints;
 }
 return String$(result, isNaN(len)?undefined:len);
 }
-$String.prototype.split = function(seps, discard) {
+String$proto.split = function(seps, discard) {
 var sepChars = $WS;
 if (seps!==undefined && seps!==null) {
 sepChars = {}
@@ -668,7 +662,7 @@ tokens.push(String$(this.value.substring(tokenBegin, i), count-tokenBeginCount))
 this.codePoints = count;
 return ArraySequence(tokens);
 }
-$String.prototype.getReversed = function() {
+String$proto.getReversed = function() {
 var result = "";
 for (var i=this.value.length; i>0;) {
 var cc = this.value.charCodeAt(--i);
@@ -680,10 +674,10 @@ result += this.value.substr(--i, 2);
 }
 return String$(result);
 }
-$String.prototype.replace = function(sub, repl) {
+String$proto.replace = function(sub, repl) {
 return String$(this.value.replace(new RegExp(sub.value, 'g'), repl.value));
 }
-$String.prototype.repeat = function(times) {
+String$proto.repeat = function(times) {
 var sb = StringBuilder();
 for (var i = 0; i < times.value; i++) {
 sb.append(this);
@@ -698,8 +692,8 @@ return that;
 }
 initType(StringIterator, 'ceylon.language.StringIterator', IdentifiableObject, Iterator);
 inheritProto(StringIterator, IdentifiableObject, '$IdentifiableObject$');
-var $StringIterator = StringIterator.$$;
-$StringIterator.prototype.next = function() {
+var StringIterator$proto = StringIterator.$$.prototype;
+StringIterator$proto.next = function() {
 if (this.index >= this.string.length) { return $finished }
 var first = this.string.charCodeAt(this.index++);
 if ((first&0xfc00) !== 0xd800 || this.index >= this.string.length) {
@@ -734,25 +728,25 @@ return that;
 }
 initType(Character, 'ceylon.language.Character', Object$, Comparable);
 inheritProto(Character, Object$, '$Object$');
-var $Character = Character.$$;
-$Character.prototype.getString = function() { return String$(codepointToString(this.value)) }
-$Character.prototype.equals = function(other) {
-return Boolean$(other.constructor===$Character && other.value===this.value);
+var Character$proto = Character.$$.prototype;
+Character$proto.getString = function() { return String$(codepointToString(this.value)) }
+Character$proto.equals = function(other) {
+return Boolean$(other.constructor===Character.$$ && other.value===this.value);
 }
-$Character.prototype.getHash = function() {return Integer(this.value)}
-$Character.prototype.compare = function(other) {
+Character$proto.getHash = function() {return Integer(this.value)}
+Character$proto.compare = function(other) {
 return this.value===other.value ? equal
 : (this.value<other.value ? smaller:larger);
 }
-$Character.prototype.getUppercased = function() {
+Character$proto.getUppercased = function() {
 var ucstr = codepointToString(this.value).toUpperCase();
 return Character(codepointFromString(ucstr, 0));
 }
-$Character.prototype.getLowercased = function() {
+Character$proto.getLowercased = function() {
 var lcstr = codepointToString(this.value).toLowerCase();
 return Character(codepointFromString(lcstr, 0));
 }
-$Character.prototype.getTitlecased = function() {
+Character$proto.getTitlecased = function() {
 var tc = $toTitlecase[this.value];
 return tc===undefined ? this.getUppercased() : Character(tc);
 }
@@ -785,9 +779,9 @@ var $toTitlecase={
 0x1f97:0x1f9f, 0x1fa0:0x1fa8, 0x1fa1:0x1fa9, 0x1fa2:0x1faa, 0x1fa3:0x1fab, 0x1fa4:0x1fac,
 0x1fa5:0x1fad, 0x1fa6:0x1fae, 0x1fa7:0x1faf, 0x1fb3:0x1fbc, 0x1fc3:0x1fcc, 0x1ff3:0x1ffc
 }
-$Character.prototype.getWhitespace = function() { return Boolean$(this.value in $WS) }
-$Character.prototype.getControl = function() { return Boolean$(this.value<32 || this.value===127) }
-$Character.prototype.getDigit = function() {
+Character$proto.getWhitespace = function() { return Boolean$(this.value in $WS) }
+Character$proto.getControl = function() { return Boolean$(this.value<32 || this.value===127) }
+Character$proto.getDigit = function() {
 var check = this.value & 0xfffffff0;
 if (check in $digit) {
 return Boolean$((this.value&0xf) <= 9);
@@ -797,27 +791,27 @@ return Boolean$((this.value&0xf) >= 6);
 }
 return Boolean$(this.value>=0x1d7ce && this.value<=0x1d7ff);
 }
-$Character.prototype.getInteger = function() { return Integer(this.value); }
-$Character.prototype.getUppercase = function() {
+Character$proto.getInteger = function() { return Integer(this.value); }
+Character$proto.getUppercase = function() {
 var str = codepointToString(this.value);
 return Boolean$(str.toLowerCase()!==str && !(this.value in $titlecase));
 }
-$Character.prototype.getLowercase = function() {
+Character$proto.getLowercase = function() {
 var str = codepointToString(this.value);
 return Boolean$(str.toUpperCase()!==str && !(this.value in $titlecase));
 }
-$Character.prototype.getTitlecase = function() {return Boolean$(this.value in $titlecase)}
-$Character.prototype.getLetter = function() {
+Character$proto.getTitlecase = function() {return Boolean$(this.value in $titlecase)}
+Character$proto.getLetter = function() {
 //TODO: this captures only letters that have case
 var str = codepointToString(this.value);
 return Boolean$(str.toUpperCase()!==str || str.toLowerCase()!==str || (this.value in $titlecase));
 }
-$Character.prototype.getSuccessor = function() {
+Character$proto.getSuccessor = function() {
 var succ = this.value+1;
 if ((succ&0xf800) === 0xd800) {return Character(0xe000)}
 return Character((succ<=0x10ffff) ? succ:0);
 }
-$Character.prototype.getPredecessor = function() {
+Character$proto.getPredecessor = function() {
 var succ = this.value-1;
 if ((succ&0xf800) === 0xd800) {return Character(0xd7ff)}
 return Character((succ>=0) ? succ:0x10ffff);
@@ -829,12 +823,12 @@ return that;
 }
 initType(StringBuilder, 'ceylon.language.StringBuilder', IdentifiableObject);
 inheritProto(StringBuilder, IdentifiableObject, '$IdentifiableObject$');
-var $StringBuilder = StringBuilder.$$;
-$StringBuilder.prototype.getString = function() { return String$(this.value); }
-$StringBuilder.prototype.append = function(s) {
+var StringBuilder$proto = StringBuilder.$$.prototype;
+StringBuilder$proto.getString = function() { return String$(this.value); }
+StringBuilder$proto.append = function(s) {
 this.value = this.value + s.value;
 }
-$StringBuilder.prototype.appendAll = function(strings) {
+StringBuilder$proto.appendAll = function(strings) {
 if (strings === null || strings === undefined) { return this; }
 for (var i = 0; i < strings.value.length; i++) {
 var _s = strings.value[i];
@@ -842,11 +836,11 @@ this.value += _s?_s.value:"null";
 }
 return this; //strictly speaking, this method should return void, but then string interpolation would be a big mess
 }
-$StringBuilder.prototype.appendCharacter = function(c) {
+StringBuilder$proto.appendCharacter = function(c) {
 this.append(c.getString());
 }
-$StringBuilder.prototype.appendNewline = function() { this.value = this.value + "\n"; }
-$StringBuilder.prototype.appendSpace = function() { this.value = this.value + " "; }
+StringBuilder$proto.appendNewline = function() { this.value = this.value + "\n"; }
+StringBuilder$proto.appendSpace = function() { this.value = this.value + " "; }
 exports.String=String$;
 exports.Character=Character;
 exports.StringBuilder=StringBuilder;
@@ -878,8 +872,8 @@ return that;
 }
 initType(Comparison, 'ceylon.language.Comparison', IdentifiableObject);
 inheritProto(Comparison, IdentifiableObject, '$IdentifiableObject$');
-var $Comparison = Comparison.$$;
-$Comparison.prototype.getString = function() { return this.name }
+var Comparison$proto = Comparison.$$.prototype;
+Comparison$proto.getString = function() { return this.name }
 function print(line) { console.log(line.getString().value) }
 exports.print=print;
 var larger = Comparison("larger");
@@ -973,7 +967,6 @@ exports.append=append;
 exports.prepend=prepend;
 exports.entries=entries;
 //These are operators for handling nulls
-function $nullsafe() { return null; }
 function exists(value) {
 return value === getNull() || value === undefined ? getFalse() : getTrue();
 }
@@ -981,7 +974,10 @@ function nonempty(value) {
 return value === null || value === undefined ? getFalse() : Boolean$(value.getEmpty() === getFalse());
 }
 function isOfType(obj, typeName) {
-return Boolean$((obj===null) ? (typeName==="ceylon.language.Nothing" || typeName==="ceylon.language.Void") : (typeName in obj.constructor.T$all));
+if (obj === null) return Boolean$(typeName==="ceylon.language.Nothing" || typeName==="ceylon.language.Void");
+var cons = obj.$$;
+if (cons === undefined) cons = obj.constructor;
+return Boolean$(typeName in cons.T$all);
 }
 function isOfTypes(obj, types) {
 if (obj===null) { //TODO check if this is right
@@ -990,11 +986,13 @@ return types.l.indexOf('ceylon.language.Nothing')>=0 || types.l.indexOf('ceylon.
 var unions = false;
 var inters = true;
 var _ints=false;
+var cons = obj.$$;
+if (cons === undefined) cons = obj.constructor;
 for (var i = 0; i < types.l.length; i++) {
 var t = types.l[i];
 var partial = false;
 if (typeof t === 'string') {
-partial = t in obj.constructor.T$all;
+partial = t in cons.T$all;
 } else {
 partial = isOfTypes(obj, t);
 }
@@ -1008,9 +1006,11 @@ _ints=true;
 return _ints ? inters||unions : unions;
 }
 function className(obj) {
-return String$(obj!==null ? obj.constructor.T$name : 'ceylon.language.Nothing');
+if (obj === null) return String$('ceylon.language.Nothing');
+var cons = obj.$$;
+if (cons === undefined) cons = obj.constructor;
+return String$(cons.T$name);
 }
-exports.nullsafe=$nullsafe;
 exports.exists=exists;
 exports.nonempty=nonempty;
 exports.isOfType=isOfType;
@@ -1020,34 +1020,34 @@ function Sequence($$sequence) {
 return $$sequence;
 }
 initType(Sequence, 'ceylon.language.Sequence', List, Some, Cloneable, Ranged);
-var $Sequence = Sequence.$$;
-$Sequence.prototype.getEmpty = function() { return $false }
-$Sequence.prototype.getSize = function() { return Integer(this.getLastIndex()+1) }
-$Sequence.prototype.defines = function(index) { return Boolean$(index.value<=this.getLastIndex().value) }
+var Sequence$proto = Sequence.$$.prototype;
+Sequence$proto.getEmpty = function() { return $false }
+Sequence$proto.getSize = function() { return Integer(this.getLastIndex()+1) }
+Sequence$proto.defines = function(index) { return Boolean$(index.value<=this.getLastIndex().value) }
 function Empty() {
 var that = new Empty.$$;
 that.value = [];
 return that;
 }
 initType(Empty, 'ceylon.language.Empty', List, None, Ranged, Cloneable);
-var $Empty = Empty.$$;
-$Empty.prototype.getEmpty = function() { return $true; }
-$Empty.prototype.defines = function(x) { return $false; }
-$Empty.prototype.getKeys = function() { return IntCategory(this); }
-$Empty.prototype.definesEvery = function(x) { return $false; }
-$Empty.prototype.definesAny = function(x) { return $false; }
-$Empty.prototype.items = function(x) { return this; }
-$Empty.prototype.getSize = function() { return Integer(0); }
-$Empty.prototype.item = function(x) { return null; }
-$Empty.prototype.getFirst = function() { return null; }
-$Empty.prototype.segment = function(a,b) { return this; }
-$Empty.prototype.span = function(a,b) { return this; }
-$Empty.prototype.getIterator = function() { return emptyIterator; }
-$Empty.prototype.getString = function() { return String$("{}"); }
-$Empty.prototype.contains = function(x) { return $false; }
-$Empty.prototype.getLastIndex = function() { return null; }
-$Empty.prototype.getClone = function() { return this; }
-$Empty.prototype.count = function(x) { return Integer(0); }
+var Empty$proto = Empty.$$.prototype;
+Empty$proto.getEmpty = function() { return $true; }
+Empty$proto.defines = function(x) { return $false; }
+Empty$proto.getKeys = function() { return IntCategory(this); }
+Empty$proto.definesEvery = function(x) { return $false; }
+Empty$proto.definesAny = function(x) { return $false; }
+Empty$proto.items = function(x) { return this; }
+Empty$proto.getSize = function() { return Integer(0); }
+Empty$proto.item = function(x) { return null; }
+Empty$proto.getFirst = function() { return null; }
+Empty$proto.segment = function(a,b) { return this; }
+Empty$proto.span = function(a,b) { return this; }
+Empty$proto.getIterator = function() { return emptyIterator; }
+Empty$proto.getString = function() { return String$("{}"); }
+Empty$proto.contains = function(x) { return $false; }
+Empty$proto.getLastIndex = function() { return null; }
+Empty$proto.getClone = function() { return this; }
+Empty$proto.count = function(x) { return Integer(0); }
 $empty = Empty();
 function EmptyIterator() {
 var that = new EmptyIterator.$$;
@@ -1055,8 +1055,8 @@ return that;
 }
 initType(EmptyIterator, 'ceylon.language.EmptyIterator', IdentifiableObject, Iterator);
 inheritProto(EmptyIterator, IdentifiableObject, '$IdentifiableObject$');
-var $EmptyIterator = EmptyIterator.$$;
-$EmptyIterator.prototype.next = function() { return $finished; }
+var EmptyIterator$proto = EmptyIterator.$$.prototype;
+EmptyIterator$proto.next = function() { return $finished; }
 emptyIterator=EmptyIterator();
 function ArraySequence(value) {
 var that = new ArraySequence.$$;
@@ -1066,8 +1066,8 @@ return that;
 initType(ArraySequence, 'ceylon.language.ArraySequence', IdentifiableObject, Sequence);
 inheritProto(ArraySequence, IdentifiableObject, '$IdentifiableObject$');
 inheritProto(ArraySequence, Sequence, '$Sequence$');
-var $ArraySequence = ArraySequence.$$;
-$ArraySequence.prototype.getString = function() {
+var ArraySequence$proto = ArraySequence.$$.prototype;
+ArraySequence$proto.getString = function() {
 if (this.value.length === 0) {
 return String$("{}");
 }
@@ -1084,17 +1084,17 @@ desc += exports.exists(item) === $true ? item.getString().value : "null";
 }
 return String$(desc +" }");
 }
-$ArraySequence.prototype.item = function(index) {
+ArraySequence$proto.item = function(index) {
 var result = this.value[index.value];
 return result!==undefined ? result:null;
 }
-$ArraySequence.prototype.getSize = function() { return Integer(this.value.length) }
-$ArraySequence.prototype.getEmpty = function() { return this.value.length > 0 ? getFalse() : getTrue(); }
-$ArraySequence.prototype.getLastIndex = function() { return this.getSize().getPredecessor(); }
-$ArraySequence.prototype.getFirst = function() { return this.item(Integer(0)); }
-$ArraySequence.prototype.getLast = function() { return this.item(this.getLastIndex()); }
-$ArraySequence.prototype.defines = function(idx) { return Boolean$(idx.compare(this.getSize()) === smaller); }
-$ArraySequence.prototype.segment = function(from, len) {
+ArraySequence$proto.getSize = function() { return Integer(this.value.length) }
+ArraySequence$proto.getEmpty = function() { return this.value.length > 0 ? getFalse() : getTrue(); }
+ArraySequence$proto.getLastIndex = function() { return this.getSize().getPredecessor(); }
+ArraySequence$proto.getFirst = function() { return this.item(Integer(0)); }
+ArraySequence$proto.getLast = function() { return this.item(this.getLastIndex()); }
+ArraySequence$proto.defines = function(idx) { return Boolean$(idx.compare(this.getSize()) === smaller); }
+ArraySequence$proto.segment = function(from, len) {
 var seq = [];
 if (len.compare(Integer(0)) === larger) {
 var stop = from.plus(len).value;
@@ -1105,7 +1105,7 @@ if (x !== getNull()) { seq.push(x); }
 }
 return ArraySequence(seq);
 }
-$ArraySequence.prototype.span = function(from, to) {
+ArraySequence$proto.span = function(from, to) {
 var fromIndex = largest(Integer(0),from).value;
 var toIndex = to === getNull() || to === undefined ? this.getLastIndex().value : smallest(to, this.getLastIndex()).value;
 var seq = [];
@@ -1123,8 +1123,8 @@ seq.push(this.item(Integer(i)));
 }
 return ArraySequence(seq);
 }
-$ArraySequence.prototype.getRest = function() { return ArraySequence(this.value.slice(1)); }
-$ArraySequence.prototype.items = function(keys) {
+ArraySequence$proto.getRest = function() { return ArraySequence(this.value.slice(1)); }
+ArraySequence$proto.items = function(keys) {
 var seq = [];
 for (var i = 0; i < keys.getSize().value; i++) {
 var key = keys.item(Integer(i));
@@ -1134,7 +1134,7 @@ seq.push(this.item(key));
 }
 return ArraySequence(seq);
 }
-$ArraySequence.prototype.definesEvery = function(keys) {
+ArraySequence$proto.definesEvery = function(keys) {
 for (var i = 0; i < keys.getSize().value; i++) {
 if (this.defines(keys.item(Integer(i))) === getFalse()) {
 return getFalse();
@@ -1142,7 +1142,7 @@ return getFalse();
 }
 return getTrue();
 }
-$ArraySequence.prototype.definesAny = function(keys) {
+ArraySequence$proto.definesAny = function(keys) {
 for (var i = 0; i < keys.getSize().value; i++) {
 if (this.defines(keys.item(Integer(i))) === getTrue()) {
 return getTrue();
@@ -1150,7 +1150,7 @@ return getTrue();
 }
 return getFalse();
 }
-$ArraySequence.prototype.equals = function(other) {
+ArraySequence$proto.equals = function(other) {
 if (other && other.getSize().equals(this.getSize()) === getTrue()) {
 for (var i = 0; i < this.getSize().value; i++) {
 var mine = this.item(Integer(i));
@@ -1163,9 +1163,9 @@ return getTrue();
 }
 return getFalse();
 }
-$ArraySequence.prototype.getIterator = function() { return ArrayIterator(this.value); }
-$ArraySequence.prototype.getKeys = function() { return IntCategory(this); }
-$ArraySequence.prototype.contains = function(elem) {
+ArraySequence$proto.getIterator = function() { return ArrayIterator(this.value); }
+ArraySequence$proto.getKeys = function() { return IntCategory(this); }
+ArraySequence$proto.contains = function(elem) {
 for (var i=0; i<this.value.length; i++) {
 if (elem.equals(this.value[i])) {
 return $true;
@@ -1180,18 +1180,18 @@ return that;
 }
 initType(IntCategory, 'ceylon.language.IntCategory', IdentifiableObject, Category);
 inheritProto(IntCategory, IdentifiableObject, '$IdentifiableObject$');
-var $IntCategory = IntCategory.$$;
-$IntCategory.prototype.contains = function(k) {
+var IntCategory$proto = IntCategory.$$.prototype;
+IntCategory$proto.contains = function(k) {
 return this.seq.defines(k);
 }
-$IntCategory.prototype.containsEvery = function(keys) {
+IntCategory$proto.containsEvery = function(keys) {
 var all = true;
 for (var i = 0; i < this.seq.value.length; i++) {
 all = all && this.seq.defines(keys.item(Integer(i))).value;
 }
 return Boolean$(all);
 }
-$IntCategory.prototype.containsAny = function(keys) {
+IntCategory$proto.containsAny = function(keys) {
 for (var i = 0; i < this.seq.value.length; i++) {
 if (this.seq.defines(keys.item(Integer(i))) == $true) {
 return $true;
@@ -1208,8 +1208,8 @@ return that;
 }
 initType(ArrayIterator, 'ceylon.language.ArrayIterator', IdentifiableObject, Iterator);
 inheritProto(ArrayIterator, IdentifiableObject, '$IdentifiableObject$');
-var $ArrayIterator = ArrayIterator.$$;
-$ArrayIterator.prototype.next = function() {
+var ArrayIterator$proto = ArrayIterator.$$.prototype;
+ArrayIterator$proto.next = function() {
 if (this.current === $finished) {
 return $finished;
 }
@@ -1224,18 +1224,18 @@ return that;
 }
 initType(SequenceBuilder, 'ceylon.language.SequenceBuilder', IdentifiableObject, Sized);
 inheritProto(SequenceBuilder, IdentifiableObject, '$IdentifiableObject$');
-var $SequenceBuilder = SequenceBuilder.$$;
-$SequenceBuilder.prototype.getSequence = function() { return ArraySequence(this.seq); }
-$SequenceBuilder.prototype.append = function(e) { this.seq.push(e); }
-$SequenceBuilder.prototype.appendAll = function(arr) {
+var SequenceBuilder$proto = SequenceBuilder.$$.prototype;
+SequenceBuilder$proto.getSequence = function() { return ArraySequence(this.seq); }
+SequenceBuilder$proto.append = function(e) { this.seq.push(e); }
+SequenceBuilder$proto.appendAll = function(arr) {
 if (arr && arr.value && arr.value.length) {
 for (var i = 0; i < arr.value.length; i++) {
 this.seq.push(arr.value[i]);
 }
 }
 }
-$SequenceBuilder.prototype.getSize = function() { return Integer(this.seq.length); }
-$SequenceBuilder.prototype.getEmpty = function() { return Boolean$(this.seq.length === 0); }
+SequenceBuilder$proto.getSize = function() { return Integer(this.seq.length); }
+SequenceBuilder$proto.getEmpty = function() { return Boolean$(this.seq.length === 0); }
 function SequenceAppender(other) {
 var that = new SequenceAppender.$$;
 that.seq = [];
@@ -1253,30 +1253,30 @@ return that;
 initType(Singleton, 'ceylon.language.Singleton', Object$, Sequence);
 inheritProto(Singleton, Object$, '$Object$');
 inheritProto(Singleton, Sequence, '$Sequence$');
-var $Singleton = Singleton.$$;
-$Singleton.prototype.getString = function() { return String$("{ " + this.elem.getString().value + " }") }
-$Singleton.prototype.item = function(index) {
+var Singleton$proto = Singleton.$$.prototype;
+Singleton$proto.getString = function() { return String$("{ " + this.elem.getString().value + " }") }
+Singleton$proto.item = function(index) {
 return index.value===0 ? this.value[0] : null;
 }
-$Singleton.prototype.getSize = function() { return Integer(1); }
-$Singleton.prototype.getLastIndex = function() { return Integer(0); }
-$Singleton.prototype.getFirst = function() { return this.elem; }
-$Singleton.prototype.getLast = function() { return this.elem; }
-$Singleton.prototype.getEmpty = function() { return $false; }
-$Singleton.prototype.getRest = function() { return $empty; }
-$Singleton.prototype.defines = function(idx) { return idx.equals(Integer(0)); }
-$Singleton.prototype.getKeys = function() { return IntCategory(this); }
-$Singleton.prototype.span = function(from, to) {
+Singleton$proto.getSize = function() { return Integer(1); }
+Singleton$proto.getLastIndex = function() { return Integer(0); }
+Singleton$proto.getFirst = function() { return this.elem; }
+Singleton$proto.getLast = function() { return this.elem; }
+Singleton$proto.getEmpty = function() { return $false; }
+Singleton$proto.getRest = function() { return $empty; }
+Singleton$proto.defines = function(idx) { return idx.equals(Integer(0)); }
+Singleton$proto.getKeys = function() { return IntCategory(this); }
+Singleton$proto.span = function(from, to) {
 if (to === undefined || to === null) to = from;
 return (from.equals(Integer(0)) === getTrue() || to.equals(Integer(0)) === getTrue()) ? this : $empty;
 }
-$Singleton.prototype.segment = function(idx, len) {
+Singleton$proto.segment = function(idx, len) {
 if (idx.equals(Integer(0)) === getTrue() && len.compare(Integer(0)) === larger) {
 return this;
 }
 return $empty;
 }
-$Singleton.prototype.getIterator = function() { return SingletonIterator(this.elem); }
+Singleton$proto.getIterator = function() { return SingletonIterator(this.elem); }
 function SingletonIterator(elem) {
 var that = new SingletonIterator.$$;
 that.elem = elem;
@@ -1285,8 +1285,8 @@ return that;
 }
 initType(SingletonIterator, 'ceylon.language.SingletonIterator', IdentifiableObject, Iterator);
 inheritProto(SingletonIterator, IdentifiableObject, '$IdentifiableObject$');
-var $SingletonIterator = SingletonIterator.$$;
-$SingletonIterator.prototype.next = function() {
+var $SingletonIterator$proto = SingletonIterator.$$.prototype;
+$SingletonIterator$proto.next = function() {
 if (this.done) {
 return $finished;
 }
@@ -1317,19 +1317,19 @@ return that;
 initType(Range, 'ceylon.language.Range', Object$, Sequence, Category, Equality);
 inheritProto(Range, Object$, '$Object$');
 inheritProto(Range, Sequence, '$Sequence$');
-var $Range = Range.$$;
-$Range.prototype.getFirst = function() { return this.first; }
-$Range.prototype.getLast = function() { return this.last; }
-$Range.prototype.getEmpty = function() { return getFalse(); }
-$Range.prototype.getDecreasing = function() {
+var Range$proto = Range.$$.prototype;
+Range$proto.getFirst = function() { return this.first; }
+Range$proto.getLast = function() { return this.last; }
+Range$proto.getEmpty = function() { return getFalse(); }
+Range$proto.getDecreasing = function() {
 return Boolean$(this.first.compare(this.last) === larger);
 }
-$Range.prototype.next = function(x) {
+Range$proto.next = function(x) {
 return this.getDecreasing() === getTrue() ? x.getPredecessor() : x.getSuccessor();
 }
-$Range.prototype.getSize = function() { return this.size; }
-$Range.prototype.getLastIndex = function() { return Integer(this.size-1); }
-$Range.prototype.item = function(index) {
+Range$proto.getSize = function() { return this.size; }
+Range$proto.getLastIndex = function() { return Integer(this.size-1); }
+Range$proto.item = function(index) {
 var idx = 0;
 var x = this.first;
 while (idx < index.value) {
@@ -1341,23 +1341,23 @@ x = this.next(x);
 }
 return x;
 }
-$Range.prototype.includes = function(x) {
+Range$proto.includes = function(x) {
 var compf = x.compare(this.first);
 var compl = x.compare(this.last);
 var rval = this.getDecreasing() === getTrue() ? ((compf === equal || compf === smaller) && (compl === equal || compl === larger)) : ((compf === equal || compf === larger) && (compl === equal || compl === smaller));
 return Boolean$(rval);
 }
-$Range.prototype.contains = function(x) {
+Range$proto.contains = function(x) {
 if (typeof x.compare==='function' || (x.prototype && typeof x.prototype.compare==='function')) {
 return this.includes(x);
 }
 return $false;
 }
-$Range.prototype.getRest = function() {
+Range$proto.getRest = function() {
 var n = this.next(this.first);
 return (n.equals(this.last) === getTrue()) ? ArraySequence([]) : Range(n, this.last);
 }
-$Range.prototype.by = function(step) {
+Range$proto.by = function(step) {
 if (step.compare(Integer(0)) !== larger) {
 //throw
 }
@@ -1372,7 +1372,7 @@ for (var i = 0; i < step.value; i++) { x = this.next(x); }
 }
 return ArraySequence(seq);
 }
-$Range.prototype.segment = function(from, len) {
+Range$proto.segment = function(from, len) {
 //only positive length for now
 if (len.compare(Integer(0)) !== larger) return $empty;
 if (this.defines(from) === $false) return $empty;
@@ -1383,7 +1383,7 @@ for (var i=1; i < len.value; i++) { y = this.next(y); }
 if (this.includes(y) === getFalse()) { y = this.last; }
 return Range(x, y);
 }
-$Range.prototype.span = function(from, to) {
+Range$proto.span = function(from, to) {
 from = largest(Integer(0),from);
 if (to === getNull() || to === undefined) {
 to = this.getLastIndex();
@@ -1404,7 +1404,7 @@ to = to.getPredecessor();
 }
 return Range(this.item(from), this.item(to));
 }
-$Range.prototype.definesEvery = function(keys) {
+Range$proto.definesEvery = function(keys) {
 for (var i = 0; i < keys.getSize().value; i++) {
 if (this.defines(keys.item(Integer(i))) === getFalse()) {
 return getFalse();
@@ -1412,7 +1412,7 @@ return getFalse();
 }
 return getTrue();
 }
-$Range.prototype.definesAny = function(keys) {
+Range$proto.definesAny = function(keys) {
 for (var i = 0; i < keys.getSize().value; i++) {
 if (this.defines(keys.item(Integer(i))) === getTrue()) {
 return getTrue();
@@ -1420,15 +1420,15 @@ return getTrue();
 }
 return getFalse();
 }
-$Range.prototype.defines = function(idx) { return Boolean$(idx.compare(this.getSize()) === smaller); }
-$Range.prototype.getString = function() { return String$(this.first.getString().value + ".." + this.last.getString().value); }
-$Range.prototype.equals = function(other) {
+Range$proto.defines = function(idx) { return Boolean$(idx.compare(this.getSize()) === smaller); }
+Range$proto.getString = function() { return String$(this.first.getString().value + ".." + this.last.getString().value); }
+Range$proto.equals = function(other) {
 if (!other) { return getFalse(); }
 var eqf = this.first.equals(other.getFirst());
 var eql = this.last.equals(other.getLast());
 return Boolean$(eqf === getTrue() && eql === getTrue());
 }
-$Range.prototype.getIterator = function() { return RangeIterator(this); }
+Range$proto.getIterator = function() { return RangeIterator(this); }
 function RangeIterator(range) {
 var that = new RangeIterator.$$;
 that.range = range;
@@ -1437,8 +1437,8 @@ return that;
 }
 initType(RangeIterator, 'ceylon.language.RangeIterator', IdentifiableObject, Iterator);
 inheritProto(RangeIterator, IdentifiableObject, '$IdentifiableObject$');
-var $RangeIterator = RangeIterator.$$;
-$RangeIterator.prototype.next = function() {
+var RangeIterator$proto = RangeIterator.$$.prototype;
+RangeIterator$proto.next = function() {
 var rval = this.current;
 if (rval.equals($finished) === getTrue()) {
 return rval;
@@ -1460,16 +1460,16 @@ return that;
 }
 initType(Entry, 'ceylon.language.Entry', Object$, Equality);
 inheritProto(Entry, Object$, '$Object$');
-var $Entry = Entry.$$;
-$Entry.prototype.getString = function() {
+var Entry$proto = Entry.$$.prototype;
+Entry$proto.getString = function() {
 return String$(this.key.getString().value + "->" + this.item.getString().value)
 }
-$Entry.prototype.getKey = function() { return this.key }
-$Entry.prototype.getItem = function() { return this.item }
-$Entry.prototype.equals = function(other) {
+Entry$proto.getKey = function() { return this.key }
+Entry$proto.getItem = function() { return this.item }
+Entry$proto.equals = function(other) {
 return Boolean$(other && this.key.equals(other.key) === getTrue() && this.item.equals(other.item) === getTrue());
 }
-$Entry.prototype.getHash = function() { Integer(this.key.getHash().value ^ this.item.getHash().value) }
+Entry$proto.getHash = function() { Integer(this.key.getHash().value ^ this.item.getHash().value) }
 exports.Equality=Equality; //TODO just to let the compiler finish
 exports.Exception=Exception; //TODO just to let the compiler finish
 exports.IdentifiableObject=IdentifiableObject;

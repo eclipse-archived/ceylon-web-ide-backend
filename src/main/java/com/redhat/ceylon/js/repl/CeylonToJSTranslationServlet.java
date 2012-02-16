@@ -60,7 +60,7 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             out.flush();
             out.close();
             
-            List<? extends Message> errors = compiler.listErrors();
+            List<AnalysisMessage> errors = compiler.listErrors();
             if (errors.size() == 0) {
                 PrintWriter writer = response.getWriter();
                 char[] buf = out.toCharArray();
@@ -71,7 +71,7 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
                 PrintWriter writer = response.getWriter();
                 boolean first = true;
                 writer.print("[");
-                for (Message err : errors) {
+                for (AnalysisMessage err : errors) {
                     if (!first) {
                         writer.print(",");
                     }
