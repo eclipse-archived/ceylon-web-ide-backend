@@ -94,6 +94,10 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
     private void writeError(PrintWriter writer, Message err) {
         writer.print("{\"msg\":\"");
         writer.print(err.getMessage().replace('"', '\''));
+        if (err instanceof AnalysisMessage) {
+            writer.print(" - at ");
+            writer.print(((AnalysisMessage)err).getTreeNode().getLocation());
+        }
         writer.print("\",\"code\":");
         writer.print(err.getCode());
         writer.print(",");
