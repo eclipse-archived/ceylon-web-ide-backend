@@ -18,11 +18,23 @@ var superProto = superType.$$.prototype;
 for(var $ in superProto){
 var $m = superProto[$];
 proto[$] = $m;
-if(suffix!==undefined && $.charAt($.length-1)!=='$') {proto[$+suffix] = $m}
+if($.charAt($.length-1)!=='$') {proto[$+suffix] = $m}
+}
+for (var i=3; i<arguments.length; ++i) {
+superProto = arguments[i].$$.prototype;
+for (var $ in superProto) {proto[$] = superProto[$]}
+}
+}
+function inheritProtoI(type) {
+var proto = type.$$.prototype;
+for (var i=1; i<arguments.length; ++i) {
+var superProto = arguments[i].$$.prototype;
+for (var $ in superProto) {proto[$] = superProto[$]}
 }
 }
 exports.initType=initType;
 exports.inheritProto=inheritProto;
+exports.inheritProtoI=inheritProtoI;
 // TODO: Equality will probably be removed
 function Equality(wat) {
 return wat;
@@ -523,7 +535,7 @@ return cmpSubString(this.value, str.value, start);
 }
 String$proto.contains = function(sub) {
 var str;
-if (sub.constructor === String.$$) {str = sub.value}
+if (sub.constructor === String$.$$) {str = sub.value}
 else if (sub.constructor !== Character.$$) {return $false}
 else {str = codepointToString(sub.value)}
 return Boolean$(this.value.indexOf(str) >= 0);
@@ -1064,8 +1076,7 @@ that.value = value;
 return that;
 }
 initType(ArraySequence, 'ceylon.language.ArraySequence', IdentifiableObject, Sequence);
-inheritProto(ArraySequence, IdentifiableObject, '$IdentifiableObject$');
-inheritProto(ArraySequence, Sequence, '$Sequence$');
+inheritProto(ArraySequence, IdentifiableObject, '$IdentifiableObject$', Sequence);
 var ArraySequence$proto = ArraySequence.$$.prototype;
 ArraySequence$proto.getString = function() {
 if (this.value.length === 0) {
@@ -1251,8 +1262,7 @@ that.elem = elem;
 return that;
 }
 initType(Singleton, 'ceylon.language.Singleton', Object$, Sequence);
-inheritProto(Singleton, Object$, '$Object$');
-inheritProto(Singleton, Sequence, '$Sequence$');
+inheritProto(Singleton, Object$, '$Object$', Sequence);
 var Singleton$proto = Singleton.$$.prototype;
 Singleton$proto.getString = function() { return String$("{ " + this.elem.getString().value + " }") }
 Singleton$proto.item = function(index) {
@@ -1315,8 +1325,7 @@ that.size = Integer(index+1);
 return that;
 }
 initType(Range, 'ceylon.language.Range', Object$, Sequence, Category, Equality);
-inheritProto(Range, Object$, '$Object$');
-inheritProto(Range, Sequence, '$Sequence$');
+inheritProto(Range, Object$, '$Object$', Sequence);
 var Range$proto = Range.$$.prototype;
 Range$proto.getFirst = function() { return this.first; }
 Range$proto.getLast = function() { return this.last; }

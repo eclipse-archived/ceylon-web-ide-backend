@@ -82,7 +82,7 @@ function remoteTranslate(src, successHandler, errorHandler) {
     
     timeoutHandle = setTimeout(errorHandler, 10000);
     
-    xhr.send("ceylon=" + escape(src));
+    xhr.send("ceylon=" + encodeURIComponent(src));
 };
 
 var oldcode, transok;
@@ -131,6 +131,7 @@ function translate(onTranslation) {
     } else {
         onTranslation();
     }
+    editor.focus();
 }
 
 function run() {
@@ -176,6 +177,7 @@ function clearEditMarkers() {
 function clearOutput() {
     var output = document.getElementById("output");
     output.innerHTML = "";
+    editor.focus();
 }
 
 function printOutput(txt) {
