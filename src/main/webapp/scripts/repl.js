@@ -1,6 +1,6 @@
 
 var sample_helloWorld = 'print("Hello World");';
-var sample_forTen = 'for (Integer i in 1..10) {\n\
+var sample_forTen = 'for (i in 1..10) {\n\
     print(i);\n\
 }';
 var sample_stringInterp='String interp = " interpolation ";\n\
