@@ -88,7 +88,7 @@ function remoteTranslate(src, successHandler, errorHandler) {
 var oldcode, transok;
 
 function translate(onTranslation) {
-    var code = "class Ceylon_Script_Runner() {" + getEditCode() + "}";
+    var code = "void run_script() {" + getEditCode() + "}";
     if (code != oldcode) {
         clearOutput();
         clearEditMarkers();
@@ -142,7 +142,7 @@ function afterTranslate() {
     if (transok == true) {
         printSystem("// Script start at " + (new Date()));
         try {
-            Ceylon_Script_Runner();
+            run_script();
         } catch(err) {
             printError("Runtime error:");
             printError("--- " + err);
