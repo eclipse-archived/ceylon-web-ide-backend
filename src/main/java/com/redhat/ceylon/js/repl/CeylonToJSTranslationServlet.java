@@ -22,6 +22,8 @@ import com.redhat.ceylon.compiler.typechecker.TypeCheckerBuilder;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
 import com.redhat.ceylon.compiler.typechecker.io.VirtualFile;
 import com.redhat.ceylon.compiler.typechecker.parser.RecognitionError;
+import com.redhat.ceylon.compiler.typechecker.analyzer.AnalysisError;
+import com.redhat.ceylon.compiler.typechecker.analyzer.AnalysisWarning;
 import com.redhat.ceylon.compiler.typechecker.tree.AnalysisMessage;
 import com.redhat.ceylon.compiler.typechecker.tree.Message;
 
@@ -51,34 +53,29 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
                     .addSrcDirectory(src)
                     .getTypeChecker();
             typeChecker.process();
-            List<Message> errors = typeChecker.getMessages();
-            if (errors.isEmpty()) {
-                //Run the compiler, if typechecker returns no errors.
-                final CharArrayWriter out = new CharArrayWriter();
-                JsCompiler compiler = new JsCompiler(typeChecker) {
-                    @Override
-                    protected Writer getWriter(PhasedUnit pu) {
-                        return out;
-                    }
-                }.optimize(true);
-                compiler.generate();
-                out.flush();
-                out.close();
-                errors.addAll(compiler.listErrors());
-                if (errors.size() == 0) {
-                    PrintWriter writer = response.getWriter();
-                    char[] buf = out.toCharArray();
-                    writer.write(buf, 0, buf.length);
-                    writer.flush();
+            //Run the compiler, if typechecker returns no errors.
+            final CharArrayWriter out = new CharArrayWriter();
+            JsCompiler compiler = new JsCompiler(typeChecker) {
+                @Override
+                protected Writer getWriter(PhasedUnit pu) {
+                    return out;
                 }
-            }
-            if (!errors.isEmpty()) {
+            }.optimize(true).stopOnErrors(true).indent(false).comment(false);
+            boolean ok = compiler.generate();
+            out.flush();
+            out.close();
+            if (ok) {
+                PrintWriter writer = response.getWriter();
+                char[] buf = out.toCharArray();
+                writer.write(buf, 0, buf.length);
+                writer.flush();
+            } else {
                 //Print out errors
                 response.setStatus(500);
                 PrintWriter writer = response.getWriter();
                 boolean first = true;
                 writer.print("[");
-                for (Message err : errors) {
+                for (Message err : compiler.listErrors()) {
                     if (!first) {
                         writer.print(",");
                     }
@@ -101,7 +98,6 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
         writer.print(err.getMessage().replaceAll("\"", "\\\"").replaceAll("'", "\\'"));
         writer.print("\",\"code\":");
         writer.print(err.getCode());
-        System.out.println("CODIGO " + err.getCode());
         writer.print(",");
         if (err instanceof AnalysisMessage) {
             AnalysisMessage msg = (AnalysisMessage)err;
