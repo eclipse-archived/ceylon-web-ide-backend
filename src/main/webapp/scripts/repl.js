@@ -152,6 +152,7 @@ function afterTranslate() {
 }
 
 function editCode(code) {
+    clearEditMarkers();
     editor.getSession().setValue(code);
     return false;
 }
