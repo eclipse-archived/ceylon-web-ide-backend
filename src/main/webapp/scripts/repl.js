@@ -88,7 +88,7 @@ function remoteTranslate(src, successHandler, errorHandler) {
 var oldcode, transok;
 
 function translate(onTranslation) {
-    var code = "void run_script() {" + getEditCode() + "}";
+    var code = "void run_script() {\n" + getEditCode() + "}";
     if (code != oldcode) {
         clearOutput();
         clearEditMarkers();
@@ -117,14 +117,14 @@ function translate(onTranslation) {
             var errors = JSON.parse(errcodes);
             for (var idx in errors) {
             	var err = errors[idx];
-                printError("--- " + err.msg);
+                printError("--- " + err.msg + " (at " + (err.start.line-1) + ":" + err.start.pos + ")");
                 annotations[idx] = {
-                	row:err.start.line-1,
+                	row:err.start.line-2,
                 	column:1,
                 	text:err.msg,
                 	type:"error"
                 }
-                var markerId = editor.getSession().addMarker(new AceRange(err.start.line-1, err.start.pos, err.end.line-1, err.end.pos+1), "editerror", "text");
+                var markerId = editor.getSession().addMarker(new AceRange(err.start.line-2, err.start.pos, err.end.line-2, err.end.pos+1), "editerror", "text");
             }
             editor.getSession().setAnnotations(annotations);
         });

@@ -12,6 +12,16 @@ var superTypes = arguments[i].$$.T$all;
 for ($ in superTypes) {cons.T$all[$] = superTypes[$]}
 }
 }
+function initExistingType(type, cons, typeName) {
+type.$$ = cons;
+cons.T$name = typeName;
+cons.T$all = {}
+cons.T$all[typeName] = type;
+for (var i=3; i<arguments.length; ++i) {
+var superTypes = arguments[i].$$.T$all;
+for ($ in superTypes) {cons.T$all[$] = superTypes[$]}
+}
+}
 function inheritProto(type, superType, suffix) {
 var proto = type.$$.prototype;
 var superProto = superType.$$.prototype;
@@ -35,11 +45,6 @@ for (var $ in superProto) {proto[$] = superProto[$]}
 exports.initType=initType;
 exports.inheritProto=inheritProto;
 exports.inheritProtoI=inheritProtoI;
-// TODO: Equality will probably be removed
-function Equality(wat) {
-return wat;
-}
-initType(Equality, 'ceylon.language.Equality');
 function Void(wat) {
 return wat;
 }
@@ -55,7 +60,7 @@ Object$proto.equals = function(other) { return Boolean$(this===other) } //TODO: 
 function IdentifiableObject(obj) {
 return obj;
 }
-initType(IdentifiableObject, 'ceylon.language.IdentifiableObject', Object$, Equality);
+initType(IdentifiableObject, 'ceylon.language.IdentifiableObject', Object$);
 inheritProto(IdentifiableObject, Object$, '$Object$');
 //INTERFACES
 function Cloneable(wat) {
@@ -119,7 +124,7 @@ exports.Closeable=Closeable;
 function Comparable(wat) {
 return wat;
 }
-initType(Comparable, 'ceylon.language.Comparable', Equality);
+initType(Comparable, 'ceylon.language.Comparable');
 exports.Comparable=Comparable;
 function Container(wat) {
 return wat;
@@ -154,7 +159,7 @@ exports.Iterator=Iterator;
 function Collection(wat) {
 return wat;
 }
-initType(Collection, 'ceylon.language.Collection', Iterable, Sized, Category, Equality, Cloneable);
+initType(Collection, 'ceylon.language.Collection', Iterable, Sized, Category, Cloneable);
 exports.Collection=Collection;
 function FixedSized(wat) {
 return wat;
@@ -174,7 +179,7 @@ exports.Summable=Summable;
 function Number$(wat) {
 return wat;
 }
-initType(Number$, 'ceylon.language.Number', Equality);
+initType(Number$, 'ceylon.language.Number');
 exports.Number=Number$;
 function Invertable(wat) {
 return wat;
@@ -189,7 +194,7 @@ exports.Numeric=Numeric;
 function Ordinal(wat) {
 return wat;
 }
-initType(Ordinal, 'ceylon.language.Ordinal', Equality);
+initType(Ordinal, 'ceylon.language.Ordinal');
 exports.Ordinal=Ordinal;
 function Integral(wat) {
 return wat;
@@ -857,24 +862,35 @@ exports.String=String$;
 exports.Character=Character;
 exports.StringBuilder=StringBuilder;
 function getNull() { return null }
-function Boolean$(value) {
-return value ? $true : $false;
-}
-initType(Boolean$, 'ceylon.language.Boolean', IdentifiableObject);
+//function Boolean$(value) {
+//    return value ? $true : $false;
+//}
+//initType(Boolean$, 'ceylon.language.Boolean', IdentifiableObject);
+//inheritProto(Boolean$, IdentifiableObject, '$IdentifiableObject$');
+//var $true = new Boolean$.$$;
+//$true.string = String$("true");
+//$true.getString = function() {return this.string}
+//function getTrue() { return $true; }
+//var $false = new Boolean$.$$;
+//$false.string = String$("false");
+//$false.getString = function() {return this.string}
+//function getFalse() { return $false; }
+function Boolean$(value) {return Boolean(value)}
+initExistingType(Boolean$, Boolean, 'ceylon.language.Boolean', IdentifiableObject);
 inheritProto(Boolean$, IdentifiableObject, '$IdentifiableObject$');
-var $true = new Boolean$.$$;
-$true.string = String$("true");
-$true.getString = function() {return this.string}
-function getTrue() { return $true; }
-var $false = new Boolean$.$$;
-$false.string = String$("false");
-$false.getString = function() {return this.string}
-function getFalse() { return $false; }
+Boolean.prototype.equals = function(other) {return other.constructor===Boolean && other==this}
+var trueString = String$("true", 4);
+var falseString = String$("false", 5);
+Boolean.prototype.getString = function() {return this.valueOf()?trueString:falseString}
+function getTrue() {return true}
+function getFalse() {return false}
+var $true = true;
+var $false = false;
 function Finished() {}
 initType(Finished, 'ceylon.language.Finished', IdentifiableObject);
 inheritProto(Finished, IdentifiableObject, '$IdentifiableObject$');
 var $finished = new Finished.$$;
-$finished.string = String$("exhausted");
+$finished.string = String$("exhausted", 9);
 $finished.getString = function() {return this.string}
 function getExhausted() { return $finished; }
 function Comparison(name) {
@@ -1009,9 +1025,9 @@ partial = t in cons.T$all;
 partial = isOfTypes(obj, t);
 }
 if (types.t==='u') {
-unions |= partial;
+unions = partial || unions;
 } else {
-inters &= partial;
+inters = partial && inters;
 _ints=true;
 }
 }
@@ -1139,9 +1155,7 @@ ArraySequence$proto.items = function(keys) {
 var seq = [];
 for (var i = 0; i < keys.getSize().value; i++) {
 var key = keys.item(Integer(i));
-if (this.defines(key)) {
 seq.push(this.item(key));
-}
 }
 return ArraySequence(seq);
 }
@@ -1324,7 +1338,7 @@ x = dec ? x.getPredecessor() : x.getSuccessor();
 that.size = Integer(index+1);
 return that;
 }
-initType(Range, 'ceylon.language.Range', Object$, Sequence, Category, Equality);
+initType(Range, 'ceylon.language.Range', Object$, Sequence, Category);
 inheritProto(Range, Object$, '$Object$', Sequence);
 var Range$proto = Range.$$.prototype;
 Range$proto.getFirst = function() { return this.first; }
@@ -1461,13 +1475,12 @@ return rval;
 function Entry(key, item) {
 var that = new Entry.$$;
 Object$(that);
-Equality(that);
 Void(that);
 that.key = key;
 that.item = item;
 return that;
 }
-initType(Entry, 'ceylon.language.Entry', Object$, Equality);
+initType(Entry, 'ceylon.language.Entry', Object$);
 inheritProto(Entry, Object$, '$Object$');
 var Entry$proto = Entry.$$.prototype;
 Entry$proto.getString = function() {
@@ -1479,7 +1492,6 @@ Entry$proto.equals = function(other) {
 return Boolean$(other && this.key.equals(other.key) === getTrue() && this.item.equals(other.item) === getTrue());
 }
 Entry$proto.getHash = function() { Integer(this.key.getHash().value ^ this.item.getHash().value) }
-exports.Equality=Equality; //TODO just to let the compiler finish
 exports.Exception=Exception; //TODO just to let the compiler finish
 exports.IdentifiableObject=IdentifiableObject;
 exports.Object=Object$; //TODO just to let the compiler finish
