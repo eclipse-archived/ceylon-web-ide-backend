@@ -1,6 +1,6 @@
-
+/* SAMPLES */
 var sample_helloWorld = 'print("Hello World");';
-var sample_forTen = 'for (Integer i in 1..10) {\n\
+var sample_forTen = 'for (i in 1..10) {\n\
     print(i);\n\
 }';
 var sample_stringInterp='String interp = " interpolation ";\n\
@@ -42,7 +42,22 @@ greet();\n\
 greet("yourself");\n\
 shout(null);\n\
 shout("yourself");';
-
+var sample_switch='void switchPrint(Integer|String x) {\n\
+    switch (x)\n\
+    case (is String) { print(x.uppercased); } //x is String inside the block\n\
+    case (is Integer) {\n\
+        //x is Integer inside this block\n\
+        switch (x <=> 5)\n\
+        case (smaller) { print("" x " is smaller than 5"); }\n\
+        case (larger) { print("" x " is larger than 5"); }\n\
+        else { print("" x " is 5"); }\n\
+    }\n\
+}\n\
+\n\
+switchPrint("hi");\n\
+for (i in 4..6) {\n\
+    switchPrint(i);\n\
+}';
 require.config({
     baseUrl: "scripts/modules",
     waitSeconds: 15
@@ -88,7 +103,7 @@ function remoteTranslate(src, successHandler, errorHandler) {
 var oldcode, transok;
 
 function translate(onTranslation) {
-    var code = "class Ceylon_Script_Runner() {" + getEditCode() + "}";
+    var code = "void run_script() {\n" + getEditCode() + "}";
     if (code != oldcode) {
         clearOutput();
         clearEditMarkers();
@@ -117,14 +132,14 @@ function translate(onTranslation) {
             var errors = JSON.parse(errcodes);
             for (var idx in errors) {
             	var err = errors[idx];
-                printError("--- " + err.msg);
+                printError("--- " + err.msg + " (at " + (err.start.line-1) + ":" + err.start.pos + ")");
                 annotations[idx] = {
-                	row:err.start.line-1,
+                	row:err.start.line-2,
                 	column:1,
                 	text:err.msg,
                 	type:"error"
                 }
-                var markerId = editor.getSession().addMarker(new AceRange(err.start.line-1, err.start.pos, err.end.line-1, err.end.pos+1), "editerror", "text");
+                var markerId = editor.getSession().addMarker(new AceRange(err.start.line-2, err.start.pos, err.end.line-2, err.end.pos+1), "editerror", "text");
             }
             editor.getSession().setAnnotations(annotations);
         });
@@ -142,7 +157,7 @@ function afterTranslate() {
     if (transok == true) {
         printSystem("// Script start at " + (new Date()));
         try {
-            Ceylon_Script_Runner();
+            run_script();
         } catch(err) {
             printError("Runtime error:");
             printError("--- " + err);
@@ -152,6 +167,7 @@ function afterTranslate() {
 }
 
 function editCode(code) {
+    clearEditMarkers();
     editor.getSession().setValue(code);
     return false;
 }
