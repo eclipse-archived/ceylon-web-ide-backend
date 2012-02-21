@@ -1,4 +1,4 @@
-
+/* SAMPLES */
 var sample_helloWorld = 'print("Hello World");';
 var sample_forTen = 'for (i in 1..10) {\n\
     print(i);\n\
@@ -42,7 +42,22 @@ greet();\n\
 greet("yourself");\n\
 shout(null);\n\
 shout("yourself");';
-
+var sample_switch='void switchPrint(Integer|String x) {\n\
+    switch (x)\n\
+    case (is String) { print(x.uppercased); } //x is String inside the block\n\
+    case (is Integer) {\n\
+        //x is Integer inside this block\n\
+        switch (x <=> 5)\n\
+        case (smaller) { print("" x " is smaller than 5"); }\n\
+        case (larger) { print("" x " is larger than 5"); }\n\
+        else { print("" x " is 5"); }\n\
+    }\n\
+}\n\
+\n\
+switchPrint("hi");\n\
+for (i in 4..6) {\n\
+    switchPrint(i);\n\
+}';
 require.config({
     baseUrl: "scripts/modules",
     waitSeconds: 15
