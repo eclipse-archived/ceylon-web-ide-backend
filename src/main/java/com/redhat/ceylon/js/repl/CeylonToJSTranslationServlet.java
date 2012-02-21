@@ -1,10 +1,11 @@
 package com.redhat.ceylon.js.repl;
 
+import java.io.ByteArrayInputStream;
 import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.io.StringBufferInputStream;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,33 +46,39 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
 	    try {
     	    String script = request.getParameter("ceylon");
     	    ScriptFile src = new ScriptFile(script);
+    	    //Run the typechecker
             TypeChecker typeChecker = new TypeCheckerBuilder()
                     .addSrcDirectory(src)
                     .getTypeChecker();
             typeChecker.process();
-            final CharArrayWriter out = new CharArrayWriter();
-            JsCompiler compiler = new JsCompiler(typeChecker) {
-                @Override
-                protected Writer getWriter(PhasedUnit pu) {
-                    return out;
+            List<Message> errors = typeChecker.getMessages();
+            if (errors.isEmpty()) {
+                //Run the compiler, if typechecker returns no errors.
+                final CharArrayWriter out = new CharArrayWriter();
+                JsCompiler compiler = new JsCompiler(typeChecker) {
+                    @Override
+                    protected Writer getWriter(PhasedUnit pu) {
+                        return out;
+                    }
+                }.optimize(true);
+                compiler.generate();
+                out.flush();
+                out.close();
+                errors.addAll(compiler.listErrors());
+                if (errors.size() == 0) {
+                    PrintWriter writer = response.getWriter();
+                    char[] buf = out.toCharArray();
+                    writer.write(buf, 0, buf.length);
+                    writer.flush();
                 }
-            }.optimize(true);
-            compiler.generate();
-            out.flush();
-            out.close();
-            
-            List<AnalysisMessage> errors = compiler.listErrors();
-            if (errors.size() == 0) {
-                PrintWriter writer = response.getWriter();
-                char[] buf = out.toCharArray();
-                writer.write(buf, 0, buf.length);
-                writer.flush();
-            } else {
+            }
+            if (!errors.isEmpty()) {
+                //Print out errors
                 response.setStatus(500);
                 PrintWriter writer = response.getWriter();
                 boolean first = true;
                 writer.print("[");
-                for (AnalysisMessage err : errors) {
+                for (Message err : errors) {
                     if (!first) {
                         writer.print(",");
                     }
@@ -83,23 +90,18 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
 	    } catch (Exception ex) {
             response.setStatus(500);
             PrintWriter writer = response.getWriter();
-            writer.print("[");
-            writer.print("\"Service error: ");
+            writer.print("[\"Service error: ");
             writer.print(ex.getMessage().replace('"', '\''));
-            writer.print("\"");
-            writer.print("]");
+            writer.print("\"]");
 	    }
 	}
 
     private void writeError(PrintWriter writer, Message err) {
         writer.print("{\"msg\":\"");
-        writer.print(err.getMessage().replace('"', '\''));
-        if (err instanceof AnalysisMessage) {
-            writer.print(" - at ");
-            writer.print(((AnalysisMessage)err).getTreeNode().getLocation());
-        }
+        writer.print(err.getMessage().replaceAll("\"", "\\\"").replaceAll("'", "\\'"));
         writer.print("\",\"code\":");
         writer.print(err.getCode());
+        System.out.println("CODIGO " + err.getCode());
         writer.print(",");
         if (err instanceof AnalysisMessage) {
             AnalysisMessage msg = (AnalysisMessage)err;
@@ -113,11 +115,11 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             }
         } else if (err instanceof RecognitionError) {
             RecognitionError rec = (RecognitionError)err;
-            writer.print("\"start\":{\"line\":");
-            writer.print(rec.getLine());
-            writer.print(",\"pos\":");
-            writer.print(rec.getCharacterInLine());
-            writer.print("}");
+            String pos = String.format("%d:%d", rec.getLine(), rec.getCharacterInLine());
+            writer.print("\"start\":");
+            writeErrPos(writer, pos);
+            writer.print(",\"end\":");
+            writeErrPos(writer, pos);
         }
         writer.print("}");
     }
@@ -154,7 +156,11 @@ class ScriptFile implements VirtualFile {
     }
     @Override
     public InputStream getInputStream() {
-        return new StringBufferInputStream(script);
+        try {
+            return new ByteArrayInputStream(script.getBytes("UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            return new ByteArrayInputStream(script.getBytes());
+        }
     }
     @Override
     public List<VirtualFile> getChildren() {
