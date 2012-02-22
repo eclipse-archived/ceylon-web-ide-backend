@@ -63,11 +63,18 @@ require.config({
     waitSeconds: 15
 });
 
-require(["ceylon/language/0.1/ceylon.language"],
+var spin;
+var waitSpin;
+
+require(["ceylon/language/0.1/ceylon.language", 'scripts/spin.js'],
     function(mod) {
         console && console.log("Ceylon language module loaded OK");
         mod.print = printOutput;
         console && console.log("ceylon.language.print() patched OK");
+        spin = Spinner({
+            lines:12, length:20, width:10, radius:25, color:'#000',
+            speed:1, trail:50, shadow:true, hwaccel:false
+        });
     }
 );
 
@@ -146,10 +153,14 @@ function translate(onTranslation) {
     } else {
         onTranslation();
     }
+    document.getElementById('submit').disabled=false;
+    waitSpin.stop();
     editor.focus();
 }
 
 function run() {
+    document.getElementById('submit').disabled=true;
+    waitSpin = spin.spin(document.getElementById('primary-content'));
     translate(afterTranslate);
 }
 
