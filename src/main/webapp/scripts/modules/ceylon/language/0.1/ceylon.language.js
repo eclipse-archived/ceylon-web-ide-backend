@@ -56,7 +56,7 @@ initType(Object$, 'ceylon.language.Object', Void);
 var Object$proto = Object$.$$.prototype;
 Object$proto.getString=function() { String$(Object.prototype.toString.apply(this)) };
 Object$proto.toString=function() { return this.getString().value };
-Object$proto.equals = function(other) { return Boolean$(this===other) } //TODO: is this correct?
+Object$proto.equals = function(other) { return Boolean$(this===other); } //TODO: is this correct?
 function IdentifiableObject(obj) {
 return obj;
 }
@@ -245,7 +245,7 @@ return e;
 }
 $Some.prototype.getEmpty = function() { return $false; }
 function Exception(description, cause, wat) {
-if (wat===undefined) {wat=new Exception.$$}
+if (wat===undefined) {wat=new Exception.$$;}
 wat.description = description;
 wat.cause = cause;
 return wat;
@@ -253,7 +253,7 @@ return wat;
 initType(Exception, 'ceylon.language.Exception', IdentifiableObject);
 inheritProto(Exception, IdentifiableObject, '$IdentifiableObject$');
 var Exception$proto = Exception.$$.prototype;
-Exception$proto.getCause = function() {return this.cause}
+Exception$proto.getCause = function() {return this.cause;}
 Exception$proto.getMessage = function() {
 return this.description!==null ? this.description
 : (this.cause!==null ? this.cause.getMessage() : String$("", 0));
@@ -844,6 +844,7 @@ var StringBuilder$proto = StringBuilder.$$.prototype;
 StringBuilder$proto.getString = function() { return String$(this.value); }
 StringBuilder$proto.append = function(s) {
 this.value = this.value + s.value;
+return this;
 }
 StringBuilder$proto.appendAll = function(strings) {
 if (strings === null || strings === undefined) { return this; }
@@ -851,13 +852,20 @@ for (var i = 0; i < strings.value.length; i++) {
 var _s = strings.value[i];
 this.value += _s?_s.value:"null";
 }
-return this; //strictly speaking, this method should return void, but then string interpolation would be a big mess
+return this;
 }
 StringBuilder$proto.appendCharacter = function(c) {
 this.append(c.getString());
+return this;
 }
-StringBuilder$proto.appendNewline = function() { this.value = this.value + "\n"; }
-StringBuilder$proto.appendSpace = function() { this.value = this.value + " "; }
+StringBuilder$proto.appendNewline = function() {
+this.value = this.value + "\n";
+return this;
+}
+StringBuilder$proto.appendSpace = function() {
+this.value = this.value + " ";
+return this;
+}
 exports.String=String$;
 exports.Character=Character;
 exports.StringBuilder=StringBuilder;
@@ -878,10 +886,10 @@ function getNull() { return null }
 function Boolean$(value) {return Boolean(value)}
 initExistingType(Boolean$, Boolean, 'ceylon.language.Boolean', IdentifiableObject);
 inheritProto(Boolean$, IdentifiableObject, '$IdentifiableObject$');
-Boolean.prototype.equals = function(other) {return other.constructor===Boolean && other==this}
+Boolean.prototype.equals = function(other) {return other.constructor===Boolean && other==this;}
 var trueString = String$("true", 4);
 var falseString = String$("false", 5);
-Boolean.prototype.getString = function() {return this.valueOf()?trueString:falseString}
+Boolean.prototype.getString = function() {return this.valueOf()?trueString:falseString;}
 function getTrue() {return true}
 function getFalse() {return false}
 var $true = true;
@@ -891,7 +899,7 @@ initType(Finished, 'ceylon.language.Finished', IdentifiableObject);
 inheritProto(Finished, IdentifiableObject, '$IdentifiableObject$');
 var $finished = new Finished.$$;
 $finished.string = String$("exhausted", 9);
-$finished.getString = function() {return this.string}
+$finished.getString = function() { return this.string; }
 function getExhausted() { return $finished; }
 function Comparison(name) {
 var that = new Comparison.$$;
@@ -1484,14 +1492,14 @@ initType(Entry, 'ceylon.language.Entry', Object$);
 inheritProto(Entry, Object$, '$Object$');
 var Entry$proto = Entry.$$.prototype;
 Entry$proto.getString = function() {
-return String$(this.key.getString().value + "->" + this.item.getString().value)
+return String$(this.key.getString().value + "->" + this.item.getString().value);
 }
-Entry$proto.getKey = function() { return this.key }
-Entry$proto.getItem = function() { return this.item }
+Entry$proto.getKey = function() { return this.key; }
+Entry$proto.getItem = function() { return this.item; }
 Entry$proto.equals = function(other) {
 return Boolean$(other && this.key.equals(other.key) === getTrue() && this.item.equals(other.item) === getTrue());
 }
-Entry$proto.getHash = function() { Integer(this.key.getHash().value ^ this.item.getHash().value) }
+Entry$proto.getHash = function() { Integer(this.key.getHash().value ^ this.item.getHash().value); }
 exports.Exception=Exception; //TODO just to let the compiler finish
 exports.IdentifiableObject=IdentifiableObject;
 exports.Object=Object$; //TODO just to let the compiler finish
