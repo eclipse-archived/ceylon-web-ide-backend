@@ -1,63 +1,5 @@
-/* SAMPLES */
-var sample_helloWorld = 'print("Hello World");';
-var sample_forTen = 'for (i in 1..10) {\n\
-    print(i);\n\
-}';
-var sample_stringInterp='String interp = " interpolation ";\n\
-String s2 = "to START and END with";\n\
-String s3 = "siht ekil ,";\n\
-print("String" interp.uppercased " needs "\n\
-      s2.lowercased " by string literals"\n\
-      s3.reversed "");';
-var sample_null1='void printIf1(String? s) {\n\
-    if (exists s) {\n\
-        print(s);\n\
-    } else {\n\
-        print("Nothing to print.");\n\
-    }\n\
-}\n\
-String? s1 = null;\n\
-String? s2 = "I do exist";\n\
-printIf1(s1);\n\
-printIf1(s2);\n\
-print(s1 else "Nothing here...");\n\
-print(s2 else "Nothing here...");';
-var sample_null2='void greet(String? name) {\n\
-    print("Hello, " name ? "World" "!");\n\
-}\n\
-void shout(String? name) {\n\
-    greet(name?.uppercased);\n\
-}\n\
-greet(null);\n\
-greet("yourself");\n\
-shout(null);\n\
-shout("yourself");';
-var sample_defparms='void greet(String name="World") {\n\
-    print("Hello, " name "!");\n\
-}\n\
-void shout(String? name) {\n\
-    greet( (name ? "world" ).uppercased);\n\
-}\n\
-greet();\n\
-greet("yourself");\n\
-shout(null);\n\
-shout("yourself");';
-var sample_switch='void switchPrint(Integer|String x) {\n\
-    switch (x)\n\
-    case (is String) { print(x.uppercased); } //x is String inside the block\n\
-    case (is Integer) {\n\
-        //x is Integer inside this block\n\
-        switch (x <=> 5)\n\
-        case (smaller) { print("" x " is smaller than 5"); }\n\
-        case (larger) { print("" x " is larger than 5"); }\n\
-        else { print("" x " is 5"); }\n\
-    }\n\
-}\n\
-\n\
-switchPrint("hi");\n\
-for (i in 4..6) {\n\
-    switchPrint(i);\n\
-}';
+var examples={};
+
 require.config({
     baseUrl: "scripts/modules",
     waitSeconds: 15
@@ -177,10 +119,40 @@ function afterTranslate() {
     }
 }
 
-function editCode(code) {
-    clearEditMarkers();
-    editor.getSession().setValue(code);
-    return false;
+function editCode(key) {
+    if (!examples[key]) {
+        //Retrieve code
+        var timeoutHandle;
+        
+        var errorHandler = function(err) {
+            alert("error: " + err);
+        };
+        
+        var url = "examples/"+key+".ceylon";
+        var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+        xhr.open('GET', url, true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                clearTimeout(timeoutHandle);
+                if (xhr.status == 200) {
+                    examples[key]=xhr.responseText;
+                    editCode(key);
+                } else {
+                    errorHandler(xhr.responseText);
+                }
+            }
+        };
+        timeoutHandle = setTimeout(errorHandler, 10000);
+        xhr.send(null);
+        waitSpin = spin.spin(document.getElementById('primary-content'));
+        return false;
+    } else {
+        spin.stop();
+        clearEditMarkers();
+        editor.getSession().setValue(examples[key]);
+        editor.focus();
+        return true;
+    }
 }
 
 function getEditCode() {
