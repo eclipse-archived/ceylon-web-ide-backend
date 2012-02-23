@@ -126,7 +126,9 @@ function editCode(key) {
     if (!examples[key]) {
         //Retrieve code
         var timeoutHandle;
-
+        var errorHandler=function(err){
+            alert("error: " + err);
+        };
         var url = "examples/"+key+".ceylon";
         var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
         xhr.open('GET', url, true);
@@ -137,7 +139,7 @@ function editCode(key) {
                     examples[key]=xhr.responseText;
                     editCode(key);
                 } else {
-                    alert("error: " + err);
+                    errorHandler(xhr.responseText);
                 }
             }
         };
