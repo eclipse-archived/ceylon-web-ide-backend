@@ -106,6 +106,7 @@ function run() {
     translate(afterTranslate);
 }
 
+//This function is called if compilation runs OK
 function afterTranslate() {
     if (transok == true) {
         printSystem("// Script start at " + (new Date()));
@@ -119,15 +120,13 @@ function afterTranslate() {
     }
 }
 
+//Shows the specified example in the editor. If the file is not available,
+//retrieves it from the server.
 function editCode(key) {
     if (!examples[key]) {
         //Retrieve code
         var timeoutHandle;
-        
-        var errorHandler = function(err) {
-            alert("error: " + err);
-        };
-        
+
         var url = "examples/"+key+".ceylon";
         var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
         xhr.open('GET', url, true);
@@ -138,7 +137,7 @@ function editCode(key) {
                     examples[key]=xhr.responseText;
                     editCode(key);
                 } else {
-                    errorHandler(xhr.responseText);
+                    alert("error: " + err);
                 }
             }
         };
