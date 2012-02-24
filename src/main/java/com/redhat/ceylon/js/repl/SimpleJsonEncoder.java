@@ -22,6 +22,9 @@ public class SimpleJsonEncoder {
         sb.append(s.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\"").replaceAll("'", "\\\\\"").replaceAll("\n", "\\\\n"));
         sb.append('"');
     }
+    public void encodeNumber(Number n, StringBuilder sb) {
+        sb.append(n.toString());
+    }
 
     @SuppressWarnings("unchecked")
     public void encodeList(List<Object> list, StringBuilder sb) {
@@ -35,6 +38,8 @@ public class SimpleJsonEncoder {
                 encodeList((List<Object>)item, sb);
             } else if (item instanceof Map) {
                 encodeMap((Map<String, Object>)item, sb);
+            } else if (item instanceof Number) {
+                encodeNumber((Number)item, sb);
             } else {
                 encodeString(item.toString(), sb);
             }
@@ -57,6 +62,8 @@ public class SimpleJsonEncoder {
                 encodeList((List<Object>)entry.getValue(), sb);
             } else if (entry.getValue() instanceof Map) {
                 encodeMap((Map<String, Object>)entry.getValue(), sb);
+            } else if (entry.getValue() instanceof Number) {
+                encodeNumber((Number)entry.getValue(), sb);
             } else {
                 encodeString(entry.getValue().toString(), sb);
             }
