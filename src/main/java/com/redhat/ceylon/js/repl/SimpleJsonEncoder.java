@@ -19,7 +19,7 @@ public class SimpleJsonEncoder {
 
     public void encodeString(String s, StringBuilder sb) {
         sb.append('"');
-        sb.append(s.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\"").replaceAll("'", "\\\\\"").replaceAll("\n", "\\n"));
+        sb.append(s.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\"").replaceAll("'", "\\\\\"").replaceAll("\n", "\\\\n"));
         sb.append('"');
     }
 
