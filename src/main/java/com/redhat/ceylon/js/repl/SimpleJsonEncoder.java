@@ -52,7 +52,7 @@ public class SimpleJsonEncoder {
                 sb.append(',');
             }
             encodeString(entry.getKey(), sb);
-            sb.append('=');
+            sb.append(':');
             if (entry.getValue() instanceof List) {
                 encodeList((List<Object>)entry.getValue(), sb);
             } else if (entry.getValue() instanceof Map) {
