@@ -8,6 +8,12 @@ require.config({
 var spin;
 var waitSpin;
 
+function stopSpinner() {
+    document.getElementById('submit').disabled=false;
+    waitSpin.stop();
+    editor.focus();
+}
+
 require(["ceylon/language/0.1/ceylon.language", 'scripts/spin.js'],
     function(mod) {
         console && console.log("Ceylon language module loaded OK");
@@ -20,16 +26,22 @@ require(["ceylon/language/0.1/ceylon.language", 'scripts/spin.js'],
     }
 );
 
-function remoteTranslate(src, successHandler, errorHandler) {
+function httpPost(url, data, successHandler, errorHandler, hideSpin) {
     var timeoutHandle;
+    var errfunc;
     
-    if (!errorHandler) {
-        errorHandler = function(err) {
+    if (errorHandler) {
+        errfunc = function(err) {
+            errorHandler(err);
+            hideSpin();
+        }
+    } else {
+        errfunc = function(err) {
             alert("error: " + err);
+            hideSpin();
         };
     }
-    
-    var url = "translate";
+
     var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
     xhr.open('POST', url, true);
     xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
@@ -38,16 +50,47 @@ function remoteTranslate(src, successHandler, errorHandler) {
             clearTimeout(timeoutHandle);
             if (xhr.status == 200) {
                 successHandler(xhr.responseText);
+                hideSpin();
             } else {
-                errorHandler(xhr.responseText);
+                errfunc(xhr.responseText);
             }
         }
     };
-    
     timeoutHandle = setTimeout(errorHandler, 10000);
-    
-    xhr.send("ceylon=" + encodeURIComponent(src));
-};
+    xhr.send(data);
+}
+
+function httpGet(url, successHandler, errorHandler, hideSpin) {
+    //Retrieve code
+    var timeoutHandle;
+    var errfunc;
+    if (errorHandler) {
+        errfunc = function(err) {
+            errorHandler(err);
+            hideSpin();
+        }
+    } else {
+        errfunc = function(err) {
+            alert("error: " + err);
+            hideSpin();
+        }
+    }
+    var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+    xhr.open('GET', url, true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            clearTimeout(timeoutHandle);
+            if (xhr.status == 200) {
+                successHandler(xhr.responseText);
+                hideSpin();
+            } else {
+                errfunc(xhr.responseText);
+            }
+        }
+    };
+    timeoutHandle = setTimeout(errorHandler, 10000);
+    xhr.send(null);
+}
 
 var oldcode, transok;
 
@@ -56,9 +99,9 @@ function translate(onTranslation) {
     if (code != oldcode) {
         clearOutput();
         clearEditMarkers();
-        oldcode = code;
         transok = false;
-        remoteTranslate(code, function(translatedcode) {
+        var compileOkHandler = function(translatedcode) {
+            oldcode = code;
             showCode(translatedcode);
             try {
                 globalEval(translatedcode);
@@ -70,7 +113,8 @@ function translate(onTranslation) {
                 printError("Translated code could not be parsed:");
                 printError("--- " + err);
             }
-        }, function(errcodes) {
+        };
+        var compileErrHandler = function(errcodes) {
             transok = false;
             
             // FIXME
@@ -91,18 +135,17 @@ function translate(onTranslation) {
                 var markerId = editor.getSession().addMarker(new AceRange(err.start.line-2, err.start.pos, err.end.line-2, err.end.pos+1), "editerror", "text");
             }
             editor.getSession().setAnnotations(annotations);
-        });
+        }
+        httpPost('translate', "ceylon=" + encodeURIComponent(code), compileOkHandler, compileErrHandler, stopSpinner);
+        document.getElementById('submit').disabled=true;
+        waitSpin = spin.spin(document.getElementById('primary-content'));
     } else {
         onTranslation();
     }
-    document.getElementById('submit').disabled=false;
-    waitSpin.stop();
-    editor.focus();
 }
 
+//Sends the code to the server for compilation and it successful, runs the resulting js.
 function run() {
-    document.getElementById('submit').disabled=true;
-    waitSpin = spin.spin(document.getElementById('primary-content'));
     translate(afterTranslate);
 }
 
@@ -123,32 +166,19 @@ function afterTranslate() {
 //Shows the specified example in the editor. If the file is not available,
 //retrieves it from the server.
 function editCode(key) {
+    //Make sure we don't do anything until we have an editor
+    if (!editor) return false;
     if (!examples[key]) {
         //Retrieve code
-        var timeoutHandle;
-        var errorHandler=function(err){
-            alert("error: " + err);
-        };
-        var url = "examples/"+key+".ceylon";
-        var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
-        xhr.open('GET', url, true);
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4) {
-                clearTimeout(timeoutHandle);
-                if (xhr.status == 200) {
-                    examples[key]=xhr.responseText;
-                    editCode(key);
-                } else {
-                    errorHandler(xhr.responseText);
-                }
-            }
-        };
-        timeoutHandle = setTimeout(errorHandler, 10000);
-        xhr.send(null);
+        httpGet("examples/"+key+".ceylon", function(sample){
+            examples[key]=sample;
+            editCode(key);
+        }, null, function(){;
+            spin.stop();
+        });
         waitSpin = spin.spin(document.getElementById('primary-content'));
         return false;
     } else {
-        spin.stop();
         clearEditMarkers();
         editor.getSession().setValue(examples[key]);
         editor.focus();
