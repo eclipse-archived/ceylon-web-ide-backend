@@ -15,6 +15,7 @@ import com.redhat.ceylon.compiler.js.DocVisitor;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.TypeCheckerBuilder;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
+import com.redhat.ceylon.js.util.DocUtils;
 
 @WebServlet("/hoverdoc")
 public class DocServlet extends HttpServlet {
@@ -33,13 +34,15 @@ public class DocServlet extends HttpServlet {
                     .addSrcDirectory(src)
                     .getTypeChecker();
             typeChecker.process();
+            //Retrieve docs
             DocVisitor dv = new DocVisitor();
             for (PhasedUnit pu: typeChecker.getPhasedUnits().getPhasedUnits()) {
                 pu.getCompilationUnit().visit(dv);
             }
+            //Send as JSON
             Map<String, Object> docs = new HashMap<String, Object>(2);
             docs.put("docs", dv.getDocs());
-            docs.put("refs", dv.getLocations());
+            docs.put("refs", DocUtils.referenceMapToList(dv.getLocations()));
             String resp = json.encode(docs);
             response.setContentLength(resp.length());
             response.getWriter().print(resp);

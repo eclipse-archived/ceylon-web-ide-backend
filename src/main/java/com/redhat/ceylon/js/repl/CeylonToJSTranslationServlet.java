@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.redhat.ceylon.compiler.js.DocVisitor;
 import com.redhat.ceylon.compiler.js.JsCompiler;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.TypeCheckerBuilder;
@@ -22,6 +23,7 @@ import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
 import com.redhat.ceylon.compiler.typechecker.parser.RecognitionError;
 import com.redhat.ceylon.compiler.typechecker.tree.AnalysisMessage;
 import com.redhat.ceylon.compiler.typechecker.tree.Message;
+import com.redhat.ceylon.js.util.DocUtils;
 
 /**
  * Servlet implementation class CeylonToJSTranslationServlet
@@ -51,6 +53,11 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
                     .addSrcDirectory(src)
                     .getTypeChecker();
             typeChecker.process();
+            //While we're at it, get the docs
+            final DocVisitor doccer = new DocVisitor();
+            for (PhasedUnit pu: typeChecker.getPhasedUnits().getPhasedUnits()) {
+                pu.getCompilationUnit().visit(doccer);
+            }
             //Run the compiler, if typechecker returns no errors.
             final CharArrayWriter out = new CharArrayWriter();
             JsCompiler compiler = new JsCompiler(typeChecker) {
@@ -62,22 +69,23 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             boolean ok = compiler.generate();
             out.flush();
             out.close();
+            final Map<String, Object> resp = new HashMap<String, Object>();
+            resp.put("code_docs", doccer.getDocs());
+            resp.put("code_refs", DocUtils.referenceMapToList(doccer.getLocations()));
             PrintWriter writer = response.getWriter();
             if (ok) {
-                char[] buf = out.toCharArray();
-                writer.write(buf, 0, buf.length);
+                resp.put("code", out.toString());
             } else {
                 //Print out errors
-                response.setStatus(500);
-                StringBuilder sb = new StringBuilder();
                 ArrayList<Object> errs = new ArrayList<Object>(compiler.listErrors().size());
                 for (Message err : compiler.listErrors()) {
                     errs.add(encodeError(err));
                 }
-                json.encodeList(errs, sb);
-                response.setContentLength(sb.length());
-                writer.print(sb.toString());
+                resp.put("errors", errs);
             }
+            String enc = json.encode(resp);
+            response.setContentLength(enc.length());
+            writer.print(enc);
             writer.flush();
 	    } catch (Exception ex) {
             response.setStatus(500);
@@ -95,29 +103,13 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
         errmsg.put("code", err.getCode());
         if (err instanceof AnalysisMessage) {
             AnalysisMessage msg = (AnalysisMessage)err;
-            String loc = msg.getTreeNode().getLocation();
-            String[] locs = loc.split("-");
-            if (locs.length == 2) {
-                errmsg.put("start", encodeErrPos(locs[0]));
-                errmsg.put("end", encodeErrPos(locs[1]));
-            }
+            errmsg.putAll(DocUtils.locationToMap(msg.getTreeNode().getLocation(), true));
         } else if (err instanceof RecognitionError) {
             RecognitionError rec = (RecognitionError)err;
             String pos = String.format("%d:%d", rec.getLine(), rec.getCharacterInLine());
-            errmsg.put("start", encodeErrPos(pos));
-            errmsg.put("end", encodeErrPos(pos));
+            errmsg.putAll(DocUtils.locationToMap(pos, true));
         }
         return errmsg;
-    }
-
-    private Map<String, Object> encodeErrPos(String loc) {
-        String[] pos = loc.split(":");
-        Map<String, Object> m = new HashMap<String, Object>();
-        if (pos.length == 2) {
-            m.put("line", pos[0]);
-            m.put("pos", pos[1]);
-        }
-        return m;
     }
 
 }
