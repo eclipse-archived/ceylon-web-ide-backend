@@ -25,7 +25,7 @@ public class TestJsonEncoder {
         m2.put("string4",1);
         m2.put("list2", Collections.emptyList());
         empty.put("map", m2);
-        String expected = "{\"string1\":\"string\",\"map\":{\"list2\":[],\"string4\":\"1\"},\"list\":[\"string2\",{},\"string3\"]}";
+        String expected = "{\"string1\":\"string\",\"map\":{\"list2\":[],\"string4\":1},\"list\":[\"string2\",{},\"string3\"]}";
         assertEquals(expected, json.encode(empty));
     }
 
