@@ -7,24 +7,26 @@ require.config({
 
 var spin;
 var waitSpin;
+var AceRange;
+
+require(["ceylon/language/0.1/ceylon.language", 'ace/range', 'scripts/spin.js'],
+    function(clang, acer) {
+        console && console.log("Ceylon language module loaded OK");
+        clang.print = printOutput;
+        console && console.log("ceylon.language.print() patched OK");
+        spin = Spinner({
+            lines:12, length:20, width:10, radius:25, color:'#000',
+            speed:1, trail:50, shadow:true, hwaccel:false
+        });
+        AceRange = acer.Range;
+    }
+);
 
 function stopSpinner() {
     document.getElementById('submit').disabled=false;
     waitSpin.stop();
     editor.focus();
 }
-
-require(["ceylon/language/0.1/ceylon.language", 'scripts/spin.js'],
-    function(mod) {
-        console && console.log("Ceylon language module loaded OK");
-        mod.print = printOutput;
-        console && console.log("ceylon.language.print() patched OK");
-        spin = Spinner({
-            lines:12, length:20, width:10, radius:25, color:'#000',
-            speed:1, trail:50, shadow:true, hwaccel:false
-        });
-    }
-);
 
 function httpPost(url, data, successHandler, errorHandler, hideSpin) {
     var timeoutHandle;
@@ -94,49 +96,86 @@ function httpGet(url, successHandler, errorHandler, hideSpin) {
 
 var oldcode, transok;
 
+//Shows the specified error messages in the code
+function showErrors(errors, docs, refs) {
+    printError("Code contains errors:");
+    clearEditMarkers();
+    var annotations = [];
+    var annidx = 0;
+    for (var i=0; i < errors.length;i++) {
+    	var err = errors[i];
+        printError("--- " + err.msg + " (at " + (err.start.row-1) + ":" + err.start.col + ")");
+        annotations[annidx++] = {
+        	row:err.start.row-2,
+        	column:1,
+        	text:err.msg,
+        	type:"error"
+        }
+        var markerId = editor.getSession().addMarker(new AceRange(err.start.row-2, err.start.col, err.end.row-2, err.end.col+1), "editerror", "text");
+    }
+    editor.getSession().setAnnotations(annotations);
+}
+function showDocs(docs, refs) {
+    var anns = editor.getSession().getAnnotations();
+    var annidx = anns.length;
+    for (var i=0; i<refs.length;i++) {
+        var ref=refs[i];
+        var idx = parseInt(ref.ref);
+        anns[annidx++]={
+            row:ref.loc.start.row-2,
+            column:ref.loc.start.col,
+            text:docs[idx],
+            type:"info"
+        };
+        var renderer=function(html, range, left, top, config) {
+            //this function can somehow setup a hover with the doc text
+        }
+        editor.getSession().addMarker(new AceRange(ref.loc.start.row-2, ref.loc.start.col, ref.loc.end.row-2, ref.loc.end.col), "hoverhelp", renderer);
+    }
+    editor.getSession().setAnnotations(anns);
+}
+
 function translate(onTranslation) {
     var code = "void run_script() {\n" + getEditCode() + "}";
     if (code != oldcode) {
         clearOutput();
         clearEditMarkers();
         transok = false;
-        var compileOkHandler = function(translatedcode) {
+        var compileHandler = function(result) {
             oldcode = code;
-            showCode(translatedcode);
-            try {
-                globalEval(translatedcode);
-                transok = true;
-                if (onTranslation) {
-                    onTranslation();
+            var json = JSON.parse(result);
+            var translatedcode=json['code'];
+            if (translatedcode) {
+                showCode(translatedcode);
+                showDocs(json['code_docs'], json['code_refs']);
+                try {
+                    globalEval(translatedcode);
+                    transok = true;
+                    if (onTranslation) {
+                        onTranslation();
+                    }
+                } catch(err) {
+                    printError("Translated code could not be parsed:");
+                    printError("--- " + err);
                 }
-            } catch(err) {
-                printError("Translated code could not be parsed:");
-                printError("--- " + err);
+            } else {
+                //errors?
+                var errs = json['errors'];
+                if (errs) {
+                    showErrors(errs);
+                    showDocs(json['code_docs'], json['code_refs']);
+                }
             }
         };
-        var compileErrHandler = function(errcodes) {
+        var errHandler = function(errcodes) {
             transok = false;
             
-            // FIXME
-            var AceRange = require("ace/range").Range;
-            
-            printError("Code contains errors:");
-            var annotations = [];
             var errors = JSON.parse(errcodes);
-            for (var idx in errors) {
-            	var err = errors[idx];
-                printError("--- " + err.msg + " (at " + (err.start.line-1) + ":" + err.start.pos + ")");
-                annotations[idx] = {
-                	row:err.start.line-2,
-                	column:1,
-                	text:err.msg,
-                	type:"error"
-                }
-                var markerId = editor.getSession().addMarker(new AceRange(err.start.line-2, err.start.pos, err.end.line-2, err.end.pos+1), "editerror", "text");
+            if (errors) {
+                showErrors(errors);
             }
-            editor.getSession().setAnnotations(annotations);
         }
-        httpPost('translate', "ceylon=" + encodeURIComponent(code), compileOkHandler, compileErrHandler, stopSpinner);
+        httpPost('translate', "ceylon=" + encodeURIComponent(code), compileHandler, errHandler, stopSpinner);
         document.getElementById('submit').disabled=true;
         waitSpin = spin.spin(document.getElementById('primary-content'));
     } else {
