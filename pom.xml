@@ -35,6 +35,13 @@
       <scope>system</scope>
       <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/jscompiler-0.1.jar</systemPath>
     </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.10</version>
+      <type>jar</type>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <profiles>
     <profile>

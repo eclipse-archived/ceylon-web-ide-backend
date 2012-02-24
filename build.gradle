@@ -15,10 +15,11 @@ repositories {
 dependencies {
 	compile "ceylon:com.redhat.ceylon.typechecker:${ceylonVersion}", "ceylon:jscompiler:${ceylonVersion}"
 	providedCompile 'org.jboss.spec:jboss-javaee-6.0:1.0.0.Final'
+	testCompile 'junit:junit:4.10'
 }
 
 task copylangmod(type:Copy) {
-	from "../ceylon-js/build/classes/main/ceylon/language/${ceylonVersion}/ceylon.language.js"
+	from "../ceylon-js/build/runtime/ceylon/language/${ceylonVersion}/ceylon.language.js"
 	into "${webAppDirName}/scripts/modules/ceylon/language/${ceylonVersion}"
 }
 
