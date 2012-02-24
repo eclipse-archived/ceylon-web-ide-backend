@@ -32,8 +32,8 @@ public class TestJsonEncoder {
     @Test
     public void testEncodeString() {
         String[] origs = {"plain", "'single quoted'", "\"double quoted\"", "\\backslashed\\", "\\'mixed\\\"" };
-        String[] encs = {"\"plain\"", "\"\\'single quoted\\'\"", "\"\\\"double quoted\\\"\"", "\"\\\\backslashed\\\\\"",
-                "\"\\\\\\'mixed\\\\\\\"\""};
+        String[] encs = {"\"plain\"", "\"\\\"single quoted\\\"\"", "\"\\\"double quoted\\\"\"", "\"\\\\backslashed\\\\\"",
+                "\"\\\\\\\"mixed\\\\\\\"\""};
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i <origs.length; i++) {
             sb.setLength(0);
