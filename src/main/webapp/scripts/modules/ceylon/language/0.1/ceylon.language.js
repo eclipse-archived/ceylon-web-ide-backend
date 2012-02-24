@@ -909,7 +909,7 @@ return that;
 initType(Comparison, 'ceylon.language.Comparison', IdentifiableObject);
 inheritProto(Comparison, IdentifiableObject, '$IdentifiableObject$');
 var Comparison$proto = Comparison.$$.prototype;
-Comparison$proto.getString = function() { return this.name }
+Comparison$proto.getString = function() { return this.name; }
 function print(line) { console.log(line.getString().value) }
 exports.print=print;
 var larger = Comparison("larger");
@@ -929,7 +929,7 @@ exports.smallest=smallest;
 function min(seq) {
 var v = seq.value[0];
 if (seq.value.length > 1) {
-for (i = 1; i < seq.value.length; i++) {
+for (var i = 1; i < seq.value.length; i++) {
 v = smallest(v, seq.value[i]);
 }
 }
@@ -939,7 +939,7 @@ return v;
 function max(seq) {
 var v = seq.value[0];
 if (seq.value.length > 1) {
-for (i = 1; i < seq.value.length; i++) {
+for (var i = 1; i < seq.value.length; i++) {
 v = largest(v, seq.value[i]);
 }
 }
@@ -948,7 +948,7 @@ return v;
 //receives ArraySequence of ArraySequences, returns flat ArraySequence
 function join(seqs) {
 var builder = [];
-for (i = 0; i < seqs.value.length; i++) {
+for (var i = 0; i < seqs.value.length; i++) {
 builder = builder.concat(seqs.value[i].value);
 }
 return ArraySequence(builder);
@@ -957,7 +957,7 @@ return ArraySequence(builder);
 function zip(keys, items) {
 var entries = []
 var numEntries = Math.min(keys.value.length, items.value.length);
-for (i = 0; i < numEntries; i++) {
+for (var i = 0; i < numEntries; i++) {
 entries[i] = Entry(keys.value[i], items.value[i]);
 }
 return ArraySequence(entries);
@@ -965,7 +965,7 @@ return ArraySequence(entries);
 //receives and returns ArraySequence
 function coalesce(seq) {
 var newseq = [];
-for (i = 0; i < seq.value.length; i++) {
+for (var i = 0; i < seq.value.length; i++) {
 if (seq.value[i]) {
 newseq = newseq.concat(seq.value[i]);
 }
@@ -989,7 +989,7 @@ return sb.getSequence();
 //Receives ArraySequence, returns ArraySequence (with Entries)
 function entries(seq) {
 var e = [];
-for (i = 0; i < seq.value.length; i++) {
+for (var i = 0; i < seq.value.length; i++) {
 e.push(Entry(Integer(i), seq.value[i]));
 }
 return ArraySequence(e);
@@ -1084,7 +1084,7 @@ Empty$proto.contains = function(x) { return $false; }
 Empty$proto.getLastIndex = function() { return null; }
 Empty$proto.getClone = function() { return this; }
 Empty$proto.count = function(x) { return Integer(0); }
-$empty = Empty();
+var $empty = Empty();
 function EmptyIterator() {
 var that = new EmptyIterator.$$;
 return that;
@@ -1093,7 +1093,7 @@ initType(EmptyIterator, 'ceylon.language.EmptyIterator', IdentifiableObject, Ite
 inheritProto(EmptyIterator, IdentifiableObject, '$IdentifiableObject$');
 var EmptyIterator$proto = EmptyIterator.$$.prototype;
 EmptyIterator$proto.next = function() { return $finished; }
-emptyIterator=EmptyIterator();
+var emptyIterator=EmptyIterator();
 function ArraySequence(value) {
 var that = new ArraySequence.$$;
 that.value = value;
