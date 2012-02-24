@@ -1,14 +1,13 @@
 package com.redhat.ceylon.js.repl;
 
-import java.io.ByteArrayInputStream;
 import java.io.CharArrayWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -20,7 +19,6 @@ import com.redhat.ceylon.compiler.js.JsCompiler;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.TypeCheckerBuilder;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
-import com.redhat.ceylon.compiler.typechecker.io.VirtualFile;
 import com.redhat.ceylon.compiler.typechecker.parser.RecognitionError;
 import com.redhat.ceylon.compiler.typechecker.tree.AnalysisMessage;
 import com.redhat.ceylon.compiler.typechecker.tree.Message;
@@ -31,8 +29,10 @@ import com.redhat.ceylon.compiler.typechecker.tree.Message;
 @WebServlet("/translate")
 public class CeylonToJSTranslationServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-       
-    /**
+
+	private SimpleJsonEncoder json = new SimpleJsonEncoder();
+
+	/**
      * @see HttpServlet#HttpServlet()
      */
     public CeylonToJSTranslationServlet() {
@@ -62,115 +62,62 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             boolean ok = compiler.generate();
             out.flush();
             out.close();
+            PrintWriter writer = response.getWriter();
             if (ok) {
-                PrintWriter writer = response.getWriter();
                 char[] buf = out.toCharArray();
                 writer.write(buf, 0, buf.length);
-                writer.flush();
             } else {
                 //Print out errors
                 response.setStatus(500);
-                PrintWriter writer = response.getWriter();
-                boolean first = true;
-                writer.print("[");
+                StringBuilder sb = new StringBuilder();
+                ArrayList<Object> errs = new ArrayList<Object>(compiler.listErrors().size());
                 for (Message err : compiler.listErrors()) {
-                    if (!first) {
-                        writer.print(",");
-                    }
-                    writeError(writer, err);
-                    first = false;
+                    errs.add(encodeError(err));
                 }
-                writer.print("]");
+                json.encodeList(errs, sb);
+                response.setContentLength(sb.length());
+                writer.print(sb.toString());
             }
+            writer.flush();
 	    } catch (Exception ex) {
             response.setStatus(500);
-            PrintWriter writer = response.getWriter();
-            writer.print("[\"Service error: ");
-            writer.print(ex.getMessage().replace('"', '\''));
-            writer.print("\"]");
+            StringBuilder sb = new StringBuilder();
+            json.encodeList(Collections.singletonList((Object)String.format("Service error: %s", ex.getMessage())), sb);
+            response.setContentLength(sb.length());
+            response.getWriter().print(sb.toString());
+            response.getWriter().flush();
 	    }
 	}
 
-    private void writeError(PrintWriter writer, Message err) {
-        writer.print("{\"msg\":\"");
-        writer.print(err.getMessage().replaceAll("\"", "\\\"").replaceAll("'", "\\'"));
-        writer.print("\",\"code\":");
-        writer.print(err.getCode());
-        writer.print(",");
+    private Map<String, Object> encodeError(Message err) {
+        Map<String, Object> errmsg = new HashMap<String, Object>();
+        errmsg.put("msg", err.getMessage());
+        errmsg.put("code", err.getCode());
         if (err instanceof AnalysisMessage) {
             AnalysisMessage msg = (AnalysisMessage)err;
             String loc = msg.getTreeNode().getLocation();
             String[] locs = loc.split("-");
             if (locs.length == 2) {
-                writer.print("\"start\":");
-                writeErrPos(writer, locs[0]);
-                writer.print(",\"end\":");
-                writeErrPos(writer, locs[1]);
+                errmsg.put("start", encodeErrPos(locs[0]));
+                errmsg.put("end", encodeErrPos(locs[1]));
             }
         } else if (err instanceof RecognitionError) {
             RecognitionError rec = (RecognitionError)err;
             String pos = String.format("%d:%d", rec.getLine(), rec.getCharacterInLine());
-            writer.print("\"start\":");
-            writeErrPos(writer, pos);
-            writer.print(",\"end\":");
-            writeErrPos(writer, pos);
+            errmsg.put("start", encodeErrPos(pos));
+            errmsg.put("end", encodeErrPos(pos));
         }
-        writer.print("}");
+        return errmsg;
     }
 
-    private void writeErrPos(PrintWriter writer, String loc) {
+    private Map<String, Object> encodeErrPos(String loc) {
         String[] pos = loc.split(":");
+        Map<String, Object> m = new HashMap<String, Object>();
         if (pos.length == 2) {
-            writer.print("{\"line\":");
-            writer.print(pos[0]);
-            writer.print(",\"pos\":");
-            writer.print(pos[1]);
-            writer.print("}");
+            m.put("line", pos[0]);
+            m.put("pos", pos[1]);
         }
+        return m;
     }
 
-}
-
-class ScriptFile implements VirtualFile {
-    private String script;
-    public ScriptFile(String script) {
-        this.script = script;
-    }
-    @Override
-    public boolean isFolder() {
-        return false;
-    }
-    @Override
-    public String getName() {
-        return "SCRIPT.ceylon";
-    }
-    @Override
-    public String getPath() {
-        return getName();
-    }
-    @Override
-    public InputStream getInputStream() {
-        try {
-            return new ByteArrayInputStream(script.getBytes("UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            return new ByteArrayInputStream(script.getBytes());
-        }
-    }
-    @Override
-    public List<VirtualFile> getChildren() {
-        return new ArrayList<VirtualFile>(0);
-    }
-    @Override
-    public int hashCode() {
-        return getPath().hashCode();
-    }
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof VirtualFile) {
-            return ((VirtualFile) obj).getPath().equals(getPath());
-        }
-        else {
-            return super.equals(obj);
-        }
-    }
 }
