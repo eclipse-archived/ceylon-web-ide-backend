@@ -1,4 +1,5 @@
 var examples={};
+var markers=[];
 
 require.config({
     baseUrl: "scripts/modules",
@@ -7,9 +8,8 @@ require.config({
 
 var spin;
 var waitSpin;
-var AceRange;
 
-require(["ceylon/language/0.1/ceylon.language", 'ace/range', 'scripts/spin.js'],
+require(["ceylon/language/0.1/ceylon.language", 'scripts/spin.js'],
     function(clang, acer) {
         console && console.log("Ceylon language module loaded OK");
         clang.print = printOutput;
@@ -18,7 +18,6 @@ require(["ceylon/language/0.1/ceylon.language", 'ace/range', 'scripts/spin.js'],
             lines:12, length:20, width:10, radius:25, color:'#000',
             speed:1, trail:50, shadow:true, hwaccel:false
         });
-        AceRange = acer.Range;
     }
 );
 
@@ -100,39 +99,20 @@ var oldcode, transok;
 function showErrors(errors, docs, refs) {
     printError("Code contains errors:");
     clearEditMarkers();
-    var annotations = [];
-    var annidx = 0;
     for (var i=0; i < errors.length;i++) {
     	var err = errors[i];
         printError("--- " + err.msg + " (at " + (err.start.row-1) + ":" + err.start.col + ")");
-        annotations[annidx++] = {
-        	row:err.start.row-2,
-        	column:1,
-        	text:err.msg,
-        	type:"error"
-        }
-        var markerId = editor.getSession().addMarker(new AceRange(err.start.row-2, err.start.col, err.end.row-2, err.end.col+1), "editerror", "text");
+        editor.setMarker(err.start.row-2, '<span class="ceylondoc"><a href="javascript:void(0);"><font color="#ff0000"><b>%N%</b></font><span>'+err.msg+'</span></a></span>');
+        markers.push(editor.markText({line:err.start.row-2,ch:err.start.col},{line:err.end.row-2,ch:err.end.col+1},"editerror"));
     }
-    editor.getSession().setAnnotations(annotations);
 }
 function showDocs(docs, refs) {
-    var anns = editor.getSession().getAnnotations();
-    var annidx = anns.length;
     for (var i=0; i<refs.length;i++) {
         var ref=refs[i];
         var idx = parseInt(ref.ref);
-        anns[annidx++]={
-            row:ref.loc.start.row-2,
-            column:ref.loc.start.col,
-            text:docs[idx],
-            type:"info"
-        };
-        var renderer=function(html, range, left, top, config) {
-            //this function can somehow setup a hover with the doc text
-        }
-        editor.getSession().addMarker(new AceRange(ref.loc.start.row-2, ref.loc.start.col, ref.loc.end.row-2, ref.loc.end.col), "hoverhelp", renderer);
+        //texto es docs[idx]
+        markers.push(editor.markText({line:ref.loc.start.row-1,ch:ref.loc.start.col},{line:ref.loc.end.row-1,ch:ref.loc.end.col},"hoverhelp"));
     }
-    editor.getSession().setAnnotations(anns);
 }
 
 function translate(onTranslation) {
@@ -219,14 +199,14 @@ function editCode(key) {
         return false;
     } else {
         clearEditMarkers();
-        editor.getSession().setValue(examples[key]);
+        editor.setValue(examples[key]);
         editor.focus();
         return true;
     }
 }
 
 function getEditCode() {
-    return editor.getSession().getValue();
+    return editor.getValue();
 }
 
 function showCode(code) {
@@ -236,11 +216,13 @@ function showCode(code) {
 }
 
 function clearEditMarkers() {
-    editor.getSession().setAnnotations([]);
-    var markers = editor.getSession().getMarkers();
-    for (var idx in markers) {
-    	editor.getSession().removeMarker(idx);
+    for (var i=0; i<editor.lineCount();i++) {
+        editor.clearMarker(i);
     }
+    for (var i=0; i<markers.length;i++) {
+        markers[i].clear();
+    }
+    markers=[];
 }
 
 function clearOutput() {
