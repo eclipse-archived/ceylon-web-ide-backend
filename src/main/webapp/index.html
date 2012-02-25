@@ -64,8 +64,14 @@
             text-align: left; 
             text-decoration: none;
         }
+        .hoverhelp { position:absolute; }
+        .hoverhelp:hover {
+        }
+        #docs_errs {
+            width:600px;
+        }
     </style>
-    <script type="text/javascript" src="scripts/require.js" data-main="scripts/repl.js"></script>
+    <script type="text/javascript" src="scripts/require-jquery.js" data-main="scripts/repl.js"></script>
     <script type="text/javascript" src="scripts/codemirror.js" charset="utf-8"></script>
     <script type="text/javascript" src="scripts/mode/javascript/javascript.js" charset="utf-8"></script>
     <link rel="stylesheet" href="scripts/codemirror.css" />
@@ -74,15 +80,6 @@
   .CodeMirror-gutter {min-width: 2.6em; cursor: pointer;}
 </style>
     <script>
-        var editor;
-        window.onload = function() {
-            var donde=document.getElementById('edit_ceylon');
-            editor = CodeMirror.fromTextArea(donde,{
-                value:'print("Hello, World!");',
-                mode:'javascript',
-                lineNumbers:true
-            });
-        };
     </script>
 
     <!-- Google+ Badge -+->
@@ -115,6 +112,7 @@
     <h1>Ceylon Web Runner</h1>
     <form>
         <textarea id="edit_ceylon"></textarea>
+        <pre id="docs_errs"> </pre>
         <input type="button" id="submit" name="submit" value="Run" onClick="run()">
         <input type="button" value="Clear Output" onClick="clearOutput()">
     </form>
@@ -171,7 +169,6 @@
         </div>
     </div>
 </div>
-
 
 </body>
 </html>

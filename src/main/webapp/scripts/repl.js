@@ -8,9 +8,11 @@ require.config({
 
 var spin;
 var waitSpin;
+var jquery;
+var editor;
 
-require(["ceylon/language/0.1/ceylon.language", 'scripts/spin.js'],
-    function(clang, acer) {
+require(["ceylon/language/0.1/ceylon.language", 'jquery', 'scripts/spin.js'],
+    function(clang, $) {
         console && console.log("Ceylon language module loaded OK");
         clang.print = printOutput;
         console && console.log("ceylon.language.print() patched OK");
@@ -18,6 +20,15 @@ require(["ceylon/language/0.1/ceylon.language", 'scripts/spin.js'],
             lines:12, length:20, width:10, radius:25, color:'#000',
             speed:1, trail:50, shadow:true, hwaccel:false
         });
+        $(document).ready(function() {
+            var donde=document.getElementById('edit_ceylon');
+            editor = CodeMirror.fromTextArea(donde,{
+                value:'print("Hello, World!");',
+                mode:'javascript',
+                lineNumbers:true
+            });
+        });
+        jquery=$;
     }
 );
 
@@ -105,14 +116,42 @@ function showErrors(errors, docs, refs) {
         editor.setMarker(err.start.row-2, '<span class="ceylondoc"><a href="javascript:void(0);"><font color="#ff0000"><b>%N%</b></font><span>'+err.msg+'</span></a></span>');
         markers.push(editor.markText({line:err.start.row-2,ch:err.start.col},{line:err.end.row-2,ch:err.end.col+1},"editerror"));
     }
+	function showErr(event) {
+        document.getElementById('docs_errs').innerHTML=this + " " + event;
+	}
+	function hideErr(event) {
+        document.getElementById('docs_errs').innerHTML=' ';
+	}
+    jquery(".editerror").hover(showErr,hideErr);
 }
 function showDocs(docs, refs) {
+    var errlocs={};
     for (var i=0; i<refs.length;i++) {
         var ref=refs[i];
         var idx = parseInt(ref.ref);
         //texto es docs[idx]
-        markers.push(editor.markText({line:ref.loc.start.row-1,ch:ref.loc.start.col},{line:ref.loc.end.row-1,ch:ref.loc.end.col},"hoverhelp"));
+        var nodo=document.createElement('pre');
+        var loc=ref.loc.start.row+":"+ref.loc.start.col;
+        nodo.setAttribute('id',loc);
+        nodo.setAttribute('class','hoverhelp');
+        var spaces='';
+        var largo=ref.loc.end.col-ref.loc.start.col+1;
+        for(var j=0;j<largo;j++)spaces+=' ';
+        nodo.appendChild(document.createTextNode(spaces));
+		console.log("Agregando widget a " + ref.loc.start.row+":"+ref.loc.start.col+" - " + docs[idx]);
+        editor.addWidget({line:ref.loc.start.row-3,ch:ref.loc.start.col},nodo,false);
+        errlocs[loc]=docs[idx];
+        //markers.push(editor.markText({line:ref.loc.start.row-2,ch:ref.loc.start.col},{line:ref.loc.end.row-2,ch:ref.loc.end.col+1},"hoverhelp"));
     }
+	function showDoc(event) {
+        if (errlocs[this.id]) {
+            document.getElementById('docs_errs').innerHTML=errlocs[this.id];
+        }
+	}
+	function hideDoc(event) {
+        document.getElementById('docs_errs').innerHTML=' ';
+	}
+    jquery(".hoverhelp").hover(showDoc, hideDoc);
 }
 
 function translate(onTranslation) {
