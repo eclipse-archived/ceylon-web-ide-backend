@@ -108,6 +108,7 @@ var oldcode, transok;
 
 //Shows the specified error messages in the code
 function showErrors(errors, docs, refs) {
+    var errlocs={};
     printError("Code contains errors:");
     clearEditMarkers();
     for (var i=0; i < errors.length;i++) {
@@ -115,17 +116,29 @@ function showErrors(errors, docs, refs) {
         printError("--- " + err.msg + " (at " + (err.start.row-1) + ":" + err.start.col + ")");
         editor.setMarker(err.start.row-2, '<span class="ceylondoc"><a href="javascript:void(0);"><font color="#ff0000"><b>%N%</b></font><span>'+err.msg+'</span></a></span>');
         markers.push(editor.markText({line:err.start.row-2,ch:err.start.col},{line:err.end.row-2,ch:err.end.col+1},"editerror"));
+        var nodo=document.createElement('pre');
+        var loc=err.start.row+":"+err.start.col;
+        nodo.setAttribute('id',loc);
+        nodo.setAttribute('class','hoverhelp');
+        var spaces='';
+        var largo=err.end.col-err.start.col+1;
+        for(var j=0;j<largo;j++)spaces+=' ';
+        nodo.appendChild(document.createTextNode(spaces));
+        editor.addWidget({line:err.start.row-3,ch:err.start.col},nodo,false);
+        errlocs[loc]=err.msg;
     }
 	function showErr(event) {
-        document.getElementById('docs_errs').innerHTML=this + " " + event;
+        if (errlocs[this.id]) {
+            document.getElementById('docs_errs').innerHTML=errlocs[this.id];
+        }
 	}
 	function hideErr(event) {
         document.getElementById('docs_errs').innerHTML=' ';
 	}
-    jquery(".editerror").hover(showErr,hideErr);
+    jquery(".hoverhelp").hover(showErr,hideErr);
 }
 function showDocs(docs, refs) {
-    var errlocs={};
+    var doclocs={};
     for (var i=0; i<refs.length;i++) {
         var ref=refs[i];
         var idx = parseInt(ref.ref);
@@ -140,12 +153,12 @@ function showDocs(docs, refs) {
         nodo.appendChild(document.createTextNode(spaces));
 		console.log("Agregando widget a " + ref.loc.start.row+":"+ref.loc.start.col+" - " + docs[idx]);
         editor.addWidget({line:ref.loc.start.row-3,ch:ref.loc.start.col},nodo,false);
-        errlocs[loc]=docs[idx];
+        doclocs[loc]=docs[idx];
         //markers.push(editor.markText({line:ref.loc.start.row-2,ch:ref.loc.start.col},{line:ref.loc.end.row-2,ch:ref.loc.end.col+1},"hoverhelp"));
     }
 	function showDoc(event) {
-        if (errlocs[this.id]) {
-            document.getElementById('docs_errs').innerHTML=errlocs[this.id];
+        if (doclocs[this.id]) {
+            document.getElementById('docs_errs').innerHTML=doclocs[this.id];
         }
 	}
 	function hideDoc(event) {
