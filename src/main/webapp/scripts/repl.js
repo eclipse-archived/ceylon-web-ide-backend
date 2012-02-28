@@ -8,9 +8,10 @@ require.config({
 var spin;
 var waitSpin;
 var AceRange;
+var jquery;
 
-require(["ceylon/language/0.1/ceylon.language", 'ace/range', 'scripts/spin.js'],
-    function(clang, acer) {
+require(["ceylon/language/0.1/ceylon.language", 'ace/range', 'jquery', 'scripts/spin.js'],
+    function(clang, acer, $) {
         console && console.log("Ceylon language module loaded OK");
         clang.print = printOutput;
         console && console.log("ceylon.language.print() patched OK");
@@ -19,6 +20,7 @@ require(["ceylon/language/0.1/ceylon.language", 'ace/range', 'scripts/spin.js'],
             speed:1, trail:50, shadow:true, hwaccel:false
         });
         AceRange = acer.Range;
+        jquery=$;
     }
 );
 
@@ -116,23 +118,28 @@ function showErrors(errors, docs, refs) {
     editor.getSession().setAnnotations(annotations);
 }
 function showDocs(docs, refs) {
-    var anns = editor.getSession().getAnnotations();
-    var annidx = anns.length;
     for (var i=0; i<refs.length;i++) {
         var ref=refs[i];
         var idx = parseInt(ref.ref);
-        anns[annidx++]={
-            row:ref.loc.start.row-2,
-            column:ref.loc.start.col,
-            text:docs[idx],
-            type:"info"
-        };
+        var spaces='';
+        var largo=ref.loc.end.col-ref.loc.start.col+1;
+        for(var j=0;j<largo;j++)spaces+=' ';
+        var loc=ref.loc.start.row+":"+ref.loc.start.col;
         var renderer=function(html, range, left, top, config) {
             //this function can somehow setup a hover with the doc text
+			html.push('<pre id="' + loc + '" class="hoverhelp">' + spaces + "</pre>");
         }
         editor.getSession().addMarker(new AceRange(ref.loc.start.row-2, ref.loc.start.col, ref.loc.end.row-2, ref.loc.end.col), "hoverhelp", renderer);
     }
-    editor.getSession().setAnnotations(anns);
+    function showDoc(event) {
+        if (doclocs[this.id]) {
+            document.getElementById('docs_errs').innerHTML=doclocs[this.id];
+        }
+    }
+    function hideDoc(event) {
+        document.getElementById('docs_errs').innerHTML=' ';
+    }
+    jquery(".hoverhelp").hover(showDoc, hideDoc);
 }
 
 function translate(onTranslation) {
@@ -241,6 +248,7 @@ function clearEditMarkers() {
     for (var idx in markers) {
     	editor.getSession().removeMarker(idx);
     }
+    renders={};
 }
 
 function clearOutput() {

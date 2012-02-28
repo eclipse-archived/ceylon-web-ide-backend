@@ -48,8 +48,11 @@
             background-position: bottom;
             background-repeat: repeat-x;
         }
+		.hoverhelp {
+			background:#000000;
+		}
     </style>
-    <script type="text/javascript" src="scripts/require.js" data-main="scripts/repl.js"></script>
+    <script type="text/javascript" src="scripts/require-jquery.js" data-main="scripts/repl.js"></script>
     <script type="text/javascript" src="scripts/ace.js" charset="utf-8"></script>
     <script type="text/javascript" src="scripts/mode-javascript.js" charset="utf-8"></script>
     <script type="text/javascript" src="scripts/mode-ceylon.js" charset="utf-8"></script>
@@ -100,21 +103,12 @@
 
     <h1>Ceylon Web Runner</h1>
     <form>
-    <table>
-        <tr>
-            <td>
                 <div id="textinput">print("Hello World");</div><br>
-            </td>
-        </tr>
-        <tr>
-            <td>
+<pre id="docs_errs"></pre><br>
                 <input type="hidden" name="ceylon" value="">
                 <input type="button" value="Translate" onClick="translate()" class="code">
                 <input type="button" id="submit" name="submit" value="Run" onClick="run()">
                 <input type="button" value="Clear Output" onClick="clearOutput()">
-            </td>
-        </tr>
-    </table>
     </form>
     <hr class="code">
     <pre id="result" class="code">
