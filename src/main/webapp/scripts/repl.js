@@ -1,5 +1,6 @@
 var examples={};
 var markers=[];
+var editWidgets=[];
 
 require.config({
     baseUrl: "scripts/modules",
@@ -124,6 +125,7 @@ function showErrors(errors, docs, refs) {
         var largo=err.end.col-err.start.col+1;
         for(var j=0;j<largo;j++)spaces+=' ';
         nodo.appendChild(document.createTextNode(spaces));
+        editWidgets.push(nodo);
         editor.addWidget({line:err.start.row-3,ch:err.start.col},nodo,false);
         errlocs[loc]=err.msg;
     }
@@ -153,8 +155,8 @@ function showDocs(docs, refs) {
         nodo.appendChild(document.createTextNode(spaces));
 		console.log("Agregando widget a " + ref.loc.start.row+":"+ref.loc.start.col+" - " + docs[idx]);
         editor.addWidget({line:ref.loc.start.row-3,ch:ref.loc.start.col},nodo,false);
+        editWidgets.push(nodo);
         doclocs[loc]=docs[idx];
-        //markers.push(editor.markText({line:ref.loc.start.row-2,ch:ref.loc.start.col},{line:ref.loc.end.row-2,ch:ref.loc.end.col+1},"hoverhelp"));
     }
 	function showDoc(event) {
         if (doclocs[this.id]) {
@@ -274,7 +276,12 @@ function clearEditMarkers() {
     for (var i=0; i<markers.length;i++) {
         markers[i].clear();
     }
+    //Remove widgets as well
+    for (var i=0; i<editWidgets.length;i++) {
+        editWidgets[i].parentNode.removeChild(editWidgets[i]);
+    }
     markers=[];
+    editWidgets=[];
 }
 
 function clearOutput() {
