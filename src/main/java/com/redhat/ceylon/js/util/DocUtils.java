@@ -15,8 +15,7 @@ public class DocUtils {
     public static List<Map<String, Object>> referenceMapToList(Map<String, Integer> refs) {
         ArrayList<Map<String, Object>> rval = new ArrayList<Map<String, Object>>(refs.size());
         for (Map.Entry<String, Integer> entry : refs.entrySet()) {
-            Map<String, Object> ref = new HashMap<String, Object>();
-            ref.put("loc", locationToMap(entry.getKey(), false));
+            Map<String, Object> ref = locationToMap(entry.getKey(), false);
             ref.put("ref", entry.getValue());
             rval.add(ref);
         }
@@ -26,9 +25,9 @@ public class DocUtils {
     /** Transforms a location of form "r:c-r:c" or just "r:c" into a map that CodeMirror can understand.
      * @param location A string in the form "r:c-r:c" or "r:c".
      * @param forceEnd if location is only r:c and this flag is true, the same position is used for the 'end' property. */
-    public static Map<String, Map<String, Number>> locationToMap(String location, boolean forceEnd) {
+    public static Map<String, Object> locationToMap(String location, boolean forceEnd) {
         String[] parts = location.split("-");
-        Map<String, Map<String, Number>> locs = new HashMap<String, Map<String, Number>>();
+        Map<String, Object> locs = new HashMap<String, Object>();
         locs.put("from", encodePosition(parts[0]));
         if (parts.length == 2) {
             locs.put("to", encodePosition(parts[1]));
