@@ -1,5 +1,6 @@
 var examples={};
 var markers=[];
+var bindings=[];
 
 require.config({
     baseUrl: "scripts/modules",
@@ -126,6 +127,7 @@ function showErrors(errors, docs, refs) {
             var estilo="ceylonerr_r"+err.from.line+"_c"+err.from.ch;
             marker=editor.markText({line:err.from.line-2,ch:err.from.ch},{line:err.to.line-2,ch:err.to.ch+1},estilo);
             markers.push(marker);
+            bindings.push(estilo);
             jquery("."+estilo).hover(showHoverDoc(err.msg),hideHoverDoc);
         }
     }
@@ -137,6 +139,7 @@ function showDocs(docs, refs) {
             var estilo="ceylondoc_r"+ref.from.line+"_c"+ref.from.ch;
             var mark = editor.markText({line:ref.from.line-2,ch:ref.from.ch},{line:ref.to.line-2,ch:ref.to.ch+1},estilo);
             markers.push(mark);
+            bindings.push(estilo);
             jquery("."+estilo).hover(showHoverDoc(docs[ref.ref]), hideHoverDoc);
         }
     }
@@ -250,6 +253,10 @@ function clearEditMarkers() {
         markers[i].clear();
     }
     markers=[];
+    for (var i=0; i<bindings.length;i++) {
+        jquery(bindings[i]).unbind('mouseenter mouseleave');
+    }
+    bindings=[];
 }
 
 function clearOutput() {
