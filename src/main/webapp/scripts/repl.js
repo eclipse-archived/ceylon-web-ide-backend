@@ -123,7 +123,7 @@ function showErrors(errors, docs, refs) {
             editor.setMarker(err.from.line-2, '<span class="ceylondoc"><a href="javascript:void(0);"><font color="#ff0000"><b>%N%</b></font><span>'+err.msg+'</span></a></span>');
             var marker=editor.markText({line:err.from.line-2,ch:err.to.line.ch},{line:err.to.line-2,ch:err.to.ch+1},"editerror");
             markers.push(marker);
-            var estilo="ceylondoc_r"+err.from.line+"_c"+err.from.ch;
+            var estilo="ceylonerr_r"+err.from.line+"_c"+err.from.ch;
             marker=editor.markText({line:err.from.line-2,ch:err.from.ch},{line:err.to.line-2,ch:err.to.ch+1},estilo);
             markers.push(marker);
             jquery("."+estilo).hover(showHoverDoc(err.msg),hideHoverDoc);
@@ -133,12 +133,11 @@ function showErrors(errors, docs, refs) {
 function showDocs(docs, refs) {
     for (var i=0; i<refs.length;i++) {
         var ref=refs[i];
-		if (ref.loc.from.line > 1) {
-			var idx = parseInt(ref.ref);
-			var estilo="ceylondoc_r"+ref.loc.from.line+"_c"+ref.loc.from.ch;
-			var mark = editor.markText({line:ref.loc.from.line-2,ch:ref.loc.from.ch},{line:ref.loc.to.line-2,ch:ref.loc.to.ch+1},estilo);
-			markers.push(mark);
-			jquery("."+estilo).hover(showHoverDoc(docs[idx]), hideHoverDoc);
+        if (ref.from.line > 1) {
+            var estilo="ceylondoc_r"+ref.from.line+"_c"+ref.from.ch;
+            var mark = editor.markText({line:ref.from.line-2,ch:ref.from.ch},{line:ref.to.line-2,ch:ref.to.ch+1},estilo);
+            markers.push(mark);
+            jquery("."+estilo).hover(showHoverDoc(docs[ref.ref]), hideHoverDoc);
         }
     }
 }
