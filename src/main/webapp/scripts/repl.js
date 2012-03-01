@@ -23,8 +23,7 @@ require(["ceylon/language/0.1/ceylon.language", 'jquery', 'scripts/spin.js'],
         $(document).ready(function() {
             var donde=document.getElementById('edit_ceylon');
             editor = CodeMirror.fromTextArea(donde,{
-                //value:'print("Hello, World!");',
-                mode:'javascript',
+                mode:'ceylon',
                 lineNumbers:true
             });
             editCode('hello_world');
