@@ -1,4 +1,3 @@
-var examples={};
 var markers=[];
 var bindings=[];
 
@@ -28,11 +27,12 @@ require(["ceylon/language/0.1/ceylon.language", 'jquery', 'scripts/spin.js'],
                 mode:'javascript',
                 lineNumbers:true
             });
-			editor.setValue('print("Hello, World!");');
+            editCode('hello_world');
         });
         jquery=$;
     }
 );
+
 
 function stopSpinner() {
     document.getElementById('submit').disabled=false;
@@ -133,6 +133,7 @@ function showErrors(errors, docs, refs) {
     }
 }
 function showDocs(docs, refs) {
+    var estilos={};
     for (var i=0; i<refs.length;i++) {
         var ref=refs[i];
         if (ref.from.line > 1) {
@@ -140,8 +141,11 @@ function showDocs(docs, refs) {
             var mark = editor.markText({line:ref.from.line-2,ch:ref.from.ch},{line:ref.to.line-2,ch:ref.to.ch+1},estilo);
             markers.push(mark);
             bindings.push(estilo);
-            jquery("."+estilo).hover(showHoverDoc(docs[ref.ref]), hideHoverDoc);
+            estilos[estilo]=ref.ref;
         }
+    }
+    for ($$ in estilos) {
+        jquery("."+$$).hover(showHoverDoc(docs[estilos[$$]]), hideHoverDoc);
     }
 }
 
@@ -216,23 +220,20 @@ function afterTranslate() {
 //retrieves it from the server.
 function editCode(key) {
     //Make sure we don't do anything until we have an editor
-    if (!editor) return false;
-    if (!examples[key]) {
-        //Retrieve code
-        httpGet("examples/"+key+".ceylon", function(sample){
-            examples[key]=sample;
-            editCode(key);
-        }, null, function(){;
-            spin.stop();
-        });
-        waitSpin = spin.spin(document.getElementById('primary-content'));
-        return false;
-    } else {
+if (!editor) return false;
+    //Retrieve code
+    httpGet("hoverdoc?key="+key, function(response){
+        var json = JSON.parse(response);
         clearEditMarkers();
-        editor.setValue(examples[key]);
+        editor.setValue(json.src);
+        showDocs(json['docs'], json['refs']);
         editor.focus();
-        return true;
-    }
+    }, null, function(){;
+        spin.stop();
+    });
+    waitSpin = spin.spin(document.getElementById('primary-content'));
+    return false;
+    return true;
 }
 
 function getEditCode() {
