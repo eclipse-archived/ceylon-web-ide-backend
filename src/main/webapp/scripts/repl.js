@@ -1,4 +1,5 @@
-var examples={};
+var markers=[];
+var bindings=[];
 
 require.config({
     baseUrl: "scripts/modules",
@@ -7,11 +8,11 @@ require.config({
 
 var spin;
 var waitSpin;
-var AceRange;
 var jquery;
+var editor;
 
-require(["ceylon/language/0.1/ceylon.language", 'ace/range', 'jquery', 'scripts/spin.js'],
-    function(clang, acer, $) {
+require(["ceylon/language/0.1/ceylon.language", 'jquery', 'scripts/spin.js'],
+    function(clang, $) {
         console && console.log("Ceylon language module loaded OK");
         clang.print = printOutput;
         console && console.log("ceylon.language.print() patched OK");
@@ -19,10 +20,18 @@ require(["ceylon/language/0.1/ceylon.language", 'ace/range', 'jquery', 'scripts/
             lines:12, length:20, width:10, radius:25, color:'#000',
             speed:1, trail:50, shadow:true, hwaccel:false
         });
-        AceRange = acer.Range;
+        $(document).ready(function() {
+            var donde=document.getElementById('edit_ceylon');
+            editor = CodeMirror.fromTextArea(donde,{
+                mode:'ceylon',
+                lineNumbers:true
+            });
+            editCode('hello_world');
+        });
         jquery=$;
     }
 );
+
 
 function stopSpinner() {
     document.getElementById('submit').disabled=false;
@@ -98,50 +107,45 @@ function httpGet(url, successHandler, errorHandler, hideSpin) {
 
 var oldcode, transok;
 
+function showHoverDoc(xxxxx){
+    return function(){document.getElementById('docs_errs').innerHTML=xxxxx;};
+}
+function hideHoverDoc() {
+    document.getElementById('docs_errs').innerHTML=' ';
+}
 //Shows the specified error messages in the code
 function showErrors(errors, docs, refs) {
     printError("Code contains errors:");
-    clearEditMarkers();
-    var annotations = [];
-    var annidx = 0;
     for (var i=0; i < errors.length;i++) {
-    	var err = errors[i];
-        printError("--- " + err.msg + " (at " + (err.start.row-1) + ":" + err.start.col + ")");
-        annotations[annidx++] = {
-        	row:err.start.row-2,
-        	column:1,
-        	text:err.msg,
-        	type:"error"
+        var err = errors[i];
+        if (err.from.line > 1) {
+            printError("--- " + err.msg + " (at " + (err.from.line-1) + ":" + err.from.ch + ")");
+            editor.setMarker(err.from.line-2, '<span class="ceylondoc"><a href="javascript:void(0);"><font color="#ff0000"><b>%N%</b></font><span>'+err.msg+'</span></a></span>');
+            var marker=editor.markText({line:err.from.line-2,ch:err.to.line.ch},{line:err.to.line-2,ch:err.to.ch+1},"editerror");
+            markers.push(marker);
+            var estilo="ceylonerr_r"+err.from.line+"_c"+err.from.ch;
+            marker=editor.markText({line:err.from.line-2,ch:err.from.ch},{line:err.to.line-2,ch:err.to.ch+1},estilo);
+            markers.push(marker);
+            bindings.push(estilo);
+            jquery("."+estilo).hover(showHoverDoc(err.msg),hideHoverDoc);
         }
-        var markerId = editor.getSession().addMarker(new AceRange(err.start.row-2, err.start.col, err.end.row-2, err.end.col+1), "editerror", "text");
     }
-    editor.getSession().setAnnotations(annotations);
 }
 function showDocs(docs, refs) {
-    var doclocs={};
+    var estilos={};
     for (var i=0; i<refs.length;i++) {
         var ref=refs[i];
-        var idx = parseInt(ref.ref);
-        var spaces='';
-        var largo=ref.loc.end.col-ref.loc.start.col+1;
-        for(var j=0;j<largo;j++)spaces+=' ';
-        var loc=ref.loc.start.row+":"+ref.loc.start.col;
-        doclocs[loc]=docs[idx];
-        var renderer=function(html, range, left, top, config) {
-            //this function can somehow setup a hover with the doc text
-			html.push('<pre id="' + loc + '" class="hoverhelp">' + spaces + "</pre>");
-        }
-        editor.getSession().addMarker(new AceRange(ref.loc.start.row-2, ref.loc.start.col+1, ref.loc.end.row-2, ref.loc.end.col+2), "hoverhelp", "text");//renderer);
-    }
-    function showDoc(event) {
-        if (doclocs[this.id]) {
-            document.getElementById('docs_errs').innerHTML=doclocs[this.id];
+        if (ref.from.line > 1) {
+            var estilo="ceylondoc_r"+ref.from.line+"_c"+ref.from.ch;
+            var mark = editor.markText({line:ref.from.line-2,ch:ref.from.ch},{line:ref.to.line-2,ch:ref.to.ch+1},estilo);
+            markers.push(mark);
+            bindings.push(estilo);
+            estilos[estilo]=ref.ref;
         }
     }
-    function hideDoc(event) {
-        document.getElementById('docs_errs').innerHTML=' ';
+    for ($$ in estilos) {
+        jquery("."+$$).hover(showHoverDoc(docs[estilos[$$]]), hideHoverDoc);
     }
-    jquery(".hoverhelp").hover(showDoc, hideDoc);
 }
 
 function translate(onTranslation) {
@@ -215,27 +219,24 @@ function afterTranslate() {
 //retrieves it from the server.
 function editCode(key) {
     //Make sure we don't do anything until we have an editor
-    if (!editor) return false;
-    if (!examples[key]) {
-        //Retrieve code
-        httpGet("examples/"+key+".ceylon", function(sample){
-            examples[key]=sample;
-            editCode(key);
-        }, null, function(){;
-            spin.stop();
-        });
-        waitSpin = spin.spin(document.getElementById('primary-content'));
-        return false;
-    } else {
+if (!editor) return false;
+    //Retrieve code
+    httpGet("hoverdoc?key="+key, function(response){
+        var json = JSON.parse(response);
         clearEditMarkers();
-        editor.getSession().setValue(examples[key]);
+        editor.setValue(json.src);
+        showDocs(json['docs'], json['refs']);
         editor.focus();
-        return true;
-    }
+    }, null, function(){;
+        spin.stop();
+    });
+    waitSpin = spin.spin(document.getElementById('primary-content'));
+    return false;
+    return true;
 }
 
 function getEditCode() {
-    return editor.getSession().getValue();
+    return editor.getValue();
 }
 
 function showCode(code) {
@@ -245,12 +246,17 @@ function showCode(code) {
 }
 
 function clearEditMarkers() {
-    editor.getSession().setAnnotations([]);
-    var markers = editor.getSession().getMarkers();
-    for (var idx in markers) {
-    	editor.getSession().removeMarker(idx);
+    for (var i=0; i<editor.lineCount();i++) {
+        editor.clearMarker(i);
     }
-    renders={};
+    for (var i=0; i<markers.length;i++) {
+        markers[i].clear();
+    }
+    markers=[];
+    for (var i=0; i<bindings.length;i++) {
+        jquery(bindings[i]).unbind('mouseenter mouseleave');
+    }
+    bindings=[];
 }
 
 function clearOutput() {

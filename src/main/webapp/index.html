@@ -4,25 +4,16 @@
     <meta charset="utf-8">
     <title>Ceylon Web Runner</title>
     
-    <link rel='stylesheet' media='screen, projection' type='text/css' href='http://ceylon-lang.org/stylesheets/screen.css'/>
-    <link rel='stylesheet' media='print' type='text/css' href='http://ceylon-lang.org/stylesheets/print.css'/>
-    <link rel='stylesheet' type='text/css' href='http://ceylon-lang.org/stylesheets/sh/shCore.css'/>
-    <link rel='stylesheet' type='text/css' href='http://ceylon-lang.org/stylesheets/sh/shThemeDefault.css'/>
+    <link rel='stylesheet' media='screen, projection' type='text/css' href='main.css'/>
+    <link rel='stylesheet' type='text/css' href='shCore.css'/>
+    <link rel='stylesheet' type='text/css' href='shThemeDefault.css'/>
     <!--[if lt IE 8]>
       <link href='http://ceylon-lang.org/stylesheets/ie.css' media='screen, projection' rel='stylesheet' type='text/css' />
     <![endif]-->
     <style type="text/css">
-        #textinput {
-            border-width: 1px;
-            border-style: solid;
-            width: 600px;
-            height: 200px;
-            position: relative;
-            background: #ffffff;
-        }
         #result {
         }
-        .code {
+        .cantseeme {
             display: none;
         }
         #output {
@@ -42,60 +33,59 @@
             color: red;
         }
         .editerror {
-            position: absolute;
-            z-index: 5;
             background-image: url(images/underline.gif);
             background-position: bottom;
             background-repeat: repeat-x;
         }
-		.hoverhelp {
-			background:#000000;
-		}
+        span.ceylondoc {
+            position: relative;
+        }
+        
+        span.ceylondoc a span {
+            display: none;
+        }
+        
+        span.ceylondoc a:hover {
+            font-size: 99%;
+            font-color: #000000;
+        }
+        
+        span.ceylondoc a:hover span { 
+            display: block; 
+            position: absolute; 
+            margin-top: 10px; 
+            margin-left: -10px; 
+            width: auto; padding: 5px; 
+            z-index: 100; 
+            color: #000000; 
+            background: #FFFFAA; 
+            font: 12px "Arial", sans-serif;
+            text-align: left; 
+            text-decoration: none;
+        }
+        #docs_errs {
+            width:600px;
+        }
     </style>
     <script type="text/javascript" src="scripts/require-jquery.js" data-main="scripts/repl.js"></script>
-    <script type="text/javascript" src="scripts/ace.js" charset="utf-8"></script>
-    <script type="text/javascript" src="scripts/mode-javascript.js" charset="utf-8"></script>
-    <script type="text/javascript" src="scripts/mode-ceylon.js" charset="utf-8"></script>
-    <script>
-        var editor;
-        window.onload = function() {
-            editor = ace.edit("textinput");
-            var CeylonMode = require("ace/mode/ceylon").Mode;
-            editor.getSession().setMode(new CeylonMode());
-        };
-    </script>
-
-    <!-- Google+ Badge -->
-    <link href="https://plus.google.com/102481741611133754149" rel="publisher" />
-    <script type="text/javascript">
-        window.___gcfg = {lang: 'en'};
-        (function() 
-        {var po = document.createElement("script");
-        po.type = "text/javascript"; po.async = true;po.src = "https://apis.google.com/js/plusone.js";
-        var s = document.getElementsByTagName("script")[0];
-        s.parentNode.insertBefore(po, s);
-        })();
-    </script>
+    <script type="text/javascript" src="scripts/codemirror.js" charset="utf-8"></script>
+    <script type="text/javascript" src="scripts/mode/ceylon/ceylon.js" charset="utf-8"></script>
+    <link rel="stylesheet" href="scripts/codemirror.css" />
+<style type="text/css">
+  .CodeMirror {border: 1px solid black;width:600px;height:200px;background:#ffffff;}
+  .CodeMirror-gutter {min-width: 2.6em; cursor: pointer;}
+</style>
 
 </head>
 <body class="bp">
 
 
-<div class="header-bar">
-<!-- /cannot use a partial as it loses the page.tab context :( -->
-<div id="header">
-  <a id="header-logo" href=".">
-	<h1 id="ceylon">
-	  Ceylon
-	</h1>
-  </a>
+<div class="header-bar"><div id="header">
+  <a id="header-logo" href="."><h1 id="ceylon">Ceylon</h1></a>
   <div id="header-tagline">
-	<p id="say_more_more_clearly">
-	  Say more, more clearly
-	</p>
+	<p id="say_more_more_clearly">Say more, more clearly</p>
   </div>
-</div>
-</div>
+</div></div>
 
 <div id="primary-content">
 
@@ -103,15 +93,13 @@
 
     <h1>Ceylon Web Runner</h1>
     <form>
-                <div id="textinput">print("Hello World");</div><br>
-<pre id="docs_errs"></pre><br>
-                <input type="hidden" name="ceylon" value="">
-                <input type="button" value="Translate" onClick="translate()" class="code">
-                <input type="button" id="submit" name="submit" value="Run" onClick="run()">
-                <input type="button" value="Clear Output" onClick="clearOutput()">
+        <textarea id="edit_ceylon"></textarea>
+        <pre id="docs_errs"> </pre>
+        <input type="button" id="submit" name="submit" value="Run" onClick="run()">
+        <input type="button" value="Clear Output" onClick="clearOutput()">
     </form>
-    <hr class="code">
-    <pre id="result" class="code">
+    <hr class="cantseeme">
+    <pre id="result" class="cantseeme">
     </pre>
     <hr>
     <div id="output">
@@ -143,6 +131,18 @@
 	<hr>
 
     <br><br><br>
+    <Google+ Badge -+->
+    <link href="https://plus.google.com/102481741611133754149" rel="publisher" />
+    <script type="text/javascript">
+        window.___gcfg = {lang: 'en'};
+        (function() 
+        {var po = document.createElement("script");
+        po.type = "text/javascript"; po.async = true;po.src = "https://apis.google.com/js/plusone.js";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(po, s);
+        })();
+    </script>
+
     <g:plus href="https://plus.google.com/102481741611133754149" width="300" height="131" theme="light"></g:plus>
 
 </div>
@@ -163,7 +163,6 @@
         </div>
     </div>
 </div>
-
 
 </body>
 </html>
