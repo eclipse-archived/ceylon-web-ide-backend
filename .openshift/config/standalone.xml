@@ -21,6 +21,12 @@
     <extension module="org.jboss.as.web"/>
     <extension module="org.jboss.as.weld"/>
   </extensions>
+
+  <system-properties>
+    <!-- IMPORTANT This should point to the "ceylon-home" directory in the root of the OpenShift application -->
+    <property name="ceylon.home" value="/var/lib/libra/05a5b190e6854e029fc71ac39b5fa1ee/try/repo/ceylon-home" />
+  </system-properties>
+
   <profile>
     <subsystem xmlns="urn:jboss:domain:datasources:1.0">
       <datasources>
