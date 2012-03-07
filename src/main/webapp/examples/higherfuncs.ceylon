@@ -4,9 +4,13 @@ class SimpleClass() {
     }
 }
 //This function receives a function as argument
-void higher(String f(Integer i)) {
-    print(f(100));
+void higher(String func(Integer i)) {
+    print(func(100));
 }
 value x = SimpleClass();
 //Here we pass a reference to the "upper" method
 higher(x.upper);
+//Or, we can store the reference locally
+function f(Integer i)=x.upper;
+//Then pass it around
+higher(f);
