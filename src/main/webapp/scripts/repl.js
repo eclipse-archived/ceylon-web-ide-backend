@@ -32,13 +32,16 @@ require(["ceylon/language/0.1/ceylon.language", 'jquery', 'scripts/spin.js'],
     }
 );
 
-
+//Hides the spinner that should be spinning at the center of the page.
 function stopSpinner() {
     document.getElementById('submit').disabled=false;
     waitSpin.stop();
     editor.focus();
 }
 
+//Performs an HTTP POST to the specified URL, posting the specified data.
+//Calls successHandler on successful response or errorHandler if something bad happens.
+//hideSpin is a function that is called after getting a response.
 function httpPost(url, data, successHandler, errorHandler, hideSpin) {
     var timeoutHandle;
     var errfunc;
@@ -73,6 +76,9 @@ function httpPost(url, data, successHandler, errorHandler, hideSpin) {
     xhr.send(data);
 }
 
+//Performs an HTTP GET on the specified URL.
+//Calls the successHandler function if everything OK or errorHandler if something bad happens.
+//hideSpin is a function that gets called when a response is received (or timeout occurs).
 function httpGet(url, successHandler, errorHandler, hideSpin) {
     //Retrieve code
     var timeoutHandle;
@@ -107,9 +113,11 @@ function httpGet(url, successHandler, errorHandler, hideSpin) {
 
 var oldcode, transok;
 
+//Returns a function that sets the content of the docs_errs element to the specified text.
 function showHoverDoc(xxxxx){
     return function(){document.getElementById('docs_errs').innerHTML=xxxxx;};
 }
+//Clears the context of the docs_errs element.
 function hideHoverDoc() {
     document.getElementById('docs_errs').innerHTML=' ';
 }
@@ -131,6 +139,7 @@ function showErrors(errors, docs, refs) {
         }
     }
 }
+//Adds hover documentation to the specified text fragments.
 function showDocs(docs, refs) {
     var estilos={};
     for (var i=0; i<refs.length;i++) {
@@ -143,11 +152,14 @@ function showDocs(docs, refs) {
             estilos[estilo]=ref.ref;
         }
     }
-    for ($$ in estilos) {
+    for (var $$ in estilos) {
         jquery("."+$$).hover(showHoverDoc(docs[estilos[$$]]), hideHoverDoc);
     }
 }
 
+//Wraps the contents of the editor in a function and sends it to the server for compilation.
+//On response, executes the script if compilation was OK, otherwise shows errors.
+//In any case it sets the hover docs if available.
 function translate(onTranslation) {
     var code = "void run_script() {\n" + getEditCode() + "}";
     if (code != oldcode) {
@@ -215,16 +227,15 @@ function afterTranslate() {
     }
 }
 
-//Shows the specified example in the editor. If the file is not available,
-//retrieves it from the server.
+//Retrieves the specified example from the editor, along with its hover docs.
 function editCode(key) {
     //Make sure we don't do anything until we have an editor
-if (!editor) return false;
+    if (!editor) return false;
     //Retrieve code
     httpGet("hoverdoc?key="+key, function(response){
         var json = JSON.parse(response);
         clearEditMarkers();
-        editor.setValue(json.src);
+        editor.setValue(json['src']);
         showDocs(json['docs'], json['refs']);
         editor.focus();
     }, null, function(){;
@@ -239,12 +250,14 @@ function getEditCode() {
     return editor.getValue();
 }
 
+//Puts the specified text in the result element.
 function showCode(code) {
     var result = document.getElementById("result");
     result.innerText = code;
     return false;
 }
 
+//Clears all error markers and hover docs.
 function clearEditMarkers() {
     for (var i=0; i<editor.lineCount();i++) {
         editor.clearMarker(i);
@@ -280,8 +293,9 @@ function printError(txt) {
     output.innerHTML = output.innerHTML + "<span class='jsc_error'>" + txt + "</span><br>";
 }
 
+//Basic HTML escaping.
 function escapeHtml(html) {
-    return html;
+    return (''+html).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
 function globalEval(src) {
