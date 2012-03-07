@@ -23,8 +23,14 @@ public class DocServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
     private final SimpleJsonEncoder json = new SimpleJsonEncoder();
+    //Here we cache the code for the examples, so that it's only compiled the first time someone asks for it.
+    private HashMap<String, Map<String, Object>> examples = new HashMap<String, Map<String,Object>>();
 
-    private void compile(TypeChecker tc, HttpServletResponse response, String src) throws IOException {
+    /** Documents the code already processed by the typechecker.
+     * @param tc The typechecker that has already processed the source code.
+     * @param src The Ceylon source, in its original form (without wrapping in a function).
+     * @return A map with the docs found for tokens in the code and the positions for said docs. */
+    private Map<String, Object> compile(TypeChecker tc) {
         //Retrieve docs
         DocVisitor dv = new DocVisitor();
         for (PhasedUnit pu: tc.getPhasedUnits().getPhasedUnits()) {
@@ -34,9 +40,10 @@ public class DocServlet extends HttpServlet {
         Map<String, Object> docs = new HashMap<String, Object>(2);
         docs.put("docs", dv.getDocs());
         docs.put("refs", DocUtils.referenceMapToList(dv.getLocations()));
-        if (src != null) {
-            docs.put("src", src);
-        }
+        return docs;
+    }
+
+    private void sendResponse(Map<String, Object> docs, HttpServletResponse response) throws IOException {
         String resp = json.encode(docs);
         response.setContentLength(resp.length());
         response.getWriter().print(resp);
@@ -46,30 +53,43 @@ public class DocServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        String key = String.format("/examples/%s.ceylon", req.getParameter("key"));
-        InputStream ins = req.getServletContext().getResourceAsStream(key);
-        StringBuilder sb = new StringBuilder();
-        byte[] buf = new byte[256];
-        int read = 0;
-        while ((read = ins.read(buf)) > 0) {
-            sb.append(new String(buf, 0, read, "UTF-8"));
+        String key = req.getParameter("key");
+        Map<String, Object> example = examples.get(key);
+        if (example == null) {
+            synchronized (this) {
+                if (example == null) {
+                    String path = String.format("/examples/%s.ceylon", key);
+                    InputStream ins = req.getServletContext().getResourceAsStream(path);
+                    StringBuilder sb = new StringBuilder();
+                    byte[] buf = new byte[256];
+                    int read = 0;
+                    while ((read = ins.read(buf)) > 0) {
+                        sb.append(new String(buf, 0, read, "UTF-8"));
+                    }
+                    String src = sb.toString();
+                    sb.insert(0, "void run_script(){\n");
+                    sb.append('}');
+                    try {
+                        //Run the typechecker
+                        TypeChecker typeChecker = new TypeCheckerBuilder()
+                                .addSrcDirectory(new ScriptFile(sb.toString()))
+                                .getTypeChecker();
+                        typeChecker.process();
+                        example = compile(typeChecker);
+                        example.put("src", src);
+                        examples.put(key, example);
+                    } catch (RuntimeException ex) {
+                        resp.setStatus(500);
+                        sb = new StringBuilder();
+                        json.encodeList(Collections.singletonList((Object)String.format("Service error: %s", ex.getMessage())), sb);
+                        resp.setContentLength(sb.length());
+                        resp.getWriter().print(sb.toString());
+                    }
+                }
+            }
         }
-        String src = sb.toString();
-        sb.insert(0, "void run_script(){\n");
-        sb.append('}');
-        try {
-            //Run the typechecker
-            TypeChecker typeChecker = new TypeCheckerBuilder()
-                    .addSrcDirectory(new ScriptFile(sb.toString()))
-                    .getTypeChecker();
-            typeChecker.process();
-            compile(typeChecker, resp, src);
-        } catch (RuntimeException ex) {
-            resp.setStatus(500);
-            sb = new StringBuilder();
-            json.encodeList(Collections.singletonList((Object)String.format("Service error: %s", ex.getMessage())), sb);
-            resp.setContentLength(sb.length());
-            resp.getWriter().print(sb.toString());
+        if (example != null) {
+            sendResponse(example, resp);
         }
     }
 
@@ -85,7 +105,7 @@ public class DocServlet extends HttpServlet {
                     .addSrcDirectory(src)
                     .getTypeChecker();
             typeChecker.process();
-            compile(typeChecker, response, null);
+            sendResponse(compile(typeChecker), response);
         } catch (RuntimeException ex) {
             response.setStatus(500);
             StringBuilder sb = new StringBuilder();
