@@ -11,7 +11,7 @@ var waitSpin;
 var jquery;
 var editor;
 
-require(["ceylon/language/0.1/ceylon.language", 'jquery', 'scripts/spin.js'],
+require(["ceylon/language/0.2/ceylon.language", 'jquery', 'scripts/spin.js'],
     function(clang, $) {
         console && console.log("Ceylon language module loaded OK");
         clang.print = function(x){ printOutput(x.getString()); };
