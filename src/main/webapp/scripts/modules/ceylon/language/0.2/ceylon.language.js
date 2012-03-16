@@ -941,6 +941,9 @@ len += this.codePoints + str.codePoints;
 return String$(result, isNaN(len)?undefined:len);
 }
 String$proto.split = function(seps, discard) {
+if (this.getEmpty() === $true) {
+return Singleton(this);
+}
 var sepChars = $WS;
 if (seps!==undefined && seps!==null) {
 sepChars = {}
@@ -1575,8 +1578,9 @@ return this.includes(x);
 return $false;
 }
 Range$proto.getRest = function() {
+if (this.first.equals(this.last) === $true) return $empty;
 var n = this.next(this.first);
-return (n.equals(this.last) === getTrue()) ? ArraySequence([]) : Range(n, this.last);
+return Range(n, this.last);
 }
 Range$proto.by = function(step) {
 if (step.compare(Integer(0)) !== larger) {
@@ -1601,7 +1605,7 @@ var x = this.first;
 for (var i=0; i < from.value; i++) { x = this.next(x); }
 var y = x;
 for (var i=1; i < len.value; i++) { y = this.next(y); }
-if (this.includes(y) === getFalse()) { y = this.last; }
+if (this.includes(y) === $false) { y = this.last; }
 return Range(x, y);
 }
 Range$proto.span = function(from, to) {
@@ -1613,7 +1617,7 @@ if (this.defines(from) === $false) {
 //If it's an inverse range, adjust the "from" (upper bound)
 if (from.compare(to) === larger && this.defines(to) === $true) {
 //Decrease the upper bound
-while (!this.defines(from)) {
+while (this.defines(from) === $false) {
 from = from.getPredecessor();
 }
 } else {
