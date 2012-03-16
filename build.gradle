@@ -1,19 +1,19 @@
 apply plugin:'war'
 version=1.0
-projectName='repl'
+ext.projectName='repl'
 defaultTasks 'war'
-sourceCompatibility=6
-targetCompatibility=6
-ceylonVersion=0.1
+ext.ceylonVersion=0.2
 
 repositories {
 	mavenCentral()
 	flatDir name:'ceylon', dirs:["${System.properties['user.home']}/.ceylon/repo/com/redhat/ceylon/typechecker/${ceylonVersion}",
+		"${System.properties['user.home']}/.ceylon/repo/com/redhat/ceylon/module-resolver/${ceylonVersion}",
 		'../ceylon-js/build/lib']
 }
 
 dependencies {
-	compile "ceylon:com.redhat.ceylon.typechecker:${ceylonVersion}", "ceylon:jscompiler:${ceylonVersion}"
+	compile "ceylon:com.redhat.ceylon.typechecker:${ceylonVersion}", "ceylon:jscompiler:${ceylonVersion}",
+		"ceylon:com.redhat.ceylon.module-resolver:${ceylonVersion}"
 	providedCompile 'org.jboss.spec:jboss-javaee-6.0:1.0.0.Final'
 	testCompile 'junit:junit:4.10'
 }
