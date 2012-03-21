@@ -11,6 +11,19 @@ var waitSpin;
 var jquery;
 var editor;
 
+//Taken from http://jquery-howto.blogspot.mx/2009/09/get-url-parameters-values-with-jquery.html
+//IMHO this is totally fugly
+function getUrlVars() {
+    var vars = [], hash;
+    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+    for (var i = 0; i < hashes.length; i++) {
+        hash = hashes[i].split('=');
+        vars.push(hash[0]);
+        vars[hash[0]] = hash[1];
+    }
+    return vars;
+}
+
 require(["ceylon/language/0.2/ceylon.language", 'jquery', 'scripts/spin.js'],
     function(clang, $) {
         console && console.log("Ceylon language module loaded OK");
@@ -33,11 +46,21 @@ require(["ceylon/language/0.2/ceylon.language", 'jquery', 'scripts/spin.js'],
                     "Cmd-B":function(instance){ run(); }
                 }
             });
-            editCode('hello_world');
+            var reqparams = getUrlVars();
+            if (reqparams && reqparams.src) {
+                editor.setValue(decodeURIComponent(reqparams.src));
+                getHoverDocs(editor);
+            } else {
+                editCode('hello_world');
+            }
         });
     }
 );
 
+function shareSource() {
+    var url = (location.href.split('?')[0]) + '?src=' + encodeURIComponent(editor.getValue());
+    console.log("share url " + url);
+}
 //Hides the spinner that should be spinning at the center of the page.
 function stopSpinner() {
     document.getElementById('submit').disabled=false;
