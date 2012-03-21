@@ -59,7 +59,9 @@ require(["ceylon/language/0.2/ceylon.language", 'jquery', 'scripts/spin.js'],
 
 function shareSource() {
     var url = (location.href.split('?')[0]) + '?src=' + encodeURIComponent(editor.getValue());
-    console.log("share url " + url);
+    document.getElementById('share_url').value=url;
+    document.getElementById('share_url').focus();
+    document.getElementById('share_url').select();
 }
 //Hides the spinner that should be spinning at the center of the page.
 function stopSpinner() {
