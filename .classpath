@@ -13,7 +13,8 @@
 			<attribute name="owner.project.facets" value="jst.web"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jscompiler-0.1.jar" sourcepath="/ceylon-js"/>
-	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/typechecker-0.1.jar" sourcepath="/ceylon-spec"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/ceylon-module-resolver-0.2.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jscompiler-0.2.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/typechecker-0.2.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
