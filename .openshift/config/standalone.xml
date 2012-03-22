@@ -24,7 +24,7 @@
 
   <system-properties>
     <!-- IMPORTANT This should point to the "ceylon-home" directory in the root of the OpenShift application -->
-    <property name="ceylon.user.repo" value="/var/lib/libra/af964010ea314db19ff93c989153f648/try/repo/ceylon-user-repo" />
+    <property name="ceylon.user.repo" value="/var/lib/stickshift/af964010ea314db19ff93c989153f648/try/repo/ceylon-user-repo" />
   </system-properties>
 
   <profile>
