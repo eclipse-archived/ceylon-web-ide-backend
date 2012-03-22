@@ -337,7 +337,17 @@ return $true;
 }
 return $false;
 }
-List$proto.getHash = function() { return this.getSize(); }
+List$proto.getHash = function() {
+var hc=1;
+var iter=this.getIterator();
+var e; while ((e = iter.next()) != $finished) {
+hc*=31;
+if (e !== null) {
+hc += e.getHash().value;
+}
+}
+return Integer(hc);
+}
 List$proto.getString = function() {
 var s = '{';
 var first = true;
@@ -507,8 +517,47 @@ return that;
 initType(EmptyArray, 'ceylon.language.EmptyArray', Array$, None);
 inheritProto(EmptyArray, Array$, '$Array$');
 inheritProto(EmptyArray, None, '$None$');
-//TODO implement setItem
+EmptyArray.$$.prototype.setItem = function(i,e) {}
+EmptyArray.$$.prototype.item = function(x) { return null; }
+exports.EmptyArray=EmptyArray;
+function ArrayList(items) {
+var that = new ArrayList.$$;
+that.value=items;
+that.size=new Integer(items.length);
+that.lastIndex=new Integer(items.length-1);
+return that;
+}
+initType(ArrayList, 'ceylon.language.ArrayList', Array$, List);
+inheritProto(ArrayList, Array$, '$Array$');
+inheritProto(ArrayList, List, '$List$');
+var ArrayList$proto = ArrayList.$$.prototype;
+ArrayList$proto.getSize = function() { return this.size; }
+ArrayList$proto.setItem = function(idx,elem) {
+if (idx.value >= 0 && idx.value < this.size.value) {
+this.value[idx.value] = elem;
+}
+}
+ArrayList$proto.item = function(idx) {
+if (idx.value >= 0 && idx.value < this.size.value) {
+return this.value[idx.value];
+}
+return null;
+}
+ArrayList$proto.getLastIndex = function() {
+return this.lastIndex;
+}
+exports.ArrayList=ArrayList;
 exports.arrayOfNone=function() { return EmptyArray(); }
+exports.arrayOfSome=function(elems) { //receives an ArraySequence
+return ArrayList(elems.value);
+}
+exports.array=function(elems) {
+if (elems === null || elems === undefined || elems.getSize().value === 0) {
+return EmptyArray();
+} else {
+return ArrayList(elems.value);
+}
+}
 function Summable(wat) {
 return wat;
 }
@@ -550,11 +599,11 @@ inheritProto(Exception, IdentifiableObject, '$IdentifiableObject$');
 var Exception$proto = Exception.$$.prototype;
 Exception$proto.getCause = function() {return this.cause;}
 Exception$proto.getMessage = function() {
-return this.description!==null ? this.description
-: (this.cause!==null ? this.cause.getMessage() : String$("", 0));
+return this.description ? this.description
+: (this.cause ? this.cause.getMessage() : String$("", 0));
 }
 Exception$proto.getString = function() {
-return String$('Exception "' + this.getMessage().value + '"');
+return String$(className(this).value + ' "' + this.getMessage().value + '"');
 }
 function Integer(value) {
 var that = new Integer.$$;
@@ -573,8 +622,14 @@ var exact = this.value/other.value;
 return Integer((exact<0) ? Math.ceil(exact) : Math.floor(exact));
 }
 Integer$proto.remainder = function(other) { return Integer(this.value%other.value) }
-Integer$proto.power = function(other) {
-var exact = Math.pow(this.value, other.value);
+Integer$proto.power = function(exp) {
+if (exp.getSign().value < 0) {
+if (this.value===1 || this.value===-1) {
+return this;
+}
+throw Exception(String$("Negative exponent"));
+}
+var exact = Math.pow(this.value, exp.value);
 return Integer((exact<0) ? Math.ceil(exact) : Math.floor(exact));
 }
 Integer$proto.getNegativeValue = function() { return Integer(-this.value) }
@@ -641,8 +696,8 @@ if (other === null || other === undefined) { return larger; }
 return this.value===other.value ? equal
 : (this.value<other.value ? smaller:larger);
 }
-Float$proto.getFloat = function() { return this }
-Float$proto.getInteger = function() { return Integer(parseInt(this.value.toFixed())); }
+Float$proto.getFloat = function() { return this; }
+Float$proto.getInteger = function() { return Integer(this.value >= 0.0 ? Math.floor(this.value) : Math.ceil(this.value)); }
 Float$proto.getWholePart = function() {
 var _p = this.value.toPrecision();
 var dot = _p.indexOf('.');
@@ -1691,12 +1746,12 @@ return String$(this.key.getString().value + "->" + this.item.getString().value);
 Entry$proto.getKey = function() { return this.key; }
 Entry$proto.getItem = function() { return this.item; }
 Entry$proto.equals = function(other) {
-return Boolean$(other && this.key.equals(other.key) === getTrue() && this.item.equals(other.item) === getTrue());
+return Boolean$(other && this.getKey().equals(other.getKey()) === $true && this.getItem().equals(other.getItem()) === $true);
 }
 Entry$proto.getHash = function() { Integer(this.key.getHash().value ^ this.item.getHash().value); }
-exports.Exception=Exception; //TODO just to let the compiler finish
+exports.Exception=Exception;
 exports.IdentifiableObject=IdentifiableObject;
-exports.Object=Object$; //TODO just to let the compiler finish
+exports.Object=Object$;
 exports.Boolean=Boolean$;
 exports.Comparison=Comparison;
 exports.getNull=getNull;
