@@ -60,6 +60,11 @@ public class DocServlet extends HttpServlet {
                 if (example == null) {
                     String path = String.format("/examples/%s.ceylon", key);
                     InputStream ins = req.getServletContext().getResourceAsStream(path);
+                    if (ins == null) {
+                        resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                        resp.flushBuffer();
+                        return;
+                    }
                     StringBuilder sb = new StringBuilder();
                     byte[] buf = new byte[256];
                     int read = 0;
