@@ -6,22 +6,27 @@ ext.ceylonVersion=0.2
 
 repositories {
 	mavenCentral()
-	flatDir name:'ceylon', dirs:["${System.properties['user.home']}/.ceylon/repo/com/redhat/ceylon/typechecker/${ceylonVersion}",
-		"${System.properties['user.home']}/.ceylon/repo/com/redhat/ceylon/module-resolver/${ceylonVersion}",
-		'../ceylon-js/build/lib']
+	flatDir name:'ceylon', dirs:['src/main/webapp/WEB-INF/lib']
 }
 
 dependencies {
-	compile "ceylon:com.redhat.ceylon.typechecker:${ceylonVersion}", "ceylon:jscompiler:${ceylonVersion}",
+	providedCompile "ceylon:com.redhat.ceylon.typechecker:${ceylonVersion}", "ceylon:jscompiler:${ceylonVersion}",
 		"ceylon:com.redhat.ceylon.module-resolver:${ceylonVersion}"
+	providedCompile 'mongo:mongo:2.7.3'
 	providedCompile 'org.jboss.spec:jboss-javaee-6.0:1.0.0.Final'
 	testCompile 'junit:junit:4.10'
 }
 
-task copylangmod(type:Copy) {
+task copylibs(type:Copy) {
 	from "../ceylon-js/build/runtime/ceylon/language/${ceylonVersion}/ceylon.language.js"
 	into "${webAppDirName}/scripts/modules/ceylon/language/${ceylonVersion}"
+	from "../ceylon-js/build/lib/jscompiler-${ceylonVersion}.jar"
+	into "${webAppDirName}/WEB-INF/lib"
+	from "../ceylon-spec/build/dist/com/redhat/ceylon/typechecker/${ceylonVersion}/com.redhat.ceylon.typechecker-${ceylonVersion}.jar"
+	into "${webAppDirName}/WEB-INF/lib"
+	from "../ceylon-module-resolver/build/dist/com/redhat/ceylon/module-resolver/${ceylonVersion}/com.redhat.ceylon.module-resolver-${ceylonVersion}.jar"
+	into "${webAppDirName}/WEB-INF/lib"
 }
 
 war.baseName='repl'
-tasks.war.dependsOn(copylangmod)
+tasks.compileJava.dependsOn(copylibs)
