@@ -47,7 +47,13 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	    try {
     	    String script = request.getParameter("ceylon");
-    	    ScriptFile src = new ScriptFile(script);
+            String module = request.getParameter("module");
+    	    ScriptFile src = new ScriptFile("ROOT",
+    	            new ScriptFile("web_ide_script",
+    	                    new ScriptFile("SCRIPT.ceylon", script),
+    	                    new ScriptFile("module.ceylon", module)
+    	            )
+    	    );
     	    //Run the typechecker
             TypeChecker typeChecker = new TypeCheckerBuilder()
                     .addSrcDirectory(src)
