@@ -17,13 +17,13 @@ dependencies {
 	testCompile 'junit:junit:4.10'
 }
 
-task copylibs(type:Copy) {
+task copylangmod(type:Copy) {
 	from "../ceylon-js/build/runtime/ceylon/language/${ceylonVersion}/ceylon.language.js"
 	into "${webAppDirName}/scripts/modules/ceylon/language/${ceylonVersion}"
+}
+task copylibs(type:Copy, dependsOn:copylangmod) {
 	from "../ceylon-js/build/lib/jscompiler-${ceylonVersion}.jar"
-	into "${webAppDirName}/WEB-INF/lib"
 	from "../ceylon-spec/build/dist/com/redhat/ceylon/typechecker/${ceylonVersion}/com.redhat.ceylon.typechecker-${ceylonVersion}.jar"
-	into "${webAppDirName}/WEB-INF/lib"
 	from "../ceylon-module-resolver/build/dist/com/redhat/ceylon/module-resolver/${ceylonVersion}/com.redhat.ceylon.module-resolver-${ceylonVersion}.jar"
 	into "${webAppDirName}/WEB-INF/lib"
 }
