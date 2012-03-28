@@ -13,15 +13,15 @@ var editor;
 
 require(["ceylon/language/0.2/ceylon.language", 'jquery', 'scripts/spin.js', "browser/1.0.0/browser", "browser/1.0.0/browser.dom"],
     function(clang, $) {
-        console && console.log("Ceylon language module loaded OK");
-        clang.print = function(x){ printOutput(x.getString()); };
-        console && console.log("ceylon.language.print() patched OK");
-        spin = Spinner({
-            lines:12, length:20, width:10, radius:25, color:'#000',
-            speed:1, trail:50, shadow:true, hwaccel:false
-        });
         jquery=$;
         $(document).ready(function() {
+            console && console.log("Ceylon language module loaded OK");
+            clang.print = function(x){ printOutput(x.getString()); };
+            console && console.log("ceylon.language.print() patched OK");
+            spin = Spinner({
+                lines:12, length:20, width:10, radius:25, color:'#000',
+                speed:1, trail:50, shadow:true, hwaccel:false
+            });
             var donde=document.getElementById('edit_ceylon');
             editor = CodeMirror.fromTextArea(donde,{
                 mode:'ceylon',
@@ -42,7 +42,7 @@ require(["ceylon/language/0.2/ceylon.language", 'jquery', 'scripts/spin.js', "br
                 httpGet('share?key='+key, function(src){
                     editor.setValue(src);
                     getHoverDocs(editor);
-                }, function(x){})
+                })
             } else if (location.href.indexOf('?src=') > 0) {
                 //Code is directly in URL
                 key = location.href.slice(location.href.indexOf('?src=')+5);
@@ -66,7 +66,7 @@ function shareSource() {
 //Hides the spinner that should be spinning at the center of the page.
 function stopSpinner() {
     document.getElementById('submit').disabled=false;
-    waitSpin.stop();
+    waitSpin && waitSpin.stop();
     editor.focus();
 }
 
