@@ -24,7 +24,7 @@ function getUrlVars() {
     return vars;
 }
 
-require(["ceylon/language/0.2/ceylon.language", 'jquery', 'scripts/spin.js'],
+require(["ceylon/language/0.2/ceylon.language", 'jquery', 'scripts/spin.js', "browser/1.0.0/browser", "browser/1.0.0/browser.dom"],
     function(clang, $) {
         console && console.log("Ceylon language module loaded OK");
         clang.print = function(x){ printOutput(x.getString()); };
@@ -185,7 +185,7 @@ function showDocs(docs, refs) {
 //On response, executes the script if compilation was OK, otherwise shows errors.
 //In any case it sets the hover docs if available.
 function translate(onTranslation) {
-    var code = "void run_script() {\n" + getEditCode() + "}";
+    var code = "import browser { ... } import browser.dom { ... } void run_script() {\n" + getEditCode() + "}";
     if (code != oldcode) {
         clearOutput();
         clearEditMarkers();
@@ -223,8 +223,9 @@ function translate(onTranslation) {
             if (errors) {
                 showErrors(errors);
             }
-        }
-        httpPost('translate', "ceylon=" + encodeURIComponent(code), compileHandler, errHandler);
+        };
+        var data = "ceylon=" + encodeURIComponent(code) + "&module=" + encodeURIComponent(getModuleCode());
+        httpPost('translate', data, compileHandler, errHandler);
         document.getElementById('submit').disabled=true;
         waitSpin = spin.spin(document.getElementById('primary-content'));
     } else {
@@ -274,6 +275,10 @@ function getEditCode() {
     return editor.getValue();
 }
 
+function getModuleCode() {
+	return "Module module { name='web_ide_script'; version='1.0.0'; dependencies = { Import { name = 'browser'; version = '1.0.0'; } };}";
+}
+
 //Puts the specified text in the result element.
 function showCode(code) {
     var result = document.getElementById("result");
@@ -319,7 +324,7 @@ function printError(txt) {
 
 //Basic HTML escaping.
 function escapeHtml(html) {
-    return (''+html).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    return (''+html).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 function globalEval(src) {
@@ -348,8 +353,9 @@ function getHoverDocs(cm) {
         if (errors) {
             showErrors(errors);
         }
-    }
-    httpPost('hoverdoc', "ceylon=" + encodeURIComponent(code), docHandler, errHandler);
+    };
+    var data = "ceylon=" + encodeURIComponent(code) + "&module=" + encodeURIComponent(getModuleCode());
+    httpPost('hoverdoc', data, docHandler, errHandler);
     document.getElementById('submit').disabled=true;
     waitSpin = spin.spin(document.getElementById('primary-content'));
 }
