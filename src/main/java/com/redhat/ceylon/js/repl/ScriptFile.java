@@ -13,33 +13,56 @@ import com.redhat.ceylon.compiler.typechecker.io.VirtualFile;
  * @author Tako Schotanus
  */
 class ScriptFile implements VirtualFile {
+    private String name;
     private String script;
-    public ScriptFile(String script) {
+    private ArrayList<VirtualFile> children;
+    private boolean folder;
+    private ScriptFile parent;
+    public ScriptFile(String name, String script) {
+        this.name = name;
         this.script = script;
+        this.children = new ArrayList<VirtualFile>(0);
+        this.folder = false;
+    }
+    public ScriptFile(String name, ScriptFile... children) {
+        this.name = name;
+        this.children = new ArrayList<VirtualFile>(children.length);
+        for (ScriptFile f : children) {
+            f.setParent(this);
+            this.children.add(f);
+        }
+        this.folder = true;
+    }
+    private void setParent(ScriptFile parent) {
+        this.parent = parent;
     }
     @Override
     public boolean isFolder() {
-        return false;
+        return folder;
     }
     @Override
     public String getName() {
-        return "SCRIPT.ceylon";
+        return name;
     }
     @Override
     public String getPath() {
-        return getName();
+        return (parent != null) ? parent.getPath() + "/" + name : name;
     }
     @Override
     public InputStream getInputStream() {
-        try {
-            return new ByteArrayInputStream(script.getBytes("UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            return new ByteArrayInputStream(script.getBytes());
+        if (script != null) {
+            try {
+                return new ByteArrayInputStream(script.getBytes("UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                return new ByteArrayInputStream(script.getBytes());
+            }
+        } else {
+            return null;
         }
     }
     @Override
     public List<VirtualFile> getChildren() {
-        return new ArrayList<VirtualFile>(0);
+        return children;
     }
     @Override
     public int hashCode() {

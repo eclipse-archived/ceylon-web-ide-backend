@@ -2,10 +2,12 @@ package com.redhat.ceylon.js.repl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -58,26 +60,22 @@ public class DocServlet extends HttpServlet {
         if (example == null) {
             synchronized (this) {
                 if (example == null) {
-                    String path = String.format("/examples/%s.ceylon", key);
-                    InputStream ins = req.getServletContext().getResourceAsStream(path);
-                    if (ins == null) {
-                        resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                        resp.flushBuffer();
-                        return;
-                    }
-                    StringBuilder sb = new StringBuilder();
-                    byte[] buf = new byte[256];
-                    int read = 0;
-                    while ((read = ins.read(buf)) > 0) {
-                        sb.append(new String(buf, 0, read, "UTF-8"));
-                    }
-                    String src = sb.toString();
-                    sb.insert(0, "void run_script(){\n");
-                    sb.append('}');
+                    String src = getFileContent(req.getServletContext(), key);
+                    StringBuilder wrappedSrc = new StringBuilder("import browser { ... } void run_script(){\n");
+                    wrappedSrc.append(src);
+                    wrappedSrc.append('}');
+                    String module = getFileContent(req.getServletContext(), "module");
                     try {
                         //Run the typechecker
                         TypeChecker typeChecker = new TypeCheckerBuilder()
-                                .addSrcDirectory(new ScriptFile(sb.toString()))
+                                .addSrcDirectory(
+                                        new ScriptFile("ROOT",
+                                                new ScriptFile("web_ide_script",
+                                                        new ScriptFile("SCRIPT.ceylon", wrappedSrc.toString()),
+                                                        new ScriptFile("module.ceylon", module)
+                                                )
+                                        )
+                                 )
                                 .getTypeChecker();
                         typeChecker.process();
                         example = compile(typeChecker);
@@ -85,10 +83,10 @@ public class DocServlet extends HttpServlet {
                         examples.put(key, example);
                     } catch (RuntimeException ex) {
                         resp.setStatus(500);
-                        sb = new StringBuilder();
-                        json.encodeList(Collections.singletonList((Object)String.format("Service error: %s", ex.getMessage())), sb);
-                        resp.setContentLength(sb.length());
-                        resp.getWriter().print(sb.toString());
+                        StringBuilder error = new StringBuilder();
+                        json.encodeList(Collections.singletonList((Object)String.format("Service error: %s", ex.getMessage())), error);
+                        resp.setContentLength(error.length());
+                        resp.getWriter().print(error.toString());
                     }
                 }
             }
@@ -104,7 +102,13 @@ public class DocServlet extends HttpServlet {
             throws ServletException, IOException {
         try {
             String script = request.getParameter("ceylon");
-            ScriptFile src = new ScriptFile(script);
+            String module = request.getParameter("module");
+            ScriptFile src = new ScriptFile("ROOT",
+                    new ScriptFile("web_ide_script",
+                            new ScriptFile("SCRIPT.ceylon", script),
+                            new ScriptFile("module.ceylon", module)
+                    )
+            );
             //Run the typechecker
             TypeChecker typeChecker = new TypeCheckerBuilder()
                     .addSrcDirectory(src)
@@ -118,5 +122,17 @@ public class DocServlet extends HttpServlet {
             response.setContentLength(sb.length());
             response.getWriter().print(sb.toString());
         }
+    }
+    
+    private String getFileContent(ServletContext ctx, String key) throws UnsupportedEncodingException, IOException {
+        String path = String.format("/examples/%s.ceylon", key);
+        InputStream ins = ctx.getResourceAsStream(path);
+        StringBuilder sb = new StringBuilder();
+        byte[] buf = new byte[256];
+        int read = 0;
+        while ((read = ins.read(buf)) > 0) {
+            sb.append(new String(buf, 0, read, "UTF-8"));
+        }
+        return sb.toString();
     }
 }

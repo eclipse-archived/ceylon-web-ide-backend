@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" output="target/classes" path="src/main/java"/>
+	<classpathentry kind="src" path="src/test/java"/>
 	<classpathentry excluding="**" kind="src" output="target/classes" path="src/main/resources"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
@@ -16,5 +17,9 @@
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/ceylon-module-resolver-0.2.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jscompiler-0.2.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/typechecker-0.2.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ceylon-js"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ceylon-module-resolver"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ceylon-spec"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

@@ -11,20 +11,7 @@ var waitSpin;
 var jquery;
 var editor;
 
-//Taken from http://jquery-howto.blogspot.mx/2009/09/get-url-parameters-values-with-jquery.html
-//IMHO this is totally fugly
-function getUrlVars() {
-    var vars = [], hash;
-    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-    for (var i = 0; i < hashes.length; i++) {
-        hash = hashes[i].split('=');
-        vars.push(hash[0]);
-        vars[hash[0]] = hash[1];
-    }
-    return vars;
-}
-
-require(["ceylon/language/0.2/ceylon.language", 'jquery', 'scripts/spin.js'],
+require(["ceylon/language/0.2/ceylon.language", 'jquery', 'scripts/spin.js', "browser/1.0.0/browser", "browser/1.0.0/browser.dom"],
     function(clang, $) {
         console && console.log("Ceylon language module loaded OK");
         clang.print = function(x){ printOutput(x.getString()); };
@@ -46,10 +33,20 @@ require(["ceylon/language/0.2/ceylon.language", 'jquery', 'scripts/spin.js'],
                     "Cmd-B":function(instance){ run(); }
                 }
             });
-            var reqparams = getUrlVars();
-            if (reqparams && reqparams.src) {
-                editor.setValue(decodeURIComponent(reqparams.src));
-                getHoverDocs(editor);
+            $('#shareurl').focus(function(){ jquery(this).select(); });
+            $('#shareurl').hide();
+            var key = location.href.split('#');
+            if (key.length > 1) {
+                //retrieve code
+                key = key[key.length-1];
+                httpGet('share?key='+key, function(src){
+                    editor.setValue(src);
+                    getHoverDocs(editor);
+                }, function(x){})
+            } else if (location.href.indexOf('?src=') > 0) {
+                //Code is directly in URL
+                key = location.href.slice(location.href.indexOf('?src=')+5);
+                editor.setValue(decodeURIComponent(key));
             } else {
                 editCode('hello_world');
             }
@@ -58,10 +55,13 @@ require(["ceylon/language/0.2/ceylon.language", 'jquery', 'scripts/spin.js'],
 );
 
 function shareSource() {
-    var url = (location.href.split('?')[0]) + '?src=' + encodeURIComponent(editor.getValue());
-    document.getElementById('share_url').value=url;
-    document.getElementById('share_url').focus();
-    document.getElementById('share_url').select();
+    function printUrl(key) {
+        var url = (location.href.split(/\?|#/)[0]) + '#' + key;
+        jquery('#shareurl').val(url);
+        jquery('#shareurl').show();
+        jquery('#shareurl').focus();
+    }
+    httpPost('share', "ceylon=" + encodeURIComponent(editor.getValue()), printUrl, null);
 }
 //Hides the spinner that should be spinning at the center of the page.
 function stopSpinner() {
@@ -72,7 +72,6 @@ function stopSpinner() {
 
 //Performs an HTTP POST to the specified URL, posting the specified data.
 //Calls successHandler on successful response or errorHandler if something bad happens.
-//hideSpin is a function that is called after getting a response.
 function httpPost(url, data, successHandler, errorHandler) {
     var timeoutHandle;
     if (!errorHandler) {
@@ -87,12 +86,11 @@ function httpPost(url, data, successHandler, errorHandler) {
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
             clearTimeout(timeoutHandle);
+            stopSpinner();
             if (xhr.status == 200) {
                 successHandler(xhr.responseText);
-                stopSpinner();
             } else {
                 errorHandler(xhr.responseText);
-                stopSpinner();
             }
         }
     };
@@ -102,20 +100,12 @@ function httpPost(url, data, successHandler, errorHandler) {
 
 //Performs an HTTP GET on the specified URL.
 //Calls the successHandler function if everything OK or errorHandler if something bad happens.
-//hideSpin is a function that gets called when a response is received (or timeout occurs).
-function httpGet(url, successHandler, errorHandler, hideSpin) {
+function httpGet(url, successHandler, errorHandler) {
     //Retrieve code
     var timeoutHandle;
-    var errfunc;
-    if (errorHandler) {
-        errfunc = function(err) {
-            errorHandler(err);
-            hideSpin();
-        }
-    } else {
-        errfunc = function(err) {
+    if (!errorHandler) {
+        errorHandler = function(err) {
             alert("error: " + err);
-            hideSpin();
         }
     }
     var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
@@ -123,11 +113,11 @@ function httpGet(url, successHandler, errorHandler, hideSpin) {
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
             clearTimeout(timeoutHandle);
+            stopSpinner();
             if (xhr.status == 200) {
                 successHandler(xhr.responseText);
-                hideSpin();
             } else {
-                errfunc(xhr.responseText);
+                errorHandler(xhr.responseText);
             }
         }
     };
@@ -185,7 +175,7 @@ function showDocs(docs, refs) {
 //On response, executes the script if compilation was OK, otherwise shows errors.
 //In any case it sets the hover docs if available.
 function translate(onTranslation) {
-    var code = "void run_script() {\n" + getEditCode() + "}";
+    var code = "import browser { ... } import browser.dom { ... } void run_script() {\n" + getEditCode() + "}";
     if (code != oldcode) {
         clearOutput();
         clearEditMarkers();
@@ -223,8 +213,9 @@ function translate(onTranslation) {
             if (errors) {
                 showErrors(errors);
             }
-        }
-        httpPost('translate', "ceylon=" + encodeURIComponent(code), compileHandler, errHandler);
+        };
+        var data = "ceylon=" + encodeURIComponent(code) + "&module=" + encodeURIComponent(getModuleCode());
+        httpPost('translate', data, compileHandler, errHandler);
         document.getElementById('submit').disabled=true;
         waitSpin = spin.spin(document.getElementById('primary-content'));
     } else {
@@ -262,9 +253,7 @@ function editCode(key) {
         editor.setValue(json['src']);
         showDocs(json['docs'], json['refs']);
         editor.focus();
-    }, null, function(){;
-        spin.stop();
-    });
+    }, null);
     waitSpin = spin.spin(document.getElementById('primary-content'));
     return false;
     return true;
@@ -272,6 +261,10 @@ function editCode(key) {
 
 function getEditCode() {
     return editor.getValue();
+}
+
+function getModuleCode() {
+	return "Module module { name='web_ide_script'; version='1.0.0'; dependencies = { Import { name = 'browser'; version = '1.0.0'; } };}";
 }
 
 //Puts the specified text in the result element.
@@ -319,7 +312,7 @@ function printError(txt) {
 
 //Basic HTML escaping.
 function escapeHtml(html) {
-    return (''+html).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    return (''+html).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 function globalEval(src) {
@@ -348,8 +341,9 @@ function getHoverDocs(cm) {
         if (errors) {
             showErrors(errors);
         }
-    }
-    httpPost('hoverdoc', "ceylon=" + encodeURIComponent(code), docHandler, errHandler);
+    };
+    var data = "ceylon=" + encodeURIComponent(code) + "&module=" + encodeURIComponent(getModuleCode());
+    httpPost('hoverdoc', data, docHandler, errHandler);
     document.getElementById('submit').disabled=true;
     waitSpin = spin.spin(document.getElementById('primary-content'));
 }
