@@ -62,10 +62,7 @@ public class MongoStorage implements CodeStorage {
     public String retrieveCode(String key) {
         DBCollection coll = db.getCollection("codez");
         DBCursor res = coll.find(new BasicDBObject("key", key));
-        if (res.hasNext()) {
-            return res.next().get("code").toString();
-        }
-        return "//NOT FOUND";
+        return res.hasNext() ?  res.next().get("code").toString() : null;
     }
 
 }

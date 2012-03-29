@@ -25,43 +25,47 @@ public class CodeSharingServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         String code = req.getParameter("ceylon");
-        if (code != null && code.length() > 0) {
+        String text = "";
+        resp.setContentType("text/plain");
+        if (code != null) {
+            code = code.trim();
             //check it's not ridiculously big to avoid DoS
             if (code.length() > MAX_CODE_SIZE) {
                 resp.setStatus(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
-                resp.flushBuffer();
+                text = "Code snippet is too long.";
             } else if (code.length() < 20) {
                 //or ridiculously short for that matter
                 resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
-                resp.flushBuffer();
+                text = "Code snippet is too short.";
+            } else {
+                //store the code, return its key
+                text = store.storeCode(code);
             }
-            String key = store.storeCode(code);
-            resp.setContentType("text/plain");
-            resp.setContentLength(key.length());
-            resp.getWriter().write(key);
-            resp.getWriter().flush();
         } else {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.flushBuffer();
+            text = "No code received.";
         }
+        resp.setContentLength(text.length());
+        resp.getWriter().write(text);
+        resp.getWriter().flush();
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         String key = req.getParameter("key");
+        String code = null;
         if (key != null) {
-            String code = store.retrieveCode(key);
-            if (code != null) {
-                resp.setContentType("text/plain");
-                resp.setContentLength(code.length());
-                resp.getWriter().write(code);
-                resp.getWriter().flush();
-                return;
-            }
+            code = store.retrieveCode(key);
         }
-        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        resp.flushBuffer();
+        if (code == null) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            code = "No code snippet was found under the specified key.";
+        }
+        resp.setContentType("text/plain");
+        resp.setContentLength(code.length());
+        resp.getWriter().write(code);
+        resp.getWriter().flush();
     }
 
 }
