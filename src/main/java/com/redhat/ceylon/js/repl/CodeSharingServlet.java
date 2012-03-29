@@ -30,6 +30,10 @@ public class CodeSharingServlet extends HttpServlet {
             if (code.length() > MAX_CODE_SIZE) {
                 resp.setStatus(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
                 resp.flushBuffer();
+            } else if (code.length() < 20) {
+                //or ridiculously short for that matter
+                resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+                resp.flushBuffer();
             }
             String key = store.storeCode(code);
             resp.setContentType("text/plain");
