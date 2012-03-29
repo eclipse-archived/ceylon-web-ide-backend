@@ -33,7 +33,7 @@
       <version>0.2</version>
       <type>jar</type>
       <scope>system</scope>
-      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/typechecker-0.2.jar</systemPath>
+      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.typechecker-0.2.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>ceylon</groupId>
@@ -42,6 +42,14 @@
       <type>jar</type>
       <scope>system</scope>
       <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/jscompiler-0.2.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>org.mongodb</groupId>
+      <artifactId>mongo</artifactId>
+      <version>2.7.3</version>
+      <type>jar</type>
+      <scope>system</scope>
+      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/mongo-2.7.3.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

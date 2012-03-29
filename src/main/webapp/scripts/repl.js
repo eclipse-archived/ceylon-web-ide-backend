@@ -11,30 +11,17 @@ var waitSpin;
 var jquery;
 var editor;
 
-//Taken from http://jquery-howto.blogspot.mx/2009/09/get-url-parameters-values-with-jquery.html
-//IMHO this is totally fugly
-function getUrlVars() {
-    var vars = [], hash;
-    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-    for (var i = 0; i < hashes.length; i++) {
-        hash = hashes[i].split('=');
-        vars.push(hash[0]);
-        vars[hash[0]] = hash[1];
-    }
-    return vars;
-}
-
 require(["ceylon/language/0.2/ceylon.language", 'jquery', 'scripts/spin.js', "browser/1.0.0/browser", "browser/1.0.0/browser.dom"],
     function(clang, $) {
-        console && console.log("Ceylon language module loaded OK");
-        clang.print = function(x){ printOutput(x.getString()); };
-        console && console.log("ceylon.language.print() patched OK");
-        spin = Spinner({
-            lines:12, length:20, width:10, radius:25, color:'#000',
-            speed:1, trail:50, shadow:true, hwaccel:false
-        });
         jquery=$;
         $(document).ready(function() {
+            console && console.log("Ceylon language module loaded OK");
+            clang.print = function(x){ printOutput(x.getString()); };
+            console && console.log("ceylon.language.print() patched OK");
+            spin = Spinner({
+                lines:12, length:20, width:10, radius:25, color:'#000',
+                speed:1, trail:50, shadow:true, hwaccel:false
+            });
             var donde=document.getElementById('edit_ceylon');
             editor = CodeMirror.fromTextArea(donde,{
                 mode:'ceylon',
@@ -46,10 +33,20 @@ require(["ceylon/language/0.2/ceylon.language", 'jquery', 'scripts/spin.js', "br
                     "Cmd-B":function(instance){ run(); }
                 }
             });
-            var reqparams = getUrlVars();
-            if (reqparams && reqparams.src) {
-                editor.setValue(decodeURIComponent(reqparams.src));
-                getHoverDocs(editor);
+            $('#shareurl').focus(function(){ jquery(this).select(); });
+            $('#shareurl').hide();
+            var key = location.href.split('#');
+            if (key.length > 1) {
+                //retrieve code
+                key = key[key.length-1];
+                httpGet('share?key='+key, function(src){
+                    editor.setValue(src);
+                    getHoverDocs(editor);
+                })
+            } else if (location.href.indexOf('?src=') > 0) {
+                //Code is directly in URL
+                key = location.href.slice(location.href.indexOf('?src=')+5);
+                editor.setValue(decodeURIComponent(key));
             } else {
                 editCode('hello_world');
             }
@@ -58,21 +55,23 @@ require(["ceylon/language/0.2/ceylon.language", 'jquery', 'scripts/spin.js', "br
 );
 
 function shareSource() {
-    var url = (location.href.split('?')[0]) + '?src=' + encodeURIComponent(editor.getValue());
-    document.getElementById('share_url').value=url;
-    document.getElementById('share_url').focus();
-    document.getElementById('share_url').select();
+    function printUrl(key) {
+        var url = (location.href.split(/\?|#/)[0]) + '#' + key;
+        jquery('#shareurl').val(url);
+        jquery('#shareurl').show();
+        jquery('#shareurl').focus();
+    }
+    httpPost('share', "ceylon=" + encodeURIComponent(editor.getValue()), printUrl, null);
 }
 //Hides the spinner that should be spinning at the center of the page.
 function stopSpinner() {
     document.getElementById('submit').disabled=false;
-    waitSpin.stop();
+    waitSpin && waitSpin.stop();
     editor.focus();
 }
 
 //Performs an HTTP POST to the specified URL, posting the specified data.
 //Calls successHandler on successful response or errorHandler if something bad happens.
-//hideSpin is a function that is called after getting a response.
 function httpPost(url, data, successHandler, errorHandler) {
     var timeoutHandle;
     if (!errorHandler) {
@@ -87,12 +86,11 @@ function httpPost(url, data, successHandler, errorHandler) {
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
             clearTimeout(timeoutHandle);
+            stopSpinner();
             if (xhr.status == 200) {
                 successHandler(xhr.responseText);
-                stopSpinner();
             } else {
                 errorHandler(xhr.responseText);
-                stopSpinner();
             }
         }
     };
@@ -102,20 +100,12 @@ function httpPost(url, data, successHandler, errorHandler) {
 
 //Performs an HTTP GET on the specified URL.
 //Calls the successHandler function if everything OK or errorHandler if something bad happens.
-//hideSpin is a function that gets called when a response is received (or timeout occurs).
-function httpGet(url, successHandler, errorHandler, hideSpin) {
+function httpGet(url, successHandler, errorHandler) {
     //Retrieve code
     var timeoutHandle;
-    var errfunc;
-    if (errorHandler) {
-        errfunc = function(err) {
-            errorHandler(err);
-            hideSpin();
-        }
-    } else {
-        errfunc = function(err) {
+    if (!errorHandler) {
+        errorHandler = function(err) {
             alert("error: " + err);
-            hideSpin();
         }
     }
     var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
@@ -123,11 +113,11 @@ function httpGet(url, successHandler, errorHandler, hideSpin) {
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
             clearTimeout(timeoutHandle);
+            stopSpinner();
             if (xhr.status == 200) {
                 successHandler(xhr.responseText);
-                hideSpin();
             } else {
-                errfunc(xhr.responseText);
+                errorHandler(xhr.responseText);
             }
         }
     };
@@ -263,9 +253,7 @@ function editCode(key) {
         editor.setValue(json['src']);
         showDocs(json['docs'], json['refs']);
         editor.focus();
-    }, null, function(){;
-        spin.stop();
-    });
+    }, null);
     waitSpin = spin.spin(document.getElementById('primary-content'));
     return false;
     return true;
