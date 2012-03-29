@@ -12,7 +12,7 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
     //B keywords expect {block}
     //C keywords expect expr
     var A = kw("keyword a"), B = kw("keyword b"), C = kw("keyword c");
-    var ann=kw("annotation");
+    var ann={type:"keyword", style:"annotation"};
     var operator = kw("operator"), atom = {type: "atom", style: "atom"};
     return {
       "if": A, "while": A, "exists": operator, "else": B, "nonempty": operator, "try": B, "finally": B,
@@ -58,7 +58,7 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
     var ch = stream.next();
     if (ch == '"' || ch == "'" || ch == '`')
       return chain(stream, state, jsTokenString(ch));
-    else if (/[\[\]{}\(\),;\:\.]/.test(ch))
+    else if (/[\[\]{}\(\),;\.]/.test(ch))
       return ret(ch);
     else if (ch == "0" && stream.eat(/x/i)) {
       stream.eatWhile(/[\da-f]/i);
@@ -90,7 +90,7 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
         stream.skipToEnd();
         return ret("error", "error");
     }*/
-    else if (/</.test(ch)) {
+    else if (/</.test(ch)) { //to detect generics
       if (stream.eat("=") && stream.eat(">")) {
         return ret("operator", "operator", stream.current());
       } else if (stream.eatWhile(/\w>/)) {
@@ -99,11 +99,16 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
       stream.eatWhile(isOperatorChar);
       return ret("operator", null, stream.current());
     }
+    else if (/:/.test(ch)) { //assign
+      if (stream.eat("=")) {
+        return ret("operator", "operator", stream.current());
+      }
+    }
     else if (isOperatorChar.test(ch)) {
       stream.eatWhile(isOperatorChar);
       return ret("operator", null, stream.current());
     }
-    else if (/[A-Z]/.test(ch)) {
+    else if (/[A-Z]/.test(ch)) { //anything starting with a capital is considered a classname
       stream.eatWhile(/[\w\_]/);
       return ret("classname", "classname", stream.current());
     }
@@ -241,8 +246,7 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
     if (type == "for") return cont(pushlex("form"), expect("("), pushlex(")"), formaybein, expect(")"),
                                       poplex, statement, poplex);
     if (type == "variable") return cont(pushlex("stat"), maybelabel);
-    if (type == "switch") return cont(pushlex("form"), expression, pushlex("}", "switch"), expect("{"),
-                                         block, poplex, poplex);
+    if (type == "switch") return cont(expect("("), expression, expect(")"));
     if (type == "catch") return cont(pushlex("form"), pushcontext, expect("("), funarg, expect(")"),
                                         statement, poplex, popcontext);
     return pass(pushlex("stat"), expression, expect(";"), poplex);
@@ -373,7 +377,7 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
       else return lexical.indented + (closing ? 0 : indentUnit);
     },
 
-    electricChars: ":{}"
+    electricChars: "{}"
   };
 });
 
