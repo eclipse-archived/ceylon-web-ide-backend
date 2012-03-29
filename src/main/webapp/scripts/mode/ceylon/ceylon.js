@@ -3,20 +3,29 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
   var jsonMode = parserConfig.json;
 
   // Tokenizer
+  // Taken from the javascript CodeMirror mode,
+  // modified for Ceylon by Enrique Zamudio
 
   var keywords = function(){
     function kw(type) {return {type: type, style: "keyword"};}
+    //A keywords expect (expr) expr or (expr) {block}
+    //B keywords expect {block}
+    //C keywords expect expr
     var A = kw("keyword a"), B = kw("keyword b"), C = kw("keyword c");
+    var ann=kw("annotation");
     var operator = kw("operator"), atom = {type: "atom", style: "atom"};
     return {
-      "if": A, "while": A, "exists": A, "else": B, "nonempty": B, "try": B, "finally": B,
-      "return": C, "break": C, "continue": C, "is": B, "satisfies": B, "throw": C, "function":A,
-      "variable": kw("var"), "value": kw("var"), "import": C, "outer":A, "super":A,
+      "if": A, "while": A, "exists": operator, "else": B, "nonempty": operator, "try": B, "finally": B,
+      "return": C, "break": C, "continue": C, "is": operator, "satisfies": operator, "throw": C,
+      "function":kw("function"),
+      "variable": ann, "value": kw("var"), "import": B, "outer":kw("outer"), "super":kw("super"),
       "class": kw("class"), "catch": kw("catch"), "interface":kw("class"), "object":kw("class"),
-      "for": kw("for"), "switch": kw("switch"), "case": kw("case"), "given": kw("given"),
-      "in": operator, "assign": kw("assign"), "void": atom, "out":operator, "then":operator, "<=>":operator,
-      "of":operator, "extends": A, "adapts" : A, "abstracts" : A, "shared" : atom, "this":atom,
-      "true": atom, "false": atom, "null": atom, "smaller": atom, "larger": atom, "exhausted": atom
+      "for": A, "switch": kw("switch"), "case": A, "given": operator,
+      "in": operator, "assign": kw("assign"), "void": atom, "out":operator, "then":operator,
+      "of":operator, "extends": kw("extends"), "adapts" : kw("extends"), "abstracts" : kw("extends"),
+      "shared" : ann, "formal":ann, "default":ann, "actual":ann, "this":atom,
+      "true": atom, "false": atom, "null": atom, "smaller": atom, "larger": atom, "exhausted": atom,
+      "equal":atom, "empty":atom, "infinity":atom, "abstract":ann
     };
   }();
 
@@ -47,7 +56,7 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
 
   function jsTokenBase(stream, state) {
     var ch = stream.next();
-    if (ch == '"' || ch == "'")
+    if (ch == '"' || ch == "'" || ch == '`')
       return chain(stream, state, jsTokenString(ch));
     else if (/[\[\]{}\(\),;\:\.]/.test(ch))
       return ret(ch);
@@ -55,10 +64,10 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
       stream.eatWhile(/[\da-f]/i);
       return ret("number", "number");
     }      
-    else if (/\d/.test(ch)) {
+/*    else if (/\d/.test(ch)) {
       stream.match(/^\d*(?:\.\d*)?(?:[eE][+\-]?\d+)?/);
       return ret("number", "number");
-    }
+    }*/
     else if (ch == "/") {
       if (stream.eat("*")) {
         return chain(stream, state, jsTokenComment);
@@ -67,23 +76,36 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
         stream.skipToEnd();
         return ret("comment", "comment");
       }
-      else if (state.reAllowed) {
+/*      else if (state.reAllowed) {
         nextUntilUnescaped(stream, "/");
         stream.eatWhile(/[gimy]/); // 'y' is "sticky" option in Mozilla
         return ret("regexp", "string-2");
-      }
+      }*/
       else {
         stream.eatWhile(isOperatorChar);
         return ret("operator", null, stream.current());
       }
     }
-    else if (ch == "#") {
+/*    else if (ch == "#") {
         stream.skipToEnd();
         return ret("error", "error");
+    }*/
+    else if (/</.test(ch)) {
+      if (stream.eat("=") && stream.eat(">")) {
+        return ret("operator", "operator", stream.current());
+      } else if (stream.eatWhile(/\w>/)) {
+        return ret("classname", "classname", stream.current());
+      }
+      stream.eatWhile(isOperatorChar);
+      return ret("operator", null, stream.current());
     }
     else if (isOperatorChar.test(ch)) {
       stream.eatWhile(isOperatorChar);
       return ret("operator", null, stream.current());
+    }
+    else if (/[A-Z]/.test(ch)) {
+      stream.eatWhile(/[\w\_]/);
+      return ret("classname", "classname", stream.current());
     }
     else {
       stream.eatWhile(/[\w\$_]/);
@@ -115,7 +137,7 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
 
   // Parser
 
-  var atomicTypes = {"atom": true, "number": true, "variable": true, "string": true, "regexp": true};
+  var atomicTypes = {"atom": true, "number": true, "variable": true, "string": true, };
 
   function JSLexical(indented, column, type, align, prev, info) {
     this.indented = indented;
@@ -216,13 +238,11 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
     if (type == "{") return cont(pushlex("}"), block, poplex);
     if (type == ";") return cont();
     if (type == "function") return cont(functiondef);
-    if (type == "for") return cont(pushlex("form"), expect("("), pushlex(")"), forspec1, expect(")"),
+    if (type == "for") return cont(pushlex("form"), expect("("), pushlex(")"), formaybein, expect(")"),
                                       poplex, statement, poplex);
     if (type == "variable") return cont(pushlex("stat"), maybelabel);
     if (type == "switch") return cont(pushlex("form"), expression, pushlex("}", "switch"), expect("{"),
                                          block, poplex, poplex);
-    if (type == "case") return cont(expression, expect(":"));
-    if (type == "default") return cont(expect(":"));
     if (type == "catch") return cont(pushlex("form"), pushcontext, expect("("), funarg, expect(")"),
                                         statement, poplex, popcontext);
     return pass(pushlex("stat"), expression, expect(";"), poplex);
@@ -348,7 +368,7 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
       else if (type == "form" && firstChar == "{") return lexical.indented;
       else if (type == "stat" || type == "form") return lexical.indented + indentUnit;
       else if (lexical.info == "switch" && !closing)
-        return lexical.indented + (/^(?:case|default)\b/.test(textAfter) ? indentUnit : 2 * indentUnit);
+        return lexical.indented + (/^(?:case)\b/.test(textAfter) ? indentUnit : 2 * indentUnit);
       else if (lexical.align) return lexical.column + (closing ? 0 : 1);
       else return lexical.indented + (closing ? 0 : indentUnit);
     },
@@ -357,5 +377,5 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
   };
 });
 
-CodeMirror.defineMIME("text/javascript", "javascript");
+CodeMirror.defineMIME("text/ceylon", "ceylon");
 CodeMirror.defineMIME("application/json", {name: "javascript", json: true});
