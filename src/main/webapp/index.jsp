@@ -8,13 +8,15 @@
     <link rel='stylesheet' type='text/css' href='shCore.css'/>
     <link rel='stylesheet' type='text/css' href='shThemeDefault.css'/>
     <!--[if lt IE 8]>
-      <link href='http://ceylon-lang.org/stylesheets/ie.css' media='screen, projection' rel='stylesheet' type='text/css' />
+        <link href='http://ceylon-lang.org/stylesheets/ie.css' media='screen, projection' rel='stylesheet' type='text/css' />
     <![endif]-->
     <style type="text/css">
         #result {
         }
         .cantseeme {
+            <% if (request.getParameter("showcode") != null) { %>
             display: none;
+            <% } %>
         }
         #output {
             border-width: 1px;
@@ -71,10 +73,10 @@
     <script type="text/javascript" src="scripts/codemirror.js" charset="utf-8"></script>
     <script type="text/javascript" src="scripts/mode/ceylon/ceylon.js" charset="utf-8"></script>
     <link rel="stylesheet" href="scripts/codemirror.css" />
-<style type="text/css">
-  .CodeMirror {border: 1px solid black;width:600px;height:200px;background:#ffffff;}
-  .CodeMirror-gutter {min-width: 2.6em; cursor: pointer;}
-</style>
+    <style type="text/css">
+        .CodeMirror {border: 1px solid black;width:600px;height:200px;background:#ffffff;}
+        .CodeMirror-gutter {min-width: 2.6em; cursor: pointer;}
+    </style>
 
 </head>
 <body class="bp">
