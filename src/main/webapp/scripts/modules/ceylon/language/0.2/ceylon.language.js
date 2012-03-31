@@ -723,7 +723,7 @@ exports.parseFloat=$parseFloat;
 function String$(value,size) {
 var that = new String$.$$;
 that.value = value;
-that.codePoints = size;
+that.codePoints = (size===undefined) ? countCodepoints(value) : size;
 return that;
 }
 initType(String$, 'ceylon.language.String', Object$, List, Comparable, Ranged, FixedSized,
