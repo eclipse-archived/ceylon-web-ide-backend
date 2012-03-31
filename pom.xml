@@ -25,7 +25,7 @@
       <version>0.2</version>
       <type>jar</type>
       <scope>system</scope>
-      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/ceylon-module-resolver-0.2.jar</systemPath>
+      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.module-resolver-0.2.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>ceylon</groupId>

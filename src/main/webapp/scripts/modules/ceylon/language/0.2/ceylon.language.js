@@ -723,7 +723,7 @@ exports.parseFloat=$parseFloat;
 function String$(value,size) {
 var that = new String$.$$;
 that.value = value;
-that.codePoints = size;
+that.codePoints = (size===undefined) ? countCodepoints(value) : size;
 return that;
 }
 initType(String$, 'ceylon.language.String', Object$, List, Comparable, Ranged, FixedSized,
@@ -1356,6 +1356,7 @@ return value === null || value === undefined ? $false : Boolean$(value.getEmpty(
 function isOfType(obj, typeName) {
 if (obj === null) return Boolean$(typeName==="ceylon.language.Nothing" || typeName==="ceylon.language.Void");
 var cons = obj.$$;
+if (cons === undefined) cons = obj.constructor.$$;
 if (cons === undefined) cons = obj.constructor;
 return Boolean$(typeName in cons.T$all);
 }
@@ -1367,6 +1368,7 @@ var unions = false;
 var inters = true;
 var _ints=false;
 var cons = obj.$$;
+if (cons === undefined) cons = obj.constructor.$$;
 if (cons === undefined) cons = obj.constructor;
 for (var i = 0; i < types.l.length; i++) {
 var t = types.l[i];
@@ -1388,6 +1390,7 @@ return _ints ? inters||unions : unions;
 function className(obj) {
 if (obj === null) return String$('ceylon.language.Nothing');
 var cons = obj.$$;
+if (cons === undefined) cons = obj.constructor.$$;
 if (cons === undefined) cons = obj.constructor;
 return String$(cons.T$name);
 }
