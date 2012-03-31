@@ -14,7 +14,7 @@
         #result {
         }
         .cantseeme {
-            <% if (request.getParameter("showcode") != null) { %>
+            <% if (request.getParameter("showcode") == null) { %>
             display: none;
             <% } %>
         }
