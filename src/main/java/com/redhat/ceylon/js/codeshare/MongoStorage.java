@@ -52,9 +52,14 @@ public class MongoStorage implements CodeStorage {
         String key = CodeKeyGenerator.generateKey(code);
         BasicDBObject snip = new BasicDBObject();
         snip.put("key", key);
-        snip.put("code", code);
         DBCollection coll = db.getCollection("codez");
-        coll.insert(snip);
+        DBCursor res = coll.find(snip);
+        if (!res.hasNext()) {
+            //Only store it if it's not already stored
+            snip.put("code", code);
+            coll.insert(snip);
+            return key;
+        }
         return key;
     }
 
