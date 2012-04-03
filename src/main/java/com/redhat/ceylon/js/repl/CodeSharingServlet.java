@@ -39,7 +39,7 @@ public class CodeSharingServlet extends HttpServlet {
                 text = "Code snippet is too short.";
             } else {
                 //store the code, return its key
-                text = store.storeCode(code);
+                text = store.storeCode(code, req.getRemoteAddr());
             }
         } else {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -56,7 +56,7 @@ public class CodeSharingServlet extends HttpServlet {
         String key = req.getParameter("key");
         String code = null;
         if (key != null) {
-            code = store.retrieveCode(key);
+            code = store.retrieveCode(key, req.getRemoteAddr());
         }
         if (code == null) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
