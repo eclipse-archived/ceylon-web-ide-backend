@@ -39,7 +39,7 @@ public class CodeSharingServlet extends HttpServlet {
                 text = "Code snippet is too short.";
             } else {
                 //store the code, return its key
-                text = store.storeCode(code, req.getRemoteAddr());
+                text = store.storeCode(code, getRemoteIP(req));
             }
         } else {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -48,6 +48,18 @@ public class CodeSharingServlet extends HttpServlet {
         resp.setContentLength(text.length());
         resp.getWriter().write(text);
         resp.getWriter().flush();
+    }
+    
+    // Try to retrieve to visitor's IP address
+    private String getRemoteIP(HttpServletRequest req) {
+        // We're running in a shared environment so
+        // probably there's a proxy in between
+        String ip = req.getHeader("x-forwarded-for");
+        if (ip == null) {
+            // Otherwise we just use whatever we can get
+            ip = req.getRemoteAddr();
+        }
+        return ip;
     }
 
     @Override
