@@ -1,6 +1,7 @@
 package com.redhat.ceylon.js.codeshare;
 
 import java.net.UnknownHostException;
+import java.util.Date;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Default;
@@ -9,7 +10,6 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 import com.redhat.ceylon.js.repl.CodeKeyGenerator;
@@ -48,7 +48,7 @@ public class MongoStorage implements CodeStorage {
     }
 
     @Override
-    public String storeCode(String code) {
+    public String storeCode(final String code, final String ip) {
         String key = CodeKeyGenerator.generateKey(code);
         BasicDBObject snip = new BasicDBObject();
         snip.put("key", key);
@@ -57,6 +57,8 @@ public class MongoStorage implements CodeStorage {
         if (!res.hasNext()) {
             //Only store it if it's not already stored
             snip.put("code", code);
+            snip.put("created", new Date());
+            snip.put("ip", ip);
             coll.insert(snip);
             return key;
         }
@@ -64,7 +66,7 @@ public class MongoStorage implements CodeStorage {
     }
 
     @Override
-    public String retrieveCode(String key) {
+    public String retrieveCode(String key, String ip) {
         DBCollection coll = db.getCollection("codez");
         DBCursor res = coll.find(new BasicDBObject("key", key));
         return res.hasNext() ?  res.next().get("code").toString() : null;
