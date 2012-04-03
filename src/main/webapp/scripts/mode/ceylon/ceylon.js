@@ -142,7 +142,7 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
 
   // Parser
 
-  var atomicTypes = {"atom": true, "number": true, "variable": true, "string": true, };
+  var atomicTypes = {"atom": true, "number": true, "variable": true, "string": true };
 
   function JSLexical(indented, column, type, align, prev, info) {
     this.indented = indented;
