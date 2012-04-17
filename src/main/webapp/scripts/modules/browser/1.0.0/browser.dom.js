@@ -1,106 +1,103 @@
 (function(define) {
-(function(define) {
-    define(function(require, exports, module) {
-	
-var $document = function() { return document; };
-exports.getDocument = $document;
-
-    });
-}(typeof define==='function' && define.amd ? define : function (factory) {
-    if (typeof exports!=='undefined') {
-        factory(require, exports, module);
-    } else {
-        throw "no module loader";
-    }
-}));
     define(function(require, exports, module) {
     	
 var clang=require('ceylon/language/0.2/ceylon.language');
 
-if (typeof Node !== "undefined") { clang.initType(Node, 'browser.dom.Node', clang.Object); clang.inheritProto(Node, clang.IdentifiableObject); }
-if (typeof Element !== "undefined") { clang.initType(Element, 'browser.dom.Element', clang.Object, Node); clang.inheritProto(Element, clang.IdentifiableObject); }
-if (typeof TypeInfo !== "undefined") { clang.initType(TypeInfo, 'browser.dom.TypeInfo', clang.Object); clang.inheritProto(TypeInfo, clang.IdentifiableObject); }
-if (typeof Attr !== "undefined") { clang.initType(Attr, 'browser.dom.Attr', clang.Object, Node); clang.inheritProto(Attr, clang.IdentifiableObject); }
-if (typeof CharacterData !== "undefined") { clang.initType(CharacterData, 'browser.dom.CharacterData', clang.Object, Node); clang.inheritProto(CharacterData, clang.IdentifiableObject); }
-if (typeof Text !== "undefined") { clang.initType(Text, 'browser.dom.Text', clang.Object, CharacterData); clang.inheritProto(Text, clang.IdentifiableObject); }
-if (typeof CDATASection !== "undefined") { clang.initType(CDATASection, 'browser.dom.CDATASection', clang.Object, Text); clang.inheritProto(CDATASection, clang.IdentifiableObject); }
-if (typeof Comment !== "undefined") { clang.initType(Comment, 'browser.dom.Comment', clang.Object, CharacterData); clang.inheritProto(Comment, clang.IdentifiableObject); }
-if (typeof DOMConfiguration !== "undefined") { clang.initType(DOMConfiguration, 'browser.dom.DOMConfiguration', clang.Object); clang.inheritProto(DOMConfiguration, clang.IdentifiableObject); }
-if (typeof DOMError !== "undefined") { clang.initType(DOMError, 'browser.dom.DOMError', clang.Object); clang.inheritProto(DOMError, clang.IdentifiableObject); }
-if (typeof DOMErrorHandler !== "undefined") { clang.initType(DOMErrorHandler, 'browser.dom.DOMErrorHandler', clang.Object); clang.inheritProto(DOMErrorHandler, clang.IdentifiableObject); }
-if (typeof DOMException !== "undefined") { clang.initType(DOMException, 'browser.dom.DOMException', clang.Object); clang.inheritProto(DOMException, clang.IdentifiableObject); }
-if (typeof DOMImplementation !== "undefined") { clang.initType(DOMImplementation, 'browser.dom.DOMImplementation', clang.Object); clang.inheritProto(DOMImplementation, clang.IdentifiableObject); }
-if (typeof DOMImplementationList !== "undefined") { clang.initType(DOMImplementationList, 'browser.dom.DOMImplementationList', clang.Object); clang.inheritProto(DOMImplementationList, clang.IdentifiableObject); }
-if (typeof DOMImplementationSource !== "undefined") { clang.initType(DOMImplementationSource, 'browser.dom.DOMImplementationSource', clang.Object); clang.inheritProto(DOMImplementationSource, clang.IdentifiableObject); }
-if (typeof DOMLocator !== "undefined") { clang.initType(DOMLocator, 'browser.dom.DOMLocator', clang.Object); clang.inheritProto(DOMLocator, clang.IdentifiableObject); }
-if (typeof DOMStringList !== "undefined") { clang.initType(DOMStringList, 'browser.dom.DOMStringList', clang.Object); clang.inheritProto(DOMStringList, clang.IdentifiableObject); }
-if (typeof DocumentType !== "undefined") { clang.initType(DocumentType, 'browser.dom.DocumentType', clang.Object, Node); clang.inheritProto(DocumentType, clang.IdentifiableObject); }
-if (typeof DocumentFragment !== "undefined") { clang.initType(DocumentFragment, 'browser.dom.DocumentFragment', clang.Object, Node); clang.inheritProto(DocumentFragment, clang.IdentifiableObject); }
-if (typeof ProcessingInstruction !== "undefined") { clang.initType(ProcessingInstruction, 'browser.dom.ProcessingInstruction', clang.Object, Node); clang.inheritProto(ProcessingInstruction, clang.IdentifiableObject); }
-if (typeof EntityReference !== "undefined") { clang.initType(EntityReference, 'browser.dom.EntityReference', clang.Object, Node); clang.inheritProto(EntityReference, clang.IdentifiableObject); }
-if (typeof NodeList !== "undefined") { clang.initType(NodeList, 'browser.dom.NodeList', clang.Object); clang.inheritProto(NodeList, clang.IdentifiableObject); }
-if (typeof Document !== "undefined") { clang.initType(Document, 'browser.dom.Document', clang.Object, Node); clang.inheritProto(Document, clang.IdentifiableObject); }
-if (typeof NamedNodeMap !== "undefined") { clang.initType(NamedNodeMap, 'browser.dom.NamedNodeMap', clang.Object); clang.inheritProto(NamedNodeMap, clang.IdentifiableObject); }
-if (typeof Entity !== "undefined") { clang.initType(Entity, 'browser.dom.Entity', clang.Object, Node); clang.inheritProto(Entity, clang.IdentifiableObject); }
-if (typeof NameList !== "undefined") { clang.initType(NameList, 'browser.dom.NameList', clang.Object); clang.inheritProto(NameList, clang.IdentifiableObject); }
-if (typeof Notation !== "undefined") { clang.initType(Notation, 'browser.dom.Notation', clang.Object, Node); clang.inheritProto(Notation, clang.IdentifiableObject); }
-if (typeof UserDataHandler !== "undefined") { clang.initType(UserDataHandler, 'browser.dom.UserDataHandler', clang.Object); clang.inheritProto(UserDataHandler, clang.IdentifiableObject); }
-if (typeof HTMLElement !== "undefined") { clang.initType(HTMLElement, 'browser.dom.HTMLElement', clang.Object, Element); clang.inheritProto(HTMLElement, clang.IdentifiableObject); }
-if (typeof HTMLAnchorElement !== "undefined") { clang.initType(HTMLAnchorElement, 'browser.dom.HTMLAnchorElement', clang.Object, HTMLElement); clang.inheritProto(HTMLAnchorElement, clang.IdentifiableObject); }
-if (typeof HTMLAppletElement !== "undefined") { clang.initType(HTMLAppletElement, 'browser.dom.HTMLAppletElement', clang.Object, HTMLElement); clang.inheritProto(HTMLAppletElement, clang.IdentifiableObject); }
-if (typeof HTMLAreaElement !== "undefined") { clang.initType(HTMLAreaElement, 'browser.dom.HTMLAreaElement', clang.Object, HTMLElement); clang.inheritProto(HTMLAreaElement, clang.IdentifiableObject); }
-if (typeof HTMLBRElement !== "undefined") { clang.initType(HTMLBRElement, 'browser.dom.HTMLBRElement', clang.Object, HTMLElement); clang.inheritProto(HTMLBRElement, clang.IdentifiableObject); }
-if (typeof HTMLBaseElement !== "undefined") { clang.initType(HTMLBaseElement, 'browser.dom.HTMLBaseElement', clang.Object, HTMLElement); clang.inheritProto(HTMLBaseElement, clang.IdentifiableObject); }
-if (typeof HTMLBaseFontElement !== "undefined") { clang.initType(HTMLBaseFontElement, 'browser.dom.HTMLBaseFontElement', clang.Object, HTMLElement); clang.inheritProto(HTMLBaseFontElement, clang.IdentifiableObject); }
-if (typeof HTMLBodyElement !== "undefined") { clang.initType(HTMLBodyElement, 'browser.dom.HTMLBodyElement', clang.Object, HTMLElement); clang.inheritProto(HTMLBodyElement, clang.IdentifiableObject); }
-if (typeof HTMLFormElement !== "undefined") { clang.initType(HTMLFormElement, 'browser.dom.HTMLFormElement', clang.Object, HTMLElement); clang.inheritProto(HTMLFormElement, clang.IdentifiableObject); }
-if (typeof HTMLButtonElement !== "undefined") { clang.initType(HTMLButtonElement, 'browser.dom.HTMLButtonElement', clang.Object, HTMLElement); clang.inheritProto(HTMLButtonElement, clang.IdentifiableObject); }
-if (typeof HTMLCollection !== "undefined") { clang.initType(HTMLCollection, 'browser.dom.HTMLCollection', clang.Object); clang.inheritProto(HTMLCollection, clang.IdentifiableObject); }
-if (typeof HTMLDListElement !== "undefined") { clang.initType(HTMLDListElement, 'browser.dom.HTMLDListElement', clang.Object, HTMLElement); clang.inheritProto(HTMLDListElement, clang.IdentifiableObject); }
-if (typeof HTMLDocument !== "undefined") { clang.initType(HTMLDocument, 'browser.dom.HTMLDocument', clang.Object, Document); clang.inheritProto(HTMLDocument, clang.IdentifiableObject); }
-if (typeof HTMLDOMImplementation !== "undefined") { clang.initType(HTMLDOMImplementation, 'browser.dom.HTMLDOMImplementation', clang.Object, DOMImplementation); clang.inheritProto(HTMLDOMImplementation, clang.IdentifiableObject); }
-if (typeof HTMLDirectoryElement !== "undefined") { clang.initType(HTMLDirectoryElement, 'browser.dom.HTMLDirectoryElement', clang.Object, HTMLElement); clang.inheritProto(HTMLDirectoryElement, clang.IdentifiableObject); }
-if (typeof HTMLDivElement !== "undefined") { clang.initType(HTMLDivElement, 'browser.dom.HTMLDivElement', clang.Object, HTMLElement); clang.inheritProto(HTMLDivElement, clang.IdentifiableObject); }
-if (typeof HTMLFieldSetElement !== "undefined") { clang.initType(HTMLFieldSetElement, 'browser.dom.HTMLFieldSetElement', clang.Object, HTMLElement); clang.inheritProto(HTMLFieldSetElement, clang.IdentifiableObject); }
-if (typeof HTMLFontElement !== "undefined") { clang.initType(HTMLFontElement, 'browser.dom.HTMLFontElement', clang.Object, HTMLElement); clang.inheritProto(HTMLFontElement, clang.IdentifiableObject); }
-if (typeof HTMLFrameElement !== "undefined") { clang.initType(HTMLFrameElement, 'browser.dom.HTMLFrameElement', clang.Object, HTMLElement); clang.inheritProto(HTMLFrameElement, clang.IdentifiableObject); }
-if (typeof HTMLFrameSetElement !== "undefined") { clang.initType(HTMLFrameSetElement, 'browser.dom.HTMLFrameSetElement', clang.Object, HTMLElement); clang.inheritProto(HTMLFrameSetElement, clang.IdentifiableObject); }
-if (typeof HTMLHRElement !== "undefined") { clang.initType(HTMLHRElement, 'browser.dom.HTMLHRElement', clang.Object, HTMLElement); clang.inheritProto(HTMLHRElement, clang.IdentifiableObject); }
-if (typeof HTMLHeadElement !== "undefined") { clang.initType(HTMLHeadElement, 'browser.dom.HTMLHeadElement', clang.Object, HTMLElement); clang.inheritProto(HTMLHeadElement, clang.IdentifiableObject); }
-if (typeof HTMLHeadingElement !== "undefined") { clang.initType(HTMLHeadingElement, 'browser.dom.HTMLHeadingElement', clang.Object, HTMLElement); clang.inheritProto(HTMLHeadingElement, clang.IdentifiableObject); }
-if (typeof HTMLHtmlElement !== "undefined") { clang.initType(HTMLHtmlElement, 'browser.dom.HTMLHtmlElement', clang.Object, HTMLElement); clang.inheritProto(HTMLHtmlElement, clang.IdentifiableObject); }
-if (typeof HTMLIFrameElement !== "undefined") { clang.initType(HTMLIFrameElement, 'browser.dom.HTMLIFrameElement', clang.Object, HTMLElement); clang.inheritProto(HTMLIFrameElement, clang.IdentifiableObject); }
-if (typeof HTMLImageElement !== "undefined") { clang.initType(HTMLImageElement, 'browser.dom.HTMLImageElement', clang.Object, HTMLElement); clang.inheritProto(HTMLImageElement, clang.IdentifiableObject); }
-if (typeof HTMLInputElement !== "undefined") { clang.initType(HTMLInputElement, 'browser.dom.HTMLInputElement', clang.Object, HTMLElement); clang.inheritProto(HTMLInputElement, clang.IdentifiableObject); }
-if (typeof HTMLIsIndexElement !== "undefined") { clang.initType(HTMLIsIndexElement, 'browser.dom.HTMLIsIndexElement', clang.Object, HTMLElement); clang.inheritProto(HTMLIsIndexElement, clang.IdentifiableObject); }
-if (typeof HTMLLIElement !== "undefined") { clang.initType(HTMLLIElement, 'browser.dom.HTMLLIElement', clang.Object, HTMLElement); clang.inheritProto(HTMLLIElement, clang.IdentifiableObject); }
-if (typeof HTMLLabelElement !== "undefined") { clang.initType(HTMLLabelElement, 'browser.dom.HTMLLabelElement', clang.Object, HTMLElement); clang.inheritProto(HTMLLabelElement, clang.IdentifiableObject); }
-if (typeof HTMLLegendElement !== "undefined") { clang.initType(HTMLLegendElement, 'browser.dom.HTMLLegendElement', clang.Object, HTMLElement); clang.inheritProto(HTMLLegendElement, clang.IdentifiableObject); }
-if (typeof HTMLLinkElement !== "undefined") { clang.initType(HTMLLinkElement, 'browser.dom.HTMLLinkElement', clang.Object, HTMLElement); clang.inheritProto(HTMLLinkElement, clang.IdentifiableObject); }
-if (typeof HTMLMapElement !== "undefined") { clang.initType(HTMLMapElement, 'browser.dom.HTMLMapElement', clang.Object, HTMLElement); clang.inheritProto(HTMLMapElement, clang.IdentifiableObject); }
-if (typeof HTMLMenuElement !== "undefined") { clang.initType(HTMLMenuElement, 'browser.dom.HTMLMenuElement', clang.Object, HTMLElement); clang.inheritProto(HTMLMenuElement, clang.IdentifiableObject); }
-if (typeof HTMLMetaElement !== "undefined") { clang.initType(HTMLMetaElement, 'browser.dom.HTMLMetaElement', clang.Object, HTMLElement); clang.inheritProto(HTMLMetaElement, clang.IdentifiableObject); }
-if (typeof HTMLModElement !== "undefined") { clang.initType(HTMLModElement, 'browser.dom.HTMLModElement', clang.Object, HTMLElement); clang.inheritProto(HTMLModElement, clang.IdentifiableObject); }
-if (typeof HTMLOListElement !== "undefined") { clang.initType(HTMLOListElement, 'browser.dom.HTMLOListElement', clang.Object, HTMLElement); clang.inheritProto(HTMLOListElement, clang.IdentifiableObject); }
-if (typeof HTMLObjectElement !== "undefined") { clang.initType(HTMLObjectElement, 'browser.dom.HTMLObjectElement', clang.Object, HTMLElement); clang.inheritProto(HTMLObjectElement, clang.IdentifiableObject); }
-if (typeof HTMLOptGroupElement !== "undefined") { clang.initType(HTMLOptGroupElement, 'browser.dom.HTMLOptGroupElement', clang.Object, HTMLElement); clang.inheritProto(HTMLOptGroupElement, clang.IdentifiableObject); }
-if (typeof HTMLOptionElement !== "undefined") { clang.initType(HTMLOptionElement, 'browser.dom.HTMLOptionElement', clang.Object, HTMLElement); clang.inheritProto(HTMLOptionElement, clang.IdentifiableObject); }
-if (typeof HTMLParagraphElement !== "undefined") { clang.initType(HTMLParagraphElement, 'browser.dom.HTMLParagraphElement', clang.Object, HTMLElement); clang.inheritProto(HTMLParagraphElement, clang.IdentifiableObject); }
-if (typeof HTMLParamElement !== "undefined") { clang.initType(HTMLParamElement, 'browser.dom.HTMLParamElement', clang.Object, HTMLElement); clang.inheritProto(HTMLParamElement, clang.IdentifiableObject); }
-if (typeof HTMLPreElement !== "undefined") { clang.initType(HTMLPreElement, 'browser.dom.HTMLPreElement', clang.Object, HTMLElement); clang.inheritProto(HTMLPreElement, clang.IdentifiableObject); }
-if (typeof HTMLQuoteElement !== "undefined") { clang.initType(HTMLQuoteElement, 'browser.dom.HTMLQuoteElement', clang.Object, HTMLElement); clang.inheritProto(HTMLQuoteElement, clang.IdentifiableObject); }
-if (typeof HTMLScriptElement !== "undefined") { clang.initType(HTMLScriptElement, 'browser.dom.HTMLScriptElement', clang.Object, HTMLElement); clang.inheritProto(HTMLScriptElement, clang.IdentifiableObject); }
-if (typeof HTMLSelectElement !== "undefined") { clang.initType(HTMLSelectElement, 'browser.dom.HTMLSelectElement', clang.Object, HTMLElement); clang.inheritProto(HTMLSelectElement, clang.IdentifiableObject); }
-if (typeof HTMLStyleElement !== "undefined") { clang.initType(HTMLStyleElement, 'browser.dom.HTMLStyleElement', clang.Object, HTMLElement); clang.inheritProto(HTMLStyleElement, clang.IdentifiableObject); }
-if (typeof HTMLTableCaptionElement !== "undefined") { clang.initType(HTMLTableCaptionElement, 'browser.dom.HTMLTableCaptionElement', clang.Object, HTMLElement); clang.inheritProto(HTMLTableCaptionElement, clang.IdentifiableObject); }
-if (typeof HTMLTableCellElement !== "undefined") { clang.initType(HTMLTableCellElement, 'browser.dom.HTMLTableCellElement', clang.Object, HTMLElement); clang.inheritProto(HTMLTableCellElement, clang.IdentifiableObject); }
-if (typeof HTMLTableColElement !== "undefined") { clang.initType(HTMLTableColElement, 'browser.dom.HTMLTableColElement', clang.Object, HTMLElement); clang.inheritProto(HTMLTableColElement, clang.IdentifiableObject); }
-if (typeof HTMLTableSectionElement !== "undefined") { clang.initType(HTMLTableSectionElement, 'browser.dom.HTMLTableSectionElement', clang.Object, HTMLElement); clang.inheritProto(HTMLTableSectionElement, clang.IdentifiableObject); }
-if (typeof HTMLTableElement !== "undefined") { clang.initType(HTMLTableElement, 'browser.dom.HTMLTableElement', clang.Object, HTMLElement); clang.inheritProto(HTMLTableElement, clang.IdentifiableObject); }
-if (typeof HTMLTableRowElement !== "undefined") { clang.initType(HTMLTableRowElement, 'browser.dom.HTMLTableRowElement', clang.Object, HTMLElement); clang.inheritProto(HTMLTableRowElement, clang.IdentifiableObject); }
-if (typeof HTMLTextAreaElement !== "undefined") { clang.initType(HTMLTextAreaElement, 'browser.dom.HTMLTextAreaElement', clang.Object, HTMLElement); clang.inheritProto(HTMLTextAreaElement, clang.IdentifiableObject); }
-if (typeof HTMLTitleElement !== "undefined") { clang.initType(HTMLTitleElement, 'browser.dom.HTMLTitleElement', clang.Object, HTMLElement); clang.inheritProto(HTMLTitleElement, clang.IdentifiableObject); }
-if (typeof HTMLUListElement !== "undefined") { clang.initType(HTMLUListElement, 'browser.dom.HTMLUListElement', clang.Object, HTMLElement); clang.inheritProto(HTMLUListElement, clang.IdentifiableObject); }
+function initBrowserType(nativeType, name) {
+    var type = function(){}
+    var args = [].slice.call(arguments, 0);
+    args.unshift(type);
+    clang.initExistingType.apply(this, args);
+    args = [].slice.call(arguments, 2);
+    args.unshift(type);
+    clang.inheritProtoI.apply(this, args);
+    return type;
+}
+
+if (typeof Node !== "undefined") { exports.Node=initBrowserType(Node, 'browser.dom.Node', clang.IdentifiableObject); }
+if (typeof Element !== "undefined") { exports.Element=initBrowserType(Element, 'browser.dom.Element', exports.Node); }
+if (typeof TypeInfo !== "undefined") { exports.TypeInfo=initBrowserType(TypeInfo, 'browser.dom.TypeInfo', clang.IdentifiableObject); }
+if (typeof Attr !== "undefined") { exports.Attr=initBrowserType(Attr, 'browser.dom.Attr', exports.Node); }
+if (typeof CharacterData !== "undefined") { exports.CharacterData=initBrowserType(CharacterData, 'browser.dom.CharacterData', exports.Node); }
+if (typeof Text !== "undefined") { exports.Text=initBrowserType(Text, 'browser.dom.Text', exports.CharacterData); }
+if (typeof CDATASection !== "undefined") { exports.CDATASection=initBrowserType(CDATASection, 'browser.dom.CDATASection', exports.Text); }
+if (typeof Comment !== "undefined") { exports.Comment=initBrowserType(Comment, 'browser.dom.Comment', exports.CharacterData); }
+if (typeof DOMConfiguration !== "undefined") { exports.DOMConfiguration=initBrowserType(DOMConfiguration, 'browser.dom.DOMConfiguration', clang.IdentifiableObject); }
+if (typeof DOMError !== "undefined") { exports.DOMError=initBrowserType(DOMError, 'browser.dom.DOMError', clang.IdentifiableObject); }
+if (typeof DOMErrorHandler !== "undefined") { exports.DOMErrorHandler=initBrowserType(DOMErrorHandler, 'browser.dom.DOMErrorHandler', clang.IdentifiableObject); }
+if (typeof DOMException !== "undefined") { exports.DOMException=initBrowserType(DOMException, 'browser.dom.DOMException', clang.IdentifiableObject); }
+if (typeof DOMImplementation !== "undefined") { exports.DOMImplementation=initBrowserType(DOMImplementation, 'browser.dom.DOMImplementation', clang.IdentifiableObject); }
+if (typeof DOMImplementationList !== "undefined") { exports.DOMImplementationList=initBrowserType(DOMImplementationList, 'browser.dom.DOMImplementationList', clang.IdentifiableObject); }
+if (typeof DOMImplementationSource !== "undefined") { exports.DOMImplementationSource=initBrowserType(DOMImplementationSource, 'browser.dom.DOMImplementationSource', clang.IdentifiableObject); }
+if (typeof DOMLocator !== "undefined") { exports.DOMLocator=initBrowserType(DOMLocator, 'browser.dom.DOMLocator', clang.IdentifiableObject); }
+if (typeof DOMStringList !== "undefined") { exports.DOMStringList=initBrowserType(DOMStringList, 'browser.dom.DOMStringList', clang.IdentifiableObject); }
+if (typeof DocumentType !== "undefined") { exports.DocumentType=initBrowserType(DocumentType, 'browser.dom.DocumentType', exports.Node); }
+if (typeof DocumentFragment !== "undefined") { exports.DocumentFragment=initBrowserType(DocumentFragment, 'browser.dom.DocumentFragment', exports.Node); }
+if (typeof ProcessingInstruction !== "undefined") { exports.ProcessingInstruction=initBrowserType(ProcessingInstruction, 'browser.dom.ProcessingInstruction', exports.Node); }
+if (typeof EntityReference !== "undefined") { exports.EntityReference=initBrowserType(EntityReference, 'browser.dom.EntityReference', exports.Node); }
+if (typeof NodeList !== "undefined") { exports.NodeList=initBrowserType(NodeList, 'browser.dom.NodeList', clang.IdentifiableObject); }
+if (typeof Document !== "undefined") { exports.Document=initBrowserType(Document, 'browser.dom.Document', exports.Node); }
+if (typeof NamedNodeMap !== "undefined") { exports.NamedNodeMap=initBrowserType(NamedNodeMap, 'browser.dom.NamedNodeMap', clang.IdentifiableObject); }
+if (typeof Entity !== "undefined") { exports.Entity=initBrowserType(Entity, 'browser.dom.Entity', exports.Node); }
+if (typeof NameList !== "undefined") { exports.NameList=initBrowserType(NameList, 'browser.dom.NameList', clang.IdentifiableObject); }
+if (typeof Notation !== "undefined") { exports.Notation=initBrowserType(Notation, 'browser.dom.Notation', exports.Node); }
+if (typeof UserDataHandler !== "undefined") { exports.UserDataHandler=initBrowserType(UserDataHandler, 'browser.dom.UserDataHandler', clang.IdentifiableObject); }
+if (typeof HTMLElement !== "undefined") { exports.HTMLElement=initBrowserType(HTMLElement, 'browser.dom.HTMLElement', exports.Element); }
+if (typeof HTMLAnchorElement !== "undefined") { exports.HTMLAnchorElement=initBrowserType(HTMLAnchorElement, 'browser.dom.HTMLAnchorElement', exports.HTMLElement); }
+if (typeof HTMLAppletElement !== "undefined") { exports.HTMLAppletElement=initBrowserType(HTMLAppletElement, 'browser.dom.HTMLAppletElement', exports.HTMLElement); }
+if (typeof HTMLAreaElement !== "undefined") { exports.HTMLAreaElement=initBrowserType(HTMLAreaElement, 'browser.dom.HTMLAreaElement', exports.HTMLElement); }
+if (typeof HTMLBRElement !== "undefined") { exports.HTMLBRElement=initBrowserType(HTMLBRElement, 'browser.dom.HTMLBRElement', exports.HTMLElement); }
+if (typeof HTMLBaseElement !== "undefined") { exports.HTMLBaseElement=initBrowserType(HTMLBaseElement, 'browser.dom.HTMLBaseElement', exports.HTMLElement); }
+if (typeof HTMLBaseFontElement !== "undefined") { exports.HTMLBaseFontElement=initBrowserType(HTMLBaseFontElement, 'browser.dom.HTMLBaseFontElement', exports.HTMLElement); }
+if (typeof HTMLBodyElement !== "undefined") { exports.HTMLBodyElement=initBrowserType(HTMLBodyElement, 'browser.dom.HTMLBodyElement', exports.HTMLElement); }
+if (typeof HTMLFormElement !== "undefined") { exports.HTMLFormElement=initBrowserType(HTMLFormElement, 'browser.dom.HTMLFormElement', exports.HTMLElement); }
+if (typeof HTMLButtonElement !== "undefined") { exports.HTMLButtonElement=initBrowserType(HTMLButtonElement, 'browser.dom.HTMLButtonElement', exports.HTMLElement); }
+if (typeof HTMLCollection !== "undefined") { exports.HTMLCollection=initBrowserType(HTMLCollection, 'browser.dom.HTMLCollection', clang.IdentifiableObject); }
+if (typeof HTMLDListElement !== "undefined") { exports.HTMLDListElement=initBrowserType(HTMLDListElement, 'browser.dom.HTMLDListElement', exports.HTMLElement); }
+if (typeof HTMLDocument !== "undefined") { exports.HTMLDocument=initBrowserType(HTMLDocument, 'browser.dom.HTMLDocument', exports.Document); }
+if (typeof HTMLDOMImplementation !== "undefined") { exports.HTMLDOMImplementation=initBrowserType(HTMLDOMImplementation, 'browser.dom.HTMLDOMImplementation', exports.DOMImplementation); }
+if (typeof HTMLDirectoryElement !== "undefined") { exports.HTMLDirectoryElement=initBrowserType(HTMLDirectoryElement, 'browser.dom.HTMLDirectoryElement', exports.HTMLElement); }
+if (typeof HTMLDivElement !== "undefined") { exports.HTMLDivElement=initBrowserType(HTMLDivElement, 'browser.dom.HTMLDivElement', exports.HTMLElement); }
+if (typeof HTMLFieldSetElement !== "undefined") { exports.HTMLFieldSetElement=initBrowserType(HTMLFieldSetElement, 'browser.dom.HTMLFieldSetElement', exports.HTMLElement); }
+if (typeof HTMLFontElement !== "undefined") { exports.HTMLFontElement=initBrowserType(HTMLFontElement, 'browser.dom.HTMLFontElement', exports.HTMLElement); }
+if (typeof HTMLFrameElement !== "undefined") { exports.HTMLFrameElement=initBrowserType(HTMLFrameElement, 'browser.dom.HTMLFrameElement', exports.HTMLElement); }
+if (typeof HTMLFrameSetElement !== "undefined") { exports.HTMLFrameSetElement=initBrowserType(HTMLFrameSetElement, 'browser.dom.HTMLFrameSetElement', exports.HTMLElement); }
+if (typeof HTMLHRElement !== "undefined") { exports.HTMLHRElement=initBrowserType(HTMLHRElement, 'browser.dom.HTMLHRElement', exports.HTMLElement); }
+if (typeof HTMLHeadElement !== "undefined") { exports.HTMLHeadElement=initBrowserType(HTMLHeadElement, 'browser.dom.HTMLHeadElement', exports.HTMLElement); }
+if (typeof HTMLHeadingElement !== "undefined") { exports.HTMLHeadingElement=initBrowserType(HTMLHeadingElement, 'browser.dom.HTMLHeadingElement', exports.HTMLElement); }
+if (typeof HTMLHtmlElement !== "undefined") { exports.HTMLHtmlElement=initBrowserType(HTMLHtmlElement, 'browser.dom.HTMLHtmlElement', exports.HTMLElement); }
+if (typeof HTMLIFrameElement !== "undefined") { exports.HTMLIFrameElement=initBrowserType(HTMLIFrameElement, 'browser.dom.HTMLIFrameElement', exports.HTMLElement); }
+if (typeof HTMLImageElement !== "undefined") { exports.HTMLImageElement=initBrowserType(HTMLImageElement, 'browser.dom.HTMLImageElement', exports.HTMLElement); }
+if (typeof HTMLInputElement !== "undefined") { exports.HTMLInputElement=initBrowserType(HTMLInputElement, 'browser.dom.HTMLInputElement', exports.HTMLElement); }
+if (typeof HTMLIsIndexElement !== "undefined") { exports.HTMLIsIndexElement=initBrowserType(HTMLIsIndexElement, 'browser.dom.HTMLIsIndexElement', exports.HTMLElement); }
+if (typeof HTMLLIElement !== "undefined") { exports.HTMLLIElement=initBrowserType(HTMLLIElement, 'browser.dom.HTMLLIElement', exports.HTMLElement); }
+if (typeof HTMLLabelElement !== "undefined") { exports.HTMLLabelElement=initBrowserType(HTMLLabelElement, 'browser.dom.HTMLLabelElement', exports.HTMLElement); }
+if (typeof HTMLLegendElement !== "undefined") { exports.HTMLLegendElement=initBrowserType(HTMLLegendElement, 'browser.dom.HTMLLegendElement', exports.HTMLElement); }
+if (typeof HTMLLinkElement !== "undefined") { exports.HTMLLinkElement=initBrowserType(HTMLLinkElement, 'browser.dom.HTMLLinkElement', exports.HTMLElement); }
+if (typeof HTMLMapElement !== "undefined") { exports.HTMLMapElement=initBrowserType(HTMLMapElement, 'browser.dom.HTMLMapElement', exports.HTMLElement); }
+if (typeof HTMLMenuElement !== "undefined") { exports.HTMLMenuElement=initBrowserType(HTMLMenuElement, 'browser.dom.HTMLMenuElement', exports.HTMLElement); }
+if (typeof HTMLMetaElement !== "undefined") { exports.HTMLMetaElement=initBrowserType(HTMLMetaElement, 'browser.dom.HTMLMetaElement', exports.HTMLElement); }
+if (typeof HTMLModElement !== "undefined") { exports.HTMLModElement=initBrowserType(HTMLModElement, 'browser.dom.HTMLModElement', exports.HTMLElement); }
+if (typeof HTMLOListElement !== "undefined") { exports.HTMLOListElement=initBrowserType(HTMLOListElement, 'browser.dom.HTMLOListElement', exports.HTMLElement); }
+if (typeof HTMLObjectElement !== "undefined") { exports.HTMLObjectElement=initBrowserType(HTMLObjectElement, 'browser.dom.HTMLObjectElement', exports.HTMLElement); }
+if (typeof HTMLOptGroupElement !== "undefined") { exports.HTMLOptGroupElement=initBrowserType(HTMLOptGroupElement, 'browser.dom.HTMLOptGroupElement', exports.HTMLElement); }
+if (typeof HTMLOptionElement !== "undefined") { exports.HTMLOptionElement=initBrowserType(HTMLOptionElement, 'browser.dom.HTMLOptionElement', exports.HTMLElement); }
+if (typeof HTMLParagraphElement !== "undefined") { exports.HTMLParagraphElement=initBrowserType(HTMLParagraphElement, 'browser.dom.HTMLParagraphElement', exports.HTMLElement); }
+if (typeof HTMLParamElement !== "undefined") { exports.HTMLParamElement=initBrowserType(HTMLParamElement, 'browser.dom.HTMLParamElement', exports.HTMLElement); }
+if (typeof HTMLPreElement !== "undefined") { exports.HTMLPreElement=initBrowserType(HTMLPreElement, 'browser.dom.HTMLPreElement', exports.HTMLElement); }
+if (typeof HTMLQuoteElement !== "undefined") { exports.HTMLQuoteElement=initBrowserType(HTMLQuoteElement, 'browser.dom.HTMLQuoteElement', exports.HTMLElement); }
+if (typeof HTMLScriptElement !== "undefined") { exports.HTMLScriptElement=initBrowserType(HTMLScriptElement, 'browser.dom.HTMLScriptElement', exports.HTMLElement); }
+if (typeof HTMLSelectElement !== "undefined") { exports.HTMLSelectElement=initBrowserType(HTMLSelectElement, 'browser.dom.HTMLSelectElement', exports.HTMLElement); }
+if (typeof HTMLStyleElement !== "undefined") { exports.HTMLStyleElement=initBrowserType(HTMLStyleElement, 'browser.dom.HTMLStyleElement', exports.HTMLElement); }
+if (typeof HTMLTableCaptionElement !== "undefined") { exports.HTMLTableCaptionElement=initBrowserType(HTMLTableCaptionElement, 'browser.dom.HTMLTableCaptionElement', exports.HTMLElement); }
+if (typeof HTMLTableCellElement !== "undefined") { exports.HTMLTableCellElement=initBrowserType(HTMLTableCellElement, 'browser.dom.HTMLTableCellElement', exports.HTMLElement); }
+if (typeof HTMLTableColElement !== "undefined") { exports.HTMLTableColElement=initBrowserType(HTMLTableColElement, 'browser.dom.HTMLTableColElement', exports.HTMLElement); }
+if (typeof HTMLTableSectionElement !== "undefined") { exports.HTMLTableSectionElement=initBrowserType(HTMLTableSectionElement, 'browser.dom.HTMLTableSectionElement', exports.HTMLElement); }
+if (typeof HTMLTableElement !== "undefined") { exports.HTMLTableElement=initBrowserType(HTMLTableElement, 'browser.dom.HTMLTableElement', exports.HTMLElement); }
+if (typeof HTMLTableRowElement !== "undefined") { exports.HTMLTableRowElement=initBrowserType(HTMLTableRowElement, 'browser.dom.HTMLTableRowElement', exports.HTMLElement); }
+if (typeof HTMLTextAreaElement !== "undefined") { exports.HTMLTextAreaElement=initBrowserType(HTMLTextAreaElement, 'browser.dom.HTMLTextAreaElement', exports.HTMLElement); }
+if (typeof HTMLTitleElement !== "undefined") { exports.HTMLTitleElement=initBrowserType(HTMLTitleElement, 'browser.dom.HTMLTitleElement', exports.HTMLElement); }
+if (typeof HTMLUListElement !== "undefined") { exports.HTMLUListElement=initBrowserType(HTMLUListElement, 'browser.dom.HTMLUListElement', exports.HTMLElement); }
 
     });
 }(typeof define==='function' && define.amd ? define : function (factory) {
