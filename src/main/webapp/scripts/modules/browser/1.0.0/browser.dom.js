@@ -3,45 +3,54 @@
     	
 var clang=require('ceylon/language/0.2/ceylon.language');
 
-function initBrowserType(nativeType, name) {
+function getHash() {
+    if (this.identifiableObjectID === undefined) {
+        clang.IdentifiableObject.call(this, this);
+    }
+    return this.identifiableObjectID;
+}
+function initBrowserType(nativeType, name, superType) {
     var type = function(){}
-    var args = [].slice.call(arguments, 0);
-    args.unshift(type);
-    clang.initExistingType.apply(this, args);
-    args = [].slice.call(arguments, 2);
-    args.unshift(type);
-    clang.inheritProtoI.apply(this, args);
+    if (superType === undefined) {
+        clang.initExistingType(type, nativeType, name, clang.IdentifiableObject);
+    } else {
+        var args = [].slice.call(arguments, 0);
+        args.unshift(type);
+        clang.initExistingType.apply(this, args);
+    }
+    clang.inheritProtoI(type, clang.IdentifiableObject);
+    nativeType.prototype.getHash = getHash;
     return type;
 }
 
-if (typeof Node !== "undefined") { exports.Node=initBrowserType(Node, 'browser.dom.Node', clang.IdentifiableObject); }
+if (typeof Node !== "undefined") { exports.Node=initBrowserType(Node, 'browser.dom.Node'); }
 if (typeof Element !== "undefined") { exports.Element=initBrowserType(Element, 'browser.dom.Element', exports.Node); }
-if (typeof TypeInfo !== "undefined") { exports.TypeInfo=initBrowserType(TypeInfo, 'browser.dom.TypeInfo', clang.IdentifiableObject); }
+if (typeof TypeInfo !== "undefined") { exports.TypeInfo=initBrowserType(TypeInfo, 'browser.dom.TypeInfo'); }
 if (typeof Attr !== "undefined") { exports.Attr=initBrowserType(Attr, 'browser.dom.Attr', exports.Node); }
 if (typeof CharacterData !== "undefined") { exports.CharacterData=initBrowserType(CharacterData, 'browser.dom.CharacterData', exports.Node); }
 if (typeof Text !== "undefined") { exports.Text=initBrowserType(Text, 'browser.dom.Text', exports.CharacterData); }
 if (typeof CDATASection !== "undefined") { exports.CDATASection=initBrowserType(CDATASection, 'browser.dom.CDATASection', exports.Text); }
 if (typeof Comment !== "undefined") { exports.Comment=initBrowserType(Comment, 'browser.dom.Comment', exports.CharacterData); }
-if (typeof DOMConfiguration !== "undefined") { exports.DOMConfiguration=initBrowserType(DOMConfiguration, 'browser.dom.DOMConfiguration', clang.IdentifiableObject); }
-if (typeof DOMError !== "undefined") { exports.DOMError=initBrowserType(DOMError, 'browser.dom.DOMError', clang.IdentifiableObject); }
-if (typeof DOMErrorHandler !== "undefined") { exports.DOMErrorHandler=initBrowserType(DOMErrorHandler, 'browser.dom.DOMErrorHandler', clang.IdentifiableObject); }
-if (typeof DOMException !== "undefined") { exports.DOMException=initBrowserType(DOMException, 'browser.dom.DOMException', clang.IdentifiableObject); }
-if (typeof DOMImplementation !== "undefined") { exports.DOMImplementation=initBrowserType(DOMImplementation, 'browser.dom.DOMImplementation', clang.IdentifiableObject); }
-if (typeof DOMImplementationList !== "undefined") { exports.DOMImplementationList=initBrowserType(DOMImplementationList, 'browser.dom.DOMImplementationList', clang.IdentifiableObject); }
-if (typeof DOMImplementationSource !== "undefined") { exports.DOMImplementationSource=initBrowserType(DOMImplementationSource, 'browser.dom.DOMImplementationSource', clang.IdentifiableObject); }
-if (typeof DOMLocator !== "undefined") { exports.DOMLocator=initBrowserType(DOMLocator, 'browser.dom.DOMLocator', clang.IdentifiableObject); }
-if (typeof DOMStringList !== "undefined") { exports.DOMStringList=initBrowserType(DOMStringList, 'browser.dom.DOMStringList', clang.IdentifiableObject); }
+if (typeof DOMConfiguration !== "undefined") { exports.DOMConfiguration=initBrowserType(DOMConfiguration, 'browser.dom.DOMConfiguration'); }
+if (typeof DOMError !== "undefined") { exports.DOMError=initBrowserType(DOMError, 'browser.dom.DOMError'); }
+if (typeof DOMErrorHandler !== "undefined") { exports.DOMErrorHandler=initBrowserType(DOMErrorHandler, 'browser.dom.DOMErrorHandler'); }
+if (typeof DOMException !== "undefined") { exports.DOMException=initBrowserType(DOMException, 'browser.dom.DOMException'); }
+if (typeof DOMImplementation !== "undefined") { exports.DOMImplementation=initBrowserType(DOMImplementation, 'browser.dom.DOMImplementation'); }
+if (typeof DOMImplementationList !== "undefined") { exports.DOMImplementationList=initBrowserType(DOMImplementationList, 'browser.dom.DOMImplementationList'); }
+if (typeof DOMImplementationSource !== "undefined") { exports.DOMImplementationSource=initBrowserType(DOMImplementationSource, 'browser.dom.DOMImplementationSource'); }
+if (typeof DOMLocator !== "undefined") { exports.DOMLocator=initBrowserType(DOMLocator, 'browser.dom.DOMLocator'); }
+if (typeof DOMStringList !== "undefined") { exports.DOMStringList=initBrowserType(DOMStringList, 'browser.dom.DOMStringList'); }
 if (typeof DocumentType !== "undefined") { exports.DocumentType=initBrowserType(DocumentType, 'browser.dom.DocumentType', exports.Node); }
 if (typeof DocumentFragment !== "undefined") { exports.DocumentFragment=initBrowserType(DocumentFragment, 'browser.dom.DocumentFragment', exports.Node); }
 if (typeof ProcessingInstruction !== "undefined") { exports.ProcessingInstruction=initBrowserType(ProcessingInstruction, 'browser.dom.ProcessingInstruction', exports.Node); }
 if (typeof EntityReference !== "undefined") { exports.EntityReference=initBrowserType(EntityReference, 'browser.dom.EntityReference', exports.Node); }
-if (typeof NodeList !== "undefined") { exports.NodeList=initBrowserType(NodeList, 'browser.dom.NodeList', clang.IdentifiableObject); }
+if (typeof NodeList !== "undefined") { exports.NodeList=initBrowserType(NodeList, 'browser.dom.NodeList'); }
 if (typeof Document !== "undefined") { exports.Document=initBrowserType(Document, 'browser.dom.Document', exports.Node); }
-if (typeof NamedNodeMap !== "undefined") { exports.NamedNodeMap=initBrowserType(NamedNodeMap, 'browser.dom.NamedNodeMap', clang.IdentifiableObject); }
+if (typeof NamedNodeMap !== "undefined") { exports.NamedNodeMap=initBrowserType(NamedNodeMap, 'browser.dom.NamedNodeMap'); }
 if (typeof Entity !== "undefined") { exports.Entity=initBrowserType(Entity, 'browser.dom.Entity', exports.Node); }
-if (typeof NameList !== "undefined") { exports.NameList=initBrowserType(NameList, 'browser.dom.NameList', clang.IdentifiableObject); }
+if (typeof NameList !== "undefined") { exports.NameList=initBrowserType(NameList, 'browser.dom.NameList'); }
 if (typeof Notation !== "undefined") { exports.Notation=initBrowserType(Notation, 'browser.dom.Notation', exports.Node); }
-if (typeof UserDataHandler !== "undefined") { exports.UserDataHandler=initBrowserType(UserDataHandler, 'browser.dom.UserDataHandler', clang.IdentifiableObject); }
+if (typeof UserDataHandler !== "undefined") { exports.UserDataHandler=initBrowserType(UserDataHandler, 'browser.dom.UserDataHandler'); }
 if (typeof HTMLElement !== "undefined") { exports.HTMLElement=initBrowserType(HTMLElement, 'browser.dom.HTMLElement', exports.Element); }
 if (typeof HTMLAnchorElement !== "undefined") { exports.HTMLAnchorElement=initBrowserType(HTMLAnchorElement, 'browser.dom.HTMLAnchorElement', exports.HTMLElement); }
 if (typeof HTMLAppletElement !== "undefined") { exports.HTMLAppletElement=initBrowserType(HTMLAppletElement, 'browser.dom.HTMLAppletElement', exports.HTMLElement); }
@@ -52,7 +61,7 @@ if (typeof HTMLBaseFontElement !== "undefined") { exports.HTMLBaseFontElement=in
 if (typeof HTMLBodyElement !== "undefined") { exports.HTMLBodyElement=initBrowserType(HTMLBodyElement, 'browser.dom.HTMLBodyElement', exports.HTMLElement); }
 if (typeof HTMLFormElement !== "undefined") { exports.HTMLFormElement=initBrowserType(HTMLFormElement, 'browser.dom.HTMLFormElement', exports.HTMLElement); }
 if (typeof HTMLButtonElement !== "undefined") { exports.HTMLButtonElement=initBrowserType(HTMLButtonElement, 'browser.dom.HTMLButtonElement', exports.HTMLElement); }
-if (typeof HTMLCollection !== "undefined") { exports.HTMLCollection=initBrowserType(HTMLCollection, 'browser.dom.HTMLCollection', clang.IdentifiableObject); }
+if (typeof HTMLCollection !== "undefined") { exports.HTMLCollection=initBrowserType(HTMLCollection, 'browser.dom.HTMLCollection'); }
 if (typeof HTMLDListElement !== "undefined") { exports.HTMLDListElement=initBrowserType(HTMLDListElement, 'browser.dom.HTMLDListElement', exports.HTMLElement); }
 if (typeof HTMLDocument !== "undefined") { exports.HTMLDocument=initBrowserType(HTMLDocument, 'browser.dom.HTMLDocument', exports.Document); }
 if (typeof HTMLDOMImplementation !== "undefined") { exports.HTMLDOMImplementation=initBrowserType(HTMLDOMImplementation, 'browser.dom.HTMLDOMImplementation', exports.DOMImplementation); }
