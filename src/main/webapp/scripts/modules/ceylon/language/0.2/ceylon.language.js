@@ -567,6 +567,15 @@ return EmptyArray();
 return ArrayList(elems.value);
 }
 }
+exports.makeArray=function(size, init) {
+if (size.value > 0) {
+var elems = [];
+for (var i = 0; i < size.value; i++) {
+elems.push(init(Integer(i)));
+}
+return ArrayList(elems);
+} else return EmptyArray();
+}
 function Summable(wat) {
 return wat;
 }
@@ -621,23 +630,50 @@ return that;
 initTypeProto(Integer, 'ceylon.language.Integer', Object$, Castable, Integral, Numeric);
 var Integer$proto = Integer.$$.prototype;
 Integer$proto.getString = function() { return String$(this.value.toString()) }
-Integer$proto.plus = function(other) { return Integer(this.value+other.value) }
-Integer$proto.minus = function(other) { return Integer(this.value-other.value) }
-Integer$proto.times = function(other) { return Integer(this.value*other.value) }
+Integer$proto.plus = function(other) {
+if (isOfType(other, 'ceylon.language.Integer') === $true) {
+return Integer(this.value+other.value);
+}
+return Float(this.value+other.value);
+}
+Integer$proto.minus = function(other) {
+if (isOfType(other, 'ceylon.language.Integer') === $true) {
+return Integer(this.value-other.value);
+}
+return Float(this.value-other.value);
+}
+Integer$proto.times = function(other) {
+if (isOfType(other, 'ceylon.language.Integer') === $true) {
+return Integer(this.value*other.value);
+}
+return Float(this.value*other.value);
+}
 Integer$proto.divided = function(other) {
 var exact = this.value/other.value;
+if (isOfType(other, 'ceylon.language.Integer') === $true) {
+if (other.value === 0) {
+throw Exception("Division by Zero");
+}
 return Integer((exact<0) ? Math.ceil(exact) : Math.floor(exact));
+}
+return Float((exact<0) ? Math.ceil(exact) : Math.floor(exact));
 }
 Integer$proto.remainder = function(other) { return Integer(this.value%other.value) }
 Integer$proto.power = function(exp) {
+var isint = isOfType(exp, 'ceylon.language.Integer') === $true;
+if (isint) {
 if (exp.getSign().value < 0) {
-if (this.value===1 || this.value===-1) {
-return this;
-}
+if (!(this.value===1 || this.value===-1)) {
 throw Exception(String$("Negative exponent"));
 }
+}
+}
 var exact = Math.pow(this.value, exp.value);
+if (isint) {
 return Integer((exact<0) ? Math.ceil(exact) : Math.floor(exact));
+} else {
+return Float(exact);
+}
 }
 Integer$proto.getNegativeValue = function() { return Integer(-this.value) }
 Integer$proto.getPositiveValue = function() { return this }
@@ -1101,6 +1137,7 @@ if ((first&0xfc00) !== 0xd800) {return first}
 var second = str.charCodeAt(index+1);
 return isNaN(second) ? first : ((first<<10) + second - 0x35fdc00);
 }
+exports.codepointFromString=codepointFromString;
 function Character(value) {
 var that = new Character.$$;
 that.value = value;
@@ -1369,21 +1406,27 @@ function nonempty(value) {
 return value === null || value === undefined ? $false : Boolean$(value.getEmpty() === $false);
 }
 function isOfType(obj, typeName) {
-if (obj === null) return Boolean$(typeName==="ceylon.language.Nothing" || typeName==="ceylon.language.Void");
+if (obj === null) {
+return Boolean$(typeName==="ceylon.language.Nothing" || typeName==="ceylon.language.Void");
+}
+if (typeof obj === 'function') {
+return Boolean$(typeName === 'ceylon.language.Callable');
+}
 var cons = obj.$$;
-if (cons === undefined) cons = obj.constructor.$$;
 if (cons === undefined) cons = obj.constructor;
 return Boolean$(typeName in cons.T$all);
 }
 function isOfTypes(obj, types) {
-if (obj===null) { //TODO check if this is right
+if (obj===null) {
 return types.l.indexOf('ceylon.language.Nothing')>=0 || types.l.indexOf('ceylon.language.Void')>=0;
+}
+if (typeof obj === 'function') {
+return Boolean$(types.l.indexOf('ceylon.language.Callable')>=0);
 }
 var unions = false;
 var inters = true;
 var _ints=false;
 var cons = obj.$$;
-if (cons === undefined) cons = obj.constructor.$$;
 if (cons === undefined) cons = obj.constructor;
 for (var i = 0; i < types.l.length; i++) {
 var t = types.l[i];
@@ -1405,8 +1448,10 @@ return _ints ? inters||unions : unions;
 function className(obj) {
 if (obj === null) return String$('ceylon.language.Nothing');
 var cons = obj.$$;
-if (cons === undefined) cons = obj.constructor.$$;
 if (cons === undefined) cons = obj.constructor;
+if (cons.T$name === undefined) {
+return String$('ceylon.language.Callable');
+}
 return String$(cons.T$name);
 }
 function identityHash(obj) {
