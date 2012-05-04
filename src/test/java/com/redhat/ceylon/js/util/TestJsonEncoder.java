@@ -1,4 +1,4 @@
-package com.redhat.ceylon.js.repl;
+package com.redhat.ceylon.js.util;
 
 import static org.junit.Assert.*;
 
