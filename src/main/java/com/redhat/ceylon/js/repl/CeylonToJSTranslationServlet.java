@@ -2,7 +2,6 @@ package com.redhat.ceylon.js.repl;
 
 import java.io.CharArrayWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,6 +23,7 @@ import com.redhat.ceylon.compiler.typechecker.parser.RecognitionError;
 import com.redhat.ceylon.compiler.typechecker.tree.AnalysisMessage;
 import com.redhat.ceylon.compiler.typechecker.tree.Message;
 import com.redhat.ceylon.js.util.DocUtils;
+import com.redhat.ceylon.js.util.SimpleJsonEncoder;
 
 /**
  * Servlet implementation class CeylonToJSTranslationServlet
@@ -34,15 +34,17 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
 
 	private SimpleJsonEncoder json = new SimpleJsonEncoder();
 
-	/**
-     * @see HttpServlet#HttpServlet()
-     */
-    public CeylonToJSTranslationServlet() {
-        super();
-    }
-
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	/** Compiles Ceylon code and returns the resulting Javascript, along with its hover help docs.
+	 * Expects the following keys:
+	 * ceylon - The Ceylon code to compile
+	 * module - The code for the module.ceylon file
+	 * Returns a JSON object with the following keys:
+	 * code_docs - a list of the doc descriptions
+	 * code_refs - a list of maps, each map contains keys "ref" with the index of the doc in the code_docs list,
+	 *             "from" and "to" with the location of the token corresponding to that doc.
+	 * code - The javascript code compiled from the Ceylon code.
+	 * errors - A list of errors, each error is a map with the keys "msg", "code",
+	 *          "from" and optionally "to" (for the error location).
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	    try {
@@ -78,7 +80,6 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             final Map<String, Object> resp = new HashMap<String, Object>();
             resp.put("code_docs", doccer.getDocs());
             resp.put("code_refs", DocUtils.referenceMapToList(doccer.getLocations()));
-            PrintWriter writer = response.getWriter();
             if (ok) {
                 resp.put("code", out.toString());
             } else {
@@ -91,16 +92,15 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             }
             String enc = json.encode(resp);
             response.setContentLength(enc.length());
-            writer.print(enc);
-            writer.flush();
+            response.getWriter().print(enc);
 	    } catch (Exception ex) {
             response.setStatus(500);
             StringBuilder sb = new StringBuilder();
             json.encodeList(Collections.singletonList((Object)String.format("Service error: %s", ex.getMessage())), sb);
             response.setContentLength(sb.length());
             response.getWriter().print(sb.toString());
-            response.getWriter().flush();
 	    }
+        response.getWriter().flush();
 	}
 
     private Map<String, Object> encodeError(Message err) {

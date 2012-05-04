@@ -19,6 +19,7 @@ import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.TypeCheckerBuilder;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
 import com.redhat.ceylon.js.util.DocUtils;
+import com.redhat.ceylon.js.util.SimpleJsonEncoder;
 
 @WebServlet("/hoverdoc")
 public class DocServlet extends HttpServlet {
@@ -123,7 +124,7 @@ public class DocServlet extends HttpServlet {
             response.getWriter().print(sb.toString());
         }
     }
-    
+
     private String getFileContent(ServletContext ctx, String key) throws UnsupportedEncodingException, IOException {
         String path = String.format("/examples/%s.ceylon", key);
         InputStream ins = ctx.getResourceAsStream(path);

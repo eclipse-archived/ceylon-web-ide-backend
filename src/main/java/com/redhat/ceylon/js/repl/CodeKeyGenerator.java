@@ -2,6 +2,8 @@ package com.redhat.ceylon.js.repl;
 
 import java.security.MessageDigest;
 
+import com.redhat.ceylon.js.util.ThreadLocalHash;
+
 /** Contains the method to generate a unique key for each code snippet, based on a hashing function.
  * 
  * @author Enrique Zamudio
