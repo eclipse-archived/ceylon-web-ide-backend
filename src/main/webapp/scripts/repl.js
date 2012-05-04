@@ -10,13 +10,17 @@ var spin;
 var waitSpin;
 var jquery;
 var editor;
+var clprinted;
 
 require(["ceylon/language/0.2/ceylon.language", 'jquery', 'scripts/spin.js', "browser/1.0.0/browser", "browser/1.0.0/browser.dom"],
     function(clang, $) {
         jquery=$;
         $(document).ready(function() {
             console && console.log("Ceylon language module loaded OK");
-            clang.print = function(x){ printOutput(x.getString()); };
+            clang.print = function(x){
+                clprinted=true;
+                printOutput(x.getString());
+            };
             console && console.log("ceylon.language.print() patched OK");
             spin = Spinner({
                 lines:12, length:20, width:10, radius:25, color:'#000',
@@ -231,14 +235,17 @@ function run() {
 //This function is called if compilation runs OK
 function afterTranslate() {
     if (transok == true) {
-        printSystem("// Script start at " + (new Date()));
+        clprinted=false;
+        //printSystem("// Script start at " + (new Date()));
         try {
             run_script();
         } catch(err) {
             printError("Runtime error:");
             printError("--- " + err);
         }
-        printSystem("// Script end at " + (new Date()));
+        if (clprinted!==true) {
+            printSystem("Script ended with no output");
+        }
     }
 }
 
