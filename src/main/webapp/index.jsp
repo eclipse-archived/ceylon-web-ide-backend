@@ -25,7 +25,8 @@
             height: 200px;
             padding: 2px;
             overflow: auto;
-            background: #ffffff
+            background: #ffffff;
+            white-space: pre-wrap;
         }
         .jsc_msg {
             color: gray;
