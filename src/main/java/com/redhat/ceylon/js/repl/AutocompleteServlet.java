@@ -1,7 +1,6 @@
 package com.redhat.ceylon.js.repl;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,14 +12,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.redhat.ceylon.compiler.js.AutocompleteVisitor;
+import com.redhat.ceylon.compiler.js.AutocompleteVisitor.AutocompleteUnitValidator;
 import com.redhat.ceylon.compiler.js.DocVisitor;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.TypeCheckerBuilder;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
+import com.redhat.ceylon.compiler.typechecker.tree.Node;
 import com.redhat.ceylon.js.util.DocUtils;
 import com.redhat.ceylon.js.util.SimpleJsonEncoder;
 
-@WebServlet("assist")
+@WebServlet("/assist")
 public class AutocompleteServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
@@ -45,6 +47,8 @@ public class AutocompleteServlet extends HttpServlet {
         try {
             String script = req.getParameter("ceylon");
             String module = req.getParameter("module");
+            int locRow = Integer.parseInt(req.getParameter("r"));
+            int locCol = Integer.parseInt(req.getParameter("c"));
             ScriptFile src = new ScriptFile("ROOT",
                     new ScriptFile("web_ide_script",
                             new ScriptFile("SCRIPT.ceylon", script),
@@ -64,10 +68,26 @@ public class AutocompleteServlet extends HttpServlet {
             final Map<String, Object> jsr = new HashMap<String, Object>();
             jsr.put("code_docs", doccer.getDocs());
             jsr.put("code_refs", DocUtils.referenceMapToList(doccer.getLocations()));
-            jsr.put("opts", Arrays.asList("method1(Integer,String)", "method2()", "methodref", "blabla"));
+            //Now get the suggestions for node at the specified location
+            //So of course first we have to find said node
+            final AutocompleteVisitor assistant = new AutocompleteVisitor(locRow, locCol, typeChecker);
+            assistant.findNode(new AutocompleteUnitValidator() {
+                @Override
+                public boolean processUnit(PhasedUnit pu) {
+                    return "SCRIPT".equals(pu.getUnitFile().getName());
+                }
+            });
+            jsr.put("opts", assistant.getCompletions());
+            //jsr.put("opts", Arrays.asList("method1(Integer,String)", "method2()", "methodref", "blabla"));
             String enc = json.encode(jsr);
             resp.setContentLength(enc.length());
             resp.getWriter().print(enc);
+        } catch (NumberFormatException ex) {
+            resp.setStatus(500);
+            StringBuilder sb = new StringBuilder();
+            json.encodeList(Collections.singletonList((Object)"Current location wasn't provided."), sb);
+            resp.setContentLength(sb.length());
+            resp.getWriter().print(sb.toString());
         } catch (Exception ex) {
             resp.setStatus(500);
             StringBuilder sb = new StringBuilder();
