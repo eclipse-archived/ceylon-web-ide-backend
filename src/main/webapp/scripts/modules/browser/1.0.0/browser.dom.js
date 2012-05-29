@@ -1,7 +1,7 @@
 (function(define) {
     define(function(require, exports, module) {
     	
-var clang=require('ceylon/language/0.2/ceylon.language');
+var clang=require('ceylon/language/0.3/ceylon.language');
 
 function getHash() {
     if (this.identifiableObjectID === undefined) {
@@ -10,7 +10,7 @@ function getHash() {
     return this.identifiableObjectID;
 }
 function initBrowserType(nativeType, name, superType) {
-    var type = function(){}
+    var type = function(){};
     if (superType === undefined) {
         clang.initExistingType(type, nativeType, name, clang.IdentifiableObject);
     } else {
@@ -18,8 +18,10 @@ function initBrowserType(nativeType, name, superType) {
         args.unshift(type);
         clang.initExistingType.apply(this, args);
     }
-    clang.inheritProtoI(type, clang.IdentifiableObject);
-    nativeType.prototype.getHash = getHash;
+    if (nativeType.prototype) {
+   	    clang.inheritProtoI(type, clang.IdentifiableObject);
+        nativeType.prototype.getHash = getHash;
+    }
     return type;
 }
 
