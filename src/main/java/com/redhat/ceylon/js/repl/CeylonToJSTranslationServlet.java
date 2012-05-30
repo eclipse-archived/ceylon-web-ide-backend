@@ -4,6 +4,7 @@ import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +15,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.redhat.ceylon.compiler.Options;
 import com.redhat.ceylon.compiler.js.DocVisitor;
 import com.redhat.ceylon.compiler.js.JsCompiler;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
@@ -68,15 +70,18 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             }
             //Run the compiler, if typechecker returns no errors.
             final CharArrayWriter out = new CharArrayWriter();
-            JsCompiler compiler = new JsCompiler(typeChecker) {
+            final Options opts = Options.parse(new ArrayList<String>(Arrays.asList("-optimize", "-compact", "-src", ".")));
+            JsCompiler compiler = new JsCompiler(typeChecker, opts) {
                 @Override
                 protected Writer getWriter(PhasedUnit pu) {
                     return out;
                 }
-            }.optimize(true).stopOnErrors(true).indent(false).comment(false);
+                protected void finish() throws IOException {
+                    out.flush();
+                    out.close();
+                }
+            }.stopOnErrors(true);
             boolean ok = compiler.generate();
-            out.flush();
-            out.close();
             final Map<String, Object> resp = new HashMap<String, Object>();
             resp.put("code_docs", doccer.getDocs());
             resp.put("code_refs", DocUtils.referenceMapToList(doccer.getLocations()));
@@ -96,7 +101,12 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
 	    } catch (Exception ex) {
             response.setStatus(500);
             StringBuilder sb = new StringBuilder();
-            json.encodeList(Collections.singletonList((Object)String.format("Service error: %s", ex.getMessage())), sb);
+            String msg = ex.getMessage();
+            if (msg == null) {
+                msg = ex.getClass().getName();
+            }
+            ex.printStackTrace(System.out);
+            json.encodeList(Collections.singletonList((Object)String.format("Service error: %s", msg)), sb);
             response.setContentLength(sb.length());
             response.getWriter().print(sb.toString());
 	    }
