@@ -48,6 +48,7 @@ public class DocServlet extends HttpServlet {
 
     private void sendResponse(Map<String, Object> docs, HttpServletResponse response) throws IOException {
         String resp = json.encode(docs);
+        response.setContentType("application/json");
         response.setContentLength(resp.length());
         response.getWriter().println(resp);
     }
