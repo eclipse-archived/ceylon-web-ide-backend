@@ -68,6 +68,7 @@ require(["ceylon/language/0.3/ceylon.language", 'jquery', "browser/1.0.0/browser
     }
 );
 
+//Stores the code on the server and displays a URL with the key to retrieve it
 function shareSource() {
     function printUrl(key, status, xhr) {
         var url = (location.href.split(/\?|#/)[0]) + '#' + key;
@@ -223,7 +224,7 @@ function editCode(key) {
     if (!editor) return false;
     //Retrieve code
     jquery.ajax('hoverdoc?key='+key, {
-        cache:false,
+        cache:true,
         dataType:'json',
         timeout:10000,
         beforeSend:startSpinner,
