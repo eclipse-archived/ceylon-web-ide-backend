@@ -1813,4 +1813,8 @@ exports.Entry=Entry;
 }(typeof define==='function' && define.amd ?
 define : function (factory) {
 if (typeof exports!=='undefined') {
-factory(require, expor
+factory(require, exports, module);
+} else {
+throw "no module loader";
+}
+}));
