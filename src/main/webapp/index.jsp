@@ -70,7 +70,7 @@
             width:600px;
         }
     </style>
-    <script type="text/javascript" src="scripts/require-jquery.js" data-main="scripts/repl.js"></script>
+    <script type="text/javascript" src="scripts/spin.js" charset="utf-8"></script>
     <script type="text/javascript" src="scripts/codemirror.js" charset="utf-8"></script>
     <script type="text/javascript" src="scripts/mode/ceylon/ceylon.js" charset="utf-8"></script>
     <link rel="stylesheet" href="scripts/codemirror.css" />
@@ -78,6 +78,7 @@
         .CodeMirror {border: 1px solid black;width:600px;height:200px;background:#ffffff;}
         .CodeMirror-gutter {min-width: 2.6em; cursor: pointer;}
     </style>
+    <script type="text/javascript" src="scripts/require-jquery.js" data-main="scripts/repl.js"></script>
 
 </head>
 <body class="bp">
