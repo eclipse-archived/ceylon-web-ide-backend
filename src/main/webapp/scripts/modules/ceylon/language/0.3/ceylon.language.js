@@ -34,6 +34,28 @@ var superTypes = arguments[i].$$.T$all;
 for (var $ in superTypes) {cons.T$all[$] = superTypes[$]}
 }
 }
+function lazyInitGetHash() {
+if (this.identifiableObjectID === undefined) {
+IdentifiableObject.call(this, this);
+}
+return this.identifiableObjectID;
+}
+function initExistingTypeProto(type, cons, typeName) {
+initExistingType.apply(this, arguments);
+var proto = cons.prototype;
+if (proto !== undefined) {
+var origToString = proto.toString;
+var args = [].slice.call(arguments, 3);
+args.unshift(type);
+try {
+inheritProtoI.apply(this, args);
+proto.toString = origToString;
+if (proto.getHash !== undefined) { proto.getHash = lazyInitGetHash; }
+} catch (exc) {
+// browser probably prevented access to the prototype
+}
+}
+}
 function inheritProto(type, superType) {
 var suffix = '$$' + superType.$$.T$name.replace(/\./g, '$') + '$';
 var proto = type.$$.prototype;
@@ -59,6 +81,7 @@ exports.initType=initType;
 exports.initTypeProto=initTypeProto;
 exports.initTypeProtoI=initTypeProtoI;
 exports.initExistingType=initExistingType;
+exports.initExistingTypeProto=initExistingTypeProto;
 exports.inheritProto=inheritProto;
 exports.inheritProtoI=inheritProtoI;
 function Void(wat) {
@@ -101,14 +124,8 @@ initType(Callable, 'ceylon.language.Callable');
 function $JsCallable(callable) {
 return callable;
 }
-initExistingType($JsCallable, Function, 'ceylon.language.JsCallable', IdentifiableObject, Callable);
-inheritProto($JsCallable, IdentifiableObject, Callable);
-Function.prototype.getHash = function() {
-if (this.identifiableObjectID === undefined) {
-IdentifiableObject.call(this, this);
-}
-return this.identifiableObjectID;
-}
+initExistingTypeProto($JsCallable, Function, 'ceylon.language.JsCallable',
+IdentifiableObject, Callable);
 function noop() { return null; }
 //This is used for plain method references
 function JsCallable(o,f) {
@@ -1274,8 +1291,7 @@ function getNull() { return null }
 //$false.getString = function() {return this.string}
 //function getFalse() { return $false; }
 function Boolean$(value) {return Boolean(value)}
-initExistingType(Boolean$, Boolean, 'ceylon.language.Boolean', IdentifiableObject);
-inheritProto(Boolean$, IdentifiableObject);
+initExistingTypeProto(Boolean$, Boolean, 'ceylon.language.Boolean', IdentifiableObject);
 Boolean.prototype.equals = function(other) {return other.constructor===Boolean && other==this;}
 var trueString = String$("true", 4);
 var falseString = String$("false", 5);
@@ -1797,8 +1813,4 @@ exports.Entry=Entry;
 }(typeof define==='function' && define.amd ?
 define : function (factory) {
 if (typeof exports!=='undefined') {
-factory(require, exports, module);
-} else {
-throw "no module loader";
-}
-}));
+factory(require, expor

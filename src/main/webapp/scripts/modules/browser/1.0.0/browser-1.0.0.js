@@ -6,24 +6,14 @@ var clang=require('ceylon/language/0.3/ceylon.language');
 var $document = function() { return document; };
 exports.getDocument = $document;
 
-function getHash() {
-    if (this.identifiableObjectID === undefined) {
-        clang.IdentifiableObject.call(this, this);
-    }
-    return this.identifiableObjectID;
-}
 function initBrowserType(nativeType, name, superType) {
     var type = function(){};
     if (superType === undefined) {
-        clang.initExistingType(type, nativeType, name, clang.IdentifiableObject);
+        clang.initExistingTypeProto(type, nativeType, name, clang.IdentifiableObject);
     } else {
         var args = [].slice.call(arguments, 0);
         args.unshift(type);
-        clang.initExistingType.apply(this, args);
-    }
-    if (nativeType.prototype) {
-   	    clang.inheritProtoI(type, clang.IdentifiableObject);
-        nativeType.prototype.getHash = getHash;
+        clang.initExistingTypeProto.apply(this, args);
     }
     return type;
 }
