@@ -12,7 +12,7 @@ var jquery;
 var editor;
 var clprinted;
 
-require(["ceylon/language/0.2/ceylon.language", 'jquery', 'scripts/spin.js', "browser/1.0.0/browser", "browser/1.0.0/browser.dom"],
+require(["ceylon/language/0.3/ceylon.language", 'jquery', 'scripts/spin.js', "browser/1.0.0/browser-1.0.0"],
     function(clang, $) {
         jquery=$;
         $(document).ready(function() {
@@ -46,6 +46,8 @@ require(["ceylon/language/0.2/ceylon.language", 'jquery', 'scripts/spin.js', "br
                 httpGet('share?key='+key, function(src){
                     editor.setValue(src);
                     getHoverDocs(editor);
+                }, function(err) {
+                    alert("error retrieving shared code: " + err);
                 })
             } else if (location.href.indexOf('?src=') > 0) {
                 //Code is directly in URL
@@ -260,7 +262,9 @@ function editCode(key) {
         editor.setValue(json['src']);
         showDocs(json['docs'], json['refs']);
         editor.focus();
-    }, null);
+    }, function(err) {
+        alert("error retrieving example: " + err);
+    });
     waitSpin = spin.spin(document.getElementById('primary-content'));
     return false;
     return true;
