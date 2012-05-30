@@ -96,43 +96,35 @@ exports.Cloneable=Cloneable;
 function Callable(wat) {
 return wat;
 }
-initType(Callable, 'ceylon.language.Callable');
 exports.Callable=Callable;
+initType(Callable, 'ceylon.language.Callable');
+function $JsCallable(callable) {
+return callable;
+}
+initExistingType($JsCallable, Function, 'ceylon.language.JsCallable', IdentifiableObject, Callable);
+inheritProto($JsCallable, IdentifiableObject, Callable);
+Function.prototype.getHash = function() {
+if (this.identifiableObjectID === undefined) {
+IdentifiableObject.call(this, this);
+}
+return this.identifiableObjectID;
+}
+function noop() { return null; }
 //This is used for plain method references
 function JsCallable(o,f) {
-var c = function() {
-if (o === null) return null;
-var al=[];
-if (arguments !== undefined && arguments.length > 0) {
-for (var i=0; i<arguments.length;i++) {
-al.push(arguments[i]);
-}
-}
-return f.apply(o,al);
-};
-c.getString = function() { return String$('ceylon.language.Callable'); }
-initTypeProtoI(c, 'ceylon.language.JsCallable', Callable);
-return c;
+return (o !== null) ? function() { return f.apply(o, arguments); }
+: noop;
 }
 //This is used for spread method references
 function JsCallableList(value) {
-var c = function() {
-var al=[];
-if (arguments !== undefined && arguments.length > 0) {
-for (var i=0; i<arguments.length;i++) {
-al.push(arguments[i]);
-}
-}
-var rval = [];
+return function() {
+var rval = Array(value.length);
 for (var i = 0; i < value.length; i++) {
 var c = value[i];
-rval.push(c.f.apply(c.o, al));
+rval[i] = c.f.apply(c.o, arguments);
 }
 return ArraySequence(rval);
 };
-c.getString = function() { return String$('ceylon.language.Callable[]'); }
-initTypeProtoI(c, 'ceylon.language.JsCallableList', Callable);
-return c;
 }
 exports.JsCallableList=JsCallableList;
 exports.JsCallable=JsCallable;
@@ -765,7 +757,7 @@ exports.parseFloat=$parseFloat;
 function String$(value,size) {
 var that = new String$.$$;
 that.value = value;
-that.codePoints = (size===undefined) ? countCodepoints(value) : size;
+that.codePoints = size;
 return that;
 }
 initTypeProto(String$, 'ceylon.language.String', Object$, List, Comparable, Ranged, FixedSized,
