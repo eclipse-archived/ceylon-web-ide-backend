@@ -53,8 +53,8 @@ require(["ceylon/language/0.3/ceylon.language", 'jquery', "browser/1.0.0/browser
                         editor.setValue(src);
                         getHoverDocs(editor);
                     },
-                    error:function(a,b,err) {
-                        alert("Error retrieving shared code: " + err);
+                    error:function(a,status,err) {
+                        alert("Error retrieving shared code: " + err?err:status);
                     }
                 });
             } else if (location.href.indexOf('?src=') > 0) {
@@ -176,15 +176,6 @@ function translate(onTranslation) {
                 }
             }
         };
-        var errHandler = function(xhr, status, err) {
-            transok = false;
-
-            //TODO change this shit
-            //var errors = JSON.parse(errcodes);
-            //if (errors) {
-            //    showErrors(errors);
-            //}
-        };
         document.getElementById('submit').disabled=true;
         jquery.ajax('translate', {
             cache:false, type:'POST',
@@ -193,7 +184,10 @@ function translate(onTranslation) {
             beforeSend:startSpinner,
             complete:stopSpinner,
             success:compileHandler,
-            error:errHandler,
+            error:function(xhr, status, err) {
+                transok = false;
+                alert("An error occurred while compiling your code: " + err?err:status);
+            },
             data:{ceylon:code, module:getModuleCode()}
         });
     } else {
@@ -241,7 +235,7 @@ function editCode(key) {
             editor.focus();
         },
         error:function(xhr, status, err) {
-            alert("error retrieving '" + key + "'example: " + err);
+            alert("error retrieving '" + key + "'example: " + err?err:status);
         }
     });
 }
@@ -320,16 +314,6 @@ function getHoverDocs(cm) {
             showDocs(json['docs'], json['refs']);
         }
     };
-    var errHandler = function(xhr, status, err) {
-        //TODO fix this shit
-        transok = false;
-        
-        /*var errors = JSON.parse(errcodes);
-        if (errors) {
-            showErrors(errors);
-        }*/
-    };
-    console.log("docs por AJAX");
     document.getElementById('submit').disabled=true;
     jquery.ajax('hoverdoc', {
         cache:false, type:'POST',
@@ -338,7 +322,10 @@ function getHoverDocs(cm) {
         beforeSend:startSpinner,
         complete:stopSpinner,
         success:docHandler,
-        error:errHandler,
+        error:function(xhr,status,err){
+            transok=false;
+            alert("An error occurred while retrieving documentation for your code: " + err?err:status);
+        },
         data:{ceylon:code, module:getModuleCode()}
     });
 }
