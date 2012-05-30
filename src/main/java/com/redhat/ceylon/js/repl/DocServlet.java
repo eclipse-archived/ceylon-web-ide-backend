@@ -49,8 +49,10 @@ public class DocServlet extends HttpServlet {
     private void sendResponse(Map<String, Object> docs, HttpServletResponse response) throws IOException {
         String resp = json.encode(docs);
         response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
         response.setContentLength(resp.length());
-        response.getWriter().println(resp);
+        response.getWriter().print(resp);
+        response.getWriter().flush();
     }
 
     /** Retrieves the code corresponding to the specified filename, compiles it and returns the compiled js along with documentation and source. */
