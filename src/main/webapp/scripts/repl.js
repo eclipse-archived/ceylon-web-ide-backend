@@ -12,7 +12,7 @@ var jquery;
 var editor;
 var clprinted;
 
-require(["ceylon/language/0.3/ceylon.language", 'jquery', 'scripts/spin.js', "browser/1.0.0/browser-1.0.0"],
+require(["ceylon/language/0.3/ceylon.language", 'jquery', "browser/1.0.0/browser-1.0.0"],
     function(clang, $) {
         jquery=$;
         $(document).ready(function() {
@@ -43,12 +43,20 @@ require(["ceylon/language/0.3/ceylon.language", 'jquery', 'scripts/spin.js', "br
             if (key.length > 1) {
                 //retrieve code
                 key = key[key.length-1];
-                httpGet('share?key='+key, function(src){
-                    editor.setValue(src);
-                    getHoverDocs(editor);
-                }, function(err) {
-                    alert("error retrieving shared code: " + err);
-                })
+                $.ajax('share?key='+key, {
+                    cache:false,
+                    dataType:'text',
+                    timeout:10000,
+                    beforeSend:startSpinner,
+                    complete:stopSpinner,
+                    success:function(src,status,xhr) {
+                        editor.setValue(src);
+                        getHoverDocs(editor);
+                    },
+                    error:function(a,b,err) {
+                        alert("Error retrieving shared code: " + err);
+                    }
+                });
             } else if (location.href.indexOf('?src=') > 0) {
                 //Code is directly in URL
                 key = location.href.slice(location.href.indexOf('?src=')+5);
@@ -61,74 +69,31 @@ require(["ceylon/language/0.3/ceylon.language", 'jquery', 'scripts/spin.js', "br
 );
 
 function shareSource() {
-    function printUrl(key) {
+    function printUrl(key, status, xhr) {
         var url = (location.href.split(/\?|#/)[0]) + '#' + key;
         jquery('#shareurl').val(url);
         jquery('#shareurl').show();
         jquery('#shareurl').focus();
     }
-    httpPost('share', "ceylon=" + encodeURIComponent(editor.getValue()), printUrl, null);
+    jquery.ajax('share', {
+        cache:false, type:'POST',
+        dataType:'text',
+        timeout:10000,
+        beforeSend:startSpinner,
+        complete:stopSpinner,
+        success:printUrl,
+        data:{ceylon:editor.getValue()}
+    });
+}
+//Starts the spinner at the center of the page.
+function startSpinner() {
+    waitSpin = spin.spin(document.getElementById('primary-content'));
 }
 //Hides the spinner that should be spinning at the center of the page.
 function stopSpinner() {
     document.getElementById('submit').disabled=false;
     waitSpin && waitSpin.stop();
     editor.focus();
-}
-
-//Performs an HTTP POST to the specified URL, posting the specified data.
-//Calls successHandler on successful response or errorHandler if something bad happens.
-function httpPost(url, data, successHandler, errorHandler) {
-    var timeoutHandle;
-    if (!errorHandler) {
-        errorHandler = function(err) {
-            alert("error: " + err);
-        };
-    }
-
-    var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
-    xhr.open('POST', url, true);
-    xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4) {
-            clearTimeout(timeoutHandle);
-            stopSpinner();
-            if (xhr.status == 200) {
-                successHandler(xhr.responseText);
-            } else {
-                errorHandler(xhr.responseText);
-            }
-        }
-    };
-    timeoutHandle = setTimeout(errorHandler, 10000);
-    xhr.send(data);
-}
-
-//Performs an HTTP GET on the specified URL.
-//Calls the successHandler function if everything OK or errorHandler if something bad happens.
-function httpGet(url, successHandler, errorHandler) {
-    //Retrieve code
-    var timeoutHandle;
-    if (!errorHandler) {
-        errorHandler = function(err) {
-            alert("error: " + err);
-        }
-    }
-    var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
-    xhr.open('GET', url, true);
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4) {
-            clearTimeout(timeoutHandle);
-            stopSpinner();
-            if (xhr.status == 200) {
-                successHandler(xhr.responseText);
-            } else {
-                errorHandler(xhr.responseText);
-            }
-        }
-    };
-    timeoutHandle = setTimeout(errorHandler, 10000);
-    xhr.send(null);
 }
 
 var oldcode, transok;
@@ -186,9 +151,8 @@ function translate(onTranslation) {
         clearOutput();
         clearEditMarkers();
         transok = false;
-        var compileHandler = function(result) {
+        var compileHandler = function(json, status, xhr) {
             oldcode = code;
-            var json = JSON.parse(result);
             var translatedcode=json['code'];
             if (translatedcode) {
                 showCode(translatedcode);
@@ -212,18 +176,26 @@ function translate(onTranslation) {
                 }
             }
         };
-        var errHandler = function(errcodes) {
+        var errHandler = function(xhr, status, err) {
             transok = false;
-            
-            var errors = JSON.parse(errcodes);
-            if (errors) {
-                showErrors(errors);
-            }
+
+            //TODO change this shit
+            //var errors = JSON.parse(errcodes);
+            //if (errors) {
+            //    showErrors(errors);
+            //}
         };
-        var data = "ceylon=" + encodeURIComponent(code) + "&module=" + encodeURIComponent(getModuleCode());
-        httpPost('translate', data, compileHandler, errHandler);
         document.getElementById('submit').disabled=true;
-        waitSpin = spin.spin(document.getElementById('primary-content'));
+        jquery.ajax('translate', {
+            cache:false, type:'POST',
+            dataType:'json',
+            timeout:10000,
+            beforeSend:startSpinner,
+            complete:stopSpinner,
+            success:compileHandler,
+            error:errHandler,
+            data:{ceylon:code, module:getModuleCode()}
+        });
     } else {
         onTranslation();
     }
@@ -256,18 +228,22 @@ function editCode(key) {
     //Make sure we don't do anything until we have an editor
     if (!editor) return false;
     //Retrieve code
-    httpGet("hoverdoc?key="+key, function(response){
-        var json = JSON.parse(response);
-        clearEditMarkers();
-        editor.setValue(json['src']);
-        showDocs(json['docs'], json['refs']);
-        editor.focus();
-    }, function(err) {
-        alert("error retrieving example: " + err);
+    jquery.ajax('hoverdoc?key='+key, {
+        cache:false,
+        dataType:'json',
+        timeout:10000,
+        beforeSend:startSpinner,
+        complete:stopSpinner,
+        success:function(json, status, xhr) {
+            clearEditMarkers();
+            editor.setValue(json['src']);
+            showDocs(json['docs'], json['refs']);
+            editor.focus();
+        },
+        error:function(xhr, status, err) {
+            alert("error retrieving '" + key + "'example: " + err);
+        }
     });
-    waitSpin = spin.spin(document.getElementById('primary-content'));
-    return false;
-    return true;
 }
 
 function getEditCode() {
@@ -339,22 +315,30 @@ function globalEval(src) {
 
 function getHoverDocs(cm) {
     var code = "void run_script() {\n" + cm.getValue() + "}";
-    var docHandler = function(result) {
-        var json = JSON.parse(result);
+    var docHandler = function(json, status, xhr) {
         if (json && json['docs'] && json['refs']) {
             showDocs(json['docs'], json['refs']);
         }
     };
-    var errHandler = function(errcodes) {
+    var errHandler = function(xhr, status, err) {
+        //TODO fix this shit
         transok = false;
         
-        var errors = JSON.parse(errcodes);
+        /*var errors = JSON.parse(errcodes);
         if (errors) {
             showErrors(errors);
-        }
+        }*/
     };
-    var data = "ceylon=" + encodeURIComponent(code) + "&module=" + encodeURIComponent(getModuleCode());
-    httpPost('hoverdoc', data, docHandler, errHandler);
+    console.log("docs por AJAX");
     document.getElementById('submit').disabled=true;
-    waitSpin = spin.spin(document.getElementById('primary-content'));
+    jquery.ajax('hoverdoc', {
+        cache:false, type:'POST',
+        dataType:'json',
+        timeout:10000,
+        beforeSend:startSpinner,
+        complete:stopSpinner,
+        success:docHandler,
+        error:errHandler,
+        data:{ceylon:code, module:getModuleCode()}
+    });
 }
