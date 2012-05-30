@@ -2,7 +2,7 @@ apply plugin:'war'
 version=1.0
 ext.projectName='repl'
 defaultTasks 'war'
-ext.ceylonVersion=0.2
+ext.ceylonVersion=0.3
 
 repositories {
 	mavenCentral()
@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-	providedCompile "ceylon:com.redhat.ceylon.typechecker:${ceylonVersion}", "ceylon:jscompiler:${ceylonVersion}",
+	providedCompile "ceylon:com.redhat.ceylon.typechecker:${ceylonVersion}", "ceylon:com.redhat.ceylon.compiler.js:${ceylonVersion}",
 		"ceylon:com.redhat.ceylon.module-resolver:${ceylonVersion}"
 	providedCompile 'mongo:mongo:2.7.3'
 	providedCompile 'org.jboss.spec:jboss-javaee-6.0:1.0.0.Final'
@@ -22,9 +22,11 @@ task copylangmod(type:Copy) {
 	into "${webAppDirName}/scripts/modules/ceylon/language/${ceylonVersion}"
 }
 task copylibs(type:Copy, dependsOn:copylangmod) {
-	from "../ceylon-js/build/lib/jscompiler-${ceylonVersion}.jar"
+	from "../ceylon-js/build/lib/com.redhat.ceylon.compiler.js-${ceylonVersion}.jar"
 	from "../ceylon-spec/build/dist/com/redhat/ceylon/typechecker/${ceylonVersion}/com.redhat.ceylon.typechecker-${ceylonVersion}.jar"
 	from "../ceylon-module-resolver/build/dist/com/redhat/ceylon/module-resolver/${ceylonVersion}/com.redhat.ceylon.module-resolver-${ceylonVersion}.jar"
+	from "../ceylon-compiler/build/dist/com/redhat/ceylon/ant/${ceylonVersion}/com.redhat.ceylon.ant-${ceylonVersion}.jar"
+	from "../ceylon-compiler/build/dist/com/redhat/ceylon/compiler/java/${ceylonVersion}/com.redhat.ceylon.compiler.java-${ceylonVersion}.jar"
 	into "${webAppDirName}/WEB-INF/lib"
 }
 
