@@ -3,6 +3,9 @@
     	
 var clang=require('ceylon/language/0.3/ceylon.language');
 
+var $document = function() { return document; };
+exports.getDocument = $document;
+
 function getHash() {
     if (this.identifiableObjectID === undefined) {
         clang.IdentifiableObject.call(this, this);
