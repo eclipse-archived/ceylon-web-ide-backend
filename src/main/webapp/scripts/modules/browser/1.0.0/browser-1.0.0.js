@@ -6,15 +6,11 @@ var clang=require('ceylon/language/0.3/ceylon.language');
 var $document = function() { return document; };
 exports.getDocument = $document;
 
-function initBrowserType(nativeType, name, superType) {
+function initBrowserType(nativeType, name) {
     var type = function(){};
-    if (superType === undefined) {
-        clang.initExistingTypeProto(type, nativeType, name, clang.IdentifiableObject);
-    } else {
-        var args = [].slice.call(arguments, 0);
-        args.unshift(type);
-        clang.initExistingTypeProto.apply(this, args);
-    }
+    var args = [].slice.call(arguments, 0);
+    args.unshift(type);
+    clang.initExistingTypeProto.apply(this, args);
     return type;
 }
 

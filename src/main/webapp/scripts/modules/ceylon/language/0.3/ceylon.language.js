@@ -41,16 +41,16 @@ IdentifiableObject.call(this, this);
 return this.identifiableObjectID;
 }
 function initExistingTypeProto(type, cons, typeName) {
-initExistingType.apply(this, arguments);
+var args = [].slice.call(arguments, 0);
+args.push(IdentifiableObject);
+initExistingType.apply(this, args);
 var proto = cons.prototype;
-if (proto !== undefined) {
+if ((proto !== undefined) && (proto.getHash === undefined)) {
 var origToString = proto.toString;
-var args = [].slice.call(arguments, 3);
-args.unshift(type);
 try {
-inheritProtoI.apply(this, args);
+inheritProtoI(type, IdentifiableObject);
 proto.toString = origToString;
-if (proto.getHash !== undefined) { proto.getHash = lazyInitGetHash; }
+proto.getHash = lazyInitGetHash;
 } catch (exc) {
 // browser probably prevented access to the prototype
 }
@@ -119,13 +119,12 @@ exports.Cloneable=Cloneable;
 function Callable(wat) {
 return wat;
 }
-exports.Callable=Callable;
 initType(Callable, 'ceylon.language.Callable');
+exports.Callable=Callable;
 function $JsCallable(callable) {
 return callable;
 }
-initExistingTypeProto($JsCallable, Function, 'ceylon.language.JsCallable',
-IdentifiableObject, Callable);
+initExistingTypeProto($JsCallable, Function, 'ceylon.language.JsCallable', Callable);
 function noop() { return null; }
 //This is used for plain method references
 function JsCallable(o,f) {
@@ -1291,7 +1290,7 @@ function getNull() { return null }
 //$false.getString = function() {return this.string}
 //function getFalse() { return $false; }
 function Boolean$(value) {return Boolean(value)}
-initExistingTypeProto(Boolean$, Boolean, 'ceylon.language.Boolean', IdentifiableObject);
+initExistingTypeProto(Boolean$, Boolean, 'ceylon.language.Boolean');
 Boolean.prototype.equals = function(other) {return other.constructor===Boolean && other==this;}
 var trueString = String$("true", 4);
 var falseString = String$("false", 5);
