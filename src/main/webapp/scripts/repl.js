@@ -17,9 +17,13 @@ require(["ceylon/language/0.3/ceylon.language", 'jquery', "browser/1.0.0/browser
         jquery=$;
         $(document).ready(function() {
             console && console.log("Ceylon language module loaded OK");
-            clang.print = function(x){
+            clang.getProcess().write = function(x){
                 clprinted=true;
                 printOutput(x.getString());
+            };
+            clang.getProcess().writeLine = function(x){
+                clprinted=true;
+                printOutputLine(x.getString());
             };
             console && console.log("ceylon.language.print() patched OK");
             spin = Spinner({
@@ -277,9 +281,13 @@ function clearOutput() {
     editor.focus();
 }
 
-function printOutput(txt) {
+function printOutputLine(txt) {
     var output = document.getElementById("output");
     output.innerHTML = output.innerHTML + escapeHtml(txt) + "<br>";
+}
+function printOutput(txt) {
+    var output = document.getElementById("output");
+    output.innerHTML = output.innerHTML + escapeHtml(txt);
 }
 
 function printSystem(txt) {
