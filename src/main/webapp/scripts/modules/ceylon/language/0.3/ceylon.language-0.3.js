@@ -1,6 +1,8 @@
 (function(define) {
 define(function(require, exports, module) {
 //the Ceylon language module
+function getT$name() {return this.constructor.T$name;}
+function getT$all() {return this.constructor.T$all;}
 function initType(type, typeName) {
 var cons = function() {}
 type.$$ = cons;
@@ -11,6 +13,8 @@ for (var i=2; i<arguments.length; ++i) {
 var superTypes = arguments[i].$$.T$all;
 for (var $ in superTypes) {cons.T$all[$] = superTypes[$]}
 }
+cons.prototype.getT$name = getT$name;
+cons.prototype.getT$all = getT$all;
 }
 function initTypeProto(type, typeName) {
 initType.apply(this, arguments);
@@ -33,12 +37,15 @@ for (var i=3; i<arguments.length; ++i) {
 var superTypes = arguments[i].$$.T$all;
 for (var $ in superTypes) {cons.T$all[$] = superTypes[$]}
 }
+var proto = cons.prototype;
+if (cons !== undefined) {
+try {
+cons.prototype.getT$name = getT$name;
+cons.prototype.getT$all = getT$all;
+} catch (exc) {
+// browser probably prevented access to the prototype
 }
-function lazyInitGetHash() {
-if (this.identifiableObjectID === undefined) {
-IdentifiableObject.call(this, this);
 }
-return this.identifiableObjectID;
 }
 function initExistingTypeProto(type, cons, typeName) {
 var args = [].slice.call(arguments, 0);
@@ -50,7 +57,6 @@ var origToString = proto.toString;
 try {
 inheritProtoI(type, IdentifiableObject);
 proto.toString = origToString;
-proto.getHash = lazyInitGetHash;
 } catch (exc) {
 // browser probably prevented access to the prototype
 }
@@ -93,23 +99,29 @@ return wat;
 }
 initTypeProto(Object$, 'ceylon.language.Object', Void);
 var Object$proto = Object$.$$.prototype;
-Object$proto.getString=function() { String$(Object.prototype.toString.apply(this)) };
+Object$proto.getString = function() { return String$(className(this).value + "@" + this.getHash().value); }
+//Object$proto.getString=function() { String$(Object.prototype.toString.apply(this)) };
 Object$proto.toString=function() { return this.getString().value };
 var identifiableObjectID=1;
-function IdentifiableObject(obj) {
-obj.identifiableObjectID=Integer(identifiableObjectID++);
-return obj;
+function $identityHash(x) {
+var hash = x.identifiableObjectID;
+return (hash !== undefined)
+? hash : (x.identifiableObjectID = Integer(identifiableObjectID++));
 }
-initTypeProto(IdentifiableObject, 'ceylon.language.IdentifiableObject', Object$);
-var IdentifiableObject$proto = IdentifiableObject.$$.prototype;
-IdentifiableObject$proto.getHash = function() { return this.identifiableObjectID; }
-IdentifiableObject$proto.getString = function() { return String$(className(this).value + "@" + this.getHash().value); }
-IdentifiableObject$proto.equals = function(other) {
-if (isOfType(other, 'ceylon.language.IdentifiableObject')) {
-return Boolean$(other===this);
+function Identifiable(obj) {}
+initType(Identifiable, "ceylon.language.Identifiable");
+var Identifiable$proto = Identifiable.$$.prototype;
+Identifiable$proto.equals = function(that) {
+if (isOfType(that, 'ceylon.language.Identifiable')) {
+return Boolean$(that===this);
 }
 return false;
 }
+Identifiable$proto.getHash = function() { return $identityHash(this); }
+function IdentifiableObject(obj) {
+return obj;
+}
+initTypeProto(IdentifiableObject, 'ceylon.language.IdentifiableObject', Object$, Identifiable);
 //INTERFACES
 function Cloneable(wat) {
 return wat;
@@ -859,7 +871,17 @@ return that;
 }
 initTypeProto(String$, 'ceylon.language.String', Object$, List, Comparable, Ranged, FixedSized,
 Summable, Castable, Cloneable);
+function StringOfSome() {}
+initType(StringOfSome, "ceylon.language.StringOfSome", String$, Some);
+function StringOfNone() {}
+initType(StringOfNone, "ceylon.language.StringOfNone", String$, None);
 var String$proto = String$.$$.prototype;
+String$proto.getT$name = function() {
+return ((this.value.length!==0)?StringOfSome:StringOfNone).$$.T$name;
+}
+String$proto.getT$all = function() {
+return ((this.value.length!==0)?StringOfSome:StringOfNone).$$.T$all;
+}
 String$proto.getString = function() { return this }
 String$proto.toString = function() { return this.value }
 String$proto.plus = function(other) {
@@ -1372,6 +1394,16 @@ function getNull() { return null }
 //function getFalse() { return $false; }
 function Boolean$(value) {return Boolean(value)}
 initExistingTypeProto(Boolean$, Boolean, 'ceylon.language.Boolean');
+function trueClass() {}
+initType(trueClass, "ceylon.language.true", Boolean$);
+function falseClass() {}
+initType(falseClass, "ceylon.language.false", Boolean$);
+Boolean.prototype.getT$name = function() {
+return (this.valueOf()?trueClass:falseClass).$$.T$name;
+}
+Boolean.prototype.getT$all = function() {
+return (this.valueOf()?trueClass:falseClass).$$.T$all;
+}
 Boolean.prototype.equals = function(other) {return other.constructor===Boolean && other==this;}
 var trueString = String$("true", 4);
 var falseString = String$("false", 5);
@@ -1525,9 +1557,7 @@ return Boolean$(typeName==="ceylon.language.Nothing" || typeName==="ceylon.langu
 if (typeof obj === 'function') {
 return Boolean$(typeName === 'ceylon.language.Callable');
 }
-var cons = obj.$$;
-if (cons === undefined) cons = obj.constructor;
-return Boolean$(typeName in cons.T$all);
+return Boolean$(obj.getT$all && typeName in obj.getT$all());
 }
 function isOfTypes(obj, types) {
 if (obj===null) {
@@ -1539,13 +1569,12 @@ return Boolean$(types.l.indexOf('ceylon.language.Callable')>=0);
 var unions = false;
 var inters = true;
 var _ints=false;
-var cons = obj.$$;
-if (cons === undefined) cons = obj.constructor;
+var objTypes = obj.getT$all();
 for (var i = 0; i < types.l.length; i++) {
 var t = types.l[i];
 var partial = false;
 if (typeof t === 'string') {
-partial = t in cons.T$all;
+partial = t in objTypes;
 } else {
 partial = isOfTypes(obj, t);
 }
@@ -1560,12 +1589,7 @@ return _ints ? inters||unions : unions;
 }
 function className(obj) {
 if (obj === null) return String$('ceylon.language.Nothing');
-var cons = obj.$$;
-if (cons === undefined) cons = obj.constructor;
-if (cons.T$name === undefined) {
-return String$('ceylon.language.Callable');
-}
-return String$(cons.T$name);
+return String$(obj.getT$name());
 }
 function identityHash(obj) {
 return obj.identifiableObjectID;
@@ -1753,6 +1777,7 @@ var process$proto = processClass.$$.prototype;
 var argv = $empty;
 var namedArgs = {};
 if ((typeof process !== "undefined") && (process.argv !== undefined)) {
+// parse command line arguments
 if (process.argv.length > 2) {
 var args = process.argv.slice(2);
 var argStrings = new Array(args.length);
@@ -1780,7 +1805,8 @@ namedArgs[arg] = null;
 }
 }
 } else if (typeof window !== "undefined") {
-var parts = window.location.search.substr(1).split('&');
+// parse URL parameters
+var parts = window.location.search.substr(1).replace('+', ' ').split('&');
 if (parts.length > 0) {
 var argStrings = new Array(parts.length);
 for (i in parts) { argStrings[i] = String$(parts[i]); }
@@ -1789,7 +1815,8 @@ for (i in parts) {
 var part = parts[i];
 var pos = part.indexOf('=');
 if (pos >= 0) {
-namedArgs[part.substr(0, pos)] = String$(part.substr(pos+1));
+var value = decodeURIComponent(part.substr(pos+1));
+namedArgs[part.substr(0, pos)] = String$(value);
 } else {
 namedArgs[part] = null;
 }
@@ -1804,22 +1831,52 @@ process$proto.namedArgumentValue = function(name) {
 var value = namedArgs[name.value];
 return (value !== undefined) ? value : null;
 }
+var properties = {};
+if (typeof navigator !== "undefined") {
+if (navigator.language !== undefined) {
+properties["user.language"] = String$(navigator.language);
+}
+if (navigator.platform !== undefined) {
+properties["os.name"] = String$(navigator.platform);
+}
+}
+if (typeof process !== "undefined") {
+if (process.platform !== undefined) {
+properties["os.name"] = String$(process.platform);
+}
+if (process.arch !== undefined) {
+properties["os.arch"] = String$(process.arch);
+}
+}
+if (typeof document !== "undefined") {
+if (document.defaultCharset !== undefined) {
+properties["file.encoding"] = String$(document.defaultCharset);
+}
+}
+var linesep = String$('\n', 1);
+var filesep = String$('/', 1);
+var pathsep = String$(':', 1);
+var osname = properties["os.name"];
+if ((osname !== undefined) && (osname.value.search(/windows/i) >= 0)) {
+linesep = String$("\r\n", 2);
+filesep = String$('\\', 1);
+pathsep = String$(';', 1);
+}
+properties["line.separator"] = linesep;
+properties["file.separator"] = filesep;
+properties["path.separator"] = pathsep;
 process$proto.propertyValue = function(name) {
-return null;//TODO
+var value = properties[name.value];
+return (value !== undefined) ? value : null;
 }
-var newline = String$("\n", 1);
-if ((typeof process !== "undefined") && (process.platform !== undefined)
-&& (process.platform.search(/windows/i) >= 0)) {
-newline = String$("\r\n", 2);
-}
-process$proto.getNewline = function() { return newline; }
+process$proto.getNewline = function() { return linesep; }
 if ((typeof process !== "undefined") && (process.stdout !== undefined)) {
 process$proto.write = function(string) {
 process.stdout.write(string.value);
 }
 process$proto.writeLine = function(line) {
 this.write(line);
-this.write(newline);
+this.write(linesep);
 }
 } else if ((typeof console !== "undefined") && (console.log !== undefined)) {
 process$proto.writeLine = function(line) {
@@ -1836,7 +1893,7 @@ process.stderr.write(string.value);
 }
 process$proto.writeErrorLine = function(line) {
 this.writeError(line);
-this.writeError(newline);
+this.writeError(linesep);
 }
 } else if ((typeof console !== "undefined") && (console.error !== undefined)) {
 process$proto.writeErrorLine = function(line) {
@@ -2033,10 +2090,12 @@ return String$(this.key.getString().value + "->" + this.item.getString().value);
 Entry$proto.getKey = function() { return this.key; }
 Entry$proto.getItem = function() { return this.item; }
 Entry$proto.equals = function(other) {
-return Boolean$(other && this.getKey().equals(other.getKey()) === $true && this.getItem().equals(other.getItem()) === $true);
+return Boolean$(other && isOfType(other, 'ceylon.language.Entry') && this.getKey().equals(other.getKey()) === $true && this.getItem().equals(other.getItem()) === $true);
 }
-Entry$proto.getHash = function() { Integer(this.key.getHash().value ^ this.item.getHash().value); }
+Entry$proto.getHash = function() { Integer((31 + this.key.getHash().value) * 31 + this.item.getHash().value); }
 exports.Exception=Exception;
+exports.Identifiable=Identifiable;
+exports.identityHash=$identityHash;
 exports.IdentifiableObject=IdentifiableObject;
 exports.Object=Object$;
 exports.Boolean=Boolean$;
