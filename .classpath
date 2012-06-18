@@ -14,9 +14,9 @@
 			<attribute name="owner.project.facets" value="jst.web"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry combineaccessrules="false" kind="src" path="/ceylon-js"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/ceylon-module-resolver"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/ceylon-spec"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/com.redhat.ceylon.compiler.js-0.3.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/com.redhat.ceylon.module-resolver-0.3.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/com.redhat.ceylon.typechecker-0.3.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
