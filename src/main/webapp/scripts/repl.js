@@ -151,7 +151,7 @@ function showDocs(docs, refs) {
 //On response, executes the script if compilation was OK, otherwise shows errors.
 //In any case it sets the hover docs if available.
 function translate(onTranslation) {
-    var code = "import browser { ... } import browser.dom { ... } void run_script() {\n" + getEditCode() + "}";
+    var code = "import browser { ... } import browser.dom { ... } void run_script() {\n" + getEditCode() + "\n}";
     if (code != oldcode) {
         clearOutput();
         clearEditMarkers();
