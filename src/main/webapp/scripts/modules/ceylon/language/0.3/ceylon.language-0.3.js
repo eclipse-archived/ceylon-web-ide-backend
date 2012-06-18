@@ -1,6 +1,8 @@
 (function(define) {
 define(function(require, exports, module) {
 //the Ceylon language module
+function getT$name() {return this.constructor.T$name;}
+function getT$all() {return this.constructor.T$all;}
 function initType(type, typeName) {
 var cons = function() {}
 type.$$ = cons;
@@ -11,6 +13,8 @@ for (var i=2; i<arguments.length; ++i) {
 var superTypes = arguments[i].$$.T$all;
 for (var $ in superTypes) {cons.T$all[$] = superTypes[$]}
 }
+cons.prototype.getT$name = getT$name;
+cons.prototype.getT$all = getT$all;
 }
 function initTypeProto(type, typeName) {
 initType.apply(this, arguments);
@@ -33,24 +37,26 @@ for (var i=3; i<arguments.length; ++i) {
 var superTypes = arguments[i].$$.T$all;
 for (var $ in superTypes) {cons.T$all[$] = superTypes[$]}
 }
+var proto = cons.prototype;
+if (cons !== undefined) {
+try {
+cons.prototype.getT$name = getT$name;
+cons.prototype.getT$all = getT$all;
+} catch (exc) {
+// browser probably prevented access to the prototype
 }
-function lazyInitGetHash() {
-if (this.identifiableObjectID === undefined) {
-IdentifiableObject.call(this, this);
 }
-return this.identifiableObjectID;
 }
 function initExistingTypeProto(type, cons, typeName) {
-initExistingType.apply(this, arguments);
+var args = [].slice.call(arguments, 0);
+args.push(IdentifiableObject);
+initExistingType.apply(this, args);
 var proto = cons.prototype;
-if (proto !== undefined) {
+if ((proto !== undefined) && (proto.getHash === undefined)) {
 var origToString = proto.toString;
-var args = [].slice.call(arguments, 3);
-args.unshift(type);
 try {
-inheritProtoI.apply(this, args);
+inheritProtoI(type, IdentifiableObject);
 proto.toString = origToString;
-if (proto.getHash !== undefined) { proto.getHash = lazyInitGetHash; }
 } catch (exc) {
 // browser probably prevented access to the prototype
 }
@@ -93,23 +99,29 @@ return wat;
 }
 initTypeProto(Object$, 'ceylon.language.Object', Void);
 var Object$proto = Object$.$$.prototype;
-Object$proto.getString=function() { String$(Object.prototype.toString.apply(this)) };
+Object$proto.getString = function() { return String$(className(this).value + "@" + this.getHash().value); }
+//Object$proto.getString=function() { String$(Object.prototype.toString.apply(this)) };
 Object$proto.toString=function() { return this.getString().value };
 var identifiableObjectID=1;
-function IdentifiableObject(obj) {
-obj.identifiableObjectID=Integer(identifiableObjectID++);
-return obj;
+function $identityHash(x) {
+var hash = x.identifiableObjectID;
+return (hash !== undefined)
+? hash : (x.identifiableObjectID = Integer(identifiableObjectID++));
 }
-initTypeProto(IdentifiableObject, 'ceylon.language.IdentifiableObject', Object$);
-var IdentifiableObject$proto = IdentifiableObject.$$.prototype;
-IdentifiableObject$proto.getHash = function() { return this.identifiableObjectID; }
-IdentifiableObject$proto.getString = function() { return String$(className(this).value + "@" + this.getHash().value); }
-IdentifiableObject$proto.equals = function(other) {
-if (isOfType(other, 'ceylon.language.IdentifiableObject')) {
-return Boolean$(other===this);
+function Identifiable(obj) {}
+initType(Identifiable, "ceylon.language.Identifiable");
+var Identifiable$proto = Identifiable.$$.prototype;
+Identifiable$proto.equals = function(that) {
+if (isOfType(that, 'ceylon.language.Identifiable')) {
+return Boolean$(that===this);
 }
 return false;
 }
+Identifiable$proto.getHash = function() { return $identityHash(this); }
+function IdentifiableObject(obj) {
+return obj;
+}
+initTypeProto(IdentifiableObject, 'ceylon.language.IdentifiableObject', Object$, Identifiable);
 //INTERFACES
 function Cloneable(wat) {
 return wat;
@@ -119,13 +131,12 @@ exports.Cloneable=Cloneable;
 function Callable(wat) {
 return wat;
 }
-exports.Callable=Callable;
 initType(Callable, 'ceylon.language.Callable');
+exports.Callable=Callable;
 function $JsCallable(callable) {
 return callable;
 }
-initExistingTypeProto($JsCallable, Function, 'ceylon.language.JsCallable',
-IdentifiableObject, Callable);
+initExistingTypeProto($JsCallable, Function, 'ceylon.language.JsCallable', Callable);
 function noop() { return null; }
 //This is used for plain method references
 function JsCallable(o,f) {
@@ -230,6 +241,71 @@ return wat;
 initTypeProtoI(Iterable, 'ceylon.language.Iterable', Container);
 Iterable.$$.prototype.getEmpty = function() {
 return Boolean$(this.getIterator().next() === $finished);
+}
+Iterable.$$.prototype.getSequence = function() {
+var a = [];
+var iter = this.getIterator();
+var next;
+while ((next = iter.next()) !== $finished) {
+a.push(next);
+}
+return ArraySequence(a);
+}
+Iterable.$$.prototype.map = function(mapper) {
+var iter = this.getIterator();
+function mapped$iter(){
+var $cmp$=new mapped$iter.$$;
+IdentifiableObject(mapped$iter);
+$cmp$.iter=iter;
+$cmp$.mapper=mapper;
+$cmp$.next=function(){
+var e = this.iter.next();
+if(e !== $finished){
+return this.mapper(e);
+}else return $finished;
+};
+return $cmp$;
+}
+initTypeProto(mapped$iter, 'ceylon.language.MappedIterator', IdentifiableObject, Iterator);
+return Comprehension(mapped$iter);
+}
+Iterable.$$.prototype.filter = function(select) {
+var iter = this.getIterator();
+function filtered$iter(){
+var $cmp$=new filtered$iter.$$;
+IdentifiableObject(filtered$iter);
+$cmp$.iter=iter;
+$cmp$.select=select;
+$cmp$.next=function(){
+var e = this.iter.next();
+var flag = e === $finished ? true : this.select(e) === $true;
+while (!flag) {
+e = this.iter.next();
+flag = e === $finished ? true : this.select(e) === $true;
+}
+return e;
+};
+return $cmp$;
+}
+initTypeProto(filtered$iter, 'ceylon.language.FilteredIterator', IdentifiableObject, Iterator);
+return Comprehension(filtered$iter);
+}
+Iterable.$$.prototype.fold = function(ini, accum) {
+var r = ini;
+var iter = this.getIterator();
+var e; while ((e = iter.next()) !== $finished) {
+r = accum(r, e);
+}
+return r;
+}
+Iterable.$$.prototype.find = function(select) {
+var iter = this.getIterator();
+var e; while ((e = iter.next()) !== $finished) {
+if (select(e) === $true) {
+return e;
+}
+}
+return null;
 }
 exports.Iterable=Iterable;
 function Category(wat) {
@@ -570,10 +646,15 @@ exports.arrayOfSome=function(elems) { //receives an ArraySequence
 return ArrayList(elems.value);
 }
 exports.array=function(elems) {
-if (elems === null || elems === undefined || elems.getSize().value === 0) {
+if (elems === null || elems === undefined) {
 return EmptyArray();
 } else {
-return ArrayList(elems.value);
+var e=[];
+var iter=elems.getIterator();
+var item;while((item=iter.next())!==$finished) {
+e.push(item);
+}
+return e.length==0 ? EmptyArray() : ArrayList(e);
 }
 }
 exports.makeArray=function(size, init) {
@@ -585,6 +666,17 @@ elems.push(init(Integer(i)));
 return ArrayList(elems);
 } else return EmptyArray();
 }
+function Comprehension(iterator) {
+var that = new Comprehension.$$;
+IdentifiableObject(that);
+that.iterator=iterator;
+return that;
+}
+initTypeProto(Comprehension, 'ceylon.language.Comprehension', IdentifiableObject, Iterable);
+Comprehension.$$.prototype.getIterator=function() {
+return this.iterator();
+};
+exports.Comprehension=Comprehension;
 function Summable(wat) {
 return wat;
 }
@@ -779,7 +871,17 @@ return that;
 }
 initTypeProto(String$, 'ceylon.language.String', Object$, List, Comparable, Ranged, FixedSized,
 Summable, Castable, Cloneable);
+function StringOfSome() {}
+initType(StringOfSome, "ceylon.language.StringOfSome", String$, Some);
+function StringOfNone() {}
+initType(StringOfNone, "ceylon.language.StringOfNone", String$, None);
 var String$proto = String$.$$.prototype;
+String$proto.getT$name = function() {
+return ((this.value.length!==0)?StringOfSome:StringOfNone).$$.T$name;
+}
+String$proto.getT$all = function() {
+return ((this.value.length!==0)?StringOfSome:StringOfNone).$$.T$all;
+}
 String$proto.getString = function() { return this }
 String$proto.toString = function() { return this.value }
 String$proto.plus = function(other) {
@@ -1291,7 +1393,17 @@ function getNull() { return null }
 //$false.getString = function() {return this.string}
 //function getFalse() { return $false; }
 function Boolean$(value) {return Boolean(value)}
-initExistingTypeProto(Boolean$, Boolean, 'ceylon.language.Boolean', IdentifiableObject);
+initExistingTypeProto(Boolean$, Boolean, 'ceylon.language.Boolean');
+function trueClass() {}
+initType(trueClass, "ceylon.language.true", Boolean$);
+function falseClass() {}
+initType(falseClass, "ceylon.language.false", Boolean$);
+Boolean.prototype.getT$name = function() {
+return (this.valueOf()?trueClass:falseClass).$$.T$name;
+}
+Boolean.prototype.getT$all = function() {
+return (this.valueOf()?trueClass:falseClass).$$.T$all;
+}
 Boolean.prototype.equals = function(other) {return other.constructor===Boolean && other==this;}
 var trueString = String$("true", 4);
 var falseString = String$("false", 5);
@@ -1314,7 +1426,7 @@ return that;
 initTypeProto(Comparison, 'ceylon.language.Comparison', IdentifiableObject);
 var Comparison$proto = Comparison.$$.prototype;
 Comparison$proto.getString = function() { return this.name; }
-function print(line) { console.log(line.getString().value) }
+function print(line) { process$.writeLine(line.getString()); }
 exports.print=print;
 var larger = Comparison("larger");
 function getLarger() { return larger }
@@ -1390,13 +1502,35 @@ sb.appendAll(seq);
 return sb.getSequence();
 }
 }
-//Receives ArraySequence, returns ArraySequence (with Entries)
+//Receives Iterable, returns ArraySequence (with Entries)
 function entries(seq) {
 var e = [];
-for (var i = 0; i < seq.value.length; i++) {
-e.push(Entry(Integer(i), seq.value[i]));
+var iter = seq.getIterator();
+var i = 0;
+var elem; while ((elem = iter.next()) !== $finished) {
+e.push(Entry(Integer(i++), elem));
 }
 return ArraySequence(e);
+}
+function any(/*Boolean...*/ values) {
+var it = values.getIterator();
+var v;
+while ((v = it.next()) !== $finished) {
+if (v === $true) {return $true;}
+}
+return $false;
+}
+function every(/*Boolean...*/ values) {
+var it = values.getIterator();
+var v;
+while ((v = it.next()) !== $finished) {
+if (v === $false) {return $false;}
+}
+return $true;
+}
+function first(/*Element...*/ elements) {
+var e = elements.getIterator().next();
+return (e !== $finished) ? e : null;
 }
 exports.min=min;
 exports.max=max;
@@ -1406,6 +1540,9 @@ exports.coalesce=coalesce;
 exports.append=append;
 exports.prepend=prepend;
 exports.entries=entries;
+exports.any=any;
+exports.every=every;
+exports.first=first;
 //These are operators for handling nulls
 function exists(value) {
 return value === null || value === undefined ? $false : $true;
@@ -1420,9 +1557,7 @@ return Boolean$(typeName==="ceylon.language.Nothing" || typeName==="ceylon.langu
 if (typeof obj === 'function') {
 return Boolean$(typeName === 'ceylon.language.Callable');
 }
-var cons = obj.$$;
-if (cons === undefined) cons = obj.constructor;
-return Boolean$(typeName in cons.T$all);
+return Boolean$(obj.getT$all && typeName in obj.getT$all());
 }
 function isOfTypes(obj, types) {
 if (obj===null) {
@@ -1434,13 +1569,12 @@ return Boolean$(types.l.indexOf('ceylon.language.Callable')>=0);
 var unions = false;
 var inters = true;
 var _ints=false;
-var cons = obj.$$;
-if (cons === undefined) cons = obj.constructor;
+var objTypes = obj.getT$all();
 for (var i = 0; i < types.l.length; i++) {
 var t = types.l[i];
 var partial = false;
 if (typeof t === 'string') {
-partial = t in cons.T$all;
+partial = t in objTypes;
 } else {
 partial = isOfTypes(obj, t);
 }
@@ -1455,16 +1589,16 @@ return _ints ? inters||unions : unions;
 }
 function className(obj) {
 if (obj === null) return String$('ceylon.language.Nothing');
-var cons = obj.$$;
-if (cons === undefined) cons = obj.constructor;
-if (cons.T$name === undefined) {
-return String$('ceylon.language.Callable');
-}
-return String$(cons.T$name);
+return String$(obj.getT$name());
 }
 function identityHash(obj) {
 return obj.identifiableObjectID;
 }
+//This is just so that you can pass a comprehension and return it as iterable
+function elements(iter) {
+return iter;
+}
+exports.elements=elements;
 exports.exists=exists;
 exports.nonempty=nonempty;
 exports.isOfType=isOfType;
@@ -1632,6 +1766,167 @@ exports.SequenceBuilder=SequenceBuilder;
 exports.SequenceAppender=SequenceAppender;
 exports.ArraySequence=ArraySequence;
 exports.Singleton=Singleton;
+// implementation of object "process" in ceylon.language
+function processClass() {
+var proc = new processClass.$$;
+IdentifiableObject(proc);
+return proc;
+}
+initTypeProto(processClass, "ceylon.language.process", IdentifiableObject);
+var process$proto = processClass.$$.prototype;
+var argv = $empty;
+var namedArgs = {};
+if ((typeof process !== "undefined") && (process.argv !== undefined)) {
+// parse command line arguments
+if (process.argv.length > 2) {
+var args = process.argv.slice(2);
+var argStrings = new Array(args.length);
+for (i in args) { argStrings[i] = String$(args[i]); }
+argv = ArraySequence(argStrings);
+for (var i=0; i<args.length; ++i) {
+var arg = args[i];
+if (arg.charAt(0) == '-') {
+var pos = 1;
+if (arg.charAt(1) == '-') { pos = 2; }
+arg = arg.substr(pos);
+pos = arg.indexOf('=');
+if (pos >= 0) {
+namedArgs[arg.substr(0, pos)] = String$(arg.substr(pos+1));
+} else {
+var value = args[i+1];
+if ((value !== undefined) && (value.charAt(0) != '-')) {
+namedArgs[arg] = String$(value);
+++i;
+} else {
+namedArgs[arg] = null;
+}
+}
+}
+}
+}
+} else if (typeof window !== "undefined") {
+// parse URL parameters
+var parts = window.location.search.substr(1).replace('+', ' ').split('&');
+if (parts.length > 0) {
+var argStrings = new Array(parts.length);
+for (i in parts) { argStrings[i] = String$(parts[i]); }
+argv = ArraySequence(argStrings);
+for (i in parts) {
+var part = parts[i];
+var pos = part.indexOf('=');
+if (pos >= 0) {
+var value = decodeURIComponent(part.substr(pos+1));
+namedArgs[part.substr(0, pos)] = String$(value);
+} else {
+namedArgs[part] = null;
+}
+}
+}
+}
+process$proto.getArguments = function() { return argv; }
+process$proto.namedArgumentPresent = function(name) {
+return (name.value in namedArgs) ? $true : $false;
+}
+process$proto.namedArgumentValue = function(name) {
+var value = namedArgs[name.value];
+return (value !== undefined) ? value : null;
+}
+var properties = {};
+if (typeof navigator !== "undefined") {
+if (navigator.language !== undefined) {
+properties["user.language"] = String$(navigator.language);
+}
+if (navigator.platform !== undefined) {
+properties["os.name"] = String$(navigator.platform);
+}
+}
+if (typeof process !== "undefined") {
+if (process.platform !== undefined) {
+properties["os.name"] = String$(process.platform);
+}
+if (process.arch !== undefined) {
+properties["os.arch"] = String$(process.arch);
+}
+}
+if (typeof document !== "undefined") {
+if (document.defaultCharset !== undefined) {
+properties["file.encoding"] = String$(document.defaultCharset);
+}
+}
+var linesep = String$('\n', 1);
+var filesep = String$('/', 1);
+var pathsep = String$(':', 1);
+var osname = properties["os.name"];
+if ((osname !== undefined) && (osname.value.search(/windows/i) >= 0)) {
+linesep = String$("\r\n", 2);
+filesep = String$('\\', 1);
+pathsep = String$(';', 1);
+}
+properties["line.separator"] = linesep;
+properties["file.separator"] = filesep;
+properties["path.separator"] = pathsep;
+process$proto.propertyValue = function(name) {
+var value = properties[name.value];
+return (value !== undefined) ? value : null;
+}
+process$proto.getNewline = function() { return linesep; }
+if ((typeof process !== "undefined") && (process.stdout !== undefined)) {
+process$proto.write = function(string) {
+process.stdout.write(string.value);
+}
+process$proto.writeLine = function(line) {
+this.write(line);
+this.write(linesep);
+}
+} else if ((typeof console !== "undefined") && (console.log !== undefined)) {
+process$proto.writeLine = function(line) {
+console.log(line.value);
+}
+process$proto.write = process$proto.writeLine;
+} else {
+process$proto.write = function() {};
+process$proto.writeLine = function() {};
+}
+if ((typeof process !== "undefined") && (process.stderr !== undefined)) {
+process$proto.writeError = function(string) {
+process.stderr.write(string.value);
+}
+process$proto.writeErrorLine = function(line) {
+this.writeError(line);
+this.writeError(linesep);
+}
+} else if ((typeof console !== "undefined") && (console.error !== undefined)) {
+process$proto.writeErrorLine = function(line) {
+console.error(line.value);
+}
+process$proto.writeError = process$proto.writeErrorLine;
+} else {
+process$proto.writeError = process$proto.write;
+process$proto.writeErrorLine = process$proto.writeLine;
+}
+process$proto.readLine = function() {
+return String$("", 0);//TODO
+}
+process$proto.getMilliseconds = function() {
+return Integer(Date.now());
+}
+process$proto.getNanoseconds = function() {
+return Integer(Date.now()*1000000);
+}
+if ((typeof process !== "undefined") && (process.exit !== undefined)) {
+process$proto.exit = function(code) {
+process.exit(code.value);
+}
+} else {
+process$proto.exit = function() {}
+}
+var processString = String$("process", 7);
+process$proto.getString = function() {
+return processString;
+}
+var process$ = processClass();
+function getProcess() { return process$; }
+exports.getProcess=getProcess;
 function Range(first, last) {
 var that = new Range.$$;
 that.first = first;
@@ -1795,10 +2090,12 @@ return String$(this.key.getString().value + "->" + this.item.getString().value);
 Entry$proto.getKey = function() { return this.key; }
 Entry$proto.getItem = function() { return this.item; }
 Entry$proto.equals = function(other) {
-return Boolean$(other && this.getKey().equals(other.getKey()) === $true && this.getItem().equals(other.getItem()) === $true);
+return Boolean$(other && isOfType(other, 'ceylon.language.Entry') && this.getKey().equals(other.getKey()) === $true && this.getItem().equals(other.getItem()) === $true);
 }
-Entry$proto.getHash = function() { Integer(this.key.getHash().value ^ this.item.getHash().value); }
+Entry$proto.getHash = function() { Integer((31 + this.key.getHash().value) * 31 + this.item.getHash().value); }
 exports.Exception=Exception;
+exports.Identifiable=Identifiable;
+exports.identityHash=$identityHash;
 exports.IdentifiableObject=IdentifiableObject;
 exports.Object=Object$;
 exports.Boolean=Boolean$;
