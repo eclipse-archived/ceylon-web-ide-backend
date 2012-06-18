@@ -1,7 +1,7 @@
 (function(define) {
     define(function(require, exports, module) {
     	
-var clang=require('ceylon/language/0.3/ceylon.language');
+var clang=require('ceylon/language/0.3/ceylon.language-0.3');
 
 var $document = function() { return document; };
 exports.getDocument = $document;
