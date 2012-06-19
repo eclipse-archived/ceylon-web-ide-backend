@@ -123,13 +123,9 @@
 	<hr>
     <div class="news_entry"><a href="#" onClick="return editCode('hello_world')">Hello World</a></div>
 	<hr>
-    <div class="news_entry"><a href="#" onClick="return editCode('for1_10')">For 1 to 10</a></div>
+    <div class="news_entry"><a href="#" onClick="return editCode('basics')">Basics</a></div>
 	<hr>
-    <div class="news_entry"><a href="#" onClick="return editCode('string_interp')">String Interpolation</a></div>
-	<hr>
-    <div class="news_entry"><a href="#" onClick="return editCode('nulls1')">Handling null, part 1</a></div>
-	<hr>
-    <div class="news_entry"><a href="#" onClick="return editCode('nulls2')">Handling null, part 2</a></div>
+    <div class="news_entry"><a href="#" onClick="return editCode('null_and_union')">Null values and union types</a></div>
 	<hr>
     <div class="news_entry"><a href="#" onClick="return editCode('defaultparms')">Defaulted parameters</a></div>
 	<hr>
