@@ -24,7 +24,10 @@ print(className(t1));
 while (f < 1_000_000.0) {
     for (j in 1..10) {
         if (j%3 == 1) {
-            f *= j.float;
+            f /= j+1;
+        }
+        else {
+            f *= j+2;
         }
     }
 }

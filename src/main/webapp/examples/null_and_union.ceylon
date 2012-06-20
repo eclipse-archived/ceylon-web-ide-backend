@@ -16,19 +16,18 @@ if (exists s2) {
 }
 
 // There are also special operators for handling null values:
-String safe = s2 ? "NULL!";  // use default value if s2 is null
+String safe = s2 else "NULL!"; // use default value if s2 is null
 Integer? len = s2?.size; // null if s2 is null
-print("'" safe "' has length " len?0 "");
-print("'" s1?"NULL!" "' has length " s1?.size?0 "");
+print("'" safe "' has length " (len else 0) "");
+print("'" (s1 else "NULL!") "' has length " (s1?.size else 0) "");
 
-// The "then"/"else" operators also work with null values:
-String? check = (10.0**0.5 > 3.0) then "ok";
-String result = check else "FAIL";
-value i = safe.startsWith("This") then 1 else -1;
-print("result='" result "', i=" i "");
+// The "else" operator can be combined with "then":
+String? check = (10.0**0.5 > 3.0) then "ok"; // otherwise null
+Integer i = safe.startsWith("This") then 1 else -1;
+print("check='" (check else "NULL!") "', x=" i "");
 
 // Types are simultaneously checked and narrowed with if(is...):
-Object o = s2?"null";
+Object o = s2 else "null";
 if (is String o) {
     String s = o; // o has type String here!
     print(s);
@@ -46,4 +45,6 @@ if (is Integer y = x) {
 // "String?" is just a shortcut for String|Nothing, where
 // Nothing is the type of "null".
 String|Nothing optional = s1; // equivalent to type "String?"
-print(optional else "optional is null");
+if (is Nothing optional) {
+    print("optional is null");
+}
