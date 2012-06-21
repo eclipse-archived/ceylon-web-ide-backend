@@ -44,7 +44,7 @@ by "superuser"
 abstract class Product(name, price) {
  
     // We can turn parameters into attributes using the syntax
-    // seen here (not the missing type above).
+    // seen here (note the missing type above).
     shared String name;
     shared Float price;
  
@@ -75,7 +75,7 @@ class ProductInDatabase(String name, Float price)
     // "actual" annotation.
     // variable attributes can be implemented as getter/setter:
     shared actual Integer quantity {
-        return 10; //TODO: read from databse
+        return 10; //TODO: read from database
     }
     assign quantity {
         //TODO: store in database
