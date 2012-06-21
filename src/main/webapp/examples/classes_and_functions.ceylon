@@ -71,6 +71,8 @@ see (Product)
 class ProductInDatabase(String name, Float price)
             extends Product(name, price) {
               
+    // To implement/override a formal/default member we use the
+    // "actual" annotation.
     // variable attributes can be implemented as getter/setter:
     shared actual Integer quantity {
         return 10; //TODO: read from databse

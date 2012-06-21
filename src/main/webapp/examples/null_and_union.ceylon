@@ -24,7 +24,7 @@ print("'" (s1 else "NULL!") "' has length " (s1?.size else 0) "");
 // The "else" operator can be combined with "then":
 String? check = (10.0**0.5 > 3.0) then "ok"; // otherwise null
 Integer i = safe.startsWith("This") then 1 else -1;
-print("check='" (check else "NULL!") "', x=" i "");
+print("check='" (check else "NULL!") "', i=" i "");
 
 // Types are simultaneously checked and narrowed with if(is...):
 Object o = s2 else "null";

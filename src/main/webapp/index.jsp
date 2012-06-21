@@ -129,6 +129,8 @@
 	<hr>
     <div class="news_entry"><a href="#" onClick="return editCode('classes_and_functions')">Classes and functions 1</a></div>
 	<hr>
+    <div class="news_entry"><a href="#" onClick="return editCode('interfaces')">Interfaces and mixin inheritance</a></div>
+        <hr>
     <div class="news_entry"><a href="#" onClick="return editCode('switch1')">The Switch statement</a></div>
     <hr>
     <div class="news_entry"><a href="#" onClick="return editCode('higherfuncs')">Higher-order functions and method references</a></div>
