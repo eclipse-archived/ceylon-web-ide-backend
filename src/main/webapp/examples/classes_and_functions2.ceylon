@@ -36,6 +36,16 @@ function makeFunc2(Float(Float) f) {
 value squareAvg = makeFunc2((Float n) n**2);
 print("squareAvg(1.0, 7.0) = " squareAvg(1.0, 7.0) "");
 
+// A different and rather elegant and approach is to define a
+// function with multiple parameter lists:
+Float expAvg(Float e)(Float x, Float y) {
+    return average(x**e, y**e);
+}
+// Applying the first parameter list returns a "normal" function
+// with one parameter list:
+value squareAvg2 = expAvg(2.0);
+print("squareAvg2(1.0, 7.0) = " squareAvg2(1.0, 7.0) "");
+
 // Function references can even refer to class initializers! They
 // are treated as functions that return an instance of the class.
 class Product(String name) {
@@ -45,3 +55,35 @@ Product? getByName(String name) { return null; }
 variable Product?(String) getProd := getByName;
 getProd := Product;
 print(getProd("Giraffe, extra long") else "not found");
+
+// Note the differing return types above: "Product"
+// vs. "Product?". That's indeed allowed:
+void voidFunc() { print("returns nothing"); }
+variable Void() funcRef := voidFunc;
+String stringFunc() { return "returns a String"; }
+funcRef := stringFunc; // return value will be ignored
+
+// Somewhere above we nested a function inside a function. In
+// fact, most language elements can be nested inside each other:
+class Outer(Float(Float, Float) func) {
+    Float calc(Float x, Float y) = func;
+ 
+    // Types can be nested inside other types...
+    shared class Inner() {
+        shared Float f() {
+            interface I { /*...*/ } // ...or inside functions.
+  
+            // The keyword "object" lets us define an anonymous
+            // class with one single instance.
+            object obj satisfies I {
+                shared Integer x = 3;
+            }
+   
+            // "outer" refers to the outer instance
+            return outer.calc(obj.x.float, 5.0);
+        }
+    }
+}
+Outer o = Outer(average);
+Outer.Inner i = o.Inner();
+print("Outer(average).Inner().f() = " i.f() "");
