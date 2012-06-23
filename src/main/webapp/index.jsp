@@ -133,6 +133,8 @@
         <hr>
     <div class="news_entry"><a href="#" onClick="return editCode('classes_and_functions2')">Classes and functions 2</a></div>
         <hr>
+    <div class="news_entry"><a href="#" onClick="return editCode('collections')">Collections and sequence comprehensions</a></div>
+        <hr>
     <div class="news_entry"><a href="#" onClick="return editCode('switch1')">The Switch statement</a></div>
     <hr>
 
