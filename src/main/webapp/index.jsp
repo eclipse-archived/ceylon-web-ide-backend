@@ -140,7 +140,11 @@
     <div class="news_entry"><a href="#" onClick="return editCode('generics')">Type parameters</a></div>
         <hr>
     <div class="news_entry"><a href="#" onClick="return editCode('switch1')">Enumerations and the switch statement</a></div>
-    <hr>
+        <hr>
+    <div class="news_entry"><a href="#" onClick="return editCode('interop')">Interoperability</a></div>
+        <hr>
+    <div class="news_entry"><a href="#" onClick="return editCode('operators')">Operator polymorphism</a></div>
+        <hr>
 
     <br><br>
     <a href="https://twitter.com/ceylonlang" class="twitter-follow-button" data-show-count="false" data-size="large">Follow @ceylonlang</a>
