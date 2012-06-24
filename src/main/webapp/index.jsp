@@ -135,6 +135,8 @@
         <hr>
     <div class="news_entry"><a href="#" onClick="return editCode('collections')">Collections and sequence comprehensions</a></div>
         <hr>
+    <div class="news_entry"><a href="#" onClick="return editCode('named_arguments')">Named argument syntax</a></div>
+        <hr>
     <div class="news_entry"><a href="#" onClick="return editCode('switch1')">The Switch statement</a></div>
     <hr>
 
