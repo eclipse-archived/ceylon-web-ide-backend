@@ -139,7 +139,7 @@
         <hr>
     <div class="news_entry"><a href="#" onClick="return editCode('generics')">Type parameters</a></div>
         <hr>
-    <div class="news_entry"><a href="#" onClick="return editCode('switch1')">The Switch statement</a></div>
+    <div class="news_entry"><a href="#" onClick="return editCode('switch1')">Enumerations and the switch statement</a></div>
     <hr>
 
     <br><br>
