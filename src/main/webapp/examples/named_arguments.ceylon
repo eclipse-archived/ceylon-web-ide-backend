@@ -42,13 +42,10 @@ Stock stock = Stock {
     }
 };
 
-// This can be written in a slightly more compact way:
-Stock stock2 { /*...*/ }
-
 // A list of items can be assigned to a sequenced parameter
 // directly by name:
 Product[] toys = { /*...*/ };
-Group toysGroup { name = "Toys"; products = toys; }
+Group toysGroup = Group { name = "Toys"; products = toys; };
 
 // But we are not restricted to simple static data, like XML.
 interface Formatter {
@@ -58,7 +55,7 @@ class Button(String text, Void()? onClick=null,
              Formatter? formatter=null) {
     shared void doClick() { if (exists onClick) {onClick();} }
 }
-Button button {
+Button button = Button {
     text = "order";
     // Streamlined syntax for specifying function arguments:
     void onClick() {
@@ -69,5 +66,5 @@ Button button {
         // Shortcut syntax for implementing a formal member:
         format = (String text) "<b>" text "</b>";
     }
-}
+};
 button.doClick();
