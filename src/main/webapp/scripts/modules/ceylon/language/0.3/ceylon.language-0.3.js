@@ -515,7 +515,58 @@ hc += elem.getHash().value;
 }
 return Integer(hc);
 }
-//TODO implement methods: getKeys, getValues, getInverse
+Map$proto.getValues = function() {
+function $map$values(outer) {
+var mv = new $map$values.$$;
+mv.outer=outer;
+IdentifiableObject(mv);
+Collection(mv);
+mv.clone=function() { return this; }
+mv.equals=function() { return $false; }
+mv.getHash=function() { return outer.getHash(); }
+mv.getIterator=function() { return getBottom(); }
+mv.getSize=function() { return outer.getSize(); }
+mv.getString=function() { return String$('',0); }
+return mv;
+}
+initTypeProto($map$values, 'ceylon.language.MapValues', IdentifiableObject, Collection);
+return $map$values(this);
+}
+Map$proto.getKeys = function() {
+function $map$keys(outer) {
+var mk = new $map$keys.$$;
+mk.outer=outer;
+IdentifiableObject(mk);
+Set(mk);
+mk.clone=function() { return this; }
+mk.equals=function() { return $false; }
+mk.getHash=function() { return outer.getHash(); }
+mk.getIterator=function() { return getBottom(); }
+mk.getSize=function() { return outer.getSize(); }
+mk.getString=function() { return String$('',0); }
+return mk;
+}
+initTypeProto($map$keys, 'ceylon.language.MapKeys', IdentifiableObject, Set);
+return $map$keys(this);
+}
+Map$proto.getInverse = function() {
+function $map$inv(outer) {
+var inv = new $map$inv.$$;
+inv.outer=outer;
+IdentifiableObject(inv);
+Map(inv);
+inv.clone=function() { return this; }
+inv.equals=function() { return $false; }
+inv.getHash=function() { return outer.getHash(); }
+inv.getItem=function() { return getBottom(); }
+inv.getIterator=function() { return getBottom(); }
+inv.getSize=function() { return outer.getSize(); }
+inv.getString=function() { return String$('',0); }
+return inv;
+}
+initTypeProto($map$inv, 'ceylon.language.InverseMap', IdentifiableObject, Map);
+return $map$inv(this);
+}
 exports.Map=Map;
 function Set(wat) {
 return wat;
@@ -753,7 +804,7 @@ Integer$proto.divided = function(other) {
 var exact = this.value/other.value;
 if (isOfType(other, 'ceylon.language.Integer') === $true) {
 if (other.value === 0) {
-throw Exception("Division by Zero");
+throw Exception(String$("Division by Zero"));
 }
 return Integer((exact<0) ? Math.ceil(exact) : Math.floor(exact));
 }
@@ -1125,23 +1176,24 @@ String$proto.getKeys = function() {
 return this.getSize().value > 0 ? Range(Integer(0), this.getSize().getPredecessor()) : $empty;
 }
 String$proto.join = function(strings) {
-if (strings===undefined || strings.value.length===0) {return String$("", 0)}
+if (strings === undefined) {return String$("", 0)}
+var it = strings.getIterator();
+var str = it.next();
+if (str === $finished) {return String$("", 0);}
 if (this.codePoints === undefined) {this.codePoints = countCodepoints(this.value)}
-var str = strings.value[0];
 var result = str.value;
 var len = str.codePoints;
-for (var i=1; i<strings.value.length; ++i) {
-str = strings.value[i];
+while ((str = it.next()) !== $finished) {
 result += this.value;
 result += str.value;
 len += this.codePoints + str.codePoints;
 }
 return String$(result, isNaN(len)?undefined:len);
 }
-String$proto.split = function(seps, discard) {
-if (this.getEmpty() === $true) {
-return Singleton(this);
-}
+String$proto.split = function(seps, discard, group) {
+var value = this.value;
+// shortcut for empty input
+if (value.length === 0) {return Singleton(this);}
 var sepChars = $WS;
 if (seps!==undefined && seps!==null) {
 sepChars = {}
@@ -1149,28 +1201,59 @@ var it = seps.getIterator();
 var c; while ((c=it.next()) !== $finished) {sepChars[c.value] = true}
 }
 if (discard === undefined) {discard = false}
+if (group === undefined) {group = true}
 //TODO: return an iterable which determines the next token on demand
 var tokens = [];
 var tokenBegin = 0;
 var tokenBeginCount = 0;
-for (var i=0, count=0; i<this.value.length;) {
+var separator = true;
+function pushToken(tokenEnd) {
+tokens.push(String$(value.substring(tokenBegin, tokenEnd), count-tokenBeginCount));
+}
+for (var i=0, count=0; i<value.length; ++count) {
 var j = i;
-var cp = this.value.charCodeAt(i++);
-if ((cp&0xfc00)===0xd800 && i<this.value.length) {
-cp = (cp<<10) + this.value.charCodeAt(i++) - 0x35fdc00;
+var cp = value.charCodeAt(i++);
+if ((cp&0xfc00)===0xd800 && i<value.length) {
+cp = (cp<<10) + value.charCodeAt(i++) - 0x35fdc00;
 }
-++count;
 if (cp in sepChars) {
-if (tokenBegin != j) {
-tokens.push(String$(this.value.substring(tokenBegin, j), count-tokenBeginCount-1))
+if (!group) {
+// ungrouped separator: store preceding token
+pushToken(j);
+if (!discard) {
+// store separator as token
+tokens.push(String$(value.substring(j, i), 1));
 }
-if (!discard) {tokens.push(String$(this.value.substring(j, i), 1))}
+// next token begins after this character
 tokenBegin = i;
+tokenBeginCount = count + 1;
+} else if (!separator || (j == 0)) {
+// begin of grouped separator: store preceding token
+pushToken(j);
+// separator token begins at this character
+tokenBegin = j;
 tokenBeginCount = count;
 }
+separator = true;
+} else if (separator) {
+// first non-separator after separators or at beginning
+if (!discard && (tokenBegin != j)) {
+// store preceding grouped separator (if group=false then tokenBegin=j)
+pushToken(j);
 }
-if (tokenBegin != i) {
-tokens.push(String$(this.value.substring(tokenBegin, i), count-tokenBeginCount))
+// non-separator token begins at this character
+tokenBegin = j;
+tokenBeginCount = count;
+separator = false;
+}
+}
+if ((tokenBegin != i) && !(separator && discard)) {
+// store preceding token (may be a grouped separator)
+pushToken(i);
+}
+if (separator) {
+// if last character was a separator then there's another empty token
+tokens.push(String$("", 0));
 }
 this.codePoints = count;
 return ArraySequence(tokens);
@@ -1985,7 +2068,7 @@ return Range(n, this.last);
 }
 Range$proto.by = function(step) {
 if (step.compare(Integer(0)) !== larger) {
-//throw
+throw Exception(String$("step must be positive"));
 }
 if (this.first.equals(this.last) === getTrue() || step.equals(Integer(1)) === getTrue()) {
 return this;
@@ -2093,6 +2176,9 @@ Entry$proto.equals = function(other) {
 return Boolean$(other && isOfType(other, 'ceylon.language.Entry') && this.getKey().equals(other.getKey()) === $true && this.getItem().equals(other.getItem()) === $true);
 }
 Entry$proto.getHash = function() { Integer((31 + this.key.getHash().value) * 31 + this.item.getHash().value); }
+function getBottom() {
+throw Exception();
+}
 exports.Exception=Exception;
 exports.Identifiable=Identifiable;
 exports.identityHash=$identityHash;
@@ -2106,6 +2192,7 @@ exports.getFalse=getFalse;
 exports.getExhausted=getExhausted;
 exports.Range=Range;
 exports.Entry=Entry;
+exports.getBottom=getBottom;
 });
 }(typeof define==='function' && define.amd ?
 define : function (factory) {
