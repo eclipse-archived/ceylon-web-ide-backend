@@ -93,6 +93,18 @@
               <warName>ROOT</warName>
             </configuration>
           </plugin>
+          <plugin>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>2.4</version>
+            <configuration>
+              <executable>${env.OPENSHIFT_DATA_DIR}jdk1.7.0_05/bin/javac</executable>
+              <source>1.7</source>
+              <target>1.7</target>
+              <showDeprecation>true</showDeprecation>
+              <showWarnings>true</showWarnings>
+              <fork>true</fork>
+            </configuration>
+          </plugin>
         </plugins>
       </build>
     </profile>
