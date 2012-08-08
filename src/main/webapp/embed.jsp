@@ -17,7 +17,7 @@
             width: 100%;
             height: 100%;
         }
-        #core-page {
+        #primary-content #core-page {
             margin: 0px;
             width: 100%;
             height: 100%;
@@ -99,7 +99,6 @@
 
 <div id="core-page">
 
-    <h1 id="hdr_title">Ceylon Web Runner</h1>
     <form>
         <textarea id="edit_ceylon"></textarea>
         <pre id="docs_errs" class="cantseeme"> </pre>
