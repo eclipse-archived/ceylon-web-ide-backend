@@ -1,0 +1,14 @@
+#!/bin/bash 
+# specify java version which we are going to use
+JAVA_VERSION="jdk1.7.0_05"
+
+export JAVA_HOME="${OPENSHIFT_DATA_DIR}${JAVA_VERSION}"
+export JBOSS_HOME="${OPENSHIFT_HOMEDIR}jbossas-7/jbossas-7"  
+
+# make sure the log file exists (first start) - could be removed after first start
+mkdir ${JBOSS_HOME}/standalone/log
+touch ${JBOSS_HOME}/standalone/log/server.log
+
+# start JBossAS7
+echo "starting JBossAS7"
+${JBOSS_HOME}/bin/standalone.sh > ${OPENSHIFT_DATA_DIR}/jboss-stdout.log &

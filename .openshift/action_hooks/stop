@@ -1,0 +1,3 @@
+#!/bin/bash 
+# kill Java VM 
+killall java 
