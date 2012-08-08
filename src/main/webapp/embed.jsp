@@ -11,6 +11,10 @@
         <link href='http://ceylon-lang.org/stylesheets/ie.css' media='screen, projection' rel='stylesheet' type='text/css' />
     <![endif]-->
     <style type="text/css">
+        #primary-content {
+            margin: 0px;
+            top: 0px;
+        }
         #result {
         }
         .cantseeme {
