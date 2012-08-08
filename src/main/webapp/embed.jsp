@@ -77,9 +77,6 @@
             text-align: left; 
             text-decoration: none;
         }
-        #docs_errs {
-            width:600px;
-        }
     </style>
     <script type="text/javascript" src="scripts/spin.js" charset="utf-8"></script>
     <script type="text/javascript" src="scripts/codemirror.js" charset="utf-8"></script>
@@ -101,7 +98,6 @@
 
     <form>
         <textarea id="edit_ceylon"></textarea>
-        <pre id="docs_errs" class="cantseeme"> </pre>
         <input type="button" id="submit" name="submit" value="Run" onClick="run()">
         <input type="button" value="Clear Output" onClick="clearOutput()">
         <input type="button" id="share_src" name="share_src" value="Share this code" onClick="shareSource()">

@@ -103,14 +103,6 @@ function stopSpinner() {
 
 var oldcode, transok;
 
-//Returns a function that sets the content of the docs_errs element to the specified text.
-function showHoverDoc(xxxxx){
-    return function(){document.getElementById('docs_errs').innerHTML=xxxxx;};
-}
-//Clears the context of the docs_errs element.
-function hideHoverDoc() {
-    document.getElementById('docs_errs').innerHTML=' ';
-}
 //Shows the specified error messages in the code
 function showErrors(errors, docs, refs) {
     printError("Code contains errors:");
@@ -125,7 +117,7 @@ function showErrors(errors, docs, refs) {
             marker=editor.markText({line:err.from.line-2,ch:err.from.ch},{line:err.to.line-2,ch:err.to.ch+1},estilo);
             markers.push(marker);
             bindings.push(estilo);
-            jquery("."+estilo).hover(showHoverDoc(err.msg),hideHoverDoc);
+            jquery("."+estilo).attr("title", err.msg);
         }
     }
 }
@@ -143,7 +135,7 @@ function showDocs(docs, refs) {
         }
     }
     for (var $$ in estilos) {
-        jquery("."+$$).hover(showHoverDoc(docs[estilos[$$]]), hideHoverDoc);
+        jquery("."+$$).attr("title", docs[estilos[$$]]);
     }
 }
 
