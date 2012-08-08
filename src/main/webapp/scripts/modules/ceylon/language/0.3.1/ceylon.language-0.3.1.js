@@ -189,6 +189,10 @@ return wat;
 }
 initType(Container, 'ceylon.language.Container');
 exports.Container=Container;
+function ContainerWithFirstElement(wat) {
+return wat;
+}
+initType(ContainerWithFirstElement, 'ceylon.language.ContainerWithFirstElement');
 function Correspondence(wat) {
 return wat;
 }
@@ -227,22 +231,27 @@ Correspondence$proto.keys = function() {
 return TypeCategory(this, 'ceylon.language.Integer');
 }
 exports.Correspondence=Correspondence;
-function Sized(wat) {
+function Iterator(wat) {
 return wat;
 }
-initTypeProtoI(Sized, 'ceylon.language.Sized', Container);
-Sized.$$.prototype.getEmpty = function() {
-return Boolean$(this.getSize().value === 0);
-}
-exports.Sized=Sized;
+initType(Iterator, 'ceylon.language.Iterator');
+exports.Iterator=Iterator;
 function Iterable(wat) {
 return wat;
 }
-initTypeProtoI(Iterable, 'ceylon.language.Iterable', Container);
-Iterable.$$.prototype.getEmpty = function() {
+initTypeProtoI(Iterable, 'ceylon.language.Iterable', ContainerWithFirstElement);
+var Iterable$proto=Iterable.$$.prototype;
+Iterable$proto.getEmpty = function() {
 return Boolean$(this.getIterator().next() === $finished);
 }
-Iterable.$$.prototype.getSequence = function() {
+Iterable$proto.getFirst = function() {
+var e = this.getIterator().next();
+return e === $finished ? null : e;
+}
+Iterable$proto.getRest = function() {
+return this.skipping(Integer(1));
+}
+Iterable$proto.getSequence = function() {
 var a = [];
 var iter = this.getIterator();
 var next;
@@ -251,46 +260,30 @@ a.push(next);
 }
 return ArraySequence(a);
 }
-Iterable.$$.prototype.map = function(mapper) {
-var iter = this.getIterator();
-function mapped$iter(){
-var $cmp$=new mapped$iter.$$;
-IdentifiableObject(mapped$iter);
-$cmp$.iter=iter;
-$cmp$.mapper=mapper;
-$cmp$.next=function(){
-var e = this.iter.next();
-if(e !== $finished){
-return this.mapper(e);
-}else return $finished;
-};
-return $cmp$;
+Iterable$proto.map = function(mapper) {
+var iter = this;
+return Comprehension(function() {
+var it = iter.getIterator();
+return function() {
+var e = it.next();
+if(e !== $finished) {return mapper(e);}
+return $finished;
 }
-initTypeProto(mapped$iter, 'ceylon.language.MappedIterator', IdentifiableObject, Iterator);
-return Comprehension(mapped$iter);
+});
 }
-Iterable.$$.prototype.filter = function(select) {
-var iter = this.getIterator();
-function filtered$iter(){
-var $cmp$=new filtered$iter.$$;
-IdentifiableObject(filtered$iter);
-$cmp$.iter=iter;
-$cmp$.select=select;
-$cmp$.next=function(){
-var e = this.iter.next();
-var flag = e === $finished ? true : this.select(e) === $true;
-while (!flag) {
-e = this.iter.next();
-flag = e === $finished ? true : this.select(e) === $true;
-}
+Iterable$proto.filter = function(select) {
+var iter = this;
+return Comprehension(function() {
+var it = iter.getIterator();
+return function() {
+do {
+var e = it.next();
+} while ((e !== $finished) && (select(e) === $false));
 return e;
-};
-return $cmp$;
 }
-initTypeProto(filtered$iter, 'ceylon.language.FilteredIterator', IdentifiableObject, Iterator);
-return Comprehension(filtered$iter);
+});
 }
-Iterable.$$.prototype.fold = function(ini, accum) {
+Iterable$proto.fold = function(ini, accum) {
 var r = ini;
 var iter = this.getIterator();
 var e; while ((e = iter.next()) !== $finished) {
@@ -298,7 +291,7 @@ r = accum(r, e);
 }
 return r;
 }
-Iterable.$$.prototype.find = function(select) {
+Iterable$proto.find = function(select) {
 var iter = this.getIterator();
 var e; while ((e = iter.next()) !== $finished) {
 if (select(e) === $true) {
@@ -307,7 +300,140 @@ return e;
 }
 return null;
 }
+Iterable$proto.findLast = function(select) {
+var iter = this.getIterator();
+var last = null;
+var e; while ((e = iter.next()) !== $finished) {
+if (select(e) === $true) {
+last = e;
+}
+}
+return last;
+}
+Iterable$proto.sorted = function(/*Callable<Comparison?,Element,Element>*/comparing) {
+var a = [];
+var iter = this.getIterator();
+var e; while ((e = iter.next()) !== $finished) {
+a.push(e);
+}
+a.sort(function(x,y) {
+var r = comparing(x,y);
+if (r === larger) return 1;
+if (r === smaller) return -1;
+return 0;
+});
+return ArraySequence(a);
+}
+Iterable$proto.any = function(/*Callable<Boolean,Element>*/selecting) {
+var iter = this.getIterator();
+var e; while ((e = iter.next()) !== $finished) {
+if (selecting(e) === $true) {
+return $true;
+}
+}
+return $false;
+}
+Iterable$proto.every = function(/*Callable<Boolean,Element>*/selecting) {
+var iter = this.getIterator();
+var e; while ((e = iter.next()) !== $finished) {
+if (selecting(e) !== $true) {
+return $false;
+}
+}
+return $true;
+}
+Iterable$proto.skipping = function(skip) {
+function skip$iter(iter,skip){
+var $cmp$=new skip$iter.$$;
+IdentifiableObject($cmp$);
+$cmp$.iter=iter;
+$cmp$.skip=skip;
+$cmp$.getIterator=function(){
+var iter = this.iter.getIterator();
+for (var i=0; i < this.skip; i++) {
+iter.next();
+}
+return iter;
+};
+return $cmp$;
+}
+initTypeProto(skip$iter, 'ceylon.language.SkipIterable', IdentifiableObject, Iterable);
+return skip$iter(this,skip.value);
+}
+Iterable$proto.taking = function(take) {
+if (take.value <= 0) return $empty;
+var iter = this;
+return Comprehension(function() {
+var it = iter.getIterator();
+var i = 0;
+return function() {
+if (i >= take.value) {return $finished;}
+++i;
+return it.next();
+}
+});
+}
+Iterable$proto.by = function(step) {
+if (step.value == 1) return this;
+if (step.value < 1) throw Exception(String$("Step must be positive"));
+var iter = this;
+return Comprehension(function() {
+var it = iter.getIterator();
+return function() {
+var e = it.next();
+for (var i=1; i<step.value && (it.next()!==$finished); i++);
+return e;
+}
+});
+}
+Iterable$proto.count = function(sel) {
+var c = 0;
+var iter = this.getIterator();
+var e; while ((e = iter.next()) !== $finished) {
+if (sel(e) === true) c++;
+}
+return Integer(c);
+}
+Iterable$proto.getCoalesced = function() {
+var iter = this;
+return Comprehension(function() {
+var it = iter.getIterator();
+return function() {
+var e;
+while ((e = it.next()) === null);
+return e;
+}
+});
+}
+Iterable$proto.getIndexed = function() {
+var iter = this;
+return Comprehension(function() {
+var it = iter.getIterator();
+var idx = 0;
+return function() {
+var e;
+while ((e = it.next()) === null);
+return e === $finished ? e : Entry(Integer(idx++), e);
+}
+});
+}
+Iterable$proto.getLast = function() {
+var iter = this.getIterator();
+var l=null;
+var e; while ((e = iter.next()) !== $finished) {
+l=e;
+}
+return l;
+}
 exports.Iterable=Iterable;
+function Sized(wat) {
+return wat;
+}
+initTypeProtoI(Sized, 'ceylon.language.Sized', Container);
+Sized.$$.prototype.getEmpty = function() {
+return Boolean$(this.getSize().value === 0);
+}
+exports.Sized=Sized;
 function Category(wat) {
 return wat;
 }
@@ -329,11 +455,6 @@ return $true;
 return $false;
 }
 exports.Category=Category;
-function Iterator(wat) {
-return wat;
-}
-initType(Iterator, 'ceylon.language.Iterator');
-exports.Iterator=Iterator;
 function Collection(wat) {
 return wat;
 }
@@ -349,17 +470,6 @@ return $true;
 }
 return $false;
 }
-Collection$proto.count = function(obj) {
-var iter = this.getIterator();
-var item;
-var count = 0;
-while ((item = iter.next()) !== $finished) {
-if (exists(item) === $true && item.equals(obj) === $true) {
-count++;
-}
-}
-return Integer(count);
-}
 exports.Collection=Collection;
 function FixedSized(wat) {
 return wat;
@@ -374,7 +484,7 @@ exports.FixedSized=FixedSized;
 function Some(wat) {
 return wat;
 }
-initTypeProtoI(Some, 'ceylon.language.Some', FixedSized);
+initTypeProtoI(Some, 'ceylon.language.Some', FixedSized, ContainerWithFirstElement);
 var $Some = Some.$$;
 $Some.prototype.getFirst = function() {
 var e = this.getIterator().next();
@@ -382,16 +492,22 @@ if (e === $finished) throw Exception();
 return e;
 }
 $Some.prototype.getEmpty = function() { return $false; }
+$Some.prototype.getFirst = function() {
+var _e = this.getIterator().next();
+if (_e === $finished) throw Exception(String$("Some.first should never get Finished!"));
+return _e;
+}
 exports.Some=Some;
 function None(wat) {
 return wat;
 }
-initTypeProtoI(None, 'ceylon.language.None', FixedSized);
+initTypeProtoI(None, 'ceylon.language.None', FixedSized, ContainerWithFirstElement);
 var None$proto = None.$$.prototype;
 None$proto.getFirst = function() { return null; }
 None$proto.getIterator = function() { return emptyIterator; }
 None$proto.getSize = function() { return Integer(0); }
 None$proto.getEmpty = function() { return $true; }
+None$proto.getFirst = function() { return null; }
 exports.None=None;
 function Ranged(wat) {
 return wat;
@@ -459,6 +575,19 @@ s += ' ';
 s += '}';
 return String$(s);
 }
+List$proto.findLast = function(select) {
+var li = this.getLastIndex();
+if (li !== null) {
+while (li.value>=0) {
+var e = this.item(li);
+if (e !== null && select(e) === $true) {
+return e;
+}
+li = li.getPredecessor();
+}
+}
+return null;
+}
 exports.List=List;
 function ListIterator(list) {
 var that = new ListIterator.$$;
@@ -484,15 +613,6 @@ return wat;
 }
 initTypeProtoI(Map, 'ceylon.language.Map', Collection, Correspondence, Cloneable);
 var Map$proto = Map.$$.prototype;
-Map$proto.count = function(elem) {
-if (isOfType(elem,'ceylon.language.Entry') === $true) {
-var item = this.item(elem.getKey());
-if (item !== null && item.equals(elem.getItem()) === $true) {
-return Integer(1);
-}
-}
-return Integer(0);
-}
 Map$proto.equals = function(other) {
 if (isOfType(other, 'ceylon.language.Map') === $true && other.getSize().equals(this.getSize())) {
 var iter = this.getIterator();
@@ -567,15 +687,39 @@ return inv;
 initTypeProto($map$inv, 'ceylon.language.InverseMap', IdentifiableObject, Map);
 return $map$inv(this);
 }
+Map$proto.mapItems = function(mapping) {
+function EmptyMap(orig) {
+var em = new EmptyMap.$$;
+IdentifiableObject(em);
+em.orig=orig;
+em.clone=function() { return this; }
+em.getItem=function() { return null; }
+em.getIterator=function() {
+function miter(iter) {
+var $i = new miter.$$;
+$i.iter = iter;
+$i.next = function() {
+var e = this.iter.next();
+return e===$finished ? e : Entry(e.getKey(), mapping(e.getKey(), e.getItem()));
+};
+return $i;
+}
+initTypeProto(miter, 'ceylon.language.MappedIterator', IdentifiableObject, Iterator);
+return miter(orig.getIterator());
+}
+em.getSize=function() { return this.orig.getSize(); }
+em.getString=function() { return String$('',0); }
+return em;
+}
+initTypeProto(EmptyMap, 'ceylon.language.EmptyMap', IdentifiableObject, Map);
+return EmptyMap(this);
+}
 exports.Map=Map;
 function Set(wat) {
 return wat;
 }
 initTypeProtoI(Set, 'ceylon.language.Set', Collection, Cloneable);
 var Set$proto = Set.$$.prototype;
-Set$proto.count = function(elem) {
-return this.contains(elem) === $true ? Integer(1) : Integer(0);
-}
 Set$proto.superset = function(set) {
 var iter = set.getIterator();
 var elem; while ((elem = iter.next()) !== $finished) {
@@ -622,14 +766,14 @@ function Array$() {
 var that = new Array$.$$;
 return that;
 }
-initTypeProto(Array$, 'ceylon.language.Array', Object$, List, FixedSized, Cloneable, Ranged);
+initTypeProto(Array$, 'ceylon.language.Array', Object$, FixedSized, Cloneable, Ranged, List);
 exports.Array=Array$;
 function Empty() {
 var that = new Empty.$$;
 that.value = [];
 return that;
 }
-initTypeProtoI(Empty, 'ceylon.language.Empty', List, None, Ranged, Cloneable);
+initTypeProtoI(Empty, 'ceylon.language.Empty', None, Ranged, Cloneable, List);
 var Empty$proto = Empty.$$.prototype;
 Empty$proto.getEmpty = function() { return $true; }
 Empty$proto.defines = function(x) { return $false; }
@@ -648,6 +792,20 @@ Empty$proto.contains = function(x) { return $false; }
 Empty$proto.getLastIndex = function() { return null; }
 Empty$proto.getClone = function() { return this; }
 Empty$proto.count = function(x) { return Integer(0); }
+Empty$proto.getReversed = function() { return this; }
+Empty$proto.skipping = function(skip) { return this; }
+Empty$proto.taking = function(take) { return this; }
+Empty$proto.by = function(step) { return this; }
+Empty$proto.every = function(f) { return $false; }
+Empty$proto.any = function(f) { return $false; }
+Empty$proto.sorted = function(f) { return this; }
+Empty$proto.map = function(f) { return this; }
+Empty$proto.fold = function(i,r) { return i; }
+Empty$proto.find = function(f) { return null; }
+Empty$proto.findLast = function(f) { return null; }
+Empty$proto.filter = function(f) { return this; }
+Empty$proto.getCoalesced = function() { return this; }
+Empty$proto.getIndexed = function() { return this; }
 var $empty = Empty();
 function EmptyIterator() {
 var that = new EmptyIterator.$$;
@@ -666,6 +824,7 @@ return that;
 initTypeProto(EmptyArray, 'ceylon.language.EmptyArray', Array$, None);
 EmptyArray.$$.prototype.setItem = function(i,e) {}
 EmptyArray.$$.prototype.item = function(x) { return null; }
+EmptyArray.$$.prototype.getReversed = function() { return this; }
 exports.EmptyArray=EmptyArray;
 function ArrayList(items) {
 var that = new ArrayList.$$;
@@ -691,9 +850,14 @@ return null;
 ArrayList$proto.getLastIndex = function() {
 return this.lastIndex;
 }
+ArrayList$proto.getReversed = function() {
+var arr = this.value.slice(0);
+arr.reverse();
+return ArrayList(arr);
+}
 exports.ArrayList=ArrayList;
 exports.arrayOfNone=function() { return EmptyArray(); }
-exports.arrayOfSome=function(elems) { //receives an ArraySequence
+exports.arrayOfSome=function(/*Sequence*/elems) { //In practice it's an ArraySequence
 return ArrayList(elems.value);
 }
 exports.array=function(elems) {
@@ -708,26 +872,35 @@ e.push(item);
 return e.length==0 ? EmptyArray() : ArrayList(e);
 }
 }
-exports.makeArray=function(size, init) {
+exports.arrayOfSize=function(size, elem) {
 if (size.value > 0) {
 var elems = [];
 for (var i = 0; i < size.value; i++) {
-elems.push(init(Integer(i)));
+elems.push(elem);
 }
 return ArrayList(elems);
 } else return EmptyArray();
 }
-function Comprehension(iterator) {
-var that = new Comprehension.$$;
-IdentifiableObject(that);
-that.iterator=iterator;
-return that;
+function Comprehension(makeNextFunc, compr) {
+if (compr===undefined) {compr = new Comprehension.$$;}
+IdentifiableObject(compr);
+compr.makeNextFunc = makeNextFunc;
+return compr;
 }
 initTypeProto(Comprehension, 'ceylon.language.Comprehension', IdentifiableObject, Iterable);
-Comprehension.$$.prototype.getIterator=function() {
-return this.iterator();
-};
+var Comprehension$proto = Comprehension.$$.prototype;
+Comprehension$proto.getIterator = function() {
+return ComprehensionIterator(this.makeNextFunc());
+}
 exports.Comprehension=Comprehension;
+function ComprehensionIterator(nextFunc, it) {
+if (it===undefined) {it = new ComprehensionIterator.$$;}
+IdentifiableObject(it);
+it.next = nextFunc;
+return it;
+}
+initTypeProto(ComprehensionIterator, 'ceylon.language.ComprehensionIterator',
+IdentifiableObject, Iterator);
 function Summable(wat) {
 return wat;
 }
@@ -907,6 +1080,8 @@ Float$proto.getHash = function() { return String$(this.value.toPrecision()).getH
 Float$proto.getUndefined = function() { return isNaN(this.value) ? $true : $false; }
 Float$proto.getFinite = function() { return this.value!==Infinity && this.value!==-Infinity && !isNaN(this.value) ? $true : $false; }
 Float$proto.getInfinite = function() { return this.value===Infinity || this.value===-Infinity ? $true : $false; }
+Float$proto.getStrictlyPositive = function() { return this.value>0 || (this.value===0 && (1/this.value===Infinity)) ? $true : $false; }
+Float$proto.getStrictlyNegative = function() { return this.value<0 || (this.value===0 && (1/this.value===-Infinity)) ? $true : $false; }
 function getInfinity() { return Float(Infinity); }
 //function getNegativeInfinity() { return Float(-Infinity); }
 exports.Integer=Integer;
@@ -920,8 +1095,8 @@ that.value = value;
 that.codePoints = size;
 return that;
 }
-initTypeProto(String$, 'ceylon.language.String', Object$, List, Comparable, Ranged, FixedSized,
-Summable, Castable, Cloneable);
+initTypeProto(String$, 'ceylon.language.String', Object$, Comparable, Ranged, FixedSized,
+Summable, Castable, Cloneable, List);
 function StringOfSome() {}
 initType(StringOfSome, "ceylon.language.StringOfSome", String$, Some);
 function StringOfNone() {}
@@ -1190,17 +1365,13 @@ len += this.codePoints + str.codePoints;
 }
 return String$(result, isNaN(len)?undefined:len);
 }
-String$proto.split = function(seps, discard, group) {
+function isWhitespace(c) { return c.value in $WS; }
+String$proto.split = function(sep, discard, group) {
 var value = this.value;
 // shortcut for empty input
 if (value.length === 0) {return Singleton(this);}
-var sepChars = $WS;
-if (seps!==undefined && seps!==null) {
-sepChars = {}
-var it = seps.getIterator();
-var c; while ((c=it.next()) !== $finished) {sepChars[c.value] = true}
-}
-if (discard === undefined) {discard = false}
+if (sep === undefined) {sep = isWhitespace}
+if (discard === undefined) {discard = true}
 if (group === undefined) {group = true}
 //TODO: return an iterable which determines the next token on demand
 var tokens = [];
@@ -1216,7 +1387,7 @@ var cp = value.charCodeAt(i++);
 if ((cp&0xfc00)===0xd800 && i<value.length) {
 cp = (cp<<10) + value.charCodeAt(i++) - 0x35fdc00;
 }
-if (cp in sepChars) {
+if (sep(Character(cp)) === $true) {
 if (!group) {
 // ungrouped separator: store preceding token
 pushToken(j);
@@ -1280,8 +1451,9 @@ sb.append(this);
 }
 return sb.getString();
 }
+function isNewline(c) { return c.value===10; }
 String$proto.getLines = function() {
-return this.split(String$("\n", 1), true);
+return this.split(isNewline, true);
 }
 String$proto.occurrences = function(sub) {
 if (sub.value.length == 0) {return Integer(0)}
@@ -1295,6 +1467,27 @@ i+=sub.value.length;
 }
 return ocs.length > 0 ? ArrayList(ocs) : $empty;
 }
+String$proto.filter = function(f) {
+var r = Iterable.$$.prototype.filter.apply(this, [f]);
+return string(r);
+}
+String$proto.skipping = function(skip) {
+if (skip.value==0) return this;
+return this.segment(skip, this.getSize());
+}
+String$proto.taking = function(take) {
+if (take.value==0) return $empty;
+return this.segment(Integer(0), take);
+}
+String$proto.by = function(step) {
+var r = Iterable.$$.prototype.by.apply(this, [step]);
+return string(r);
+}
+String$proto.sorted = function(f) {
+var r = Iterable.$$.prototype.sorted.apply(this, [f]);
+return string(r);
+}
+String$proto.getCoalesced = function() { return this; }
 function StringIterator(string) {
 var that = new StringIterator.$$;
 that.string = string;
@@ -1462,19 +1655,6 @@ exports.String=String$;
 exports.Character=Character;
 exports.StringBuilder=StringBuilder;
 function getNull() { return null }
-//function Boolean$(value) {
-//    return value ? $true : $false;
-//}
-//initType(Boolean$, 'ceylon.language.Boolean', IdentifiableObject);
-//inheritProto(Boolean$, IdentifiableObject, '$IdentifiableObject$');
-//var $true = new Boolean$.$$;
-//$true.string = String$("true");
-//$true.getString = function() {return this.string}
-//function getTrue() { return $true; }
-//var $false = new Boolean$.$$;
-//$false.string = String$("false");
-//$false.getString = function() {return this.string}
-//function getFalse() { return $false; }
 function Boolean$(value) {return Boolean(value)}
 initExistingTypeProto(Boolean$, Boolean, 'ceylon.language.Boolean');
 function trueClass() {}
@@ -1526,29 +1706,34 @@ exports.largest=largest;
 exports.smallest=smallest;
 //receives ArraySequence, returns element
 function min(seq) {
-var v = seq.value[0];
-if (seq.value.length > 1) {
-for (var i = 1; i < seq.value.length; i++) {
-v = smallest(v, seq.value[i]);
-}
+var v = seq.getFirst();
+if (v === null) return null;
+var iter = seq.getRest().getIterator();
+var e; while ((e = iter.next()) !== $finished) {
+v = smallest(v, e);
 }
 return v;
 }
 //receives ArraySequence, returns element
-function max(seq) {
-var v = seq.value[0];
-if (seq.value.length > 1) {
-for (var i = 1; i < seq.value.length; i++) {
-v = largest(v, seq.value[i]);
-}
+function max(/*ContainerWithFirstElement*/seq) {
+var v = seq.getFirst();
+if (v === null) return null;
+var iter = seq.getRest().getIterator();
+var e; while ((e = iter.next()) !== $finished) {
+v = largest(v, e);
 }
 return v;
 }
 //receives ArraySequence of ArraySequences, returns flat ArraySequence
 function join(seqs) {
+if (seqs === undefined) return $empty;
 var builder = [];
-for (var i = 0; i < seqs.value.length; i++) {
-builder = builder.concat(seqs.value[i].value);
+var it = seqs.getIterator();
+var seq;
+while ((seq = it.next()) !== $finished) {
+var it2 = seq.getIterator();
+var elem;
+while ((elem = it2.next()) != $finished) {builder.push(elem);}
 }
 return ArraySequence(builder);
 }
@@ -1563,13 +1748,8 @@ return ArraySequence(entries);
 }
 //receives and returns ArraySequence
 function coalesce(seq) {
-var newseq = [];
-for (var i = 0; i < seq.value.length; i++) {
-if (seq.value[i]) {
-newseq = newseq.concat(seq.value[i]);
-}
-}
-return ArraySequence(newseq);
+if (seq === undefined) {return $empty}
+return seq.getCoalesced();
 }
 //receives ArraySequence and CeylonObject, returns new ArraySequence
 function append(seq, elem) {
@@ -1587,15 +1767,11 @@ return sb.getSequence();
 }
 //Receives Iterable, returns ArraySequence (with Entries)
 function entries(seq) {
-var e = [];
-var iter = seq.getIterator();
-var i = 0;
-var elem; while ((elem = iter.next()) !== $finished) {
-e.push(Entry(Integer(i++), elem));
-}
-return ArraySequence(e);
+if (seq === undefined) return $empty;
+return seq.getIndexed();
 }
 function any(/*Boolean...*/ values) {
+if (values === undefined) return $false;
 var it = values.getIterator();
 var v;
 while ((v = it.next()) !== $finished) {
@@ -1604,6 +1780,7 @@ if (v === $true) {return $true;}
 return $false;
 }
 function every(/*Boolean...*/ values) {
+if (values === undefined) return $false;
 var it = values.getIterator();
 var v;
 while ((v = it.next()) !== $finished) {
@@ -1612,6 +1789,7 @@ if (v === $false) {return $false;}
 return $true;
 }
 function first(/*Element...*/ elements) {
+if (elements === undefined) return null;
 var e = elements.getIterator().next();
 return (e !== $finished) ? e : null;
 }
@@ -1637,17 +1815,11 @@ function isOfType(obj, typeName) {
 if (obj === null) {
 return Boolean$(typeName==="ceylon.language.Nothing" || typeName==="ceylon.language.Void");
 }
-if (typeof obj === 'function') {
-return Boolean$(typeName === 'ceylon.language.Callable');
-}
 return Boolean$(obj.getT$all && typeName in obj.getT$all());
 }
 function isOfTypes(obj, types) {
 if (obj===null) {
 return types.l.indexOf('ceylon.language.Nothing')>=0 || types.l.indexOf('ceylon.language.Void')>=0;
-}
-if (typeof obj === 'function') {
-return Boolean$(types.l.indexOf('ceylon.language.Callable')>=0);
 }
 var unions = false;
 var inters = true;
@@ -1688,17 +1860,98 @@ exports.isOfType=isOfType;
 exports.isOfTypes=isOfTypes;
 exports.className=className;
 exports.identityHash=identityHash;
+//More functions, related to comprehensions and iterables
+function byIncreasing/*<Element,Value>*/(/*Callable<Value?,Element>*/comp) {
+return function(x, y) {
+var a = comp(x);
+if (a !== null) {
+var b = comp(y);
+if (b !== null) {
+return a.compare(b);
+}
+}
+return null;
+};
+}
+function byDecreasing/*<Element,Value>*/(/*Callable<Value?,Element>*/comp) {
+return function(x, y) {
+var a = comp(x);
+if (a !== null) {
+var b = comp(y);
+if (b !== null) {
+return b.compare(a);
+}
+}
+return null;
+};
+}
+function count(/*Iterable<Boolean>*/truths) {
+if (truths === undefined) return Integer(0);
+var c=0;
+var iter = truths.getIterator();
+var i; while ((i = iter.next()) !== $finished) {
+if (i === $true) c++;
+}
+return Integer(c);
+}
+function string(/*Iterable<Character>*/chars) {
+if (chars === undefined) return String$('',0);
+var s = StringBuilder();
+var iter = chars.getIterator();
+var c; while ((c = iter.next()) !== $finished) {
+s.appendCharacter(c);
+}
+return s.getString();
+}
+function equalTo(v) {
+return function(e) {
+return v.equals(e);
+};
+}
+function greaterThan(v) {
+return function(e) {
+return e.compare(v) === larger;
+};
+}
+function lessThan(v) {
+return function(e) {
+return e.compare(v) === smaller;
+};
+}
+function byKey(/*Callable<Comparison,Key,Key>*/f) {
+return function(a,b) {
+return f(a.getKey(), b.getKey());
+}
+}
+function byItem(/*Callable<Comparison,Key,Key*/f) {
+return function(a,b) {
+return f(a.getItem(), b.getItem());
+}
+}
+function emptyOrSingleton(/*Element?*/elem) {
+return elem===null ? $empty : Singleton(elem);
+}
+exports.emptyOrSingleton=emptyOrSingleton;
+exports.equalTo=equalTo;
+exports.greaterThan=greaterThan;
+exports.lessThan=lessThan;
+exports.byIncreasing=byIncreasing;
+exports.byDecreasing=byDecreasing;
+exports.count=count;
+exports.string=string;
+exports.byKey=byKey;
+exports.byItem=byItem;
 function Sequence($$sequence) {
 return $$sequence;
 }
-initTypeProtoI(Sequence, 'ceylon.language.Sequence', List, Some, Cloneable, Ranged);
+initTypeProtoI(Sequence, 'ceylon.language.Sequence', Some, Cloneable, Ranged, List);
 var Sequence$proto = Sequence.$$.prototype;
 Sequence$proto.getLast = function() {
 var last = this.item(this.getLastIndex());
 if (last === null) throw Exception();
 return last;
 }
-function ArraySequence(value) {
+function ArraySequence(/* js array */value) {
 var that = new ArraySequence.$$;
 that.value = value;
 return that;
@@ -1762,6 +2015,11 @@ return $true;
 }
 }
 return $false;
+}
+ArraySequence$proto.getReversed = function() {
+var arr = this.value.slice(0);
+arr.reverse();
+return ArraySequence(arr);
 }
 function TypeCategory(seq, type) {
 var that = new TypeCategory.$$;
@@ -1829,6 +2087,36 @@ return this;
 return $empty;
 }
 Singleton$proto.getIterator = function() { return SingletonIterator(this.elem); }
+Singleton$proto.getReversed = function() { return this; }
+Singleton$proto.map = function(f) { return ArraySequence([ f(this.elem) ]); }
+Singleton$proto.filter = function(f) {
+return f(this.elem) === $true ? this : $empty;
+}
+Singleton$proto.fold = function(v,f) {
+return f(v, this.elem);
+}
+Singleton$proto.find = function(f) {
+return f(this.elem) === $true ? this.elem : null;
+}
+Singleton$proto.findLast = function(f) {
+return f(this.elem) === $true ? this.elem : null;
+}
+Singleton$proto.any = function(f) {
+return f(this.elem);
+}
+Singleton$proto.every = function(f) {
+return f(this.elem);
+}
+Singleton$proto.skipping = function(skip) {
+return skip.value==0 ? this : $empty;
+}
+Singleton$proto.taking = function(take) {
+return take.value>0 ? this : $empty;
+}
+Singleton$proto.by = function(step) {
+return this;
+}
+Singleton$proto.getCoalesced = function() { return this; }
 function SingletonIterator(elem) {
 var that = new SingletonIterator.$$;
 that.elem = elem;
@@ -1864,7 +2152,7 @@ if ((typeof process !== "undefined") && (process.argv !== undefined)) {
 if (process.argv.length > 2) {
 var args = process.argv.slice(2);
 var argStrings = new Array(args.length);
-for (i in args) { argStrings[i] = String$(args[i]); }
+for (var i in args) { argStrings[i] = String$(args[i]); }
 argv = ArraySequence(argStrings);
 for (var i=0; i<args.length; ++i) {
 var arg = args[i];
@@ -2014,14 +2302,18 @@ function Range(first, last) {
 var that = new Range.$$;
 that.first = first;
 that.last = last;
+var dec = first.compare(last) === larger;
+if (isOfType(first, 'ceylon.language.Integer') && isOfType(last, 'ceylon.language.Integer')) {
+that.size=Integer((dec?first.value-last.value:last.value-first.value)+1);
+} else {
 var index = 0;
 var x = first;
-var dec = first.compare(last) === larger;
 while (x.equals(last) === getFalse()) { //some replicated code because we don't yet have the functions here
 index++;
 x = dec ? x.getPredecessor() : x.getSuccessor();
 }
 that.size = Integer(index+1);
+}
 return that;
 }
 initTypeProto(Range, 'ceylon.language.Range', Object$, Sequence, Category);
@@ -2066,21 +2358,6 @@ if (this.first.equals(this.last) === $true) return $empty;
 var n = this.next(this.first);
 return Range(n, this.last);
 }
-Range$proto.by = function(step) {
-if (step.compare(Integer(0)) !== larger) {
-throw Exception(String$("step must be positive"));
-}
-if (this.first.equals(this.last) === getTrue() || step.equals(Integer(1)) === getTrue()) {
-return this;
-}
-var seq = [];
-var x = this.first;
-while (this.includes(x) === getTrue()) {
-seq.push(x);
-for (var i = 0; i < step.value; i++) { x = this.next(x); }
-}
-return ArraySequence(seq);
-}
 Range$proto.segment = function(from, len) {
 //only positive length for now
 if (len.compare(Integer(0)) !== larger) return $empty;
@@ -2093,25 +2370,31 @@ if (this.includes(y) === $false) { y = this.last; }
 return Range(x, y);
 }
 Range$proto.span = function(from, to) {
-from = largest(Integer(0),from);
-if (to === getNull() || to === undefined) {
-to = this.getLastIndex();
-}
-if (this.defines(from) === $false) {
-//If it's an inverse range, adjust the "from" (upper bound)
-if (from.compare(to) === larger && this.defines(to) === $true) {
-//Decrease the upper bound
-while (this.defines(from) === $false) {
-from = from.getPredecessor();
-}
-} else {
+var li = this.getLastIndex();
+to = (to==null || to==undefined) ? li : to;
+if (to.value<0) {
+if (from.value<0) {
 return $empty;
 }
-} else while (this.defines(to) === $false) {
-//decrease the upper bound
-to = to.getPredecessor();
+to = Integer(0);
 }
-return Range(this.item(from), this.item(to));
+else if (to.value > li.value) {
+if (from.value > li.value) {
+return $empty;
+}
+to = li;
+}
+if (from.value < 0) {
+from = Integer(0);
+}
+else if (from.value > li.value) {
+from = li;
+}
+var x = this.first;
+for (var i=0; i < from.value; i++) { x = this.next(x); }
+var y = this.first;
+for (var i=0; i < to.value; i++) { y = this.next(y); }
+return Range(x, y);
 }
 Range$proto.definesEvery = function(keys) {
 for (var i = 0; i < keys.getSize().value; i++) {
@@ -2138,6 +2421,28 @@ var eql = this.last.equals(other.getLast());
 return Boolean$(eqf === getTrue() && eql === getTrue());
 }
 Range$proto.getIterator = function() { return RangeIterator(this); }
+Range$proto.getReversed = function() { return Range(this.last, this.first); }
+Range$proto.skipping = function(skip) {
+var x=0;
+var e=this.first;
+while (x++<skip.value) {
+e=this.next(e);
+}
+return this.includes(e) === $true ? new Range(e, this.last) : $empty;
+}
+Range$proto.taking = function(take) {
+if (take.value == 0) {
+return $empty;
+}
+var x=0;
+var e=this.first;
+while (++x<take) {
+e=this.next(e);
+}
+return this.includes(e) ? new Range(this.first, e) : this;
+}
+Range$proto.getSequence = function() { return this; }
+Range$proto.getCoalesced = function() { return this; }
 function RangeIterator(range) {
 var that = new RangeIterator.$$;
 that.range = range;
@@ -2148,7 +2453,7 @@ initTypeProto(RangeIterator, 'ceylon.language.RangeIterator', IdentifiableObject
 var RangeIterator$proto = RangeIterator.$$.prototype;
 RangeIterator$proto.next = function() {
 var rval = this.current;
-if (rval.equals($finished) === getTrue()) {
+if (rval === $finished) {
 return rval;
 } else if (rval.equals(this.range.getLast()) === getTrue()) {
 this.current = $finished;
@@ -2179,6 +2484,10 @@ Entry$proto.getHash = function() { Integer((31 + this.key.getHash().value) * 31 
 function getBottom() {
 throw Exception();
 }
+//Turns out we need to have empty implementations of these annotations
+exports.see=function(){};
+exports.by=function(){};
+exports.tagged=function(){};
 exports.Exception=Exception;
 exports.Identifiable=Identifiable;
 exports.identityHash=$identityHash;
