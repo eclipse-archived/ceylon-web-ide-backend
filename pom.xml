@@ -93,7 +93,7 @@
               <warName>ROOT</warName>
             </configuration>
           </plugin>
-          <plugin>
+          <!--plugin>
             <artifactId>maven-compiler-plugin</artifactId>
             <version>2.4</version>
             <configuration>
@@ -104,7 +104,7 @@
               <showWarnings>true</showWarnings>
               <fork>true</fork>
             </configuration>
-          </plugin>
+          </plugin-->
         </plugins>
       </build>
     </profile>
