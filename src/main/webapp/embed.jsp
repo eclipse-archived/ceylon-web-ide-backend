@@ -14,6 +14,13 @@
         #primary-content {
             margin: 0px;
             top: 0px;
+            width: 100%;
+            height: 100%;
+        }
+        #core-page {
+            margin: 0px;
+            width: 100%;
+            height: 100%;
         }
         #result {
         }
@@ -25,7 +32,7 @@
         #output {
             border-width: 1px;
             border-style: solid;
-            width: 600px;
+            width: 100%;
             height: 200px;
             padding: 2px;
             overflow: auto;
@@ -79,7 +86,7 @@
     <script type="text/javascript" src="scripts/mode/ceylon/ceylon.js" charset="utf-8"></script>
     <link rel="stylesheet" href="scripts/codemirror.css" />
     <style type="text/css">
-        .CodeMirror {border: 1px solid black;width:600px;height:200px;background:#ffffff;}
+        .CodeMirror {border: 1px solid black;width:100%;height:200px;background:#ffffff;}
         .CodeMirror-gutter {min-width: 2.6em; cursor: pointer;}
     </style>
     <script type="text/javascript" src="scripts/require-jquery.js" data-main="scripts/repl.js"></script>
@@ -95,7 +102,7 @@
     <h1 id="hdr_title">Ceylon Web Runner</h1>
     <form>
         <textarea id="edit_ceylon"></textarea>
-        <pre id="docs_errs"> </pre>
+        <pre id="docs_errs" class="cantseeme"> </pre>
         <input type="button" id="submit" name="submit" value="Run" onClick="run()">
         <input type="button" value="Clear Output" onClick="clearOutput()">
         <input type="button" id="share_src" name="share_src" value="Share this code" onClick="shareSource()">
