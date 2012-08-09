@@ -67,7 +67,10 @@ public class CodeSharingServlet extends HttpServlet {
             throws ServletException, IOException {
         String key = req.getParameter("key");
         String code = null;
-        if (key != null) {
+        if (store == null) {
+            resp.setStatus(HttpServletResponse.SC_EXPECTATION_FAILED);
+            code = "Code sharing is disabled for the moment.";
+        } else if (key != null) {
             code = store.retrieveCode(key, req.getRemoteAddr());
         }
         if (code == null) {
