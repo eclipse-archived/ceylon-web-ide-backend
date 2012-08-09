@@ -87,7 +87,13 @@
         .CodeMirror-gutter {min-width: 2.6em; cursor: pointer;}
     </style>
     <script type="text/javascript" src="scripts/require-jquery.js" data-main="scripts/repl.js"></script>
-
+    <script type="text/javascript">
+        $(function() {
+            if(document.domain != "localhost") {
+                document.domain = 'ceylon-lang.org';
+            }
+        });
+    </script>
 </head>
 <body class="bp">
 
