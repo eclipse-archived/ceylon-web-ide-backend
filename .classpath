@@ -15,8 +15,8 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/com.redhat.ceylon.compiler.js-0.3.jar"/>
-	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/com.redhat.ceylon.module-resolver-0.3.jar"/>
-	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/com.redhat.ceylon.typechecker-0.3.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/com.redhat.ceylon.compiler.js-0.3.1.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/com.redhat.ceylon.module-resolver-0.3.1.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/com.redhat.ceylon.typechecker-0.3.1.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
