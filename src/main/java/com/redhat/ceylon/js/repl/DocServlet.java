@@ -50,7 +50,8 @@ public class DocServlet extends HttpServlet {
         String resp = json.encode(docs);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        response.setContentLength(resp.length());
+        //Unicode chars cause problems with length so we have to count bytes here
+        response.setContentLength(resp.getBytes().length);
         response.getWriter().print(resp);
         response.getWriter().flush();
     }
