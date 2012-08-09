@@ -20,6 +20,7 @@ import com.redhat.ceylon.compiler.js.DocVisitor;
 import com.redhat.ceylon.compiler.js.JsCompiler;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.TypeCheckerBuilder;
+import com.redhat.ceylon.compiler.typechecker.analyzer.UsageWarning;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
 import com.redhat.ceylon.compiler.typechecker.parser.RecognitionError;
 import com.redhat.ceylon.compiler.typechecker.tree.AnalysisMessage;
@@ -81,18 +82,22 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
                     out.close();
                 }
             }.stopOnErrors(true);
-            boolean ok = compiler.generate();
+            //Don't reply on result flag, check errors instead
+            compiler.generate();
             final Map<String, Object> resp = new HashMap<String, Object>();
             resp.put("code_docs", doccer.getDocs());
             resp.put("code_refs", DocUtils.referenceMapToList(doccer.getLocations()));
-            if (ok) {
+            //Put errors in this list
+            ArrayList<Object> errs = new ArrayList<Object>(compiler.listErrors().size());
+            for (Message err : compiler.listErrors()) {
+                if (!(err instanceof UsageWarning)) {
+                    errs.add(encodeError(err));
+                }
+            }
+            if (errs.isEmpty()) {
                 resp.put("code", out.toString());
             } else {
                 //Print out errors
-                ArrayList<Object> errs = new ArrayList<Object>(compiler.listErrors().size());
-                for (Message err : compiler.listErrors()) {
-                    errs.add(encodeError(err));
-                }
                 resp.put("errors", errs);
             }
             String enc = json.encode(resp);
