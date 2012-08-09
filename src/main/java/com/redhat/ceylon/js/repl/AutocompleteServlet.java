@@ -32,8 +32,8 @@ public class AutocompleteServlet extends HttpServlet {
      * at said location. The following keys must be present in the request:
      * ceylon - The Ceylon code to analyze
      * module - The code for the module.ceylon file
-     * row  - The row where the token to complete is located
-     * col  - The column where the token to complete is located
+     * r  - The row where the token to complete is located
+     * c  - The column where the token to complete is located
      *
      * The response is a JSON object with the following keys:
      * opts - A list of strings, with the completion options.
@@ -74,7 +74,7 @@ public class AutocompleteServlet extends HttpServlet {
             assistant.findNode(new AutocompleteUnitValidator() {
                 @Override
                 public boolean processUnit(PhasedUnit pu) {
-                    return "SCRIPT".equals(pu.getUnitFile().getName());
+                    return "SCRIPT.ceylon".equals(pu.getUnitFile().getName());
                 }
             });
             jsr.put("opts", assistant.getCompletions());
