@@ -19,7 +19,7 @@
         }
         #primary-content #core-page {
             margin: 0px;
-            width: 100%;
+            width: 99%;
             height: 100%;
         }
         #result {
