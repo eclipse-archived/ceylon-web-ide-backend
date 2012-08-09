@@ -726,6 +726,25 @@ form.bp textarea {
   overflow: hidden;
   *zoom: 1;
 }
+#primary-content .bubble-button {
+    font-weight: bold;
+    color: #ffffff;
+    font-size: 13px;
+    padding: 5px 7px;
+    text-decoration: none;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    -webkit-box-shadow: 0px 1px 3px #666666;
+    -moz-box-shadow: 0px 1px 3px #666666;
+    text-shadow: 1px 1px 3px #255A5F;
+    border: solid #368D73 1px;
+    background: -webkit-gradient(linear, 0 0, 0 100%, from(#82cdba), to(#368d73));
+    background: -moz-linear-gradient(top, #82cdba, #368d73);
+}
+#primary-content .bubble-button:hover {
+    background: -webkit-gradient(linear, 0 0, 0 100%, from(#6bae9d), to(#368d73));
+    background: -moz-linear-gradient(top, #6bae9d, #368d73);
+}
 /* line 263 */
 #primary-content #core-page {
   display: inline;
