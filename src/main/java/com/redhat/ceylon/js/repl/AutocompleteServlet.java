@@ -1,7 +1,6 @@
 package com.redhat.ceylon.js.repl;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,13 +11,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.redhat.ceylon.compiler.js.AutocompleteVisitor;
-import com.redhat.ceylon.compiler.js.AutocompleteVisitor.AutocompleteUnitValidator;
 import com.redhat.ceylon.compiler.js.DocVisitor;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.TypeCheckerBuilder;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
 import com.redhat.ceylon.compiler.typechecker.tree.Node;
+import com.redhat.ceylon.js.repl.AutocompleteVisitor.AutocompleteUnitValidator;
 import com.redhat.ceylon.js.util.DocUtils;
 import com.redhat.ceylon.js.util.SimpleJsonEncoder;
 
