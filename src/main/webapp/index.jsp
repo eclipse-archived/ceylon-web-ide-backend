@@ -97,7 +97,7 @@
         <textarea id="edit_ceylon"></textarea>
         <input type="button" class="bubble-button" id="submit" name="submit" value="Run" onClick="run()">
         <input type="button" class="bubble-button" value="Clear Output" onClick="clearOutput()">
-        <input type="button" class="bubble-button" id="share_src" name="share_src" value="Share this code" onClick="shareSource()">
+        <input type="button" class="bubble-button" id="share_src" name="share_src" value="Share Code" onClick="shareSource()">
         <input type="text" id="shareurl" name="shareurl" value="" size="45" disabled="true">
     </form>
     <hr class="cantseeme">
