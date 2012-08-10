@@ -274,6 +274,13 @@ function getEditCode() {
     return "import browser { ... } import browser.dom { ... } void run_script() {\n" + editor.getValue() + "\n}";
 }
 
+function setEditCode(src) {
+	clearOutput();
+    clearEditMarkers();
+    editor.setValue(src);
+    editor.focus();
+}
+
 function getModuleCode() {
 	return "Module module { name='web_ide_script'; version='1.0.0'; dependencies = { Import { name = 'browser'; version = '1.0.0'; } };}";
 }
