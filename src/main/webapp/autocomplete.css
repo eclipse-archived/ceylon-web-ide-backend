@@ -1,0 +1,49 @@
+.popup {
+    width: 400px;
+    height: 200px;
+    background: white;
+    border: 1px inset gray;
+    text-shadow: none;
+    overflow: auto;
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.help {
+    width: 200px;
+    height: 200px;
+    top: 0px;
+    left: 400px;
+    background: gray;
+    border: 1px inset white;
+    text-shadow: none;
+    overflow: auto;
+    color: white;
+    position: absolute;
+}
+
+.popup > div {
+    white-space: pre;
+}
+.popup > .selected {
+    background: blue;
+    color: white;
+}
+.popup > .selected span {
+    color: white;
+}
+.CodeMirror-completions {
+    overflow: hidden;
+    position: absolute;
+    width: 600px;
+    height: 200px;
+    z-index: 200;
+}
+.CodeMirror-completions > input {
+    position: absolute;
+    width: 1em;
+    height: 10px;
+    left: -2em;
+}

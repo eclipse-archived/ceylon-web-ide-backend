@@ -69,6 +69,7 @@
     </style>
     <script type="text/javascript" src="scripts/spin.js" charset="utf-8"></script>
     <script type="text/javascript" src="scripts/codemirror.js" charset="utf-8"></script>
+    <script type="text/javascript" src="scripts/autocomplete.js" charset="utf-8"></script>
     <script type="text/javascript" src="scripts/mode/ceylon/ceylon.js" charset="utf-8"></script>
     <link rel="stylesheet" href="scripts/codemirror.css" />
     <style type="text/css">
@@ -76,6 +77,7 @@
         .CodeMirror-gutter {min-width: 2.6em; cursor: pointer;}
     </style>
     <script type="text/javascript" src="scripts/require-jquery.js" data-main="scripts/repl.js"></script>
+    <link rel='stylesheet' type='text/css' href='autocomplete.css'/>
 
 </head>
 <body class="bp">
