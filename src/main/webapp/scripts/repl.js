@@ -38,7 +38,8 @@ require(["ceylon/language/0.3.1/ceylon.language-0.3.1", 'jquery', "browser/1.0.0
                     "Ctrl-D":function(cm){ getHoverDocs(cm); },
                     "Cmd-D":function(cm){ getHoverDocs(cm); },
                     "Ctrl-B":function(instance){ run(); },
-                    "Cmd-B":function(instance){ run(); }
+                    "Cmd-B":function(instance){ run(); },
+                    "Ctrl-Space":function(){complete(editor);}
                 }
             });
             $('#shareurl').focus(function(){ jquery(this).select(); });
@@ -71,6 +72,38 @@ require(["ceylon/language/0.3.1/ceylon.language-0.3.1", 'jquery', "browser/1.0.0
         });
     }
 );
+
+// autocompletion support
+function complete(editor){
+	var cursor = editor.getCursor();
+    var code = getEditCode();
+    jQuery.ajax('assist', {
+        cache:false, type:'POST',
+        dataType:'json',
+        timeout:10000,
+        beforeSend: startSpinner,
+        success: function(json, status, xhr){
+        	stopSpinner();
+        	CodeMirror.autocomplete(editor, function(){
+        		return {
+        			list: json.opts,
+        			from: cursor,
+        			to: cursor
+        		};
+        	});
+        },
+        error:function(xhr, status, err) {
+        	stopSpinner();
+            alert("An error occurred while compiling your code: " + err?err:status);
+        },
+        data: { 
+        	ceylon:code, 
+        	module:getModuleCode(),
+        	r: cursor.line+2,
+        	c: cursor.ch-1
+        }
+    });
+}
 
 //Stores the code on the server and displays a URL with the key to retrieve it
 function shareSource() {
@@ -143,7 +176,7 @@ function showDocs(docs, refs) {
 //On response, executes the script if compilation was OK, otherwise shows errors.
 //In any case it sets the hover docs if available.
 function translate(onTranslation) {
-    var code = "import browser { ... } import browser.dom { ... } void run_script() {\n" + getEditCode() + "\n}";
+    var code = getEditCode();
     if (code != oldcode) {
         clearOutput();
         clearEditMarkers();
@@ -238,7 +271,7 @@ function editCode(key) {
 }
 
 function getEditCode() {
-    return editor.getValue();
+    return "import browser { ... } import browser.dom { ... } void run_script() {\n" + editor.getValue() + "\n}";
 }
 
 function getModuleCode() {
