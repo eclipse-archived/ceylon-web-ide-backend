@@ -275,10 +275,12 @@ function getEditCode() {
 }
 
 function setEditCode(src) {
-	clearOutput();
-    clearEditMarkers();
-    editor.setValue(src);
-    editor.focus();
+	if (src != getEditCode()) {
+		clearOutput();
+	    clearEditMarkers();
+	    editor.setValue(src);
+	    editor.focus();
+	}
 }
 
 function getModuleCode() {
