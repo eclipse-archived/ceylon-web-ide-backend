@@ -45,9 +45,9 @@ require(["ceylon/language/0.3.1/ceylon.language-0.3.1", 'jquery', "browser/1.0.0
             $('#shareurl').focus(function(){ jquery(this).select(); });
             $('#shareurl').hide();
             var key = location.href.split('#');
-            if (key.toString().trim().length > 16) {
+            if (key.length == 2 && key[1].toString().trim().length > 16) {
                 //retrieve code
-                key = key[key.length-1];
+                key = key[1];
                 $.ajax('share?key='+key, {
                     cache:false,
                     dataType:'text',
