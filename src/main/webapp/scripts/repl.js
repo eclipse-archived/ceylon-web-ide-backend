@@ -59,7 +59,7 @@ require(["ceylon/language/0.3.1/ceylon.language-0.3.1", 'jquery', "browser/1.0.0
                         getHoverDocs(editor);
                     },
                     error:function(a,status,err) {
-                        alert("Error retrieving shared code: " + err?err:status);
+                        alert("Error retrieving shared code: " + (err?err:status));
                     }
                 });
             } else if (location.href.indexOf('?src=') > 0) {
