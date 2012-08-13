@@ -141,15 +141,16 @@ function showErrors(errors, docs, refs) {
     for (var i=0; i < errors.length;i++) {
         var err = errors[i];
         if (err.from.line > 1) {
-            printError("--- " + err.msg + " (at " + (err.from.line-1) + ":" + err.from.ch + ")");
-            editor.setMarker(err.from.line-2, '<span class="ceylondoc"><a href="javascript:void(0);"><font color="#ff0000"><b>%N%</b></font><span>'+err.msg+'</span></a></span>');
+            var errmsg = err.msg.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            printError("--- " + errmsg + " (at " + (err.from.line-1) + ":" + err.from.ch + ")");
+            editor.setMarker(err.from.line-2, '<span class="ceylondoc"><a href="javascript:void(0);"><font color="#ff0000"><b>%N%</b></font><span>'+errmsg+'</span></a></span>');
             var marker=editor.markText({line:err.from.line-2,ch:err.to.line.ch},{line:err.to.line-2,ch:err.to.ch+1},"editerror");
             markers.push(marker);
             var estilo="ceylonerr_r"+err.from.line+"_c"+err.from.ch;
             marker=editor.markText({line:err.from.line-2,ch:err.from.ch},{line:err.to.line-2,ch:err.to.ch+1},estilo);
             markers.push(marker);
             bindings.push(estilo);
-            jquery("."+estilo).attr("title", err.msg);
+            jquery("."+estilo).attr("title", errmsg);
         }
     }
 }
