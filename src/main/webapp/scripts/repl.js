@@ -142,8 +142,8 @@ function showErrors(errors, docs, refs) {
     for (var i=0; i < errors.length;i++) {
         var err = errors[i];
         if (err.from.line > 1) {
-            var errmsg = err.msg.replace(/</g,'&lt;').replace(/>/g,'&gt;');
-            printError("--- " + errmsg + " (at " + (err.from.line-1) + ":" + err.from.ch + ")");
+            var errmsg = escapeHtml(err.msg);
+            printError("--- " + err.msg + " (at " + (err.from.line-1) + ":" + err.from.ch + ")");
             editor.setMarker(err.from.line-2, '<span class="ceylondoc"><a href="javascript:void(0);"><font color="#ff0000"><b>%N%</b></font><span>'+errmsg+'</span></a></span>');
             var marker=editor.markText({line:err.from.line-2,ch:err.to.line.ch},{line:err.to.line-2,ch:err.to.ch+1},"editerror");
             markers.push(marker);
@@ -327,12 +327,12 @@ function printOutput(txt) {
 
 function printSystem(txt) {
     var output = document.getElementById("output");
-    output.innerHTML = output.innerHTML + "<span class='jsc_msg'>" + txt + "</span><br>";
+    output.innerHTML = output.innerHTML + "<span class='jsc_msg'>" + escapeHtml(txt) + "</span><br>";
 }
 
 function printError(txt) {
     var output = document.getElementById("output");
-    output.innerHTML = output.innerHTML + "<span class='jsc_error'>" + txt + "</span><br>";
+    output.innerHTML = output.innerHTML + "<span class='jsc_error'>" + escapeHtml(txt) + "</span><br>";
 }
 
 //Basic HTML escaping.
