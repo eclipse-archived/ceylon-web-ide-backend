@@ -1,1 +1,1 @@
-shared package browser;
+shared package browser.dom;
