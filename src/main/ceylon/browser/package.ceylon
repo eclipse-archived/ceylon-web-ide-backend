@@ -1,4 +1,1 @@
-Package package {
-    name='browser';
-    shared=true;
-}
+shared package browser;
