@@ -285,7 +285,7 @@ function setEditCode(src) {
 }
 
 function getModuleCode() {
-	return "Module module { name='web_ide_script'; version='1.0.0'; dependencies = { Import { name = 'browser'; version = '1.0.0'; } };}";
+	return "module web_ide_script '1.0.0' { import browser '1.0.0'; }";
 }
 
 //Puts the specified text in the result element.
