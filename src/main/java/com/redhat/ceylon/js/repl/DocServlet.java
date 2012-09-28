@@ -2,6 +2,7 @@ package com.redhat.ceylon.js.repl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,12 +15,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.redhat.ceylon.compiler.SimpleJsonEncoder;
 import com.redhat.ceylon.compiler.js.DocVisitor;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.TypeCheckerBuilder;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
 import com.redhat.ceylon.js.util.DocUtils;
-import com.redhat.ceylon.js.util.SimpleJsonEncoder;
 
 @WebServlet("/hoverdoc")
 public class DocServlet extends HttpServlet {
@@ -47,7 +48,9 @@ public class DocServlet extends HttpServlet {
     }
 
     private void sendResponse(Map<String, Object> docs, HttpServletResponse response) throws IOException {
-        String resp = json.encode(docs);
+        StringWriter swriter = new StringWriter();
+        json.encode(docs, swriter);
+        String resp = swriter.toString();
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         //Unicode chars cause problems with length so we have to count bytes here
@@ -88,10 +91,11 @@ public class DocServlet extends HttpServlet {
                         examples.put(key, example);
                     } catch (RuntimeException ex) {
                         resp.setStatus(500);
-                        StringBuilder error = new StringBuilder();
+                        StringWriter error = new StringWriter();
                         json.encodeList(Collections.singletonList((Object)String.format("Service error: %s", ex.getMessage())), error);
-                        resp.setContentLength(error.length());
-                        resp.getWriter().print(error.toString());
+                        final String enc = error.toString();
+                        resp.setContentLength(enc.length());
+                        resp.getWriter().print(enc);
                     }
                 }
             }
@@ -122,10 +126,11 @@ public class DocServlet extends HttpServlet {
             sendResponse(compile(typeChecker), response);
         } catch (RuntimeException ex) {
             response.setStatus(500);
-            StringBuilder sb = new StringBuilder();
+            StringWriter sb = new StringWriter();
             json.encodeList(Collections.singletonList((Object)String.format("Service error: %s", ex.getMessage())), sb);
-            response.setContentLength(sb.length());
-            response.getWriter().print(sb.toString());
+            final String enc = sb.toString();
+            response.setContentLength(enc.length());
+            response.getWriter().print(enc);
         }
     }
 

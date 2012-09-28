@@ -1,6 +1,7 @@
 package com.redhat.ceylon.js.repl;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,10 +16,9 @@ import com.redhat.ceylon.compiler.js.DocVisitor;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.TypeCheckerBuilder;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
-import com.redhat.ceylon.compiler.typechecker.tree.Node;
 import com.redhat.ceylon.js.repl.AutocompleteVisitor.AutocompleteUnitValidator;
 import com.redhat.ceylon.js.util.DocUtils;
-import com.redhat.ceylon.js.util.SimpleJsonEncoder;
+import com.redhat.ceylon.compiler.SimpleJsonEncoder;
 
 @WebServlet("/assist")
 public class AutocompleteServlet extends HttpServlet {
@@ -77,21 +77,25 @@ public class AutocompleteServlet extends HttpServlet {
             });
             jsr.put("opts", assistant.getCompletions());
             //jsr.put("opts", Arrays.asList("method1(Integer,String)", "method2()", "methodref", "blabla"));
-            String enc = json.encode(jsr);
+            final StringWriter swriter = new StringWriter();
+            json.encode(jsr, swriter);
+            final String enc = swriter.toString();
             resp.setContentLength(enc.length());
             resp.getWriter().print(enc);
         } catch (NumberFormatException ex) {
             resp.setStatus(500);
-            StringBuilder sb = new StringBuilder();
+            final StringWriter sb = new StringWriter();
             json.encodeList(Collections.singletonList((Object)"Current location wasn't provided."), sb);
-            resp.setContentLength(sb.length());
-            resp.getWriter().print(sb.toString());
+            final String enc = sb.toString();
+            resp.setContentLength(enc.length());
+            resp.getWriter().print(enc);
         } catch (Exception ex) {
             resp.setStatus(500);
-            StringBuilder sb = new StringBuilder();
+            final StringWriter sb = new StringWriter();
             json.encodeList(Collections.singletonList((Object)String.format("Service error: %s", ex.getMessage())), sb);
-            resp.setContentLength(sb.length());
-            resp.getWriter().print(sb.toString());
+            final String enc = sb.toString();
+            resp.setContentLength(enc.length());
+            resp.getWriter().print(enc);
         }
         resp.getWriter().flush();
     }

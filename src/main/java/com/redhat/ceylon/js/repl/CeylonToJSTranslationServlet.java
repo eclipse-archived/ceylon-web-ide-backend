@@ -2,6 +2,7 @@ package com.redhat.ceylon.js.repl;
 
 import java.io.CharArrayWriter;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,7 +27,7 @@ import com.redhat.ceylon.compiler.typechecker.parser.RecognitionError;
 import com.redhat.ceylon.compiler.typechecker.tree.AnalysisMessage;
 import com.redhat.ceylon.compiler.typechecker.tree.Message;
 import com.redhat.ceylon.js.util.DocUtils;
-import com.redhat.ceylon.js.util.SimpleJsonEncoder;
+import com.redhat.ceylon.compiler.SimpleJsonEncoder;
 
 /**
  * Servlet implementation class CeylonToJSTranslationServlet
@@ -100,21 +101,24 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
                 //Print out errors
                 resp.put("errors", errs);
             }
-            String enc = json.encode(resp);
+            final StringWriter swriter = new StringWriter();
+            json.encode(resp, swriter);
+            final String enc = swriter.toString();
             response.setContentType("application/json");
             response.setContentLength(enc.length());
             response.getWriter().print(enc);
 	    } catch (Exception ex) {
             response.setStatus(500);
-            StringBuilder sb = new StringBuilder();
+            final StringWriter sb = new StringWriter();
             String msg = ex.getMessage();
             if (msg == null) {
                 msg = ex.getClass().getName();
             }
             ex.printStackTrace(System.out);
             json.encodeList(Collections.singletonList((Object)String.format("Service error: %s", msg)), sb);
-            response.setContentLength(sb.length());
-            response.getWriter().print(sb.toString());
+            final String enc = sb.toString();
+            response.setContentLength(enc.length());
+            response.getWriter().print(enc);
 	    }
         response.getWriter().flush();
 	}
