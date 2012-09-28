@@ -69,7 +69,7 @@ public class DocServlet extends HttpServlet {
             synchronized (this) {
                 if (example == null) {
                     String src = getFileContent(req.getServletContext(), key);
-                    StringBuilder wrappedSrc = new StringBuilder("import browser { ... } void run_script(){\n");
+                    StringBuilder wrappedSrc = new StringBuilder("import browser { ... } import browser.dom { ... } void run_script(){\n");
                     wrappedSrc.append(src);
                     wrappedSrc.append("\n}");
                     String module = getFileContent(req.getServletContext(), "module");
