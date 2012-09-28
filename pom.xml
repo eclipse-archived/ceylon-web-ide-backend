@@ -13,6 +13,14 @@
   </properties>
   <dependencies>
     <dependency>
+      <groupId>antlr</groupId>
+      <artifactId>antlr</artifactId>
+      <version>3.4</version>
+      <type>jar</type>
+      <scope>system</scope>
+      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/antlr-3.4.jar</systemPath>
+    </dependency>
+    <dependency>
       <groupId>org.jboss.spec</groupId>
       <artifactId>jboss-javaee-6.0</artifactId>
       <version>1.0.0.Final</version>
@@ -22,42 +30,26 @@
     <dependency>
       <groupId>ceylon</groupId>
       <artifactId>module-resolver</artifactId>
-      <version>0.3.1</version>
+      <version>0.4</version>
       <type>jar</type>
       <scope>system</scope>
-      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.module-resolver-0.3.1.jar</systemPath>
+      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.module-resolver-0.4.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>ceylon</groupId>
       <artifactId>typechecker</artifactId>
-      <version>0.3.1</version>
+      <version>0.4</version>
       <type>jar</type>
       <scope>system</scope>
-      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.typechecker-0.3.1.jar</systemPath>
+      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.typechecker-0.4.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>ceylon</groupId>
       <artifactId>jscompiler</artifactId>
-      <version>0.3.1</version>
+      <version>0.4</version>
       <type>jar</type>
       <scope>system</scope>
-      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.compiler.js-0.3.1.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>ceylon</groupId>
-      <artifactId>compiler</artifactId>
-      <version>0.3.1</version>
-      <type>jar</type>
-      <scope>system</scope>
-      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.compiler.java-0.3.1.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>ceylon</groupId>
-      <artifactId>ant</artifactId>
-      <version>0.3.1</version>
-      <type>jar</type>
-      <scope>system</scope>
-      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.ant-0.3.1.jar</systemPath>
+      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.compiler.js-0.4.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>org.mongodb</groupId>
