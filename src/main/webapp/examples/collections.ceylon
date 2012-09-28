@@ -51,7 +51,7 @@ for (i->animal in entries(animals...)) {
 }
            
 // Implementing an iterator is simple in Ceylon:
-class LenghtsIterator(String... strings)
+class LengthsIterator(String... strings)
                     satisfies Iterator<Integer> {
     value it = strings.iterator;
                     
@@ -64,18 +64,18 @@ class LenghtsIterator(String... strings)
 }
      
 // Now we can implement our own simple Iterable:
-class Lenghts(String... strings) satisfies Iterable<Integer> {
+class Lengths(String... strings) satisfies Iterable<Integer> {
     shared actual Iterator<Integer> iterator {
-        return LenghtsIterator(strings...);
+        return LengthsIterator(strings...);
     }
 }
-for (len in Lenghts(animals...)) {
-    print("lenght: " len "");
+for (len in Lengths(animals...)) {
+    print("length: " len "");
 }
 
 // With a sequence comprehension we can produce the same result:
-Integer[] lenghts = { for (a in animals) a.size };
-for (len in lenghts) { print("lenght: " len ""); }
+Integer[] lengths = { for (a in animals) a.size };
+for (len in lengths) { print("length: " len ""); }
 
 // Sequence comprehension as input to a sequenced parameter:
 list(for (a in animals) a+" egg");
