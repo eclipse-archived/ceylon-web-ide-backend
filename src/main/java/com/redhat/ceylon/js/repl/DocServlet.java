@@ -71,7 +71,7 @@ public class DocServlet extends HttpServlet {
                     String src = getFileContent(req.getServletContext(), key);
                     StringBuilder wrappedSrc = new StringBuilder("import browser { ... } void run_script(){\n");
                     wrappedSrc.append(src);
-                    wrappedSrc.append('}');
+                    wrappedSrc.append("\n}");
                     String module = getFileContent(req.getServletContext(), "module");
                     try {
                         //Run the typechecker
