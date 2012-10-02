@@ -23,6 +23,7 @@ import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.TypeCheckerBuilder;
 import com.redhat.ceylon.compiler.typechecker.analyzer.UsageWarning;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
+import com.redhat.ceylon.compiler.typechecker.model.Module;
 import com.redhat.ceylon.compiler.typechecker.parser.RecognitionError;
 import com.redhat.ceylon.compiler.typechecker.tree.AnalysisMessage;
 import com.redhat.ceylon.compiler.typechecker.tree.Message;
@@ -74,10 +75,16 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             final CharArrayWriter out = new CharArrayWriter();
             final Options opts = Options.parse(new ArrayList<String>(Arrays.asList("-optimize", "-compact", "-src", ".")));
             JsCompiler compiler = new JsCompiler(typeChecker, opts) {
-                @Override
-                protected Writer getWriter(PhasedUnit pu) {
-                    return out;
+                //Override the inner output class to use the in-memory writer
+                class JsMemoryOutput extends JsCompiler.JsOutput {
+                    JsMemoryOutput(Module m) throws IOException { super(m); }
+                    @Override protected Writer getWriter() { return out; }
                 }
+                @Override
+                protected JsOutput newJsOutput(Module m) throws IOException {
+                    return new JsMemoryOutput(m);
+                }
+                //Override this to avoid generating artifacts
                 protected void finish() throws IOException {
                     out.flush();
                     out.close();
