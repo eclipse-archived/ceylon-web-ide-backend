@@ -2,7 +2,6 @@ package com.redhat.ceylon.js.repl;
 
 import java.io.CharArrayWriter;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,7 +73,7 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
                 pu.getCompilationUnit().visit(doccer);
             }
             //Run the compiler, if typechecker returns no errors.
-            final CharArrayWriter out = new CharArrayWriter();
+            final CharArrayWriter out = new CharArrayWriter(script.length()*2);
             JsCompiler compiler = new JsCompiler(typeChecker, opts) {
                 //Override the inner output class to use the in-memory writer
                 class JsMemoryOutput extends JsCompiler.JsOutput {
@@ -109,7 +108,7 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
                 //Print out errors
                 resp.put("errors", errs);
             }
-            final StringWriter swriter = new StringWriter();
+            final CharArrayWriter swriter = new CharArrayWriter(script.length()*2);
             json.encode(resp, swriter);
             final String enc = swriter.toString();
             response.setContentType("application/json");
@@ -117,7 +116,7 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             response.getWriter().print(enc);
 	    } catch (Exception ex) {
             response.setStatus(500);
-            final StringWriter sb = new StringWriter();
+            final CharArrayWriter sb = new CharArrayWriter(512);
             String msg = ex.getMessage();
             if (msg == null) {
                 msg = ex.getClass().getName();
