@@ -12,6 +12,8 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
+import com.mongodb.MongoOptions;
+import com.mongodb.ServerAddress;
 import com.redhat.ceylon.js.repl.CodeKeyGenerator;
 import com.redhat.ceylon.js.repl.CodeStorage;
 
@@ -26,6 +28,7 @@ public class MongoStorage implements CodeStorage {
     private DB db;
 
     public MongoStorage() throws UnknownHostException, MongoException {
+        System.out.println("Using MongoDB storage");
         String host = System.getenv("OPENSHIFT_NOSQL_DB_HOST");
         String sport = System.getenv("OPENSHIFT_NOSQL_DB_PORT");
         String dbname = System.getenv("OPENSHIFT_GEAR_NAME");
@@ -38,7 +41,10 @@ public class MongoStorage implements CodeStorage {
         if (host == null) {
             host = "127.0.0.1";
         }
-        mongo = new Mongo(host, port);
+        MongoOptions opts = new MongoOptions();
+        opts.connectTimeout=1000;
+        opts.socketTimeout=5000;
+        mongo = new Mongo(new ServerAddress(host, port), opts);
         db = mongo.getDB(dbname);
         if (user != null && password!=null) {
             if (!db.authenticate(user, password.toCharArray())) {
