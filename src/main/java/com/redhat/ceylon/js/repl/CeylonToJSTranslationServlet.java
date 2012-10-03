@@ -36,6 +36,8 @@ import com.redhat.ceylon.compiler.SimpleJsonEncoder;
 @WebServlet("/translate")
 public class CeylonToJSTranslationServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+    private final Options opts = Options.parse(new ArrayList<String>(Arrays.asList(
+            "-optimize", "-compact", "-src", ".", "-nomodule")));
 
 	private SimpleJsonEncoder json = new SimpleJsonEncoder();
 
@@ -73,7 +75,6 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             }
             //Run the compiler, if typechecker returns no errors.
             final CharArrayWriter out = new CharArrayWriter();
-            final Options opts = Options.parse(new ArrayList<String>(Arrays.asList("-optimize", "-compact", "-src", ".")));
             JsCompiler compiler = new JsCompiler(typeChecker, opts) {
                 //Override the inner output class to use the in-memory writer
                 class JsMemoryOutput extends JsCompiler.JsOutput {
