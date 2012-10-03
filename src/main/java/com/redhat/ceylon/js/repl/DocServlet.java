@@ -1,9 +1,8 @@
 package com.redhat.ceylon.js.repl;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.StringWriter;
+import java.io.CharArrayWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -49,7 +48,7 @@ public class DocServlet extends HttpServlet {
     }
 
     private void sendResponse(Map<String, Object> docs, HttpServletResponse response) throws IOException {
-        StringWriter swriter = new StringWriter();
+        CharArrayWriter swriter = new CharArrayWriter(8192);
         json.encode(docs, swriter);
         String resp = swriter.toString();
         response.setContentType("application/json");
@@ -92,7 +91,7 @@ public class DocServlet extends HttpServlet {
                         examples.put(key, example);
                     } catch (RuntimeException ex) {
                         resp.setStatus(500);
-                        StringWriter error = new StringWriter();
+                        CharArrayWriter error = new CharArrayWriter(1024);
                         json.encodeList(Collections.singletonList((Object)String.format("Service error: %s", ex.getMessage())), error);
                         final String enc = error.toString();
                         resp.setContentLength(enc.length());
@@ -127,7 +126,7 @@ public class DocServlet extends HttpServlet {
             sendResponse(compile(typeChecker), response);
         } catch (RuntimeException ex) {
             response.setStatus(500);
-            StringWriter sb = new StringWriter();
+            CharArrayWriter sb = new CharArrayWriter(512);
             json.encodeList(Collections.singletonList((Object)String.format("Service error: %s", ex.getMessage())), sb);
             final String enc = sb.toString();
             response.setContentLength(enc.length());
