@@ -2,6 +2,7 @@ package com.redhat.ceylon.js.repl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
@@ -136,13 +137,18 @@ public class DocServlet extends HttpServlet {
 
     private String getFileContent(ServletContext ctx, String key) throws UnsupportedEncodingException, IOException {
         String path = String.format("/examples/%s.ceylon", key);
-        InputStream ins = ctx.getResourceAsStream(path);
-        StringBuilder sb = new StringBuilder();
-        byte[] buf = new byte[256];
-        int read = 0;
-        while ((read = ins.read(buf)) > 0) {
-            sb.append(new String(buf, 0, read, "UTF-8"));
+        InputStreamReader reader = null;
+        try {
+            reader = new InputStreamReader(ctx.getResourceAsStream(path), "UTF-8");
+            StringBuilder sb = new StringBuilder();
+            char[] buf = new char[8192];
+            int read = 0;
+            while ((read = reader.read(buf)) > 0) {
+                sb.append(buf, 0, read);
+            }
+            return sb.toString();
+        } finally {
+            if (reader != null) { reader.close(); }
         }
-        return sb.toString();
     }
 }
