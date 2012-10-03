@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.redhat.ceylon.compiler.SimpleJsonEncoder;
 import com.redhat.ceylon.compiler.js.DocVisitor;
+import com.redhat.ceylon.compiler.loader.JsModuleManagerFactory;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.TypeCheckerBuilder;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
@@ -29,6 +30,7 @@ public class DocServlet extends HttpServlet {
     private final SimpleJsonEncoder json = new SimpleJsonEncoder();
     //Here we cache the code for the examples, so that it's only compiled the first time someone asks for it.
     private HashMap<String, Map<String, Object>> examples = new HashMap<String, Map<String,Object>>();
+    public static final JsModuleManagerFactory MMF = new JsModuleManagerFactory();
 
     /** Documents the code already processed by the typechecker.
      * @param tc The typechecker that has already processed the source code.
@@ -84,6 +86,7 @@ public class DocServlet extends HttpServlet {
                                                 )
                                         )
                                  )
+                                 .moduleManagerFactory(MMF)
                                 .getTypeChecker();
                         typeChecker.process();
                         example = compile(typeChecker);
@@ -121,6 +124,7 @@ public class DocServlet extends HttpServlet {
             //Run the typechecker
             TypeChecker typeChecker = new TypeCheckerBuilder()
                     .addSrcDirectory(src)
+                    .moduleManagerFactory(MMF)
                     .getTypeChecker();
             typeChecker.process();
             sendResponse(compile(typeChecker), response);
