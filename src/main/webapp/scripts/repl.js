@@ -51,7 +51,7 @@ require(["ceylon/language/0.4/ceylon.language-0.4", 'jquery', "browser/1.0.0/bro
                 $.ajax('share?key='+key, {
                     cache:false,
                     dataType:'text',
-                    timeout:10000,
+                    timeout:20000,
                     beforeSend:startSpinner,
                     complete:stopSpinner,
                     success:function(src,status,xhr) {
@@ -80,7 +80,7 @@ function complete(editor){
     jQuery.ajax('assist', {
         cache:false, type:'POST',
         dataType:'json',
-        timeout:10000,
+        timeout:20000,
         beforeSend: startSpinner,
         success: function(json, status, xhr){
         	stopSpinner();
@@ -116,7 +116,7 @@ function shareSource() {
     jquery.ajax('share', {
         cache:false, type:'POST',
         dataType:'text',
-        timeout:10000,
+        timeout:20000,
         beforeSend:startSpinner,
         complete:stopSpinner,
         success:printUrl,
@@ -211,7 +211,7 @@ function translate(onTranslation) {
         jquery.ajax('translate', {
             cache:false, type:'POST',
             dataType:'json',
-            timeout:10000,
+            timeout:20000,
             beforeSend:startSpinner,
             complete:stopSpinner,
             success:compileHandler,
@@ -256,7 +256,7 @@ function editCode(key) {
     jquery.ajax('hoverdoc?key='+key, {
         cache:true,
         dataType:'json',
-        timeout:10000,
+        timeout:20000,
         beforeSend:startSpinner,
         complete:stopSpinner,
         success:function(json, status, xhr) {
@@ -362,7 +362,7 @@ function getHoverDocs(cm) {
     jquery.ajax('hoverdoc', {
         cache:false, type:'POST',
         dataType:'json',
-        timeout:10000,
+        timeout:20000,
         beforeSend:startSpinner,
         complete:stopSpinner,
         success:docHandler,
