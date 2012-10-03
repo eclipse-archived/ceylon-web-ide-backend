@@ -27,6 +27,7 @@ task copylibs(type:Copy, dependsOn:copylangmod) {
 	from "${ceylonDistRepo}/com/redhat/ceylon/typechecker/${ceylonVersion}/com.redhat.ceylon.typechecker-${ceylonVersion}.jar"
 	from "${ceylonDistRepo}/com/redhat/ceylon/module-resolver/${ceylonVersion}/com.redhat.ceylon.module-resolver-${ceylonVersion}.jar"
 	from "${ceylonDistRepo}/com/redhat/ceylon/ant/${ceylonVersion}/com.redhat.ceylon.ant-${ceylonVersion}.jar"
+    from "../ceylon-js/lib/json-smart-1.1.1.jar"
 	into "${webAppDirName}/WEB-INF/lib"
 }
 
