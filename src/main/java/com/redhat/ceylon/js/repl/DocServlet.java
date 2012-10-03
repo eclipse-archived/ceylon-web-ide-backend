@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -31,6 +32,16 @@ public class DocServlet extends HttpServlet {
     //Here we cache the code for the examples, so that it's only compiled the first time someone asks for it.
     private HashMap<String, Map<String, Object>> examples = new HashMap<String, Map<String,Object>>();
     public static final JsModuleManagerFactory MMF = new JsModuleManagerFactory();
+    private static ScriptFile exampleModuleFile = null;
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        try {
+            exampleModuleFile = new ScriptFile("module.ceylon", getFileContent(config.getServletContext(), "module"));
+        } catch (IOException ex) {
+            throw new ServletException("Cannot load module.ceylon for examples", ex);
+        }
+    }
 
     /** Documents the code already processed by the typechecker.
      * @param tc The typechecker that has already processed the source code.
@@ -61,50 +72,48 @@ public class DocServlet extends HttpServlet {
         response.getWriter().flush();
     }
 
+    private Map<String, Object> loadExample(ServletContext cxt, String key) throws IOException {
+        Map<String, Object> example = examples.get(key);
+        if (example == null) {
+            synchronized (examples) {
+                if (example == null) {
+                    String src = getFileContent(cxt, key);
+                    String wrappedSrc = new StringBuilder(
+                        "import browser { ... } import browser.dom { ... } void run_script(){\n")
+                        .append(src).append("\n}").toString();
+                    //Run the typechecker
+                    TypeChecker typeChecker = new TypeCheckerBuilder()
+                        .addSrcDirectory(new ScriptFile("ROOT",
+                            new ScriptFile("web_ide_script", exampleModuleFile,
+                                new ScriptFile("SCRIPT.ceylon", wrappedSrc))
+                            )
+                        )
+                        .moduleManagerFactory(MMF)
+                        .getTypeChecker();
+                    typeChecker.process();
+                    example = compile(typeChecker);
+                    example.put("src", src);
+                    examples.put(key, example);
+                }
+            }
+        }
+        return example;
+    }
+
     /** Retrieves the code corresponding to the specified filename, compiles it and returns the compiled js along with documentation and source. */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         String key = req.getParameter("key");
-        Map<String, Object> example = examples.get(key);
-        if (example == null) {
-            synchronized (this) {
-                if (example == null) {
-                    String src = getFileContent(req.getServletContext(), key);
-                    StringBuilder wrappedSrc = new StringBuilder("import browser { ... } import browser.dom { ... } void run_script(){\n");
-                    wrappedSrc.append(src);
-                    wrappedSrc.append("\n}");
-                    String module = getFileContent(req.getServletContext(), "module");
-                    try {
-                        //Run the typechecker
-                        TypeChecker typeChecker = new TypeCheckerBuilder()
-                                .addSrcDirectory(
-                                        new ScriptFile("ROOT",
-                                                new ScriptFile("web_ide_script",
-                                                        new ScriptFile("SCRIPT.ceylon", wrappedSrc.toString()),
-                                                        new ScriptFile("module.ceylon", module)
-                                                )
-                                        )
-                                 )
-                                 .moduleManagerFactory(MMF)
-                                .getTypeChecker();
-                        typeChecker.process();
-                        example = compile(typeChecker);
-                        example.put("src", src);
-                        examples.put(key, example);
-                    } catch (RuntimeException ex) {
-                        resp.setStatus(500);
-                        CharArrayWriter error = new CharArrayWriter(1024);
-                        json.encodeList(Collections.singletonList((Object)String.format("Service error: %s", ex.getMessage())), error);
-                        final String enc = error.toString();
-                        resp.setContentLength(enc.length());
-                        resp.getWriter().print(enc);
-                    }
-                }
-            }
-        }
-        if (example != null) {
-            sendResponse(example, resp);
+        try {
+            sendResponse(loadExample(req.getServletContext(), key), resp);
+        } catch (RuntimeException ex) {
+            resp.setStatus(500);
+            CharArrayWriter error = new CharArrayWriter(1024);
+            json.encodeList(Collections.singletonList((Object)String.format("Service error: %s", ex.getMessage())), error);
+            final String enc = error.toString();
+            resp.setContentLength(enc.length());
+            resp.getWriter().print(enc);
         }
     }
 
