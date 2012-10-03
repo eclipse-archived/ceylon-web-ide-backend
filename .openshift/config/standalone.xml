@@ -24,7 +24,9 @@
 
   <system-properties>
     <!-- IMPORTANT This should point to the "ceylon-home" directory in the root of the OpenShift application -->
-    <property name="ceylon.repo" value="${env.OPENSHIFT_REPO_DIR}ceylon-user-repo" />
+    <property name="ceylon.system.repo" value="${env.OPENSHIFT_REPO_DIR}ceylon-repo/system" />
+    <property name="ceylon.user.repo" value="${env.OPENSHIFT_REPO_DIR}ceylon-repo/user" />
+    <property name="ceylon.cache.repo" value="${env.OPENSHIFT_REPO_DIR}ceylon-repo/cache" />
   </system-properties>
 
   <profile>
