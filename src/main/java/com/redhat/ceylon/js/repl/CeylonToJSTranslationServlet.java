@@ -65,6 +65,7 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
     	    //Run the typechecker
             TypeChecker typeChecker = new TypeCheckerBuilder()
                     .addSrcDirectory(src)
+                    .moduleManagerFactory(DocServlet.MMF)
                     .getTypeChecker();
             typeChecker.process();
             //While we're at it, get the docs
