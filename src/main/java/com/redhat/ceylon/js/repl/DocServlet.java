@@ -37,7 +37,21 @@ public class DocServlet extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         try {
+            long t0 = System.currentTimeMillis();
+            System.err.println("Loading and compiling all examples...");
             exampleModuleFile = new ScriptFile("module.ceylon", getFileContent(config.getServletContext(), "module"));
+            long t1 = System.currentTimeMillis();
+            System.err.println("Module file loaded in " + (t1-t0) + " millis");
+            t0 = System.currentTimeMillis();
+            for (String path : config.getServletContext().getResourcePaths("/examples")) {
+                if (path.endsWith(".ceylon") && !path.equals("/examples/module.ceylon")) {
+                    path = path.substring(10, path.length()-7);
+                    System.err.println("Loading example " + path);
+                    loadExample(config.getServletContext(), path);
+                }
+            }
+            t1 = System.currentTimeMillis();
+            System.err.println("Examples loaded and compiled in " + (t1-t0) + " millis");
         } catch (IOException ex) {
             throw new ServletException("Cannot load module.ceylon for examples", ex);
         }
