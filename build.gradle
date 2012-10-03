@@ -3,6 +3,7 @@ version=1.0
 ext.projectName='repl'
 defaultTasks 'war'
 ext.ceylonVersion='0.4'
+ext.ceylonDistRepo='../ceylon-dist/dist/repo'
 
 repositories {
 	mavenCentral()
@@ -23,9 +24,9 @@ task copylangmod(type:Copy) {
 }
 task copylibs(type:Copy, dependsOn:copylangmod) {
 	from "../ceylon-js/build/dist/com/redhat/ceylon/compiler/js/${ceylonVersion}/com.redhat.ceylon.compiler.js-${ceylonVersion}.jar"
-	from "../ceylon-spec/build/dist/com/redhat/ceylon/typechecker/${ceylonVersion}/com.redhat.ceylon.typechecker-${ceylonVersion}.jar"
-	from "../ceylon-module-resolver/build/dist/com/redhat/ceylon/module-resolver/${ceylonVersion}/com.redhat.ceylon.module-resolver-${ceylonVersion}.jar"
-	from "../ceylon-compiler/build/dist/com/redhat/ceylon/ant/${ceylonVersion}/com.redhat.ceylon.ant-${ceylonVersion}.jar"
+	from "${ceylonDistRepo}/com/redhat/ceylon/typechecker/${ceylonVersion}/com.redhat.ceylon.typechecker-${ceylonVersion}.jar"
+	from "${ceylonDistRepo}/com/redhat/ceylon/module-resolver/${ceylonVersion}/com.redhat.ceylon.module-resolver-${ceylonVersion}.jar"
+	from "${ceylonDistRepo}/com/redhat/ceylon/ant/${ceylonVersion}/com.redhat.ceylon.ant-${ceylonVersion}.jar"
 	into "${webAppDirName}/WEB-INF/lib"
 }
 
