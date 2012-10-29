@@ -5,8 +5,10 @@
 String? s1 = null;
 String? s2 = "This is a String.";
 
+print(s1);
+print(s2);
+
 // But now we can't use it where a "String" is required:
-//print(s1);  //ERROR!
 //Integer len = s1.size;  //ERROR!
 
 // We have to check for null using if(exists...):
