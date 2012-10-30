@@ -39,7 +39,10 @@ require(["ceylon/language/0.4/ceylon.language-0.4", 'jquery', "browser/1.0.0/bro
                     "Cmd-D":function(cm){ getHoverDocs(cm); },
                     "Ctrl-B":function(instance){ run(); },
                     "Cmd-B":function(instance){ run(); },
-                    "Ctrl-Space":function(){complete(editor);}
+                    "Ctrl-Space":function(){complete(editor);},
+                    "Cmd-Space":function(){complete(editor);},
+                    "Ctrl-.":function(){complete(editor);},
+                    "Cmd-.":function(){complete(editor);}
                 }
             });
             $('#shareurl').focus(function(){ jquery(this).select(); });
@@ -97,6 +100,7 @@ function complete(editor){
         	stopSpinner();
             alert("An error occurred while compiling your code: " + err?err:status);
         },
+        contentType:'application/x-www-form-urlencoded; charset=UTF-8',
         data: { 
         	ceylon:code, 
         	module:getModuleCode(),
@@ -121,6 +125,7 @@ function shareSource() {
         beforeSend:startSpinner,
         complete:stopSpinner,
         success:printUrl,
+        contentType:'application/x-www-form-urlencoded; charset=UTF-8',
         data:{ceylon:editor.getValue()}
     });
 }
@@ -232,6 +237,7 @@ function translateCode(code, doShowCode, doShowDocs, onTranslation) {
             transok = false;
             alert("An error occurred while compiling your code: " + err?err:status);
         },
+        contentType:'application/x-www-form-urlencoded; charset=UTF-8',
         data:{ceylon:code, module:getModuleCode()}
     });
 }
@@ -274,6 +280,7 @@ function editCode(key) {
         timeout:20000,
         beforeSend:startSpinner,
         complete:stopSpinner,
+        contentType:'application/x-www-form-urlencoded; charset=UTF-8',
         success:function(json, status, xhr) {
             clearEditMarkers();
             editor.setValue(json['src']);
@@ -291,7 +298,7 @@ function getEditCode() {
 }
 
 function wrapCode(code) {
-    return "import browser { ... } import browser.dom { ... } void run_script() {\n" + code + "\n}";
+    return "import browser{...} import browser.dom{...} void run_script(){\n" + code + "\n}";
 }
 
 function setEditCode(src) {
@@ -304,7 +311,7 @@ function setEditCode(src) {
 }
 
 function getModuleCode() {
-	return "module web_ide_script '1.0.0' { import browser '1.0.0'; }";
+	return "module web_ide_script '1.0.0' {import browser '1.0.0';}";
 }
 
 //Puts the specified text in the result element.
@@ -389,6 +396,7 @@ function getHoverDocs(cm) {
             transok=false;
             alert("An error occurred while retrieving documentation for your code: " + err?err:status);
         },
+        contentType:'application/x-www-form-urlencoded; charset=UTF-8',
         data:{ceylon:code, module:getModuleCode()}
     });
 }
