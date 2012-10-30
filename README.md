@@ -39,11 +39,6 @@ simply by pushing any updated fils to the application's Git repository on OpenSh
 Right now this can only be done by Tako (@quintesse), or you need to supply him with
 an SSH public key to give you push access to the application's Git repository.
 
-NB: If you change the openshift application you have to adjust the absolute path to the
-Ceylon repository in the .openshift/config/standalone.xml file!
-For this to work it's also necessary to have a patched typechecker the standard one
-doesn't work.
-
 ## License
 
 The content of this repository is released under the ASL v2.0
