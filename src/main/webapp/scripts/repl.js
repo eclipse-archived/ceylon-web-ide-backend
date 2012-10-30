@@ -67,6 +67,7 @@ require(["ceylon/language/0.4/ceylon.language-0.4", 'jquery', "browser/1.0.0/bro
                 key = location.href.slice(location.href.indexOf('?src=')+5);
                 editor.setValue(decodeURIComponent(key));
             } else {
+            	runCode(wrapCode('print("Ceylon " language.version " \\"" language.versionName "\\"");'));
                 editCode('hello_world');
             }
         });
@@ -177,58 +178,72 @@ function showDocs(docs, refs) {
 //On response, executes the script if compilation was OK, otherwise shows errors.
 //In any case it sets the hover docs if available.
 function translate(onTranslation) {
-    var code = getEditCode();
-    if (code != oldcode) {
-        clearOutput();
-        clearEditMarkers();
-        transok = false;
-        var compileHandler = function(json, status, xhr) {
-            oldcode = code;
-            var translatedcode=json['code'];
-            if (translatedcode) {
-                showCode(translatedcode);
-                showDocs(json['code_docs'], json['code_refs']);
-                try {
-                    globalEval(translatedcode);
-                    transok = true;
-                    if (onTranslation) {
-                        onTranslation();
-                    }
-                } catch(err) {
-                    printError("Translated code could not be parsed:");
-                    printError("--- " + err);
-                }
-            } else {
-                //errors?
-                var errs = json['errors'];
-                if (errs) {
-                    showErrors(errs);
-                    showDocs(json['code_docs'], json['code_refs']);
-                }
-            }
-        };
-        document.getElementById('submit').disabled=true;
-        jquery.ajax('translate', {
-            cache:false, type:'POST',
-            dataType:'json',
-            timeout:20000,
-            beforeSend:startSpinner,
-            complete:stopSpinner,
-            success:compileHandler,
-            error:function(xhr, status, err) {
-                transok = false;
-                alert("An error occurred while compiling your code: " + err?err:status);
-            },
-            data:{ceylon:code, module:getModuleCode()}
-        });
-    } else {
-        onTranslation();
-    }
+  var code = getEditCode();
+  if (code != oldcode) {
+      clearEditMarkers();
+      translateCode(code, true, true, onTranslation);
+  } else {
+      if (onTranslation) {
+          onTranslation();
+      }
+  }
 }
 
-//Sends the code to the server for compilation and it successful, runs the resulting js.
+//Wraps the contents of the editor in a function and sends it to the server for compilation.
+//On response, executes the script if compilation was OK, otherwise shows errors.
+//In any case it sets the hover docs if available.
+function translateCode(code, doShowCode, doShowDocs, onTranslation) {
+    clearOutput();
+    transok = false;
+    var compileHandler = function(json, status, xhr) {
+        oldcode = code;
+        var translatedcode=json['code'];
+        if (translatedcode) {
+            showCode(translatedcode);
+            showDocs(json['code_docs'], json['code_refs']);
+            try {
+                globalEval(translatedcode);
+                transok = true;
+                if (onTranslation) {
+                    onTranslation();
+                }
+            } catch(err) {
+                printError("Translated code could not be parsed:");
+                printError("--- " + err);
+            }
+        } else {
+            //errors?
+            var errs = json['errors'];
+            if (errs) {
+                showErrors(errs);
+                showDocs(json['code_docs'], json['code_refs']);
+            }
+        }
+    };
+    document.getElementById('submit').disabled=true;
+    jquery.ajax('translate', {
+        cache:false, type:'POST',
+        dataType:'json',
+        timeout:20000,
+        beforeSend:startSpinner,
+        complete:stopSpinner,
+        success:compileHandler,
+        error:function(xhr, status, err) {
+            transok = false;
+            alert("An error occurred while compiling your code: " + err?err:status);
+        },
+        data:{ceylon:code, module:getModuleCode()}
+    });
+}
+
+//Sends the code from the editor to the server for compilation and it successful, runs the resulting js.
 function run() {
     translate(afterTranslate);
+}
+
+//Sends the given code to the server for compilation and it successful, runs the resulting js.
+function runCode(code) {
+  translateCode(code, false, false, afterTranslate);
 }
 
 //This function is called if compilation runs OK
@@ -272,7 +287,11 @@ function editCode(key) {
 }
 
 function getEditCode() {
-    return "import browser { ... } import browser.dom { ... } void run_script() {\n" + editor.getValue() + "\n}";
+    return wrapCode(editor.getValue());
+}
+
+function wrapCode(code) {
+    return "import browser { ... } import browser.dom { ... } void run_script() {\n" + code + "\n}";
 }
 
 function setEditCode(src) {
