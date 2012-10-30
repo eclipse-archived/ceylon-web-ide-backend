@@ -95,10 +95,13 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             resp.put("code_docs", doccer.getDocs());
             resp.put("code_refs", DocUtils.referenceMapToList(doccer.getLocations()));
             //Put errors in this list
-            ArrayList<Object> errs = new ArrayList<Object>(compiler.listErrors().size());
+            ArrayList<Map<String, Object>> errs = new ArrayList<Map<String, Object>>(compiler.listErrors().size());
             for (Message err : compiler.listErrors()) {
                 if (!(err instanceof UsageWarning)) {
-                    errs.add(encodeError(err));
+                    Map<String, Object> encoded = encodeError(err);
+                    if (!errs.contains(encoded)) {
+                        errs.add(encodeError(err));
+                    }
                 }
             }
             if (errs.isEmpty()) {
