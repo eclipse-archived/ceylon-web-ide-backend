@@ -19,7 +19,7 @@ dependencies {
 }
 
 task copylangmod(type:Copy) {
-	from "../ceylon-js/build/runtime/ceylon/language/${ceylonVersion}/ceylon.language.js"
+	from "../ceylon-js/build/runtime/ceylon/language/${ceylonVersion}/ceylon.language-${ceylonVersion}.js"
 	into "${webAppDirName}/scripts/modules/ceylon/language/${ceylonVersion}"
 }
 task copylibs(type:Copy, dependsOn:copylangmod) {
