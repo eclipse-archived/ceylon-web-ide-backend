@@ -278,6 +278,60 @@ MemoryPoolMXBean item = (MemoryPoolMXBean) iter.next();
 	}
 %>
 
+
+<%
+    e = System.getProperties().keys();
+    if(e != null && e.hasMoreElements()) {
+%>
+<H2>System Properties</H2>
+<TABLE>
+<TR valign=top>
+    <TH align=left>Parameter:</TH>
+    <TH align=left>Value:</TH>
+</TR>
+<%
+        while(e.hasMoreElements()) {
+            String k = (String) e.nextElement();
+            String val = System.getProperty(k);
+%>
+<TR valign=top>
+    <TD><%= k %></TD>
+    <TD><%= val %></TD>
+</TR>
+<%
+        }
+%>
+</TABLE>
+<%
+    }
+%>
+<%
+    iter = System.getenv().keySet().iterator();
+    if(iter != null && iter.hasNext()) {
+%>
+<H2>System Environment</H2>
+<TABLE>
+<TR valign=top>
+    <TH align=left>Parameter:</TH>
+    <TH align=left>Value:</TH>
+</TR>
+<%
+        while(iter.hasNext()) {
+            String k = (String) iter.next();
+            String val = System.getenv(k);
+%>
+<TR valign=top>
+    <TD><%= k %></TD>
+    <TD><%= val %></TD>
+</TR>
+<%
+        }
+%>
+</TABLE>
+<%
+    }
+%>
+
 </BODY>
 </HTML>
 
