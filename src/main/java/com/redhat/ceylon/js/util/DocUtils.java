@@ -1,9 +1,9 @@
 package com.redhat.ceylon.js.util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 
 /** Hover docs utilities.
  * 
@@ -12,10 +12,10 @@ import java.util.Map;
 public class DocUtils {
 
     /** Transforms the reference map into a list of locations in a format that CodeMirror can understand. */
-    public static List<Map<String, Object>> referenceMapToList(Map<String, Integer> refs) {
-        ArrayList<Map<String, Object>> rval = new ArrayList<Map<String, Object>>(refs.size());
+    public static JSONArray referenceMapToList(Map<String, Integer> refs) {
+        JSONArray rval = new JSONArray();
         for (Map.Entry<String, Integer> entry : refs.entrySet()) {
-            Map<String, Object> ref = locationToMap(entry.getKey(), false);
+            JSONObject ref = locationToMap(entry.getKey(), false);
             ref.put("ref", entry.getValue());
             rval.add(ref);
         }
@@ -25,9 +25,9 @@ public class DocUtils {
     /** Transforms a location of form "r:c-r:c" or just "r:c" into a map that CodeMirror can understand.
      * @param location A string in the form "r:c-r:c" or "r:c".
      * @param forceEnd if location is only r:c and this flag is true, the same position is used for the 'end' property. */
-    public static Map<String, Object> locationToMap(String location, boolean forceEnd) {
+    public static JSONObject locationToMap(String location, boolean forceEnd) {
         String[] parts = location.split("-");
-        Map<String, Object> locs = new HashMap<String, Object>();
+        JSONObject locs = new JSONObject();
         locs.put("from", encodePosition(parts[0]));
         if (parts.length == 2) {
             locs.put("to", encodePosition(parts[1]));
@@ -37,9 +37,9 @@ public class DocUtils {
         return locs;
     }
 
-    public static Map<String, Number> encodePosition(String pos) {
+    public static JSONObject encodePosition(String pos) {
         String[] rc = pos.split(":");
-        Map<String, Number> m = new HashMap<String, Number>();
+        JSONObject m = new JSONObject();
         if (rc.length == 2) {
             m.put("line", Integer.parseInt(rc[0], 10));
             m.put("ch", Integer.parseInt(rc[1], 10));

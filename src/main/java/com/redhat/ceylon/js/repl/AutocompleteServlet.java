@@ -1,10 +1,6 @@
 package com.redhat.ceylon.js.repl;
 
 import java.io.IOException;
-import java.io.StringWriter;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -12,7 +8,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.redhat.ceylon.compiler.SimpleJsonEncoder;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+
 import com.redhat.ceylon.compiler.js.DocVisitor;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
@@ -24,7 +22,6 @@ import com.redhat.ceylon.js.util.DocUtils;
 public class AutocompleteServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
-    private SimpleJsonEncoder json = new SimpleJsonEncoder();
 
     /** Receives a block of Ceylon code and a location, and returns a list of the possible completions for the token
      * at said location. The following keys must be present in the request:
@@ -61,7 +58,7 @@ public class AutocompleteServlet extends HttpServlet {
             for (PhasedUnit pu: typeChecker.getPhasedUnits().getPhasedUnits()) {
                 pu.getCompilationUnit().visit(doccer);
             }
-            final Map<String, Object> jsr = new HashMap<String, Object>();
+            final JSONObject jsr = new JSONObject();
             jsr.put("code_docs", doccer.getDocs());
             jsr.put("code_refs", DocUtils.referenceMapToList(doccer.getLocations()));
             //Now get the suggestions for node at the specified location
@@ -74,24 +71,21 @@ public class AutocompleteServlet extends HttpServlet {
                 }
             });
             jsr.put("opts", assistant.getCompletions());
-            //jsr.put("opts", Arrays.asList("method1(Integer,String)", "method2()", "methodref", "blabla"));
-            final StringWriter swriter = new StringWriter();
-            json.encode(jsr, swriter);
-            final String enc = swriter.toString();
+            final String enc = jsr.toJSONString();
             resp.setContentLength(enc.length());
             resp.getWriter().print(enc);
         } catch (NumberFormatException ex) {
             resp.setStatus(500);
-            final StringWriter sb = new StringWriter();
-            json.encodeList(Collections.singletonList((Object)"Current location wasn't provided."), sb);
-            final String enc = sb.toString();
+            final JSONArray errs = new JSONArray();
+            errs.add("Current location wasn't provided.");
+            final String enc = errs.toJSONString();
             resp.setContentLength(enc.length());
             resp.getWriter().print(enc);
         } catch (Exception ex) {
             resp.setStatus(500);
-            final StringWriter sb = new StringWriter();
-            json.encodeList(Collections.singletonList((Object)String.format("Service error: %s", ex.getMessage())), sb);
-            final String enc = sb.toString();
+            final JSONArray sb = new JSONArray();
+            sb.add(String.format("Service error: %s", ex.getMessage()));
+            final String enc = sb.toJSONString();
             resp.setContentLength(enc.length());
             resp.getWriter().print(enc);
         }

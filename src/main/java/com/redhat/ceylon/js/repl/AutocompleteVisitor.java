@@ -1,11 +1,13 @@
 package com.redhat.ceylon.js.repl;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
@@ -133,7 +135,7 @@ public class AutocompleteVisitor extends Visitor {
     }
 
     /** Looks for declarations matching the node's text and returns them as strings. */
-    public List<Map<String, Object>> getCompletions() {
+    public JSONArray getCompletions() {
         Map<String, DeclarationWithProximity> comps = new HashMap<String, DeclarationWithProximity>();
         if (node != null) {
             HashSet<PhasedUnit> units = new HashSet<PhasedUnit>();
@@ -154,17 +156,17 @@ public class AutocompleteVisitor extends Visitor {
         return translateCompletions(comps);
     }
 
-    private List<Map<String, Object>> translateCompletions(
+    private JSONArray translateCompletions(
             Map<String, DeclarationWithProximity> comps) {
-        List<Map<String,Object>> completions = new ArrayList<Map<String,Object>>(comps.size());
+        JSONArray completions = new JSONArray();
         for(Map.Entry<String, DeclarationWithProximity> entry : comps.entrySet()){
             completions.add(translateCompletion(entry.getValue()));
         }
         return completions;
     }
 
-    private Map<String, Object> translateCompletion(DeclarationWithProximity value) {
-        Map<String,Object> completion = new HashMap<String,Object>();
+    private JSONObject translateCompletion(DeclarationWithProximity value) {
+        JSONObject completion = new JSONObject();
         translateCompletion(completion, value.getDeclaration());
         completion.put("help", getDoc(value.getDeclaration()));
         return completion;
@@ -175,7 +177,7 @@ public class AutocompleteVisitor extends Visitor {
     private final static String TYPE = "<span class='cm-classname'>";
     private final static String END = "</span>";
     
-    private void translateCompletion(Map<String, Object> completion,
+    private void translateCompletion(JSONObject completion,
             Declaration declaration) {
         StringBuilder insert = new StringBuilder();
         StringBuilder display = new StringBuilder();
@@ -207,8 +209,8 @@ public class AutocompleteVisitor extends Visitor {
             display.append(declaration.getName());
             move = declaration.getName().length();
         }
-        completion.put("insert", insert);
-        completion.put("display", display);
+        completion.put("insert", insert.toString());
+        completion.put("display", display.toString());
         completion.put("move", move);
     }
 

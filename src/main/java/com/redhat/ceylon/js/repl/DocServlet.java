@@ -2,11 +2,8 @@ package com.redhat.ceylon.js.repl;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.CharArrayWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -16,7 +13,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.redhat.ceylon.compiler.SimpleJsonEncoder;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+
 import com.redhat.ceylon.compiler.js.DocVisitor;
 import com.redhat.ceylon.compiler.loader.JsModuleManagerFactory;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
@@ -29,9 +28,8 @@ import com.redhat.ceylon.js.util.DocUtils;
 public class DocServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
-    private final SimpleJsonEncoder json = new SimpleJsonEncoder();
     //Here we cache the code for the examples, so that it's only compiled the first time someone asks for it.
-    private HashMap<String, Map<String, Object>> examples = new HashMap<String, Map<String,Object>>();
+    private HashMap<String, JSONObject> examples = new HashMap<String, JSONObject>();
     public static final JsModuleManagerFactory MMF = new JsModuleManagerFactory();
     private static ScriptFile exampleModuleFile = null;
 
@@ -62,23 +60,21 @@ public class DocServlet extends HttpServlet {
      * @param tc The typechecker that has already processed the source code.
      * @param src The Ceylon source, in its original form (without wrapping in a function).
      * @return A map with the docs found for tokens in the code and the positions for said docs. */
-    private Map<String, Object> compile(TypeChecker tc) {
+    private JSONObject compile(TypeChecker tc) {
         //Retrieve docs
         DocVisitor dv = new DocVisitor();
         for (PhasedUnit pu: tc.getPhasedUnits().getPhasedUnits()) {
             pu.getCompilationUnit().visit(dv);
         }
         //Send as JSON
-        Map<String, Object> docs = new HashMap<String, Object>(2);
+        JSONObject docs = new JSONObject();
         docs.put("docs", dv.getDocs());
         docs.put("refs", DocUtils.referenceMapToList(dv.getLocations()));
         return docs;
     }
 
-    private void sendResponse(Map<String, Object> docs, HttpServletResponse response) throws IOException {
-        CharArrayWriter swriter = new CharArrayWriter(8192);
-        json.encode(docs, swriter);
-        String resp = swriter.toString();
+    private void sendResponse(JSONObject docs, HttpServletResponse response) throws IOException {
+        String resp = docs.toJSONString();
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         //Unicode chars cause problems with length so we have to count bytes here
@@ -87,8 +83,8 @@ public class DocServlet extends HttpServlet {
         response.getWriter().flush();
     }
 
-    private Map<String, Object> loadExample(ServletContext cxt, String key) throws IOException {
-        Map<String, Object> example = examples.get(key);
+    private JSONObject loadExample(ServletContext cxt, String key) throws IOException {
+        JSONObject example = examples.get(key);
         if (example == null) {
             synchronized (examples) {
                 if (example == null) {
@@ -120,9 +116,9 @@ public class DocServlet extends HttpServlet {
             sendResponse(loadExample(req.getServletContext(), key), resp);
         } catch (RuntimeException ex) {
             resp.setStatus(500);
-            CharArrayWriter error = new CharArrayWriter(1024);
-            json.encodeList(Collections.singletonList((Object)String.format("Service error: %s", ex.getMessage())), error);
-            final String enc = error.toString();
+            JSONArray error = new JSONArray();
+            error.add(String.format("Service error: %s", ex.getMessage()));
+            final String enc = error.toJSONString();
             resp.setContentLength(enc.length());
             resp.getWriter().print(enc);
         }
@@ -150,9 +146,9 @@ public class DocServlet extends HttpServlet {
             sendResponse(compile(typeChecker), response);
         } catch (RuntimeException ex) {
             response.setStatus(500);
-            CharArrayWriter sb = new CharArrayWriter(512);
-            json.encodeList(Collections.singletonList((Object)String.format("Service error: %s", ex.getMessage())), sb);
-            final String enc = sb.toString();
+            JSONArray sb = new JSONArray();
+            sb.add(String.format("Service error: %s", ex.getMessage()));
+            final String enc = sb.toJSONString();
             response.setContentLength(enc.length());
             response.getWriter().print(enc);
         }
