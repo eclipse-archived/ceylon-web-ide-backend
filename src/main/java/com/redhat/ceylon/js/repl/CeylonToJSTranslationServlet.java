@@ -16,18 +16,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.redhat.ceylon.compiler.Options;
+import com.redhat.ceylon.compiler.SimpleJsonEncoder;
 import com.redhat.ceylon.compiler.js.DocVisitor;
 import com.redhat.ceylon.compiler.js.JsCompiler;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
-import com.redhat.ceylon.compiler.typechecker.TypeCheckerBuilder;
 import com.redhat.ceylon.compiler.typechecker.analyzer.UsageWarning;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
 import com.redhat.ceylon.compiler.typechecker.model.Module;
 import com.redhat.ceylon.compiler.typechecker.parser.RecognitionError;
 import com.redhat.ceylon.compiler.typechecker.tree.AnalysisMessage;
 import com.redhat.ceylon.compiler.typechecker.tree.Message;
+import com.redhat.ceylon.js.util.CompilerUtils;
 import com.redhat.ceylon.js.util.DocUtils;
-import com.redhat.ceylon.compiler.SimpleJsonEncoder;
 
 /**
  * Servlet implementation class CeylonToJSTranslationServlet
@@ -62,12 +62,10 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
     	                    new ScriptFile("module.ceylon", module)
     	            )
     	    );
-    	    //Run the typechecker
-            TypeChecker typeChecker = new TypeCheckerBuilder()
-                    .addSrcDirectory(src)
-                    .moduleManagerFactory(DocServlet.MMF)
-                    .getTypeChecker();
+
+    	    TypeChecker typeChecker = CompilerUtils.getTypeChecker(request.getServletContext(), src);
             typeChecker.process();
+            
             //While we're at it, get the docs
             final DocVisitor doccer = new DocVisitor();
             for (PhasedUnit pu: typeChecker.getPhasedUnits().getPhasedUnits()) {

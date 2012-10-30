@@ -22,6 +22,7 @@ import com.redhat.ceylon.compiler.loader.JsModuleManagerFactory;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.TypeCheckerBuilder;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
+import com.redhat.ceylon.js.util.CompilerUtils;
 import com.redhat.ceylon.js.util.DocUtils;
 
 @WebServlet("/hoverdoc")
@@ -96,14 +97,10 @@ public class DocServlet extends HttpServlet {
                         "import browser { ... } import browser.dom { ... } void run_script(){\n")
                         .append(src).append("\n}").toString();
                     //Run the typechecker
-                    TypeChecker typeChecker = new TypeCheckerBuilder()
-                        .addSrcDirectory(new ScriptFile("ROOT",
+                    TypeChecker typeChecker = CompilerUtils.getTypeChecker(cxt, new ScriptFile("ROOT",
                             new ScriptFile("web_ide_script", exampleModuleFile,
                                 new ScriptFile("SCRIPT.ceylon", wrappedSrc))
-                            )
-                        )
-                        .moduleManagerFactory(MMF)
-                        .getTypeChecker();
+                            ));
                     typeChecker.process();
                     example = compile(typeChecker);
                     example.put("src", src);

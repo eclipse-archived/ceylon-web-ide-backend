@@ -12,13 +12,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.redhat.ceylon.compiler.SimpleJsonEncoder;
 import com.redhat.ceylon.compiler.js.DocVisitor;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
-import com.redhat.ceylon.compiler.typechecker.TypeCheckerBuilder;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
 import com.redhat.ceylon.js.repl.AutocompleteVisitor.AutocompleteUnitValidator;
+import com.redhat.ceylon.js.util.CompilerUtils;
 import com.redhat.ceylon.js.util.DocUtils;
-import com.redhat.ceylon.compiler.SimpleJsonEncoder;
 
 @WebServlet("/assist")
 public class AutocompleteServlet extends HttpServlet {
@@ -54,9 +54,7 @@ public class AutocompleteServlet extends HttpServlet {
                     )
             );
             //Run the typechecker
-            TypeChecker typeChecker = new TypeCheckerBuilder()
-                    .addSrcDirectory(src)
-                    .getTypeChecker();
+            TypeChecker typeChecker = CompilerUtils.getTypeChecker(req.getServletContext(), src);
             typeChecker.process();
             //Get the docs
             final DocVisitor doccer = new DocVisitor();

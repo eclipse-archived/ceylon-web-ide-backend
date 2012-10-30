@@ -12,7 +12,7 @@ import com.redhat.ceylon.compiler.typechecker.io.VirtualFile;
  * 
  * @author Tako Schotanus
  */
-class ScriptFile implements VirtualFile {
+public class ScriptFile implements VirtualFile {
     private String name;
     private String script;
     private ArrayList<VirtualFile> children;
