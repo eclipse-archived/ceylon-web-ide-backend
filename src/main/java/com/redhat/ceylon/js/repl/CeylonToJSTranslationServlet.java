@@ -114,7 +114,8 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             json.encode(resp, swriter);
             final String enc = swriter.toString();
             response.setContentType("application/json");
-            response.setContentLength(enc.length());
+            response.setCharacterEncoding("UTF-8");
+            response.setContentLength(enc.getBytes("UTF-8").length);
             response.getWriter().print(enc);
 	    } catch (Exception ex) {
             response.setStatus(500);
