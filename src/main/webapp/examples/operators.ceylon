@@ -17,8 +17,17 @@ class Product(String name, Float price)
 value frog = Product("Frog", 16.0);
 value bee = Product("Bee", 0.50);
 void cmp(Product x, Product y) {
-  if (x < y) { print("" x " < " y ""); }
-  else if (x > y) { print("" x " > " y ""); }
-  else { print("" x " == " y ""); }
+    if (x < y) { print("" x " < " y ""); }
+    else if (x > y) { print("" x " > " y ""); }
+    else { print("" x " == " y ""); }
 }
 cmp(frog, bee);
+
+// alternative version:
+void cmp2(Product x, Product y) {
+    switch (x <=> y)
+    case (smaller) { print("" x " < " y ""); }
+    case (larger) { print("" x " > " y ""); }
+    case (equal) { print("" x " == " y ""); }
+}
+cmp(bee, frog);
