@@ -136,8 +136,6 @@ return ArraySequence(rval);
 }
 exports.JsCallableList=JsCallableList;
 exports.JsCallable=JsCallable;
-//#dont include iterable.js
-//#dont include sequential.js
 function Comprehension(makeNextFunc, $$targs$$, compr) {
 $init$Comprehension();
 if (compr===undefined) {compr = new Comprehension.$$;}
@@ -3398,10 +3396,6 @@ var times=function (x$647,y$648,$$$mptypes){
 };
 exports.times=times;
 //Ends compiled from Ceylon sources
-/****************************************************************
-* Overwriting of some methods not yet working in compiled code *
-****************************************************************/
-//#dont include maps.js
 function Number$(wat) {
 return wat;
 }
