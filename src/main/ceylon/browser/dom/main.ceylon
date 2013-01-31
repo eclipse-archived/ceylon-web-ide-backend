@@ -1,4 +1,4 @@
-shared Nothing nativejs() { return null; }
+shared Null nativejs() { return null; }
 shared nativejs interface Node {
     shared formal Integer \iATTRIBUTE_NODE;
     shared formal Integer \iCDATA_SECTION_NODE;
