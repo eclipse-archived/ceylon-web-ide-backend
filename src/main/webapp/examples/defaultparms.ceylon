@@ -2,7 +2,7 @@ void greet(String name="World") {
     print("Hello, " name "!");
 }
 void shout(String? name) {
-    greet( (name ? "world" ).uppercased);
+    greet( (name else "world" ).uppercased);
 }
 greet();
 greet("yourself");

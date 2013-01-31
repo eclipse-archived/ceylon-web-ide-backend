@@ -8,9 +8,9 @@ doc "Declarations can be documented using the `doc` annotation.
 Boolean b = (i == 3);
 
 // An attribute annotated "variable" can be re-assigned after it
-// has been initialized. Note the ":=" instead of "=".
-variable Float f := 0.3;
-f := 2.0**0.5; // exponentiation
+// has been initialized.
+variable Float f = 0.3;
+f = 2.0^0.5; // exponentiation
 
 // String templates can be used to compose strings. They must
 // start and end with a string literal.

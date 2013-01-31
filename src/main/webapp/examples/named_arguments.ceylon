@@ -1,5 +1,5 @@
 void order(String product, Integer count=1, Float discount=0.0,
-           String... comments) {
+          {String*} comments={}) {
     String commentStr = ", ".join(for (c in comments) "'"c"'");
     print("Order '" product "', quantity " count ", discount "
           discount ", comments: " commentStr "");
@@ -16,8 +16,8 @@ order { product = "Bee"; count = 531;
 // structures. For instance for the following classes:
 class Product(String name, Float price, String description=name,
               Float shippingCosts=0.0) {/*...*/}
-class Group(String name, Product... products) {/*...*/}
-class Stock(Group... groups) {/*...*/}
+class Group(String name, {Product*} products) {/*...*/}
+class Stock({Group*} groups) {/*...*/}
 
 // We can write the data in a way that's similar to JSON or XML:
 Stock stock = Stock {
@@ -51,7 +51,7 @@ Group toysGroup = Group { name = "Toys"; products = toys; };
 interface Formatter {
     shared formal String format(String text);
 }
-class Button(String text, Void()? onClick=null,
+class Button(String text, Anything()? onClick=null,
              Formatter? formatter=null) {
     shared void doClick() { if (exists onClick) {onClick();} }
 }
@@ -64,7 +64,7 @@ Button button = Button {
     // An argument can be specified as object declaration:
     object formatter satisfies Formatter {
         // Shortcut syntax for implementing a formal member:
-        format = (String text) "<b>" text "</b>";
+        format = (String text) => "<b>" text "</b>";
     }
 };
 button.doClick();

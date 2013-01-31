@@ -1,6 +1,6 @@
 // Functions use the familiar C/Java syntax:
 Float mean(Float x, Float y) {
-    return ((x*x + y*y) / 2) ** 0.5;
+    return ((x*x + y*y) / 2) ^ 0.5;
 }
 print("mean(11.0, 307.0) = " mean(11.0, 307.0) "");
  
@@ -19,7 +19,7 @@ class SimpleProduct(String name, Float price) {
     }
  
     // Classes can contain attributes and methods as members.
-    variable value quantity := 10;
+    variable value quantity = 10;
  
     // "shared" members are visible everywhere the class is
     // visible, otherwise they are private to the class.
@@ -90,14 +90,14 @@ print("Product '" polly.name "' costs " polly.price "");
 // irrelevant when accessing it:
 print("In stock: " polly.inStock
       " (quantity: " polly.quantity ")");
-polly.quantity := 12;
+polly.quantity = 12;
  
 // Overloading (two functions with the same name, or two class
 // constructors) is not allowed. But we can use union types,
 // defaulted parameters and sequenced parameters to achieve
 // approximately the same effect.
 void order(Product|String product, Integer count=1,
-           String... comments) {
+           String* comments) {
  
     // We can check the type using if(is..) or switch/case(is..)
     // as shown below.

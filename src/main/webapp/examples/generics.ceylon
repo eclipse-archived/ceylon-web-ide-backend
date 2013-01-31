@@ -1,7 +1,7 @@
 // Ceylon allows generic types and functions, i.e. they may have
 // type parameters:
-class Generic<Item>(Item i) {
-    shared variable Item item := i;
+class Generic<Item>(item) {
+    shared variable Item item;
     shared Item f(Item other) { return other; }
 }
 Item genericFunc<Item>(Item i) { return i; }
@@ -12,8 +12,8 @@ Item genericFunc<Item>(Item i) { return i; }
 // But for some types such a relation is possible, namely if the
 // generic type is only used as return type, not for method
 // parameters:
-class Covariant<out Item>(Item i) {
-    shared Item item = i;
+class Covariant<out Item>(item) {
+    shared Item item;
     shared Item? f() { return null; }
 }
 Covariant<Object> obj = Covariant<String>("test");

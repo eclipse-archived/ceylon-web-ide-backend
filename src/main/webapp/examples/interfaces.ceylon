@@ -13,7 +13,7 @@ interface Customer {
     // But in contrast to classes an interface can't contain
     // initialization code. The following is not allowed:
     //print(name); //ERROR!
-    //shared variable Integer attr := 0; //ERROR!
+    //shared variable Integer attr = 0; //ERROR!
 }
 
 // A class can satisfy one or more interfaces:
@@ -64,7 +64,7 @@ class PetShopCustomer(id, name)
  
     // It is allowed to implement/override a non-variable
     // attribute with a variable attribute.
-    shared actual variable Integer numberOfItems := 0;
+    shared actual variable Integer numberOfItems = 0;
    
     // This class inherits a "description" attribute from two
     // different types! That's allowed because both override the
@@ -90,5 +90,5 @@ class PetShopCustomer(id, name)
  
 value catwoman = PetShopCustomer(1, "Catwoman");
 print("Customer: " catwoman ""); // automatically uses ".string"
-catwoman.numberOfItems := 3;
+catwoman.numberOfItems = 3;
 catwoman.checkOut();

@@ -7,7 +7,7 @@ print("f1(1.0, 7.0) = " f1(1.0, 7.0) "");
 Float(Float, Float) f2 = f1;
 
 // We can also write:
-Float f3(Float x, Float y) = f1;
+Float f3(Float x, Float y) => f1(x,y);
 
 // Function references can be used like any other value,
 // for instance as arguments or return values:
@@ -31,15 +31,15 @@ print("Should be the same: " makeFunc(2.0.times)(1.0, 7.0) "");
 // We can further improve this using anonymous functions:
 function makeFunc2(Float(Float) f) {
     // This is equivalent to "ret" in makeFunc above:
-    return (Float x, Float y) average(f(x), f(y));
+    return (Float x, Float y) => average(f(x), f(y));
 }
-value squareAvg = makeFunc2((Float n) n**2);
+value squareAvg = makeFunc2((Float n) => n^2);
 print("squareAvg(1.0, 7.0) = " squareAvg(1.0, 7.0) "");
 
 // A different and rather elegant and approach is to define a
 // function with multiple parameter lists:
 Float expAvg(Float e)(Float x, Float y) {
-    return average(x**e, y**e);
+    return average(x^e, y^e);
 }
 // Applying the first parameter list returns a "normal" function
 // with one parameter list:
@@ -52,21 +52,21 @@ class Product(String name) {
     shared actual String string = "Product '" name "'";
 }
 Product? getByName(String name) { return null; }
-variable Product?(String) getProd := getByName;
-getProd := Product;
+variable Product?(String) getProd = getByName;
+getProd = Product;
 print(getProd("Giraffe, extra long") else "not found");
 
 // Note the differing return types above: "Product"
 // vs. "Product?". That's indeed allowed:
 void voidFunc() { print("returns nothing"); }
-variable Void() funcRef := voidFunc;
+variable Anything() funcRef = voidFunc;
 String stringFunc() { return "returns a String"; }
-funcRef := stringFunc; // return value will be ignored
+funcRef = stringFunc; // return value will be ignored
 
 // Somewhere above we nested a function inside a function. In
 // fact, most language elements can be nested inside each other:
 class Outer(Float(Float, Float) func) {
-    Float calc(Float x, Float y) = func;
+    Float calc(Float x, Float y) => func(x,y);
  
     // Types can be nested inside other types...
     shared class Inner() {

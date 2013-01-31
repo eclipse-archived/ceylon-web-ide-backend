@@ -11,6 +11,8 @@ value x = SimpleClass();
 //Here we pass a reference to the "upper" method
 higher(x.upper);
 //Or, we can store the reference locally
-function f(Integer i)=x.upper;
+function f(Integer i) => x.upper(i);
 //Then pass it around
 higher(f);
+//Even pass an anonymous function
+higher((Integer x) => "inline " x "!");

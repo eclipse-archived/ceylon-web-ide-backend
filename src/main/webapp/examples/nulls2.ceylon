@@ -1,5 +1,5 @@
 void greet(String? name) {
-    print("Hello, " name ? "World" "!");
+    print("Hello, " name else "World" "!");
 }
 void shout(String? name) {
     greet(name?.uppercased);
