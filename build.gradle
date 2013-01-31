@@ -16,7 +16,7 @@ dependencies {
 		'net.minidev.json:json-smart:1.1.1'
 	providedCompile 'mongo:mongo:2.7.3'
 	providedCompile 'org.jboss.spec:jboss-javaee-6.0:1.0.0.Final'
-	testCompile 'junit:junit:4.10'
+	testCompile 'junit:junit:4.10', "ceylon:com.redhat.ceylon.common:${ceylonVersion}"
 }
 
 task copylangmod(type:Copy) {
