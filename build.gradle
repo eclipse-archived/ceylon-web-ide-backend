@@ -20,14 +20,36 @@ dependencies {
 }
 
 task copylangmod(type:Copy) {
-	from "../ceylon-js/build/runtime/ceylon/language/${ceylonVersion}/ceylon.language-${ceylonVersion}.js"
+	from "../ceylon-js/build/runtime/ceylon/language/${ceylonVersion}"
 	into "${webAppDirName}/scripts/modules/ceylon/language/${ceylonVersion}"
+	into "${webAppDirName}/WEB-INF/ceylon-repo/system/ceylon/language/${ceylonVersion}"
 }
-task copylibs(type:Copy, dependsOn:copylangmod) {
+task copyJsCompiler(type:Copy) {
+	into "${webAppDirName}/WEB-INF/ceylon-repo/system/com/redhat/ceylon/compiler/js/${ceylonVersion}"
+	from "../ceylon-js/build/dist/com/redhat/ceylon/compiler/js/${ceylonVersion}"
+}
+task copyCommon(type:Copy) {
+	into "${webAppDirName}/WEB-INF/ceylon-repo/system/com/redhat/ceylon/common/${ceylonVersion}"
+	from "${ceylonDistRepo}/com/redhat/ceylon/common/${ceylonVersion}"
+}
+task copyTypechecker(type:Copy) {
+	into "${webAppDirName}/WEB-INF/ceylon-repo/system/com/redhat/ceylon/typechecker/${ceylonVersion}"
+	from "${ceylonDistRepo}/com/redhat/ceylon/typechecker/${ceylonVersion}"
+}
+task copyCMR(type:Copy) {
+	into "${webAppDirName}/WEB-INF/ceylon-repo/system/com/redhat/ceylon/module-resolver/${ceylonVersion}"
+	from "${ceylonDistRepo}/com/redhat/ceylon/module-resolver/${ceylonVersion}"
+}
+task copyAnt(type:Copy) {
+	into "${webAppDirName}/WEB-INF/ceylon-repo/system/com/redhat/ceylon/ant/${ceylonVersion}"
+	from "${ceylonDistRepo}/com/redhat/ceylon/ant/${ceylonVersion}"
+}
+task copylibs(type:Copy, dependsOn:[copyJsCompiler,copyCommon,copyTypechecker,copyCMR,copyAnt,copylangmod]) {
 	from "../ceylon-js/build/dist/com/redhat/ceylon/compiler/js/${ceylonVersion}/com.redhat.ceylon.compiler.js-${ceylonVersion}.jar"
 	from "${ceylonDistRepo}/com/redhat/ceylon/typechecker/${ceylonVersion}/com.redhat.ceylon.typechecker-${ceylonVersion}.jar"
 	from "${ceylonDistRepo}/com/redhat/ceylon/module-resolver/${ceylonVersion}/com.redhat.ceylon.module-resolver-${ceylonVersion}.jar"
 	from "${ceylonDistRepo}/com/redhat/ceylon/ant/${ceylonVersion}/com.redhat.ceylon.ant-${ceylonVersion}.jar"
+	from "${ceylonDistRepo}/com/redhat/ceylon/common/${ceylonVersion}/com.redhat.ceylon.common-${ceylonVersion}.jar"
     from "../ceylon-js/lib/json-smart-1.1.1.jar"
 	into "${webAppDirName}/WEB-INF/lib"
 }
