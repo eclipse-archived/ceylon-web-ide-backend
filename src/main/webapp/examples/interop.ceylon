@@ -13,7 +13,7 @@ while (i < nodes.length) {
     if (is HTMLAnchorElement elem = nodes.item(i)) {
         String oldText = elem.textContent;
         print(oldText);
-        elem.textContent := "*" oldText "*";
+        elem.textContent = "*" oldText "*";
     }
     i++;
 }
