@@ -68,7 +68,7 @@ public class TestExamples {
                 .buildManager();
         TypeCheckerBuilder tcb = new TypeCheckerBuilder()
                 .addSrcDirectory(new File("./src/main/ceylon"))
-                .addSrcDirectory(tmpRoot);
+                .addSrcDirectory(tmpRoot)
                 .moduleManagerFactory(new JsModuleManagerFactory());
         tcb.setRepositoryManager(repoman);
         TypeChecker tc = tcb.getTypeChecker();
