@@ -14,7 +14,6 @@ import org.junit.Test;
 import com.redhat.ceylon.cmr.api.RepositoryManager;
 import com.redhat.ceylon.cmr.ceylon.CeylonUtils;
 import com.redhat.ceylon.compiler.Options;
-import com.redhat.ceylon.compiler.js.JsCompiler;
 import com.redhat.ceylon.compiler.loader.JsModuleManagerFactory;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.TypeCheckerBuilder;
@@ -46,19 +45,24 @@ public class TestExamples {
         for (File f : srcdir.listFiles()) {
             File dst = new File(tmpsrc, f.getName());
             PrintWriter fout = new PrintWriter(new FileWriter(dst));
-            fout.printf("import ceylon.browser{...} import ceylon.browser.dom{...} shared void caca_%d(){", count++);
+            boolean isSpecial = f.getName().equals("module.ceylon") || f.getName().equals("package.ceylon");
+            if (!isSpecial) {
+                fout.printf("import browser{...} import browser.dom{...} shared void caca_%d(){", count++);
+            }
             BufferedReader fin = new BufferedReader(new FileReader(f));
             String jsline = null;
             while ((jsline = fin.readLine()) != null) {
                 fout.println(jsline);
             }
             fin.close();
-            fout.println("}");
+            if (!isSpecial) {
+                fout.println("}");
+            }
             fout.close();
         }
         args.addAll(Arrays.asList("-src", tmpRoot.getAbsolutePath(),
                 "-optimize", "-src", "src/main/ceylon",
-                "-rep", "src/main/webapp/WEB-INF/ceylon-repo/system",
+                "-rep", "src/main/webapp/scripts/modules",
                 "-out", tmpout.getAbsolutePath()));
         Options opts = Options.parse(args);
         final RepositoryManager repoman = CeylonUtils.repoManager()
@@ -67,19 +71,11 @@ public class TestExamples {
                 .outRepo(opts.getOutDir())
                 .buildManager();
         TypeCheckerBuilder tcb = new TypeCheckerBuilder()
-                .addSrcDirectory(new File("./src/main/ceylon"))
                 .addSrcDirectory(tmpRoot)
                 .moduleManagerFactory(new JsModuleManagerFactory());
         tcb.setRepositoryManager(repoman);
         TypeChecker tc = tcb.getTypeChecker();
         tc.process();
-        JsCompiler jsc = new JsCompiler(tc, opts);
-        jsc.stopOnErrors(false);
-        if (jsc.generate()) {
-            System.out.println("OK");
-        } else {
-            jsc.printErrors(System.out);
-        }
     }
 
 }
