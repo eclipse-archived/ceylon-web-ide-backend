@@ -70,7 +70,7 @@ require(["ceylon/language/0.5/ceylon.language-0.5", 'jquery', "browser/1.0.0/bro
                 key = location.href.slice(location.href.indexOf('?src=')+5);
                 editor.setValue(decodeURIComponent(key));
             } else {
-            	runCode(wrapCode('print("Ceylon " language.version " \\"" language.versionName "\\"");'));
+            	runCode(wrapCode('print("Ceylon ``language.version`` \\"``language.versionName``\\"");'));
                 editCode('hello_world');
             }
         });
