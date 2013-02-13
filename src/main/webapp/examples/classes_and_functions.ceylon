@@ -2,20 +2,20 @@
 Float mean(Float x, Float y) {
     return ((x*x + y*y) / 2) ^ 0.5;
 }
-print("mean(11.0, 307.0) = " mean(11.0, 307.0) "");
+print("mean(11.0, 307.0) = ``mean(11.0, 307.0)``");
  
 // With the "function" keyword the compiler infers the type.
 function average(Float x, Float y) {
     return (x + y) * 0.5;
 }
-print("average(11.0, 307.0) = " average(11.0, 307.0) "");
+print("average(11.0, 307.0) = ``average(11.0, 307.0)``");
  
 // Classes look fairly similar to functions:
 class SimpleProduct(String name, Float price) {
  
     // The class body may contain initialization code.
     if (price < 0.0) {
-        throw Exception("Invalid price: " price "!");
+        throw Exception("Invalid price: ``price``!");
     }
  
     // Classes can contain attributes and methods as members.
@@ -35,7 +35,7 @@ class SimpleProduct(String name, Float price) {
 }
 
 value trompon = SimpleProduct("Elephant", 0.0);
-print("free: " trompon.isFree() "");
+print("free: ``trompon.isFree()``");
 
 // Let's improve this with some nice Ceylon features!
 
@@ -49,7 +49,7 @@ abstract class Product(name, price) {
     shared Float price;
  
     if (price <= 0.0) {
-        throw Exception("Invalid price: " price "!");
+        throw Exception("Invalid price: ``price``!");
     }
  
     // "formal" members have no value/implementation. They are
@@ -79,17 +79,16 @@ class ProductInDatabase(String name, Float price)
     }
     assign quantity {
         //TODO: store in database
-        print("Set quantity to " quantity "");
+        print("Set quantity to ``quantity``");
     }
 }
 
 value polly = ProductInDatabase("Parrot", 49.99);
-print("Product '" polly.name "' costs " polly.price "");
+print("Product '``polly.name``' costs ``polly.price``");
 
 // Whether an attribute is implemented with a getter/setter is
 // irrelevant when accessing it:
-print("In stock: " polly.inStock
-      " (quantity: " polly.quantity ")");
+print("In stock: ``polly.inStock`` (quantity: ``polly.quantity``)");
 polly.quantity = 12;
  
 // Overloading (two functions with the same name, or two class
@@ -108,9 +107,9 @@ void order(Product|String product, Integer count=1,
     case (is Product) { name = product.name; }
     case (is String) { name = product; }
  
-    print("Order product '" name "', count: " count "");
+    print("Order product '``name``', count: ``count``");
     for (c in comments) {
-        print("  Comment: '" c "'");
+        print("  Comment: '``c``'");
     }
 }
 

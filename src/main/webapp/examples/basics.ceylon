@@ -14,7 +14,7 @@ f = 2.0^0.5; // exponentiation
 
 // String templates can be used to compose strings. They must
 // start and end with a string literal.
-print("The square root of 2 is " f "");
+print("The square root of 2 is ``f``");
 
 // With the "value" keyword the type is inferred by the compiler.
 value t1 = process.milliseconds;
@@ -31,4 +31,4 @@ while (f < 1_000_000.0) {
         }
     }
 }
-print("f=" f " (" (process.milliseconds-t1) "ms)");
+print("f=``f`` (``process.milliseconds-t1``ms)");

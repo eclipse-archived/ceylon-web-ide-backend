@@ -38,9 +38,8 @@ class Tools<out Num>(Num x, Num y)
     }
 }
 Tools<Float> t1 = Tools<Float>(-3.1, 0.62);
-print("t1.dist() = " t1.dist() "");
+print("t1.dist() = ``t1.dist()``");
 
 // Let the compiler infer the types:
 value t2 = Tools(814, 5);
-print("t2.dist() = " t2.dist() " (type "
-      className(t2.dist()) ")");
+print("t2.dist() = ``t2.dist()`` (type ``className(t2.dist())``)");

@@ -1,7 +1,7 @@
 // We can use a reference to a function as a value:
 Float average(Float x, Float y) { return (x + y) * 0.5; }
 value f1 = average;
-print("f1(1.0, 7.0) = " f1(1.0, 7.0) "");
+print("f1(1.0, 7.0) = ``f1(1.0, 7.0)``");
 
 // The type of f1 is Float(Float, Float):
 Float(Float, Float) f2 = f1;
@@ -22,11 +22,11 @@ Float(Float, Float) makeFunc(Float(Float) f) {
 
 Float twice(Float n) { return 2.0*n; }
 value doubleAvg = makeFunc(twice);
-print("doubleAvg(1.0, 7.0) = " doubleAvg(1.0, 7.0) "");
+print("doubleAvg(1.0, 7.0) = ``doubleAvg(1.0, 7.0)``");
 
 // We can also use references to methods of objects.
 // For instance, Float has a method "times":
-print("Should be the same: " makeFunc(2.0.times)(1.0, 7.0) "");
+print("Should be the same: ``makeFunc(2.0.times)(1.0, 7.0)``");
 
 // We can further improve this using anonymous functions:
 function makeFunc2(Float(Float) f) {
@@ -34,7 +34,7 @@ function makeFunc2(Float(Float) f) {
     return (Float x, Float y) => average(f(x), f(y));
 }
 value squareAvg = makeFunc2((Float n) => n^2);
-print("squareAvg(1.0, 7.0) = " squareAvg(1.0, 7.0) "");
+print("squareAvg(1.0, 7.0) = ``squareAvg(1.0, 7.0)``");
 
 // A different and rather elegant and approach is to define a
 // function with multiple parameter lists:
@@ -44,12 +44,12 @@ Float expAvg(Float e)(Float x, Float y) {
 // Applying the first parameter list returns a "normal" function
 // with one parameter list:
 value squareAvg2 = expAvg(2.0);
-print("squareAvg2(1.0, 7.0) = " squareAvg2(1.0, 7.0) "");
+print("squareAvg2(1.0, 7.0) = ``squareAvg2(1.0, 7.0)``");
 
 // Function references can even refer to class initializers! They
 // are treated as functions that return an instance of the class.
 class Product(String name) {
-    shared actual String string = "Product '" name "'";
+    shared actual String string = "Product '``name``'";
 }
 Product? getByName(String name) { return null; }
 variable Product?(String) getProd = getByName;
@@ -86,4 +86,4 @@ class Outer(Float(Float, Float) func) {
 }
 Outer o = Outer(average);
 Outer.Inner i = o.Inner();
-print("Outer(average).Inner().f() = " i.f() "");
+print("Outer(average).Inner().f() = ``i.f()``");

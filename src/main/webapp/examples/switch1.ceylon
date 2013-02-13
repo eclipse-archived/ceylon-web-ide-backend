@@ -47,8 +47,8 @@ object blue extends Color("blue") {}
 void testSize(Integer x) {
     Comparison cmp = x <=> 5;
     switch (cmp)
-    case (smaller) { print("" x " is smaller than 5"); }
-    case (larger) { print("" x " is larger than 5"); }
+    case (smaller) { print("``x`` is smaller than 5"); }
+    case (larger) { print("``x`` is larger than 5"); }
     case (equal) { print("x is exactly 5"); }
 }
 testSize(42);

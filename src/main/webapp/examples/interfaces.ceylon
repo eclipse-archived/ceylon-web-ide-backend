@@ -7,7 +7,7 @@ interface Customer {
     // Interfaces may define concrete implementations of methods
     // and getters/setters.
     shared default String description {
-       return "'" name "'";
+       return "'``name``'";
     }
   
     // But in contrast to classes an interface can't contain
@@ -23,7 +23,7 @@ class SimpleCustomer(name) satisfies Customer {
 }
  
 value batman = SimpleCustomer("Batman");
-print("Customer: " batman.description "");
+print("Customer: ``batman.description``");
  
 // Interfaces also can satisfy one or more parent interfaces.
 interface RegisteredCustomer satisfies Customer {
@@ -33,7 +33,7 @@ interface RegisteredCustomer satisfies Customer {
  
     // Override the inherited default implementation.
     shared actual default String description {
-       return "'" name "' (#" id ")";
+       return "'``name``' (#``id``)";
     }
 }
 
@@ -45,12 +45,12 @@ interface CartOwner satisfies Customer {
  
     // Again, we override the inherited implementation
     shared actual default String description {
-       return "'" name "' (" numberOfItems " items)";
+       return "'``name``' (``numberOfItems`` items)";
     }
  
     doc "The customer buys the items in the cart."
     shared default void checkOut() {
-       print("'" name "' buys " numberOfItems " items.");
+       print("'``name``' buys ``numberOfItems`` items.");
     }
 }
 
@@ -72,7 +72,7 @@ class PetShopCustomer(id, name)
     // compiler forces us to override it again here to avoid any
     // ambiguity.
     shared actual String description {
-       return "'" name "' (#" id ", " numberOfItems " items)";
+       return "'``name``' (#``id``, ``numberOfItems`` items)";
     }
  
     // Unless specified otherwise, classes extend
@@ -89,6 +89,6 @@ class PetShopCustomer(id, name)
 }
  
 value catwoman = PetShopCustomer(1, "Catwoman");
-print("Customer: " catwoman ""); // automatically uses ".string"
+print("Customer: ``catwoman``"); // automatically uses ".string"
 catwoman.numberOfItems = 3;
 catwoman.checkOut();

@@ -3,7 +3,7 @@ print("Hello world!");
 
 // This prints the same text:
 String str = "world";
-print("Hello " str "!");
+print("Hello ``str``!");
 
 // Click "Run" below to run the program.
 // It is converted to JavaScript and runs directly in your browser!

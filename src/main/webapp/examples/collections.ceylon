@@ -3,24 +3,24 @@ String[] animals = [ "elephant", "parrot", "giraffe" ];
 String[] none = {}; // empty sequence
 
 // Accessing the sequence returns an optional value (String?)
-print("First: " animals.first else "none" "");
-print("Second: " (animals[1] else "none") "");
-print("Fourth: " (animals[3] else "none") "");
+print("First: ``animals.first else "none"``");
+print("Second: ``animals[1] else "none"``");
+print("Fourth: ``animals[3] else "none"``");
 
 // Check if the sequence in non-empty:
 if (nonempty animals) {
     // Now ".first" and ".last" return String:
-    print("First: " animals.first "");
-    print("Last: " animals.last "");
+    print("First: ``animals.first``");
+    print("Last: ``animals.last``");
 }
 
-print("Is {} non-empty: " (none nonempty) "");
+print("Is {} non-empty: ``none nonempty``");
 
 // Output the elements comma-seperated in one line:
 if (nonempty animals) {
     process.write(animals.first);
     for (animal in animals.rest) {
-        process.write(", " animal "");
+        process.write(", ``animal``");
     }
     process.write(process.newline);
 }
@@ -34,7 +34,7 @@ void list(Object* items) {
     // "items" is an Iterable
     variable Integer index = 0;
     for (item in items) {
-        print("" ++index ". " item.string "");
+        print("``++index``.``item.string``");
     }
 }
 list("cat", "bat");
@@ -47,7 +47,7 @@ print(", ".join(*animals));
 
 // "entries" creates a sequence of entries (type Integer->String)
 for (i->animal in entries(animals)) {
-    print("" (i+1) ". " animal "");
+    print("``i+1``.``animal``");
 }
 
 // Implementing an iterator is simple in Ceylon:
@@ -70,12 +70,12 @@ class Lengths(String* strings) satisfies Iterable<Integer> {
     }
 }
 for (len in Lengths(*animals)) {
-    print("length: " len "");
+    print("length: ``len``");
 }
 
 // With a sequence comprehension we can produce the same result:
 {Integer*} lengths = { for (a in animals) a.size };
-for (len in lengths) { print("length: " len ""); }
+for (len in lengths) { print("length: ``len``"); }
 
 // Sequence comprehension as input to a sequenced parameter:
 list(for (a in animals) a+" egg");

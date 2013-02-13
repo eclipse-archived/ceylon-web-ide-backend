@@ -1,6 +1,6 @@
 class SimpleClass() {
     shared String upper(Integer x) {
-        return "INT " x "";
+        return "INT ``x``";
     }
 }
 //This function receives a function as argument
@@ -15,4 +15,4 @@ function f(Integer i) => x.upper(i);
 //Then pass it around
 higher(f);
 //Even pass an anonymous function
-higher((Integer x) => "inline " x "!");
+higher((Integer x) => "inline ``x``!");

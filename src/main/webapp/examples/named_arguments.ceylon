@@ -1,8 +1,7 @@
 void order(String product, Integer count=1, Float discount=0.0,
           {String*} comments={}) {
-    String commentStr = ", ".join(for (c in comments) "'"c"'");
-    print("Order '" product "', quantity " count ", discount "
-          discount ", comments: " commentStr "");
+    String commentStr = ", ".join(for (c in comments) "'``c``'");
+    print("Order '``product``', quantity ``count``, discount ``discount``, comments: ``commentStr``");
 }
 
 // Ceylon has an alternative syntax for invoking functions or
@@ -64,7 +63,7 @@ Button button = Button {
     // An argument can be specified as object declaration:
     object formatter satisfies Formatter {
         // Shortcut syntax for implementing a formal member:
-        format = (String text) => "<b>" text "</b>";
+        format = (String text) => "<b>``text``</b>";
     }
 };
 button.doClick();
