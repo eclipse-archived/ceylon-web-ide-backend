@@ -12,7 +12,7 @@ var jquery;
 var editor;
 var clprinted;
 
-require(["ceylon/language/0.5/ceylon.language-0.5", 'jquery', "browser/1.0.0/browser-1.0.0"],
+require(["ceylon/language/0.5/ceylon.language-0.5", 'jquery'],
     function(clang, $) {
         jquery=$;
         $(document).ready(function() {
@@ -298,7 +298,7 @@ function getEditCode() {
 }
 
 function wrapCode(code) {
-    return "import browser{...} import browser.dom{...} void run_script(){\n" + code + "\n}";
+    return "void run_script(){\n" + code + "\n}";
 }
 
 function setEditCode(src) {
@@ -311,7 +311,7 @@ function setEditCode(src) {
 }
 
 function getModuleCode() {
-	return "module web_ide_script '1.0.0' {import browser '1.0.0';}";
+	return "module web_ide_script '1.0.0' {}";
 }
 
 //Puts the specified text in the result element.

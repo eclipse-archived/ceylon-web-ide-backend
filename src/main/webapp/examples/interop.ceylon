@@ -3,15 +3,19 @@
 // JavaScript interoperability in the JavaScript backend used
 // here is still work in progress, but accessing the browser's
 // DOM is already possible:
+dynamic {
+    value headerNode = document.getElementById("hdr_title");
+    headerNode.textContent = "Who needs JavaScript?";
 
-value headerNode = document.getElementById("hdr_title");
-headerNode.textContent = "Who needs JavaScript?";
-
-value nodes = document.getElementsByTagName("A");
-for (i in 0..nodes.length-1) {
-    if (is HTMLAnchorElement elem = nodes.item(i)) {
+    value nodes = document.getElementsByTagName("A");
+    for (i in 0..nodes.length-1) {
+        value elem = nodes.item(i);
         String oldText = elem.textContent;
         print(oldText);
-        elem.textContent = "*``oldText``*";
+        if (oldText.startsWith("*") && oldText.endsWith("*")) {
+            elem.textContent = oldText[1:oldText.size-2];
+        } else {
+            elem.textContent = "*``oldText``*";
+        }
     }
 }
