@@ -90,7 +90,7 @@ public class DocServlet extends HttpServlet {
                 if (example == null) {
                     String src = getFileContent(cxt, key);
                     String wrappedSrc = new StringBuilder(
-                        "import browser { ... } import browser.dom { ... } void run_script(){\n")
+                        "void run_script(){\n")
                         .append(src).append("\n}").toString();
                     //Run the typechecker
                     TypeChecker typeChecker = CompilerUtils.getTypeChecker(cxt, new ScriptFile("ROOT",
