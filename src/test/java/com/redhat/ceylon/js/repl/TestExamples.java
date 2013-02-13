@@ -47,7 +47,7 @@ public class TestExamples {
             PrintWriter fout = new PrintWriter(new FileWriter(dst));
             boolean isSpecial = f.getName().equals("module.ceylon") || f.getName().equals("package.ceylon");
             if (!isSpecial) {
-                fout.printf("import browser{...} import browser.dom{...} shared void caca_%d(){", count++);
+                fout.printf("shared void caca_%d(){", count++);
             }
             BufferedReader fin = new BufferedReader(new FileReader(f));
             String jsline = null;
