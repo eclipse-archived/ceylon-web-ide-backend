@@ -8,7 +8,7 @@ value headerNode = document.getElementById("hdr_title");
 headerNode.textContent = "Who needs JavaScript?";
 
 value nodes = document.getElementsByTagName("A");
-for (i in 0..nodes.length) {
+for (i in 0..nodes.length-1) {
     if (is HTMLAnchorElement elem = nodes.item(i)) {
         String oldText = elem.textContent;
         print(oldText);
