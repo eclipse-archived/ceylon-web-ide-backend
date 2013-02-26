@@ -1,0 +1,24 @@
+
+How to deploy to OpenShift
+==========================
+
+Right now I have in my .git/config file of this project the following useful entries:
+
+    [remote "tryfinal"]
+        fetch = +refs/heads/*:refs/remotes/origin/*
+        url = ssh://af964010ea314db19ff93c989153f648@try-ceylon.rhcloud.com/~/git/try.git/
+    [remote "trybeta"]
+        fetch = +refs/heads/*:refs/remotes/origin/*
+        url = ssh://41e9f0403d934da4b50794042ecb3835@trybeta-ceylon.rhcloud.com/~/git/trybeta.git/
+
+Which makes deployment very simple:
+
+    git push trybeta master
+
+for the test site (http://trybeta-ceylon.rhcloud.com/), or:
+
+    git push tryfinal master
+
+to update the production site (http://try-ceylon-lang.org)
+
+PS: You'd still need the rights for the OpenShift account we use, talk to Tako
