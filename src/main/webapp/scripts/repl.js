@@ -19,11 +19,11 @@ require(["ceylon/language/0.5/ceylon.language-0.5", 'jquery'],
             console && console.log("Ceylon language module loaded OK");
             clang.getProcess().write = function(x){
                 clprinted=true;
-                printOutput(x.getString());
+                printOutput(x.string);
             };
             clang.getProcess().writeLine = function(x){
                 clprinted=true;
-                printOutputLine(x.getString());
+                printOutputLine(x.string);
             };
             console && console.log("ceylon.language.print() patched OK");
             spin = Spinner({
