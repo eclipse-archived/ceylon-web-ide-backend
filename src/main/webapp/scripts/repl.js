@@ -267,7 +267,7 @@ function afterTranslate() {
             printError("Runtime error:");
             printError("--- " + err);
         }
-        if (clprinted!==true) {
+        if (!clprinted) {
             printSystem("Script ended with no output");
         }
     }
