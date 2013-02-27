@@ -128,21 +128,23 @@
     <div class="news_entry"><a href="#" onClick="return editCode('classes_and_functions')">Classes and functions 1</a></div>
 	<hr>
     <div class="news_entry"><a href="#" onClick="return editCode('interfaces')">Interfaces and mixin inheritance</a></div>
-        <hr>
+    <hr>
     <div class="news_entry"><a href="#" onClick="return editCode('classes_and_functions2')">Classes and functions 2</a></div>
-        <hr>
+    <hr>
     <div class="news_entry"><a href="#" onClick="return editCode('collections')">Collections and sequence comprehensions</a></div>
-        <hr>
+    <hr>
     <div class="news_entry"><a href="#" onClick="return editCode('named_arguments')">Named argument syntax</a></div>
-        <hr>
+    <hr>
     <div class="news_entry"><a href="#" onClick="return editCode('generics')">Type parameters</a></div>
-        <hr>
+    <hr>
     <div class="news_entry"><a href="#" onClick="return editCode('switch1')">Enumerations and the switch statement</a></div>
-        <hr>
+    <hr>
     <div class="news_entry"><a href="#" onClick="return editCode('interop')">Interoperability</a></div>
-        <hr>
+    <hr>
+    <div class="news_entry"><a href="#" onClick="return editCode('request')">Interoperability 2</a></div>
+    <hr>
     <div class="news_entry"><a href="#" onClick="return editCode('operators')">Operator polymorphism</a></div>
-        <hr>
+    <hr>
 
     <br><br>
     <a href="https://twitter.com/ceylonlang" class="twitter-follow-button" data-show-count="false" data-size="large">Follow @ceylonlang</a>
