@@ -69,6 +69,10 @@ require(["ceylon/language/0.5/ceylon.language-0.5", 'jquery'],
                 //Code is directly in URL
                 key = location.href.slice(location.href.indexOf('?src=')+5);
                 editor.setValue(decodeURIComponent(key));
+            } else if (location.href.indexOf('?sample=') > 0) {
+                //Retrieve code from the given sample id
+                key = location.href.slice(location.href.indexOf('?sample=')+8);
+                editCode(key);
             } else {
             	runCode(wrapCode('print("Ceylon ``language.version`` \\"``language.versionName``\\"");'));
                 editCode('hello_world');
