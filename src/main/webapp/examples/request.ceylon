@@ -4,14 +4,13 @@
 dynamic {
   print("Sending request...");
   value req = XMLHttpRequest();      
-  void handleResponse() {
+  req.onreadystatechange = void() {
     if (req.readyState==4) {
       print(req.status==200
         then "Time on server is: " + req.responseText
         else "Received error: " + req.status);
     }
-  }
-  req.onreadystatechange = handleResponse;
+  };
   req.open("GET", "/time", true);
   req.send();
 }
