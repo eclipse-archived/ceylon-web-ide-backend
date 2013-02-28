@@ -149,6 +149,8 @@
     <hr>
     <div class="news_entry"><a href="#" onClick="return editCode('operators')">Operator polymorphism</a></div>
     <hr>
+    <div class="news_entry"><a href="#" onClick="return editCode('game_of_life')">Game of Life</a></div>
+    <hr>
 
     <br><br>
     <a href="https://twitter.com/ceylonlang" class="twitter-follow-button" data-show-count="false" data-size="large">Follow @ceylonlang</a>
