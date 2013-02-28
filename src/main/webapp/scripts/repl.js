@@ -139,7 +139,7 @@ function startSpinner() {
 }
 //Hides the spinner that should be spinning at the center of the page.
 function stopSpinner() {
-    document.getElementById('submit').disabled=false;
+    document.getElementById('run_ceylon').disabled=false;
     waitSpin && waitSpin.stop();
     editor.focus();
 }
@@ -229,7 +229,7 @@ function translateCode(code, doShowCode, doShowDocs, onTranslation) {
             }
         }
     };
-    document.getElementById('submit').disabled=true;
+    document.getElementById('run_ceylon').disabled=true;
     jquery.ajax('translate', {
         cache:false, type:'POST',
         dataType:'json',
@@ -271,6 +271,28 @@ function afterTranslate() {
             printSystem("Script ended with no output");
         }
     }
+}
+
+var stopfunc;
+
+function setOnStop(func) {
+	if (!stopfunc) {
+		stopfunc = func;
+		$('#run_ceylon').addClass('invis');
+		$('#stop_ceylon').removeClass('invis');
+	}
+}
+
+//A way to stop running scripts (that support it!)
+function stop() {
+	if (stopfunc) {
+		try {
+			stopfunc();
+		} catch(e) {}
+		stopfunc = undefined;
+		$('#run_ceylon').removeClass('invis');
+		$('#stop_ceylon').addClass('invis');
+	}
 }
 
 //Retrieves the specified example from the editor, along with its hover docs.
@@ -388,7 +410,7 @@ function getHoverDocs(cm) {
             showDocs(json['docs'], json['refs']);
         }
     };
-    document.getElementById('submit').disabled=true;
+    document.getElementById('run_ceylon').disabled=true;
     jquery.ajax('hoverdoc', {
         cache:false, type:'POST',
         dataType:'json',
