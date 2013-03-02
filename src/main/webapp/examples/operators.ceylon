@@ -4,13 +4,13 @@
 class Product(String name, Float price)
             satisfies Comparable<Product> {
     shared actual String string = name;
-    shared actual Comparison compare(Product other) {
-        return price <=> other.price;
-    }
+    shared actual Comparison compare(Product other)
+            => price <=> other.price;
     shared actual Boolean equals(Object other) {
         if (is Product other) { return price==other.price; }
         return false;
     }
+    shared actual Integer hash => price.hash;
 }
 
 // Now we can use comparison operators with Products:

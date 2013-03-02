@@ -1,8 +1,8 @@
 // The JVM backend of the Ceylon compiler provides good
 // interoperability with Java, so that programs can use the JDK.
-// JavaScript interoperability in the JavaScript backend used
-// here is still work in progress, but accessing the browser's
-// DOM is already possible:
+// Interoperability with JavaScript is also provided, mainly
+// through "dynamic" blocks. Compile-time checks are relaxed in
+// these blocks (of course this can result in erros at runtime).
 dynamic {
     value headerNode = document.getElementById("hdr_title");
     headerNode.textContent = "Who needs JavaScript?";

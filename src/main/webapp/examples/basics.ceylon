@@ -12,8 +12,7 @@ Boolean b = (i == 3);
 variable Float f = 0.3;
 f = 2.0^0.5; // exponentiation
 
-// String templates can be used to compose strings. They must
-// start and end with a string literal.
+// String templates can be used to compose strings.
 print("The square root of 2 is ``f``");
 
 // With the "value" keyword the type is inferred by the compiler.

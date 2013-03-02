@@ -3,7 +3,10 @@ Float mean(Float x, Float y) {
     return ((x*x + y*y) / 2) ^ 0.5;
 }
 print("mean(11.0, 307.0) = ``mean(11.0, 307.0)``");
- 
+
+// Short form for functions consisting of a single expression
+Float mean2(Float x, Float y) => ((x*x + y*y) / 2) ^ 0.5;
+
 // With the "function" keyword the compiler infers the type.
 function average(Float x, Float y) {
     return (x + y) * 0.5;
@@ -23,9 +26,7 @@ class SimpleProduct(String name, Float price) {
  
     // "shared" members are visible everywhere the class is
     // visible, otherwise they are private to the class.
-    shared Boolean inStock() {
-        return quantity > 0;
-    }
+    shared Boolean inStock() => quantity > 0;
 
     doc "Determines if the product is free of charge"
     shared Boolean isFree() {
@@ -64,6 +65,7 @@ abstract class Product(name, price) {
     // "default" members have a default value/implementation
     // which can be overridden in derived classes.
     shared default Boolean inStock { return quantity > 0; }
+    //or: shared default Boolean inStock => quantity > 0;
 }
  
 doc "Concrete implementation of `Product`"

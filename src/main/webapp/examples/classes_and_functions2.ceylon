@@ -1,5 +1,5 @@
 // We can use a reference to a function as a value:
-Float average(Float x, Float y) { return (x + y) * 0.5; }
+Float average(Float x, Float y) => (x + y) * 0.5;
 value f1 = average;
 print("f1(1.0, 7.0) = ``f1(1.0, 7.0)``");
 
@@ -12,15 +12,13 @@ Float f3(Float x, Float y) => f1(x,y);
 // Function references can be used like any other value,
 // for instance as arguments or return values:
 Float(Float, Float) makeFunc(Float(Float) f) {
-    Float ret(Float x, Float y) {
-        // Nested functions can access data from the surrounding
-        // function:
-        return average(f(x), f(y));
-    }
+    // Nested functions can access data from the surrounding
+    // function:
+    Float ret(Float x, Float y) => average(f(x), f(y));
     return ret;
 }
 
-Float twice(Float n) { return 2.0*n; }
+Float twice(Float n) => 2.0*n;
 value doubleAvg = makeFunc(twice);
 print("doubleAvg(1.0, 7.0) = ``doubleAvg(1.0, 7.0)``");
 
@@ -38,9 +36,8 @@ print("squareAvg(1.0, 7.0) = ``squareAvg(1.0, 7.0)``");
 
 // A different and rather elegant and approach is to define a
 // function with multiple parameter lists:
-Float expAvg(Float e)(Float x, Float y) {
-    return average(x^e, y^e);
-}
+Float expAvg(Float e)(Float x, Float y) => average(x^e, y^e);
+
 // Applying the first parameter list returns a "normal" function
 // with one parameter list:
 value squareAvg2 = expAvg(2.0);
@@ -60,7 +57,7 @@ print(getProd("Giraffe, extra long") else "not found");
 // vs. "Product?". That's indeed allowed:
 void voidFunc() { print("returns nothing"); }
 variable Anything() funcRef = voidFunc;
-String stringFunc() { return "returns a String"; }
+String stringFunc() => "returns a String";
 funcRef = stringFunc; // return value will be ignored
 
 // Somewhere above we nested a function inside a function. In

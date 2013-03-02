@@ -6,9 +6,7 @@ interface Customer {
  
     // Interfaces may define concrete implementations of methods
     // and getters/setters.
-    shared default String description {
-       return "'``name``'";
-    }
+    shared default String description => "'``name``'";
   
     // But in contrast to classes an interface can't contain
     // initialization code. The following is not allowed:
@@ -32,9 +30,8 @@ interface RegisteredCustomer satisfies Customer {
     shared formal Integer id;
  
     // Override the inherited default implementation.
-    shared actual default String description {
-       return "'``name``' (#``id``)";
-    }
+    shared actual default String description
+            => "'``name``' (#``id``)";
 }
 
 // A second specialization of the Customer interface
@@ -44,9 +41,8 @@ interface CartOwner satisfies Customer {
     shared formal Integer numberOfItems;
  
     // Again, we override the inherited implementation
-    shared actual default String description {
-       return "'``name``' (``numberOfItems`` items)";
-    }
+    shared actual default String description
+            => "'``name``' (``numberOfItems`` items)";
  
     doc "The customer buys the items in the cart."
     shared default void checkOut() {
@@ -71,13 +67,12 @@ class PetShopCustomer(id, name)
     // same original declaration in Customer. However, the
     // compiler forces us to override it again here to avoid any
     // ambiguity.
-    shared actual String description {
-       return "'``name``' (#``id``, ``numberOfItems`` items)";
-    }
+    shared actual String description
+            => "'``name``' (#``id``, ``numberOfItems`` items)";
  
-    // Unless specified otherwise, classes extend
-    // IdentifiableObject. We can override the members inherited
-    // from that class: equals, hash and string.
+    // Unless specified otherwise, classes extend Basic.
+    // We can override the members inherited from that class:
+    // equals, hash and string.
     shared actual Boolean equals(Object other) {
         if (is PetShopCustomer other) {
             return other.id == id;

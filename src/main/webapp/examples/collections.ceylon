@@ -26,7 +26,7 @@ if (nonempty animals) {
 }
 
 // A String is a sequence of characters:
-for (Character c in "cat") { // type (Character) is optional
+for (Character c in "cat") {//or shorter: for (c in "cat")
     print(c);
 }
 
@@ -55,7 +55,7 @@ class LengthsIterator(String* strings)
                     satisfies Iterator<Integer> {
     value it = strings.iterator;
 
-    // next() returns "exhausted" (type Finished) if there are
+    // next() returns "finished" (type Finished) if there are
     // no more values
     shared actual Integer|Finished next() {
         if (is String s = it.next()) { return s.size; }
@@ -65,9 +65,8 @@ class LengthsIterator(String* strings)
 
 // Now we can implement our own simple Iterable:
 class Lengths(String* strings) satisfies Iterable<Integer> {
-    shared actual Iterator<Integer> iterator {
-        return LengthsIterator(*strings);
-    }
+    shared actual Iterator<Integer> iterator
+            => LengthsIterator(*strings);
 }
 for (len in Lengths(*animals)) {
     print("length: ``len``");

@@ -2,9 +2,9 @@
 // type parameters:
 class Generic<Item>(item) {
     shared variable Item item;
-    shared Item f(Item other) { return other; }
+    shared Item f(Item other) => other;
 }
-Item genericFunc<Item>(Item i) { return i; }
+Item genericFunc<Item>(Item i) => i;
 
 // Note that a Generic<String> is not a Generic<Object>:
 //    Generic<Object> obj = Generic<String>("test");
@@ -14,7 +14,7 @@ Item genericFunc<Item>(Item i) { return i; }
 // parameters:
 class Covariant<out Item>(item) {
     shared Item item;
-    shared Item? f() { return null; }
+    shared Item? f() => null;
 }
 Covariant<Object> obj = Covariant<String>("test");
 Object i1 = obj.item; // No conflict arises if Item is only
@@ -31,11 +31,9 @@ obj2.f("hi"); // no conflict, a String is an Object
 // We can specify bounds for the type parameter:
 class Tools<out Num>(Num x, Num y)
             given Num satisfies Scalar<Num> {
-    shared Num dist() {
-        // We know that x and y are numbers (type Scalar<Num>),
-        // so we can use the corresponding operations/methods.
-        return (x < y) then (y-x) else (x-y);
-    }
+    // We know that x and y are numbers (type Scalar<Num>),
+    // so we can use the corresponding operations/methods.
+    shared Num dist() => (x < y) then (y-x) else (x-y);
 }
 Tools<Float> t1 = Tools<Float>(-3.1, 0.62);
 print("t1.dist() = ``t1.dist()``");
