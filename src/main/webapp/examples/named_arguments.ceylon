@@ -1,6 +1,6 @@
 void order(String product, Integer count=1, Float discount=0.0,
           {String*} comments={}) {
-    String commentStr = ", ".join(for (c in comments) "'``c``'");
+    String commentStr = ", ".join { for (c in comments) "'``c``'" };
     print("Order '``product``', quantity ``count``, discount ``
             discount``, comments: ``commentStr``");
 }

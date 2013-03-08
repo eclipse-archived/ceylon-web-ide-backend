@@ -43,7 +43,7 @@ list("cat", "bat");
 list(*animals);
 
 // Simpler way to print the elements comma-separated:
-print(", ".join(*animals));
+print(", ".join(animals));
 
 // "entries" creates a sequence of entries (type Integer->String)
 for (i->animal in entries(animals)) {
@@ -53,7 +53,7 @@ for (i->animal in entries(animals)) {
 // Implementing an iterator is simple in Ceylon:
 class LengthsIterator(String* strings)
                     satisfies Iterator<Integer> {
-    value it = strings.iterator;
+    value it = strings.iterator();
 
     // next() returns "finished" (type Finished) if there are
     // no more values
@@ -65,7 +65,7 @@ class LengthsIterator(String* strings)
 
 // Now we can implement our own simple Iterable:
 class Lengths(String* strings) satisfies Iterable<Integer> {
-    shared actual Iterator<Integer> iterator
+    shared actual Iterator<Integer> iterator()
             => LengthsIterator(*strings);
 }
 for (len in Lengths(*animals)) {
