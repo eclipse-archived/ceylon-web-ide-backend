@@ -40,15 +40,10 @@ task copyCMR(type:Copy) {
 	into "${webAppDirName}/WEB-INF/ceylon-repo/system/com/redhat/ceylon/module-resolver/${ceylonVersion}"
 	from "${ceylonDistRepo}/com/redhat/ceylon/module-resolver/${ceylonVersion}"
 }
-task copyAnt(type:Copy) {
-	into "${webAppDirName}/WEB-INF/ceylon-repo/system/com/redhat/ceylon/ant/${ceylonVersion}"
-	from "${ceylonDistRepo}/com/redhat/ceylon/ant/${ceylonVersion}"
-}
-task copylibs(type:Copy, dependsOn:[copyJsCompiler,copyCommon,copyTypechecker,copyCMR,copyAnt,copylangmod]) {
+task copylibs(type:Copy, dependsOn:[copyJsCompiler,copyCommon,copyTypechecker,copyCMR,copylangmod]) {
 	from "../ceylon-js/build/dist/com/redhat/ceylon/compiler/js/${ceylonVersion}/com.redhat.ceylon.compiler.js-${ceylonVersion}.jar"
 	from "${ceylonDistRepo}/com/redhat/ceylon/typechecker/${ceylonVersion}/com.redhat.ceylon.typechecker-${ceylonVersion}.jar"
 	from "${ceylonDistRepo}/com/redhat/ceylon/module-resolver/${ceylonVersion}/com.redhat.ceylon.module-resolver-${ceylonVersion}.jar"
-	from "${ceylonDistRepo}/com/redhat/ceylon/ant/${ceylonVersion}/com.redhat.ceylon.ant-${ceylonVersion}.jar"
 	from "${ceylonDistRepo}/com/redhat/ceylon/common/${ceylonVersion}/com.redhat.ceylon.common-${ceylonVersion}.jar"
     from "../ceylon-js/lib/json-smart-1.1.1.jar"
 	into "${webAppDirName}/WEB-INF/lib"
