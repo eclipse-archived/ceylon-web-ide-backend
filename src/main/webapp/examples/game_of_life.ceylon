@@ -1,176 +1,282 @@
-value pwidth = 300;   // Width of drawing area in pixels
+// Game of Life 2.4
+
+value pwidth = 600;   // Width of drawing area in pixels
 value pheight = 300;  // Height of drawing area in pixels
-value size = 30;      // Number of cells horizontally and vertically
+value gwidth = 120;   // Number of cells horizontally and vertically
+value gheight = 60;   // Number of cells horizontally and vertically
 
-class Cell(index) {
-    doc "The index of the Cell inside its Matrix."
-    shared Integer index;
-    doc "The current state of the Cell."
-    shared variable Boolean state = false;
-    doc "The next state of the Cell."
-    variable Boolean ns = false;
+abstract class State() of alive | resurrected | moribund | dead {}
+object alive extends State() {}
+object resurrected extends State() {}
+object moribund extends State() {}
+object dead extends State() {}
 
-    shared Boolean nextState { return ns; }
-    assign nextState {
-        ns = nextState;
+class Cell(x, y) {
+    doc "The x position of the Cell inside the Grid"
+    shared Integer x;
+    doc "The y position of the Cell inside the Grid."
+    shared Integer y;
+    doc "The current state of the Cell"
+    shared variable State state = dead;
+
+    // All the neighbouring cells
+    late shared Cell ul;
+    late shared Cell uc;
+    late shared Cell ur;
+    late shared Cell l;
+    late shared Cell r;
+    late shared Cell bl;
+    late shared Cell bc;
+    late shared Cell br;
+
+    variable Integer nroNeighbours = 0;
+
+    shared void setup() {
+        update(resurrected, 0);
     }
 
-    doc "Evaluates the next state of the Cell, which
-         depends on the states of its neighboring cells."
-    shared void evaluateNextState([Cell+] neighbors) {
-        value alives = neighbors.count((Cell c) => c.state);
-        if (state) {
-            ns = alives > 1 && alives < 4;
-        } else {
-            ns = alives == 3;
-        }
+    shared void resurrect() {
+        update(alive, 1);
     }
 
-    doc "Copies the next state to the current state."
-    shared void evolve() {
-        state = ns;
+    shared void kill() {
+        update(dead, -1);
     }
 
-    shared actual String string =>
-        "Cell: ``state then 1 else 0``";
-}
-
-class Matrix(gridSize) satisfies Iterable<Cell> {
-    doc "The number of rows and columns of the Matrix."
-    shared Integer gridSize;
-    value sb = SequenceBuilder<Cell>();
-    for (i in 0..(gridSize*gridSize-1)) {
-        sb.append(Cell(i));
+    void update(State newState, Integer dN) {
+        if (state == newState) {
+            return;
+        }
+        state = newState;
+        nroNeighbours = (ul.state == alive then 1 else 0)
+            + (uc.state == alive then 1 else 0)
+            + (ur.state == alive then 1 else 0)
+            + (l.state == alive then 1 else 0)
+            + (r.state == alive then 1 else 0)
+            + (bl.state == alive then 1 else 0)
+            + (bc.state == alive then 1 else 0)
+            + (br.state == alive then 1 else 0);
+        ul.nroNeighbours += dN;
+        uc.nroNeighbours += dN;
+        ur.nroNeighbours += dN;
+        l.nroNeighbours += dN;
+        r.nroNeighbours += dN;
+        bl.nroNeighbours += dN;
+        bc.nroNeighbours += dN;
+        br.nroNeighbours += dN;
     }
-    value grid = sb.sequence;
-
-    shared actual Iterator<Cell> iterator() =>
-        grid.iterator();
-
-    doc "Returns the cells to the left and righ of the cell
-         at the specified index."
-    shared [Cell,Cell] getLeftRightNeighbors(Integer index) {
-        variable value i = index - 1;
-        //The cell to the left
-        if (index%gridSize == 0) {
-            i+=gridSize;
-        }
-        assert(exists c1 = grid[i]);
-        //The cell to the right
-        i = index + 1;
-        if (i%gridSize == 0) {
-            i -= gridSize;
-        }
-        assert(exists c2 = grid[i]);
-        return [c1,c2];
-    }
-
-    doc "Returns the 8 cells surrounding the one at
-         the specified index."
-    shared [Cell+] getNeighbors(Integer index) {
-        value sb = SequenceBuilder<Cell>();
-        //Left and right
-        variable value sameRow = getLeftRightNeighbors(index);
-        sb.append(sameRow[0]);
-        sb.append(sameRow[1]);
-        //The cell above
-        variable value i = index - gridSize;
-        if (i < 0) {
-            i += grid.size;
-        }
-        if (exists c = grid[i]) {
-            sb.append(c);
-            sameRow = getLeftRightNeighbors(i);
-            sb.append(sameRow[0]);
-            sb.append(sameRow[1]);
-        }
-        //The cell below
-        i = index + gridSize;
-        if (i >= grid.size) {
-            i -= grid.size;
-        }
-        if (exists c = grid[i]) {
-            sb.append(c);
-            sameRow = getLeftRightNeighbors(i);
-            sb.append(sameRow[0]);
-            sb.append(sameRow[1]);
-        }
-        assert(nonempty r = sb.sequence);
-        return r;
-    }
-
-    shared void evaluate(void intermedio(Cell c), void final(Cell c)) {
-        for (c in this) {
-            c.evaluateNextState(getNeighbors(c.index));
-            intermedio(c);
-        }
-        for (c in this) {
-            c.evolve();
-            final(c);
-        }
-    }
-
-    doc "Sets the state of the cell at the specified index."
-    shared void setState(Integer index, Boolean state = true) {
-        if (exists c = grid[index]) {
-            c.state = state;
-        }
-    }
-
-    doc "Prints the matrix, using dots for dead cells
-         and X for living cells."
-    shared actual String string {
-        value sb = StringBuilder();
-        for (c in this) {
-            if (c.index > 0 && c.index%gridSize==0) {
-                sb.appendNewline();
+    
+    shared State nextState {
+        if (state == alive) {
+            if (nroNeighbours < 2 || nroNeighbours > 3) {
+                return moribund;
             }
-            sb.append(c.state then "X" else ".");
-        }
-        return sb.string;
-    }
-
-    doc "Resets all the cells to a dead state, then
-         sets the cells at the specified indexes to a
-         living state."
-    shared void init(Integer* values) {
-        for (c in grid) {
-            c.state=false;
-        }
-        for (i in values) {
-            setState(i);
+            return alive;
+        } else {
+            if (nroNeighbours == 3) {
+                return resurrected;
+            }
+            return dead;
         }
     }
 
+    shared Boolean canResurrect() {
+        if (state == dead && nroNeighbours == 3) {
+            state = resurrected;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    shared Cell[] resurrections() {
+        variable Cell[] result = {};
+        if (state == resurrected) { result = result.withTrailing(this); }
+        if (ul.canResurrect()) { result = result.withTrailing(ul); }
+        if (uc.canResurrect()) { result = result.withTrailing(uc); }
+        if (ur.canResurrect()) { result = result.withTrailing(ur); }
+        if (l.canResurrect()) { result = result.withTrailing(l); }
+        if (r.canResurrect()) { result = result.withTrailing(r); }
+        if (bl.canResurrect()) { result = result.withTrailing(bl); }
+        if (bc.canResurrect()) { result = result.withTrailing(bc); }
+        if (br.canResurrect()) { result = result.withTrailing(br); }
+        return result;
+    }
+    
+    shared actual String string =>
+        "Cell[``x``,``y``]: ``state`` (``nroNeighbours``)";
 }
 
-value life = Matrix(size);
+class Grid(width, height) {
+    doc "The number of columns of the Grid"
+    shared Integer width;
+    doc "The number of rows of the Grid"
+    shared Integer height;
+    
+    // The list of alive cells
+    variable Cell[] _living = {};
+    
+    shared Cell[] living {
+        return _living;
+    }
+    
+    // Create the grid
+    value cells = array{for(y in 0:height) for(x in 0:width) Cell(x, y)};
+    
+    Cell cell(Integer x, Integer y) {
+        value c = cells[(y + height) % height * width + (x + width) % width];
+        assert(exists c);
+        return c;
+    }
+    
+    // Set up the grid
+    for (y in 0:height) {
+        for (x in 0:width) {
+            value c = cell(x, y);
+            c.ul = cell(x - 1, y - 1);
+            c.uc = cell(x, y - 1);
+            c.ur = cell(x + 1, y - 1);
+            c.l = cell(x - 1, y);
+            c.r = cell(x + 1, y);
+            c.bl = cell(x - 1, y + 1);
+            c.bc = cell(x, y + 1);
+            c.br = cell(x + 1, y + 1);
+        }
+    }
+ 
+    shared void add(Integer x, Integer y) {
+        value c = cell(x, y);
+        c.setup();
+        _living = _living.withTrailing(c);
+    }
+    
+    shared [Cell[], Cell[]] evolve() {
+        // Pass through the list of living cells and split
+        // it in teo: one for the ones that stay alive and
+        // one for the ones that will die. At the same time
+        // we construct a third list with dead cells that
+        // will be resurrected
+        variable Cell[] alives = [];
+        variable Cell[] moribunds = [];
+        value seq = SequenceBuilder<Cell>();
+        for (c in _living) {
+            if (c.state == alive) {
+                if (c.nextState == alive) {
+                    alives = alives.withTrailing(c);
+                } else if (c.nextState == moribund) {
+                    moribunds = moribunds.withTrailing(c);
+                }
+            }
+            seq.appendAll(c.resurrections());
+        }
+        Cell[] resurrections = seq.sequence;
+        
+        // And resurrect the dead ones
+        for (c in resurrections) {
+            c.resurrect();
+        }
+        // Now kill all the moribund cells
+        for (c in moribunds) {
+            c.kill();
+        }
+        // Set the global list of alive cells
+        _living = join(alives, resurrections);
+        
+        return [resurrections, moribunds];
+    }
+}
 
-value cwidth = pwidth / size;
-value cheight = pheight / size;
+Integer getTime() {
+    dynamic {
+        return Date().getTime();
+    }
+}
+
+// George Marsaglia's Random Number Generator
+variable Integer m_w = getTime() / 13;
+variable Integer m_z = getTime() / 648;
+Float random() {
+    m_z = 36969 * m_z.and(2^15-1) + m_z.rightLogicalShift(16);
+    m_w = 18000 * m_w.and(2^15-1) + m_w.rightLogicalShift(16);
+    Integer r = m_z.leftLogicalShift(15).and(2^30-1) + m_w;  /* 32-bit result */
+    return r.float / (2^30-1).float;
+}
+
+Grid randomNoiseGrid(Integer width, Integer height, Float probability) {
+    value grid = Grid(width, height);
+    for (y in 0..gheight) {
+        for (x in 0..gwidth) {
+            if (random() > probability) {
+                grid.add(x, y);
+            }
+        }
+    }
+    return grid;
+}
+
+value life = randomNoiseGrid(gwidth, gheight, 0.8);
+
+value cwidth = pwidth / gwidth;
+value cheight = pheight / gheight;
+
+variable value count = 0;
+variable value start = getTime();
+variable value prevNew = -1;
+variable value prevDead = -1;
+variable value prevCount = 0;
+
+void drawCells({Cell*} cells, void drawCell(Cell c)) {
+    for (c in cells) {
+        drawCell(c);
+    }
+}
 
 void draw() {
+    value newXdead = life.evolve();
+    value new = newXdead[0];
+    value dead = newXdead[1];
+    count++;
+    value runtime = (getTime() - start);
+    value fps = count.float / (runtime.float / 1000.0);
+    if (prevCount >= 0 && count % 100 == 0) {
+        print("draw (new=``new.size``, dead=``dead.size``, count=``count``, fps=``fps``)");
+    }
+    
+    if (prevCount >= 0 && prevNew == new.size && prevDead == dead.size) {
+        if (prevCount > 10) {
+            print("Stable state, loop detected");
+            print("Drawn ``count`` frames in ``runtime/1000`` seconds (fps=``fps``)");
+            prevCount = -1;
+        } else {
+            prevCount++;
+        }
+    } else {
+        prevNew = new.size;
+        prevDead = dead.size;
+    }
     dynamic {
         value canvas = document.getElementById("lifegrid");
         if (exists canvas) {
             value ctx = canvas.getContext("2d");
             
-            void drawinter(Cell c) {
-                // Not drawing intermediate state
-            }
-            void drawfinal(Cell c) {
-                value cx = c.index % size;
-                value cy = c.index / size;
-                if (c.state) {
+            void drawCell(Cell c) {
+                if (c.state == alive) {
                     ctx.fillStyle = "#FF0000";
                 } else {
-                    ctx.fillStyle = "#000000";
+                    ctx.fillStyle = "#FFE0E0";
                 }
-                ctx.fillRect(cx * cwidth, cy * cheight, cwidth, cheight);
+                ctx.fillRect(c.x * cwidth, c.y * cheight, cwidth, cheight);
             }
-            life.evaluate(drawinter, drawfinal);
+            
+            drawCells(new, drawCell);
+            drawCells(dead, drawCell);
       
-            setTimeout(draw, 100);
+            if (!new.empty || !dead.empty) {
+                setTimeout(draw, 1);
+            } else {
+                print("Stable state, stopped");
+                print("Drawn ``count`` frames in ``runtime/1000`` seconds (fps=``fps``)");
+            }
         }
     }
 }
@@ -184,11 +290,8 @@ dynamic {
         value corePage = document.getElementById("core-page");
         corePage.insertBefore(canvas, corePage.childNodes[3]);
         value ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#FFFFFF";
         ctx.fillRect(0, 0, pwidth, pheight);
-    }
-
-    for (c in life) {
-        c.state = c.index%2==0 then (Math.random() > 0.5) else false;
     }
 
     setOnStop(void() {
@@ -198,5 +301,8 @@ dynamic {
         }
     });
   
-    setTimeout(draw, 100);
+    setTimeout(draw, 1);
 }
+
+print("Game of Life");
+print("Seed used: ``m_w``, ``m_z``");
