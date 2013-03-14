@@ -72,7 +72,7 @@ public class TestExamples {
                 .buildManager();
         TypeCheckerBuilder tcb = new TypeCheckerBuilder()
                 .addSrcDirectory(tmpRoot)
-                .moduleManagerFactory(new JsModuleManagerFactory());
+                .moduleManagerFactory(new JsModuleManagerFactory("UTF-8"));
         tcb.setRepositoryManager(repoman);
         TypeChecker tc = tcb.getTypeChecker();
         tc.process();

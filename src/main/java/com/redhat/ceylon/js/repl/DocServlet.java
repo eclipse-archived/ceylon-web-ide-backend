@@ -30,7 +30,7 @@ public class DocServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     //Here we cache the code for the examples, so that it's only compiled the first time someone asks for it.
     private HashMap<String, JSONObject> examples = new HashMap<String, JSONObject>();
-    public static final JsModuleManagerFactory MMF = new JsModuleManagerFactory();
+    public static final JsModuleManagerFactory MMF = new JsModuleManagerFactory("UTF-8");
     private static ScriptFile exampleModuleFile = null;
 
     @Override
