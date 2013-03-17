@@ -73,17 +73,17 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
     else if (/[\[\]{}\(\),;\.]/.test(ch)) {
       return ret(ch);
     }
-    else if (ch == "#") {
+    else if (ch == '#') {
       stream.eatWhile(/[\da-f_]/i);
       return ret("number", "number");
     }      
-    else if (ch == "$") {
+    else if (ch == '$') {
       stream.eatWhile(/[\d_]/);
       return ret("number", "number");
     }      
     else if (/\d/.test(ch)) {
       stream.eatWhile(/[\d_]/);
-      if (stream.eat('.') {
+      if (stream.eat('.')) {
           stream.eatWhile(/[\d_]/);
           if (stream.eat('e')||stream.eat('E')) {
               stream.eat('-'); stream.eat('+');
@@ -102,7 +102,7 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
       if (stream.eat('*')) {
         return chain(stream, state, jsTokenComment);
       }
-      else if (stream.eat("/")) {
+      else if (stream.eat('/')) {
         stream.skipToEnd();
         return ret("comment", "comment");
       }
@@ -124,7 +124,7 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
       stream.eatWhile(isOperatorChar);
       return ret("operator", null, stream.current());
     }
-    else if (ch == '\') {
+    else if (ch == '\\') {
       if (stream.eat('i')) {
         stream.eatWhile(/[\w\d_]/);
          return ret("variable", "variable", stream.current());
