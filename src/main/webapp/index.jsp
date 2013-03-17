@@ -31,6 +31,7 @@
             background: #ffffff;
             white-space: pre-wrap;
             font-family: Menlo, Monaco, Courier, monospace;
+            font-size: 85%;
         }
         .jsc_msg {
             color: gray;
