@@ -83,9 +83,9 @@
             text-decoration: none;
         }
         div.CodeMirror pre {
-            margin-left:0 !important;
-            padding-left:0 !important;
-            border-left:none !important;
+            margin-left:0;
+            padding-left:0;
+            border-left:0px;
         }
         input {
             border-style:none;
