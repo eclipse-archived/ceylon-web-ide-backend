@@ -100,11 +100,13 @@
     <h1 id="hdr_title">Ceylon Web Runner</h1>
     <form>
         <textarea id="edit_ceylon"></textarea>
+        <div style="text-align:center">
         <input type="button" class="bubble-button" id="run_ceylon" name="run_ceylon" value="Run" onClick="run()">
         <input type="button" class="bubble-button invis" id="stop_ceylon" name="stop_ceylon" value="Stop" onClick="stop()">
         <input type="button" class="bubble-button" value="Clear Output" onClick="clearOutput()">
         <input type="button" class="bubble-button" id="share_src" name="share_src" value="Share Code" onClick="shareSource()">
         <input type="text" id="shareurl" name="shareurl" value="" size="45" disabled="true">
+        </div>
     </form>
     <hr class="cantseeme">
     <pre id="result" class="cantseeme">

@@ -114,16 +114,17 @@ form.inline p {
   margin-bottom: 0;
 }
 
-/* line 25 */
+/* line 27 */
 body.bp {
   line-height: 1.5;
   font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
   color: #333333;
   font-size: 75%;
-  font: 14px "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+  font-size: 15px;
+  font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
   color: #2c2c2c;
-  text-shadow: white 1px 1px 0px;
-  background-color: #f1f1f1;
+  background-color: white;
+  font-weight: 400;
 }
 /* line 51, /usr/lib64/ruby/gems/1.8/gems/compass-0.11.7/frameworks/blueprint/stylesheets/blueprint/_typography.scss */
 body.bp h1, body.bp h2, body.bp h3, body.bp h4, body.bp h5, body.bp h6 {
@@ -240,11 +241,13 @@ body.bp del {
 }
 /* line 70, /usr/lib64/ruby/gems/1.8/gems/compass-0.11.7/frameworks/blueprint/stylesheets/blueprint/_typography.scss */
 body.bp pre {
+  margin: 1.5em 0;
   white-space: pre;
 }
 /* line 71, /usr/lib64/ruby/gems/1.8/gems/compass-0.11.7/frameworks/blueprint/stylesheets/blueprint/_typography.scss */
 body.bp pre, body.bp code, body.bp tt {
   font: 1em "andale mono", "lucida console", monospace;
+  line-height: 1.5;
 }
 /* line 72, /usr/lib64/ruby/gems/1.8/gems/compass-0.11.7/frameworks/blueprint/stylesheets/blueprint/_typography.scss */
 body.bp li ul, body.bp li ol {
@@ -436,53 +439,88 @@ body.bp .removed {
   background: #990000;
   color: white;
 }
-/* line 39 */
+/* line 41 */
 body.bp h1 {
   color: #456b6e;
-}
-/* line 43 */
-body.bp h3, body.bp h4, body.bp h5, body.bp h6 {
-  color: #8d5e0b;
-}
-/* line 47 */
-body.bp h1 {
   font-size: 1.6em;
   font-weight: bold;
+  font-family: 'PT Sans', Helvetica, 'Helvetica Neue', Arial, sans-serif;
 }
-/* line 52 */
+/* line 47 */
 body.bp h2 {
   font-size: 1.3em;
   font-weight: bold;
-  color: #2a4a4c;
+  color: #255A5F;
   clear: left;
+  margin-top: 0.6em;
+  font-family: 'PT Sans', Helvetica, 'Helvetica Neue', Arial, sans-serif;
+}
+/* line 55 */
+body.bp h3, body.bp h4, body.bp h5, body.bp h6 {
+  color: #8d5e0b;
 }
 /* line 58 */
 body.bp h3 {
+  font-family: 'PT Sans', Helvetica, 'Helvetica Neue', Arial, sans-serif;
   font-size: 1.2em;
   font-weight: bold;
-}
-/* line 62 */
-body.bp h4 {
-  font-size: 1.1em;
+  margin-top: 0.6em;
+  margin-bottom: 0.6em;
 }
 /* line 65 */
-body.bp h5 {
+body.bp h4, body.bp h5 {
+  font-family: 'PT Sans', Helvetica, 'Helvetica Neue', Arial, sans-serif;
   font-size: 1.1em;
 }
-/* line 68 */
+/* line 69 */
 body.bp h6 {
   font-size: 100%;
 }
-/* line 76 */
+/* line 73 */
+body.bp p {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  line-height: 1.45em;
+}
+/* line 79 */
+body.bp ul, body.bp ol {
+  margin-top: 0.2em;
+  margin-bottom: 0.2em;
+}
+/* line 82 */
+body.bp ul li, body.bp ol li {
+  margin-top: 0.3em;
+  margin-bottom: 0.3em;
+}
+/* line 90 */
+body.bp pre,
+body.bp .syntaxhighlighter .lines {
+  margin-left: 10px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  border-left: 5px solid #f0f0f0;
+  padding-left: 10px;
+  font-family: Menlo, Monaco, Courier, monospace;
+  font-style: normal;
+  font-size: 85%;
+}
+/* line 103 */
+body.bp p code, body.bp ul code, body.bp ol code {
+  font-family: Menlo, Monaco, Courier, monospace;
+  font-style: normal;
+  font-size: 90%;
+  color: #2E5C00;
+}
+/* line 112 */
 body.bp .news_entry {
   margin-bottom: 0;
   padding-bottom: 0;
 }
-/* line 81 */
+/* line 117 */
 body.bp .news_entry p {
   margin-bottom: 0px;
 }
-/* line 86 */
+/* line 121 */
 body.bp .news_entry h4 {
   background: url("http://ceylon-lang.org/images/bullet_elephant.png") no-repeat 0px 0px;
   min-height: 24px;
@@ -491,18 +529,18 @@ body.bp .news_entry h4 {
   margin-bottom: 0;
   padding-bottom: 0;
 }
-/* line 97 */
+/* line 130 */
 body.bp .news_entry hr {
   margin-top: 20px;
   margin-bottom: 20px;
   background-color: white;
 }
-/* line 103 */
+/* line 136 */
 body.bp .news_entry .news_date {
   padding-left: 36px;
   font-size: 80%;
 }
-/* line 108 */
+/* line 141 */
 body.bp .news_entry .news_detail {
   padding-top: 10px;
 }
@@ -571,18 +609,18 @@ form.bp textarea {
   height: 250px;
 }
 
-/* line 119 */
+/* line 152 */
 .header-bar {
   background: url("http://ceylon-lang.org/images/bkg_header.png") repeat-x;
 }
 
-/* line 123 */
+/* line 156 */
 #header {
   height: 100px;
   width: 950px;
   margin: auto;
 }
-/* line 129 */
+/* line 162 */
 #header #header-logo {
   background: url("http://ceylon-lang.org/images/ceylon-logo.png") no-repeat 0px 0px;
   height: 100px;
@@ -590,27 +628,29 @@ form.bp textarea {
   display: block;
   float: left;
 }
-/* line 136 */
+/* line 169 */
 #header #header-logo h1 {
   text-indent: -9999px;
   font-weight: normal;
   margin: 0;
   text-shadow: none;
 }
-/* line 145 */
+/* line 177 */
 #header #header-tagline {
   width: 10px;
   float: left;
   text-indent: -9999px;
   display: block;
 }
-/* line 152 */
+/* line 184 */
 #header #menu {
+  font-family: 'Lucida Grande', 'Lucida Sans Unicode', Arial, sans-serif;
+  font-size: 14px;
   float: right;
   margin-top: 70px;
   width: 600px;
 }
-/* line 158 */
+/* line 191 */
 #header #menu #menu-core {
   font-size: 110%;
   padding: 0 15 0 0;
@@ -618,17 +658,21 @@ form.bp textarea {
   list-style-type: none;
   float: right;
 }
-/* line 167 */
+/* line 197 */
 #header #menu #menu-core li:hover {
   cursor: pointer;
 }
-/* line 171 */
+/* line 201 */
+#header #menu #menu-core li {
+  margin-top: 0;
+}
+/* line 205 */
 #header #menu #menu-core li#selected a {
   background: url("http://ceylon-lang.org/images/nav_indicator.png") no-repeat center 15px;
   color: #FFFFFF;
   height: 30px;
 }
-/* line 178 */
+/* line 211 */
 #header #menu #menu-core li {
   text-align: center;
   position: relative;
@@ -637,7 +681,7 @@ form.bp textarea {
   padding: 0 12px;
   height: 2em;
 }
-/* line 188 */
+/* line 220 */
 #header #menu #menu-core a {
   display: block;
   color: #d4e5e5;
@@ -646,78 +690,152 @@ form.bp textarea {
   text-align: center;
   text-shadow: none;
 }
-/* line 197 */
+/* line 229 */
 #header #menu #menu-core li:hover a {
   color: #94aebd;
 }
 
-/* line 209 */
+/* line 239 */
+#banner #code {
+  display: none;
+}
+
+/* line 243 */
+.homepage #banner {
+  position: relative;
+  width: 900px;
+  margin: 0 auto;
+  height: 270px;
+}
+/* line 249 */
+.homepage #banner #elephant {
+  position: absolute;
+  left: -20px;
+  height: 260px;
+  width: 370px;
+  background: url("http://ceylon-lang.org/images/ceylon_homebanner_elephant.png") no-repeat center top;
+}
+/* line 257 */
+.homepage #banner #text {
+  position: absolute;
+  top: 20px;
+  width: 600px;
+  right: 0;
+  background: url("http://ceylon-lang.org/images/ceylon_homebanner_text.png") no-repeat center top;
+}
+/* line 265 */
+.homepage #banner #code {
+  display: block;
+  position: absolute;
+  width: 475px;
+  height: 170px;
+  background: rgba(12, 31, 31, 0.9);
+  top: 80px;
+  right: 0;
+  border-radius: 15px;
+  padding: 1em 2em 1em 2em;
+  color: white;
+  text-shadow: none;
+  font-size: 15px;
+  font-weight: bold;
+}
+/* line 280 */
+.homepage #banner #code pre {
+  background: none;
+  margin: 0;
+  border: none;
+  padding: 0;
+}
+/* line 285 */
+.homepage #banner #code pre code {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 15.5px;
+  font-weight: bold;
+  text-shadow: none;
+  line-height: .99em;
+}
+/* line 291 */
+.homepage #banner #code pre code .code_type {
+  color: #D98BD6;
+}
+/* line 294 */
+.homepage #banner #code pre code .code_string {
+  color: #88AEFF;
+}
+
+/* line 303 */
 .homepage {
   background: url("http://ceylon-lang.org/images/bkg_home.png") repeat-x center 100px;
 }
 
-/* line 212 */
-.homepage .banner {
-  background: url("http://ceylon-lang.org/images/sectionbanner_home.png") no-repeat center top;
+/* line 306 */
+.homepage #banner #elephant {
+  background: url("http://ceylon-lang.org/images/ceylon_homebanner_elephant.png") no-repeat center top;
   height: 260px;
 }
 
-/* line 217 */
+/* line 311 */
+.homepage #banner #text {
+  background: url("http://ceylon-lang.org/images/ceylon_homebanner_text.png") no-repeat center top;
+  height: 260px;
+}
+
+/* line 316 */
 .docspage {
   background: url("http://ceylon-lang.org/images/bkg_section.png") repeat-x center 100px;
 }
 
-/* line 220 */
-.docspage .banner {
+/* line 320 */
+.docspage #banner {
   background: url("http://ceylon-lang.org/images/sectionbanner_learn.png") no-repeat center top;
   height: 90px;
 }
 
-/* line 225 */
+/* line 325 */
 .downloadpage {
   background: url("http://ceylon-lang.org/images/bkg_section.png") repeat-x center 100px;
 }
 
-/* line 228 */
-.downloadpage .banner {
+/* line 329 */
+.downloadpage #banner {
   background: url("http://ceylon-lang.org/images/sectionbanner_download.png") no-repeat center top;
   height: 90px;
 }
 
-/* line 233 */
+/* line 334 */
 .communitypage {
   background: url("http://ceylon-lang.org/images/bkg_section.png") repeat-x center 100px;
 }
 
-/* line 236 */
-.communitypage .banner {
+/* line 338 */
+.communitypage #banner {
   background: url("http://ceylon-lang.org/images/sectionbanner_community.png") no-repeat center top;
   height: 90px;
 }
 
-/* line 241 */
+/* line 343 */
 .codepage {
   background: url("http://ceylon-lang.org/images/bkg_section.png") repeat-x center 100px;
 }
 
-/* line 244 */
-.codepage .banner {
+/* line 347 */
+.codepage #banner {
   background: url("http://ceylon-lang.org/images/sectionbanner_code.png") no-repeat center top;
   height: 90px;
 }
 
-/* line 249 */
+/* line 352 */
 .blogpage {
   background: url("http://ceylon-lang.org/images/bkg_section.png") repeat-x center 100px;
 }
 
-/* line 252 */
-.blogpage .banner {
+/* line 356 */
+.blogpage #banner {
   background: url("http://ceylon-lang.org/images/sectionbanner_blog.png") no-repeat center top;
   height: 90px;
 }
 
-/* line 259 */
+/* line 365 */
 #primary-content {
   position: relative;
   top: 2em;
@@ -726,26 +844,7 @@ form.bp textarea {
   overflow: hidden;
   *zoom: 1;
 }
-#primary-content .bubble-button {
-    font-weight: bold;
-    color: #ffffff;
-    font-size: 13px;
-    padding: 5px 7px;
-    text-decoration: none;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    -webkit-box-shadow: 0px 1px 3px #666666;
-    -moz-box-shadow: 0px 1px 3px #666666;
-    text-shadow: 1px 1px 3px #255A5F;
-    border: solid #368D73 1px;
-    background: -webkit-gradient(linear, 0 0, 0 100%, from(#82cdba), to(#368d73));
-    background: -moz-linear-gradient(top, #82cdba, #368d73);
-}
-#primary-content .bubble-button:hover {
-    background: -webkit-gradient(linear, 0 0, 0 100%, from(#6bae9d), to(#368d73));
-    background: -moz-linear-gradient(top, #6bae9d, #368d73);
-}
-/* line 263 */
+/* line 369 */
 #primary-content #core-page {
   display: inline;
   float: left;
@@ -756,7 +855,242 @@ form.bp textarea {
 * html #primary-content #core-page {
   overflow-x: hidden;
 }
-/* line 267 */
+/* line 373 */
+#primary-content #ishas {
+  background: #E6E7E8;
+  -moz-border-radius: 15px;
+  border-radius: 15px;
+  margin: 1em 1.5em 0 1.5em;
+  padding: 25px;
+}
+/* line 379 */
+#primary-content #ishas .hometitle-text {
+  padding-top: 1em;
+}
+/* line 382 */
+#primary-content #ishas .bubble {
+  display: inline-block;
+  width: 280px;
+}
+/* line 386 */
+#primary-content #ishas .bubble-block-transparent {
+  padding: 0;
+}
+/* line 391 */
+#primary-content .bubble {
+  display: inline-block;
+  width: 313px;
+  vertical-align: top;
+  text-shadow: white 1px 1px 0px;
+}
+/* line 398 */
+#primary-content .bubble-block {
+  -moz-border-radius: 15px;
+  border-radius: 15px;
+  font-size: 15px;
+  padding: 1.5em;
+  margin: 0em 1.75em;
+  border-left: 1px solid #c7d8d8;
+  border-right: 1px solid #c7d8d8;
+  background: url("http://ceylon-lang.org/images/sidebar_bkg_elephant.png") no-repeat 0px 0px #d4e5e5;
+}
+/* line 408 */
+#primary-content .bubble-block strong {
+  font-weight: boldest;
+}
+/* line 412 */
+#primary-content .bubble-block h3 {
+  color: #456B6E;
+}
+/* line 416 */
+#primary-content .bubble-block h2 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  text-align: center;
+}
+/* line 422 */
+#primary-content .bubble-block p {
+  margin-top: 0;
+  line-height: 1.2em;
+}
+/* line 428 */
+#primary-content .bubble-block-transparent {
+  color: #3e4747;
+  font-size: 15px;
+  padding: 1.5em;
+  margin: 0em 1.75em;
+}
+/* line 434 */
+#primary-content .bubble-block-transparent strong {
+  font-weight: bold;
+}
+/* line 438 */
+#primary-content .bubble-block-transparent h2 {
+  text-align: left;
+  font-size: 16px;
+  color: #3e4747;
+  margin-top: 0;
+  font-family: Helvetica, 'Helvetica Neue', Arial, sans-serif;
+}
+/* line 446 */
+#primary-content .bubble-block-transparent h3 {
+  margin: 1em 0;
+}
+/* line 449 */
+#primary-content .bubble-block-transparent h3:first-child {
+  margin-top: 0;
+}
+/* line 452 */
+#primary-content .bubble-block-transparent h3:last-child {
+  margin-bottom: 0;
+}
+/* line 456 */
+#primary-content .bubble-block-transparent h4 {
+  margin: 0.5em 1em;
+}
+/* line 460 */
+#primary-content .bubble-block-transparent p {
+  margin-bottom: 1em;
+  line-height: 1.2em;
+}
+/* line 464 */
+#primary-content .bubble-block-transparent p:last-child {
+  margin-bottom: 0;
+}
+/* line 469 */
+#primary-content .fixed-vertical-bubble {
+  height: 170px;
+  position: relative;
+}
+/* line 475 */
+#primary-content .bubble-button {
+  font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
+  font-weight: normal;
+  font-size: 15px;
+  text-decoration: none;
+  line-height: normal;
+  padding: 7px 10px;
+  color: white;
+  background-color: #5bb65b;
+  text-shadow: 0 -1px 1px #666666;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  background-image: -moz-linear-gradient(top, #62c462, #51a351);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#62c462), to(#51a351));
+  background-image: -webkit-linear-gradient(top, #62c462, #51a351);
+  background-image: -o-linear-gradient(top, #62c462, #51a351);
+  background-image: linear-gradient(to bottom, #62c462, #51a351);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FF62C462', endColorstr='#FF51A351', GradientType=0);
+}
+/* line 498 */
+#primary-content .bubble-button:hover {
+  color: #aaddff;
+  text-shadow: 0 -1px 1px #666666;
+}
+/* line 503 */
+#primary-content .bubble-bottom {
+  text-align: center;
+  position: absolute;
+  bottom: 20px;
+  width: 220px;
+}
+/* line 510 */
+#primary-content .bubbleline {
+  display: inline;
+  float: left;
+  margin-right: 0;
+  width: 950px;
+}
+/* line 147, /usr/lib64/ruby/gems/1.8/gems/compass-0.11.7/frameworks/blueprint/stylesheets/blueprint/_grid.scss */
+* html #primary-content .bubbleline {
+  overflow-x: hidden;
+}
+/* line 514 */
+#primary-content .hometitle {
+  display: inline;
+  float: left;
+  margin-right: 0;
+  width: 950px;
+  margin-top: 2.5em;
+}
+/* line 147, /usr/lib64/ruby/gems/1.8/gems/compass-0.11.7/frameworks/blueprint/stylesheets/blueprint/_grid.scss */
+* html #primary-content .hometitle {
+  overflow-x: hidden;
+}
+/* line 519 */
+#primary-content .hometitle-text {
+  text-align: left;
+  margin-left: 1.6em;
+}
+/* line 522 */
+#primary-content .hometitle-text h1 {
+  font-size: 21px;
+}
+/* line 527 */
+#primary-content .titlebar {
+  margin-top: 1em;
+}
+/* line 531 */
+#primary-content #newsbar {
+  width: 900px;
+  margin-bottom: 2.5em;
+  margin-left: 1.75em;
+  height: 2em;
+  -moz-border-radius: 15px;
+  border-radius: 15px;
+  font-size: 15px;
+  text-shadow: #656565 1px 1px 0px;
+  padding: 0.5em 1.5em;
+  background-color: #255A5F;
+}
+/* line 537 */
+#primary-content #newsbar h3 {
+  color: white;
+  margin: 1em 0;
+}
+/* line 542 */
+#primary-content #newsbar h3:first-child {
+  margin-top: 0;
+}
+/* line 546 */
+#primary-content #newsbar h3:last-child {
+  margin-bottom: 0;
+}
+/* line 550 */
+#primary-content #newsbar h4 {
+  margin: 0.5em 1em;
+}
+/* line 562 */
+#primary-content #newsbar p {
+  color: white;
+  margin-bottom: 1em;
+  margin-top: 0;
+}
+/* line 566 */
+#primary-content #newsbar p code {
+  font-family: Courier, monospace;
+  color: white;
+  text-shadow: none;
+}
+/* line 572 */
+#primary-content #newsbar p:last-child {
+  margin-bottom: 0;
+}
+/* line 576 */
+#primary-content #newsbar a {
+  color: white;
+}
+/* line 583 */
+#primary-content #newsbar #newsbar-services {
+  text-align: right;
+}
+/* line 585 */
+#primary-content #newsbar #newsbar-services a {
+  text-decoration: none;
+}
+/* line 591 */
 #primary-content #sidebar {
   display: inline;
   float: left;
@@ -767,99 +1101,140 @@ form.bp textarea {
 * html #primary-content #sidebar {
   overflow-x: hidden;
 }
-/* line 270 */
-#primary-content #sidebar .sidebar-block {
+/* line 594 */
+#primary-content #sidebar #feed {
+  padding-left: 34px;
+  background: url("http://ceylon-lang.org/images/feed_icon.png") no-repeat 0px 0px;
+  height: 26px;
+}
+/* line 601 */
+#primary-content .sidebar-block {
   -moz-border-radius: 15px;
   border-radius: 15px;
   font-size: 14px;
+  text-shadow: white 1px 1px 0px;
   padding: 1.5em;
   margin: 0em 1.75em;
   border-left: 1px solid #c7d8d8;
   border-right: 1px solid #c7d8d8;
   background: url("http://ceylon-lang.org/images/sidebar_bkg_elephant.png") no-repeat 0px 0px #d4e5e5;
 }
-/* line 271 */
-#primary-content #sidebar .sidebar-block h3 {
+/* line 612 */
+#primary-content .sidebar-block h3 {
+  font-size: 16px;
   color: #456B6E;
 }
-/* line 285 */
-#primary-content #sidebar .sidebar-dark {
+/* line 617 */
+#primary-content .sidebar-block li {
+  font-size: 12px;
+}
+/* line 621 */
+#primary-content .sidebar-block ul {
+  margin-bottom: 1em;
+}
+/* line 627 */
+#primary-content .sidebar-dark {
   -moz-border-radius: 15px;
   border-radius: 15px;
   font-size: 14px;
-  text-shadow: #656565 1px 1px 0px;
   padding: 1.5em;
   margin: 0em 1.75em;
   background-color: #121f1f;
-}
-/* line 287 */
-#primary-content #sidebar .sidebar-dark h3 {
   color: white;
-  margin: 1em 0;
+  text-style: normal;
 }
-/* line 292 */
-#primary-content #sidebar .sidebar-dark h3:first-child {
+/* line 638 */
+#primary-content .sidebar-dark h3 {
+  color: white;
+  margin: 0.8em 0;
+}
+/* line 642 */
+#primary-content .sidebar-dark h3:first-child {
   margin-top: 0;
 }
-/* line 296 */
-#primary-content #sidebar .sidebar-dark h3:last-child {
+/* line 645 */
+#primary-content .sidebar-dark h3:last-child {
   margin-bottom: 0;
 }
-/* line 300 */
-#primary-content #sidebar .sidebar-dark h4 {
+/* line 649 */
+#primary-content .sidebar-dark h4 {
   margin: 0.5em 1em;
 }
-/* line 304 */
-#primary-content #sidebar .sidebar-dark #feed {
-  padding-left: 34px;
-  background: url("http://ceylon-lang.org/images/feed_icon.png") no-repeat 0px 0px;
-  height: 26px;
-}
-/* line 318 */
-#primary-content #sidebar .sidebar-dark p {
+/* line 653 */
+#primary-content .sidebar-dark p {
   color: white;
+  margin-bottom: 0.8em;
+}
+/* line 657 */
+#primary-content .sidebar-dark p:last-child {
   margin-bottom: 0;
 }
-/* line 323 */
-#primary-content #sidebar .sidebar-dark a {
-  color: white;
+/* line 661 */
+#primary-content .sidebar-dark li {
+  font-size: 12px;
+  padding: 1px;
+  margin: 0;
 }
-/* line 328 */
-#primary-content #sidebar .expandable {
+/* line 666 */
+#primary-content .sidebar-dark li a {
+  text-decoration: none;
+}
+/* line 670 */
+#primary-content .sidebar-dark ol {
+  margin-bottom: 0;
+}
+/* line 674 */
+#primary-content .sidebar-dark a {
+  color: white;
+  font-weight: normal;
+}
+/* line 678 */
+#primary-content .sidebar-dark a:hover {
+  color: #d5d5d5;
+}
+
+/* line 684 */
+.expandable {
   overflow: hidden;
 }
-/* line 332 */
-#primary-content #sidebar .point-dark-top {
+
+/* line 688 */
+.point-dark-top {
   background: url("http://ceylon-lang.org/images/sidebar_dark_top.png") no-repeat bottom center;
   height: 15px;
 }
-/* line 337 */
-#primary-content #sidebar .point-dark-bottom {
+
+/* line 693 */
+.point-dark-bottom {
   background: url("http://ceylon-lang.org/images/sidebar_dark_bottom.png") no-repeat top center;
   height: 15px;
 }
-/* line 342 */
-#primary-content #sidebar .point-dark-end {
+
+/* line 698 */
+.point-dark-end {
   background: url("http://ceylon-lang.org/images/sidebar_dark_end.png") no-repeat top center;
   height: 40px;
 }
-/* line 347 */
-#primary-content #sidebar .point-light-top {
+
+/* line 703 */
+.point-light-top {
   background: url("http://ceylon-lang.org/images/sidebar_light_top.png") no-repeat bottom center;
   height: 15px;
 }
-/* line 352 */
-#primary-content #sidebar .point-light-bottom {
+
+/* line 708 */
+.point-light-bottom {
   background: url("http://ceylon-lang.org/images/sidebar_light_bottom.png") no-repeat top center;
   height: 15px;
 }
-/* line 357 */
-#primary-content #sidebar .point-light-end {
+
+/* line 713 */
+.point-light-end {
   background: url("http://ceylon-lang.org/images/sidebar_light_end.png") no-repeat top center;
   height: 40px;
 }
 
-/* line 367 */
+/* line 719 */
 .footer-bar {
   background-color: #656565;
   border-top: 3px solid #424242;
@@ -868,7 +1243,7 @@ form.bp textarea {
   clear: both;
 }
 
-/* line 374 */
+/* line 726 */
 #footer {
   width: 950px;
   margin: 0 auto;
@@ -876,11 +1251,11 @@ form.bp textarea {
   *zoom: 1;
   overflow: hidden;
 }
-/* line 377 */
+/* line 729 */
 #footer #footer-core {
   display: block;
 }
-/* line 379 */
+/* line 731 */
 #footer #footer-core #copyright {
   padding: 2em 0;
   font-size: .75em;
@@ -895,57 +1270,57 @@ form.bp textarea {
 * html #footer #footer-core #copyright {
   overflow-x: hidden;
 }
-/* line 387 */
+/* line 739 */
 #footer #footer-core #copyright p {
   margin: 0px;
 }
-/* line 391 */
+/* line 743 */
 #footer #footer-core #copyright a {
   padding-bottom: 100px;
   font-size: .75em;
   color: #8eb1de;
   text-shadow: rgba(66, 66, 66, 0.3) 1px 1px 0px;
 }
-/* line 398 */
+/* line 750 */
 #footer #footer-core #copyright :hover {
   color: #666666;
 }
 
-/* line 409 */
+/* line 759 */
 #upcoming-talks .item {
   margin-bottom: 1em;
   padding-bottom: 1em;
   border-bottom: 1px solid #bbbbbb;
 }
-/* line 414 */
+/* line 764 */
 #upcoming-talks h1, #upcoming-talks h2 {
   font-weight: bold;
 }
-/* line 417 */
+/* line 767 */
 #upcoming-talks h1 {
   font-size: 160%;
   border-bottom: 1px solid #656565;
 }
-/* line 421 */
+/* line 771 */
 #upcoming-talks h2 {
   font-size: 120%;
   margin-bottom: 0px;
 }
-/* line 424 */
+/* line 774 */
 #upcoming-talks h2 a {
   text-decoration: none;
 }
-/* line 428 */
+/* line 778 */
 #upcoming-talks h3 {
   font-size: 100%;
 }
-/* line 431 */
+/* line 781 */
 #upcoming-talks .event_details {
   float: right;
   font-weight: bold;
   text-align: right;
 }
-/* line 436 */
+/* line 786 */
 #upcoming-talks img.event_logo {
   clear: both;
   max-width: 200px;
@@ -954,18 +1329,18 @@ form.bp textarea {
   margin-bottom: 2em;
   margin-top: 2em;
 }
-/* line 444 */
+/* line 794 */
 #upcoming-talks .details {
   clear: both;
   margin-bottom: 1ex;
 }
-/* line 448 */
+/* line 798 */
 #upcoming-talks .links {
   text-align: right;
   font-weight: bold;
 }
 
-/* line 457 */
+/* line 807 */
 .post {
   clear: both;
   margin-bottom: 2em;
@@ -973,52 +1348,52 @@ form.bp textarea {
   background: url("http://ceylon-lang.org/images/blogpost_divider.png") no-repeat bottom;
   line-height: 1.5em;
 }
-/* line 463 */
+/* line 813 */
 .post h1.title {
   text-align: left;
   margin-bottom: 0.5em;
 }
-/* line 469 */
+/* line 819 */
 .post h1.title a {
   text-decoration: none;
 }
-/* line 473 */
+/* line 823 */
 .post .byline {
   margin-bottom: 2em;
   font-size: 90%;
 }
-/* line 476 */
+/* line 826 */
 .post .byline .date {
   display: inline;
   color: #555555;
   margin-left: 1ex;
 }
-/* line 481 */
+/* line 831 */
 .post .byline .author {
   font-weight: bold;
   display: inline;
 }
-/* line 485 */
+/* line 835 */
 .post .byline .tags {
   display: inline;
   margin-left: 1em;
 }
-/* line 488 */
+/* line 838 */
 .post .byline .tags a {
   font-weight: bold;
   margin-right: 1ex;
   text-decoration: none;
 }
-/* line 495 */
+/* line 845 */
 .post .body {
   margin-bottom: 2em;
 }
-/* line 498 */
+/* line 848 */
 .post .comments {
   border-top: 1px solid #dddddd;
   margin-bottom: 2em;
 }
-/* line 502 */
+/* line 852 */
 .post .tail {
   background-color: #eeeeee;
   border: 1px solid #bbbbbb;
@@ -1027,30 +1402,30 @@ form.bp textarea {
   margin-top: 1em;
 }
 
-/* line 510 */
+/* line 860 */
 .pagination-links {
   margin-bottom: 1em;
 }
-/* line 512 */
+/* line 862 */
 .pagination-links a {
   text-decoration: none;
 }
-/* line 515 */
+/* line 865 */
 .pagination-links a, .pagination-links .current-page, .pagination-links .slip {
   padding: .5ex;
   margin-right: .5ex;
 }
-/* line 519 */
+/* line 869 */
 .pagination-links a.page-link, .pagination-links .current-page, .pagination-links .previous-link, .pagination-links .next-link {
   border: 1px solid #999999;
   background-color: #fbfafa;
 }
-/* line 523 */
+/* line 873 */
 .pagination-links .current-page {
   font-weight: bold;
 }
 
-/* line 527 */
+/* line 877 */
 .post-navigation {
   margin-top: 2em;
   line-height: 1.4em;
@@ -1058,85 +1433,77 @@ form.bp textarea {
   float: left;
   width: 100%;
 }
-/* line 533 */
+/* line 883 */
 .post-navigation .next, .post-navigation .previous {
   color: #999999;
   margin-bottom: 1em;
   display: inline;
 }
-/* line 537 */
+/* line 887 */
 .post-navigation .next .label, .post-navigation .previous .label {
   font-weight: bold;
   display: inline;
   margin-right: 1em;
 }
-/* line 543 */
+/* line 893 */
 .post-navigation .next .nav-link, .post-navigation .previous .nav-link {
   display: inline;
 }
-/* line 546 */
+/* line 896 */
 .post-navigation .next a, .post-navigation .previous a {
   text-decoration: none;
   padding: 0px;
 }
 
-/* line 553 */
+/* line 903 */
 #post-nav-previous {
   float: left;
   width: 50%;
 }
 
-/* line 558 */
+/* line 908 */
 #post-nav-next {
   float: right;
 }
 
-/* line 564 */
+/* line 914 */
 #blog-archive h4 {
   background: url("http://ceylon-lang.org/images/bullet_elephant.png") no-repeat 0px 0px;
   min-height: 24px;
   padding-left: 36px;
-  font-size: 10px;
+  font-size: 11px;
   color: #2c2c2c;
 }
-/* line 572 */
+/* line 922 */
 #blog-archive h4 a {
-  font-size: 14px;
+  font-size: 15px;
 }
 
-/* line 578 */
+/* line 928 */
 .teammemberbio {
   font-size: 90%;
   display: inline;
 }
-/* line 581 */
+/* line 931 */
 .teammemberbio ul {
   list-style-position: inside;
 }
 
-/* line 586 */
+/* line 936 */
 .teammemberphoto {
   float: left;
   margin: 0 20px 20px 0;
   display: inline;
 }
 
-/* line 600 */
-body.bp pre code {
-  font-family: 'Courier New', 'Andale Mono', Consolas, 'Bitstream Vera Sans Mono', Courier, monospace;
-  font-style: normal;
-  font-size: .99em;
-  line-height: 1em;
-}
-
-/* line 610 */
+/* line 943 */
 div.milestone {
   float: right;
   display: block;
   font-weight: bold;
 }
 
-/* line 615 */
+/* line 949 */
 .milestone {
   background: #1a3c3d;
   padding: 0.2em 0.4em;
@@ -1145,33 +1512,73 @@ div.milestone {
   -moz-border-radius: 3px;
   border-radius: 3px;
 }
-/* line 623 */
+/* line 957 */
 .milestone p {
   margin: 0 !important;
 }
-/* line 626 */
+/* line 960 */
 .milestone a {
   color: white !important;
   text-shadow: none;
 }
 
-/* line 632 */
+/* line 966 */
 .milestone.future {
   background: red;
 }
-/* line 634 */
+/* line 968 */
 .milestone.future a {
   text-shadow: #A00 1px 1px 0px;
 }
 
-/* line 642 */
+/* line 976 */
+.known-issue > b {
+  margin-left: 0.5em;
+}
+/* line 980 */
+.known-issue .title {
+  color: #8d5e0b;
+  font-weight: bold;
+  margin-bottom: 1em;
+  margin-top: 2em;
+}
+/* line 987 */
+.known-issue a.see {
+  float: right;
+  display: block;
+  font-weight: bold;
+  background: #1a3c3d;
+  padding: 0.2em 0.4em;
+  color: white !important;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  text-shadow: none;
+}
+/* line 1000 */
+.known-issue a.see.closed {
+  background: red;
+  text-shadow: #A00 1px 1px 0px;
+}
+/* line 1005 */
+.known-issue a.see.open {
+  background: green;
+}
+/* line 1009 */
+.known-issue .workaround {
+  margin-top: 0.5em;
+  margin-left: 2em;
+  margin-bottom: 1em;
+}
+
+/* line 1019 */
 body.two-col #container {
   width: 950px;
   margin: 0 auto;
   overflow: hidden;
   *zoom: 1;
 }
-/* line 644 */
+/* line 1022 */
 body.two-col #header, body.two-col #footer {
   display: inline;
   float: left;
@@ -1182,7 +1589,7 @@ body.two-col #header, body.two-col #footer {
 * html body.two-col #header, * html body.two-col #footer {
   overflow-x: hidden;
 }
-/* line 646 */
+/* line 1025 */
 body.two-col #sidebar {
   display: inline;
   float: left;
@@ -1193,7 +1600,7 @@ body.two-col #sidebar {
 * html body.two-col #sidebar {
   overflow-x: hidden;
 }
-/* line 650 */
+/* line 1030 */
 body.two-col #content {
   display: inline;
   float: left;
@@ -1205,17 +1612,124 @@ body.two-col #content {
   overflow-x: hidden;
 }
 
-/* line 658 */
+/* line 1039 */
 .tag-cloud ul {
   padding-left: 0em;
 }
 
-/* line 662 */
+/* line 1043 */
 .tag-cloud li {
   list-style-type: none;
 }
 
-/* line 667 */
+/* line 1047 */
 #dsq-content .dsq-toolbar-label {
   text-shadow: none;
+}
+
+/* Inline code editor */
+/* line 1053 */
+.syntaxhighlighter.with-editor .lines {
+  margin-right: 40px !important;
+}
+
+/* line 1057 */
+.syntaxhighlighter .bubble-button {
+  display: block;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 25px;
+  cursor: pointer;
+  text-align: center;
+  padding: 2px 4px !important;
+}
+
+/* line 1068 */
+.ui-dialog {
+  padding: 1em;
+  background: white;
+  border: 1px solid black;
+  text-shadow: none;
+}
+
+/* line 1075 */
+.ui-widget-overlay {
+  opacity: 0.8;
+  top: 0px;
+  position: absolute;
+  background-color: gray;
+}
+
+/* line 1082 */
+.ui-dialog-titlebar {
+  height: 2em;
+  text-align: right;
+}
+
+/* line 1087 */
+iframe.code-editor {
+  width: 100% !important;
+}
+
+/* line 1091 */
+p.screenshot {
+  text-align: center;
+}
+/* line 1094 */
+p.screenshot img {
+  box-shadow: 0 0 1em black;
+  margin: 1em;
+}
+
+/* line 1101 */
+#milestones-progress .milestone-progress {
+  width: 400px;
+  margin-bottom: 1em;
+}
+/* line 1105 */
+#milestones-progress #milestone-overall {
+  width: 600px;
+}
+/* line 1108 */
+#milestones-progress .milestone-progress > * {
+  margin-bottom: 0.5em;
+}
+/* line 1111 */
+#milestones-progress .title {
+  font-weight: bold;
+  font-size: bigger;
+}
+/* line 1115 */
+#milestones-progress .count {
+  color: gray;
+}
+/* line 1118 */
+#milestones-progress .progress-bar {
+  height: 30px;
+  border-radius: 3px;
+  background: #E2E2E2;
+  background: -moz-linear-gradient(#e2e2e2, #d8d8d8);
+  background: -webkit-linear-gradient(#e2e2e2, #d8d8d8);
+  background: linear-gradient(#e2e2e2, #d8d8d8);
+}
+/* line 1126 */
+#milestones-progress .progress {
+  position: relative;
+  height: 30px;
+  border-radius: 3px 0 0 3px;
+  background: #8DCF16;
+  background: -moz-linear-gradient(#8dcf16, #65bd10);
+  background: -webkit-linear-gradient(#8dcf16, #65bd10);
+  background: linear-gradient(#8dcf16, #65bd10);
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.7);
+}
+/* line 1139 */
+#milestones-progress .progress .text {
+  position: absolute;
+  top: 5px;
+  left: 5px;
 }
