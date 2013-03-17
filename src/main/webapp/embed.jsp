@@ -5,8 +5,6 @@
     <title>Ceylon Web Runner</title>
     
     <link rel='stylesheet' media='screen, projection' type='text/css' href='main.css'/>
-    <link rel='stylesheet' type='text/css' href='shCore.css'/>
-    <link rel='stylesheet' type='text/css' href='shThemeDefault.css'/>
     <!--[if lt IE 8]>
         <link href='http://ceylon-lang.org/stylesheets/ie.css' media='screen, projection' rel='stylesheet' type='text/css' />
     <![endif]-->
