@@ -67,10 +67,11 @@
 
     // If we're at the edge of the screen, then we want the menu to appear on the left of the cursor.
     var winW = window.innerWidth || Math.max(document.body.offsetWidth, document.documentElement.offsetWidth);
-    if(winW - pos.x < (sel.clientWidth + help.clientWidth)){
+    var popW = sel.clientWidth; //+ help.clientWidth;
+    if(winW-pos.x < popW && pos.x > popW){
     	help.style.left = "0px";
     	sel.style.left = help.clientWidth + "px";
-    	complete.style.left = (pos.x - sel.clientWidth - help.clientWidth) + "px";
+    	complete.style.left = (pos.x-popW) + "px";
     }
 
     var selectedIndex = 0;
