@@ -11,21 +11,24 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
     //A keywords expect (expr) expr or (expr) {block}
     //B keywords expect {block}
     //C keywords expect expr
-    var A = kw("keyword a"), B = kw("keyword b"), C = kw("keyword c");
     var ann={type:"keyword", style:"annotation"};
     var operator = kw("operator"), atom = {type: "atom", style: "atom"};
     return {
-      "if": A, "while": A, "exists": operator, "else": B, "nonempty": operator, "try": B, "finally": B,
-      "return": C, "break": C, "continue": C, "is": operator, "satisfies": operator, "throw": C,
-      "function":kw("function"),
-      "variable": ann, "value": kw("var"), "import": B, "outer":kw("outer"), "super":kw("super"),
-      "class": kw("class"), "catch": kw("catch"), "interface":kw("class"), "object":kw("class"),
-      "for": A, "switch": kw("switch"), "case": A, "given": operator,
-      "in": operator, "assign": kw("assign"), "void": atom, "out":operator, "then":operator,
-      "of":operator, "extends": kw("extends"), "adapts" : kw("extends"), "abstracts" : kw("extends"),
-      "shared" : ann, "formal":ann, "default":ann, "actual":ann, "this":atom,
-      "true": atom, "false": atom, "null": atom, "smaller": atom, "larger": atom, "exhausted": atom,
-      "equal":atom, "empty":atom, "infinity":atom, "abstract":ann
+      "module": kw("module"), "package": kw("package"), "import": kw("import"), 
+      "alias": kw("alias"), "class": kw("class"), "interface":kw("interface"), "object":kw("object"),
+      "given": kw("given"), "value":kw("value"), "assign": kw("assign"), "void": kw("void"), "function":kw("function"),
+      "of":kw("of"), "extends": kw("extends"), "satisfies": kw("satisfies"), "adapts" : kw("adapts"), "abstracts" : kw("abstracts"),
+      "in": kw("in"), "out":kw("out"), 
+      "return": kw("return"), "break": kw("break"), "continue": kw("continue"), "throw": kw("throw"), 
+      "assert": kw("assert"), "dynamic":kw("dynamic"),
+      "if": kw("if"), "else": kw("else"), "switch": kw("switch"), "case": kw("case"), "for": kw("for"), 
+      "while": kw("while"),  "try": kw("try"), "catch": kw("catch"), "finally": kw("finally"), "then":kw("then"),
+      "this":kw("this"), "outer":kw("outer"), "super":kw("super"),
+      "is": kw("is"), "exists": kw("exists"), "nonempty": kw("nonempty"),
+     
+      "variable": ann, "shared": ann, "formal":ann, "default":ann, "actual":ann, "abstract":ann,
+      "late":ann, "native":ann, "deprecated":ann, 
+      "doc":ann, "by":ann, "license":ann, "see":ann, "throws":ann, "tagged":ann
     };
   }();
 
@@ -56,18 +59,33 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
 
   function jsTokenBase(stream, state) {
     var ch = stream.next();
-    if (ch == '"' || ch == "'" || ch == '`')
-      return chain(stream, state, jsTokenString(ch));
-    else if (/[\[\]{}\(\),;\.]/.test(ch))
+    if (ch == '"' || ch == '`' && stream.eat('`')) {
+      if (stream.eat('""')) {
+          return chain(stream, state, jsTokenVerbatim);
+      }
+      else {
+          return chain(stream, state, jsTokenString);
+      }
+    }
+    else if (ch == "'") {
+      stream.match(/'([^'\\\n]|\\.)*'/);
+      return ret("string","string");
+    }
+    else if (/[\[\]{}\(\),;\.]/.test(ch)) {
       return ret(ch);
-    else if (ch == "0" && stream.eat(/x/i)) {
+    }
+    else if (ch == "#") {
       stream.eatWhile(/[\da-f]/i);
       return ret("number", "number");
     }      
-/*    else if (/\d/.test(ch)) {
-      stream.match(/^\d*(?:\.\d*)?(?:[eE][+\-]?\d+)?/);
+    else if (ch == "$") {
+      stream.eatWhile(/[\d]/i);
       return ret("number", "number");
-    }*/
+    }      
+    else if (/\d/.test(ch)) {
+      stream.match(/(\d|_)+(\.(\d|_)+)?((E|e)(\+|\-)?\d+)?[munpfkMGTP]?/);
+      return ret("number", "number");
+    }
     else if (ch == "/") {
       if (stream.eat("*")) {
         return chain(stream, state, jsTokenComment);
@@ -76,20 +94,11 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
         stream.skipToEnd();
         return ret("comment", "comment");
       }
-/*      else if (state.reAllowed) {
-        nextUntilUnescaped(stream, "/");
-        stream.eatWhile(/[gimy]/); // 'y' is "sticky" option in Mozilla
-        return ret("regexp", "string-2");
-      }*/
       else {
         stream.eatWhile(isOperatorChar);
         return ret("operator", null, stream.current());
       }
     }
-/*    else if (ch == "#") {
-        stream.skipToEnd();
-        return ret("error", "error");
-    }*/
     else if (/</.test(ch)) { //to detect generics
       if (stream.eat("=") && stream.eat(">")) {
         return ret("operator", "operator", stream.current());
@@ -98,11 +107,6 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
       }
       stream.eatWhile(isOperatorChar);
       return ret("operator", null, stream.current());
-    }
-    else if (/:/.test(ch)) { //assign
-      if (stream.eat("=")) {
-        return ret("operator", "operator", stream.current());
-      }
     }
     else if (isOperatorChar.test(ch)) {
       stream.eatWhile(isOperatorChar);
@@ -120,22 +124,43 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
     }
   }
 
-  function jsTokenString(quote) {
-    return function(stream, state) {
-      if (!nextUntilUnescaped(stream, quote))
-        state.tokenize = jsTokenBase;
-      return ret("string", "string");
-    };
-  }
-
-  function jsTokenComment(stream, state) {
-    var maybeEnd = false, ch;
+  function jsTokenVerbatim(stream, state) {
+    var lastlast, last, ch;
     while (ch = stream.next()) {
-      if (ch == "/" && maybeEnd) {
+      if (ch == '"' && 
+          last == '"' && 
+          lastlast == '"') {
+        while (stream.eat('"')) {}
         state.tokenize = jsTokenBase;
         break;
       }
-      maybeEnd = (ch == "*");
+      lastlast = last;
+      last = ch;
+    }
+    return ret("string", "string");
+  }
+
+  function jsTokenString(stream, state) {
+    var last, ch;
+    while (ch = stream.next()) {
+      if (ch == '"' && last != '\\' ||
+          ch == '`' && last == '`') {
+        state.tokenize = jsTokenBase;
+        break;
+      }
+      last = ch;
+    }
+    return ret("string", "string");
+  }
+
+  function jsTokenComment(stream, state) {
+    var last, ch;
+    while (ch = stream.next()) {
+      if (ch == '/' && last == '*') {
+        state.tokenize = jsTokenBase;
+        break;
+      }
+      last = ch;
     }
     return ret("comment", "comment");
   }
