@@ -68,8 +68,7 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
       }
     }
     else if (ch == "'") {
-      stream.match(/([^'\\\n]|\\.)*'/);
-      return ret("string","string");
+      return chain(stream, state, jsTokenChar);
     }
     else if (/[\[\]{}\(\),;\.]/.test(ch)) {
       return ret(ch);
@@ -83,11 +82,24 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
       return ret("number", "number");
     }      
     else if (/\d/.test(ch)) {
-      stream.match(/[\d_])*(\.[\d_]+)?([Ee][+\-])?\d+)?[munpfkMGTP]?/);
+      stream.eatWhile(/[\d_]/);
+      if (stream.eat('.') {
+          stream.eatWhile(/[\d_]/);
+          if (stream.eat('e')||stream.eat('E')) {
+              stream.eat('-'); stream.eat('+');
+              stream.eatWhile(/[\d_]/);
+          }
+          else {
+              stream.eatWhile(/[munpfkMGTP]/);
+          }
+      }
+      else {
+          stream.eatWhile(/[MGTP]/);
+      }
       return ret("number", "number");
     }
-    else if (ch == "/") {
-      if (stream.eat("*")) {
+    else if (ch == '/') {
+      if (stream.eat('*')) {
         return chain(stream, state, jsTokenComment);
       }
       else if (stream.eat("/")) {
@@ -112,12 +124,22 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
       stream.eatWhile(isOperatorChar);
       return ret("operator", null, stream.current());
     }
+    else if (ch == '\') {
+      if (stream.eat('i')) {
+        stream.eatWhile(/[\w\d_]/);
+         return ret("variable", "variable", stream.current());
+      }
+      if (stream.eat('I')) {
+        stream.eatWhile(/[\w\d_]/);
+         return ret("classname", "classname", stream.current());
+      }
+    }
     else if (/[A-Z]/.test(ch)) { //anything starting with a capital is considered a classname
-      stream.eatWhile(/[\w\_]/);
+      stream.eatWhile(/[\w\_\d]/);
       return ret("classname", "classname", stream.current());
     }
     else {
-      stream.eatWhile(/[\w\$_]/);
+      stream.eatWhile(/[\w\d_]/);
       var word = stream.current(), known = keywords.propertyIsEnumerable(word) && keywords[word];
       return (known && state.kwAllowed) ? ret(known.type, known.style, word) :
                      ret("variable", "variable", word);
@@ -145,6 +167,19 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
     while (ch = stream.next()) {
       if (ch == '"' && last != '\\' ||
           ch == '`' && last == '`') {
+        state.tokenize = jsTokenBase;
+        break;
+      }
+      last = ch;
+    }
+    return ret("string", "string");
+  }
+
+  function jsTokenChar(stream, state) {
+    var last, ch;
+    while (ch = stream.next()) {
+      if (ch == ''' && last != '\\' ||
+          ch == '\n') {
         state.tokenize = jsTokenBase;
         break;
       }
