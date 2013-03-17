@@ -69,8 +69,8 @@
     var winW = window.innerWidth || Math.max(document.body.offsetWidth, document.documentElement.offsetWidth);
     if(winW - pos.x < (sel.clientWidth + help.clientWidth)){
     	help.style.left = "0px";
-    	sel.style.left = "200px";
-    	complete.style.left = (pos.x - sel.clientWidth - 200) + "px";
+    	sel.style.left = help.clientWidth + "px";
+    	complete.style.left = (pos.x - sel.clientWidth - help.clientWidth) + "px";
     }
 
     var selectedIndex = 0;
