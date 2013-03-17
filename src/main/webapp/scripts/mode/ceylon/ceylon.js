@@ -68,22 +68,22 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
       }
     }
     else if (ch == "'") {
-      stream.match(/'([^'\\\n]|\\.)*'/);
+      stream.match(/([^'\\\n]|\\.)*'/);
       return ret("string","string");
     }
     else if (/[\[\]{}\(\),;\.]/.test(ch)) {
       return ret(ch);
     }
     else if (ch == "#") {
-      stream.eatWhile(/[\da-f]/i);
+      stream.eatWhile(/[\da-f_]/i);
       return ret("number", "number");
     }      
     else if (ch == "$") {
-      stream.eatWhile(/[\d]/i);
+      stream.eatWhile(/[\d_]/);
       return ret("number", "number");
     }      
     else if (/\d/.test(ch)) {
-      stream.match(/(\d|_)+(\.(\d|_)+)?((E|e)(\+|\-)?\d+)?[munpfkMGTP]?/);
+      stream.match(/[\d_])*(\.[\d_]+)?([Ee][+\-])?\d+)?[munpfkMGTP]?/);
       return ret("number", "number");
     }
     else if (ch == "/") {
