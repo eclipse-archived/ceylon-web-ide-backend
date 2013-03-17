@@ -178,7 +178,7 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
   function jsTokenChar(stream, state) {
     var last, ch;
     while (ch = stream.next()) {
-      if (ch == ''' && last != '\\' ||
+      if (ch == "'" && last != '\\' ||
           ch == '\n') {
         state.tokenize = jsTokenBase;
         break;
