@@ -69,6 +69,14 @@
             text-align: left; 
             text-decoration: none;
         }
+        div.CodeMirror pre {
+            margin-left:0 !important;
+            padding-left:0 !important;
+            border-left:none !important;
+        }
+        input {
+            border-style:none;
+        }
     </style>
     <script type="text/javascript" src="scripts/spin.js" charset="utf-8"></script>
     <script type="text/javascript" src="scripts/codemirror.js" charset="utf-8"></script>
