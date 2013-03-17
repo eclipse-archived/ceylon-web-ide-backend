@@ -1,34 +1,39 @@
 .popup {
     width: 400px;
     height: 200px;
-    background: white;
-    border: 1px inset gray;
+    background: lightyellow;
     text-shadow: none;
     overflow: auto;
     cursor: pointer;
     position: absolute;
     top: 0;
     left: 0;
+    font-family: Menlo, Monaco, Courier, monospace;
+    padding-left:2px;
+    font-size: 85%;
 }
 
 .help {
-    width: 200px;
+    width: 300px;
     height: 200px;
     top: 0px;
     left: 400px;
-    background: gray;
-    border: 1px inset white;
+    background: #99CCFF;
     text-shadow: none;
     overflow: auto;
-    color: white;
+    color: black;
     position: absolute;
+    font-family: Menlo, Monaco, Courier, monospace;
+    font-size: 80%;
+    font-style: italic;
+    padding-left: 2px;
 }
 
 .popup > div {
     white-space: pre;
 }
 .popup > .selected {
-    background: blue;
+    background: red;
     color: white;
 }
 .popup > .selected span {
@@ -37,9 +42,10 @@
 .CodeMirror-completions {
     overflow: hidden;
     position: absolute;
-    width: 600px;
+    width: 700px;
     height: 200px;
     z-index: 200;
+    box-shadow: 0 0 7px grey;
 }
 .CodeMirror-completions > input {
     position: absolute;
