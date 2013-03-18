@@ -27,6 +27,7 @@
     font-size: 80%;
     font-style: italic;
     padding-left: 2px;
+    white-space: pre;
 }
 
 .popup > div {
