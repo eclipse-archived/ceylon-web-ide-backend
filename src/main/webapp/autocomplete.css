@@ -46,6 +46,8 @@
     width: 750px;
     height: 200px;
     z-index: 200;
+    -moz-box-shadow: 0 0 7px grey;
+    -webkit-box-shadow: 0 0 7px grey;
     box-shadow: 0 0 7px grey;
 }
 .CodeMirror-completions > input {
