@@ -23,9 +23,9 @@
     overflow: auto;
     color: black;
     position: absolute;
-    font-family: Menlo, Monaco, Courier, monospace;
-    font-size: 80%;
-    font-style: italic;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    //font-style: italic;
     padding-left: 2px;
     white-space: pre;
 }
