@@ -92,11 +92,13 @@
     	$children.each(function (index, line){
     		var $line = jQuery(line);
     		if(completionMatches(index)){
-    			if(selectedIndex == -1)
+    			if(selectedIndex == -1) {
     				selectedIndex = index;
+				}
     			$line.show();
-    		}else
+    		} else {
     			$line.hide();
+			}
     		$line.removeClass("selected");
     	});
     	if(selectedIndex != -1)
@@ -122,10 +124,13 @@
     	// update the help
     	help.innerHTML = completions[selectedIndex].help;
     }
+    var fuckingStop=false;
     function keydown(event){
+        fuckingStop=false;
     	function prevent(){
-    		event.preventDefault();
-    		event.stopPropagation();
+            event.preventDefault();
+            event.stopPropagation();
+            fuckingStop=true;
     	}
     	
     	var code = event.which;
@@ -141,8 +146,8 @@
     	}else if(code == 40){
     		prevent();
     		// Down
-    		while(selectedIndex < completions.length - 1){
-    			selectedIndex++;
+    		while(selectedIndex < completions.length - 1) {
+    		    selectedIndex++;
     			if(completionMatches(selectedIndex))
     				break;
     		}
@@ -150,8 +155,8 @@
     	}else if(code == 38){
     		prevent();
     		// Up
-    		while(selectedIndex > 0){
-    			selectedIndex--;
+    		while(selectedIndex > 0) {
+    		    selectedIndex--;
     			if(completionMatches(selectedIndex))
     				break;
     		}
@@ -221,6 +226,7 @@
     // capture keys
     jQuery(input).keydown(keydown);
     jQuery(input).keypress(function(event){
+        if (fuckingStop)return;
     	var char = String.fromCharCode(event.which);
 		editor.replaceRange(char, {line: cursor.line, ch: insertionPoint++});
 		filter += char;
