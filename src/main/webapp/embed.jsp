@@ -30,7 +30,7 @@
             display: none;
             <% } %>
         }
-        #output {
+        #output, #edit_ceylon {
             border-width: 1px;
             border-style: solid;
             width: 100%;
