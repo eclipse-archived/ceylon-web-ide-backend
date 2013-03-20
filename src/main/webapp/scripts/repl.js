@@ -39,8 +39,6 @@ require(["ceylon/language/0.5/ceylon.language-0.5", 'jquery'],
                     "Cmd-D":function(cm){ getHoverDocs(cm); },
                     "Ctrl-B":function(instance){ run(); },
                     "Cmd-B":function(instance){ run(); },
-                    "Ctrl-Space":function(){complete(editor);},
-                    "Cmd-Space":function(){complete(editor);},
                     "Ctrl-.":function(){complete(editor);},
                     "Cmd-.":function(){complete(editor);}
                 }
@@ -59,7 +57,6 @@ require(["ceylon/language/0.5/ceylon.language-0.5", 'jquery'],
                     complete:stopSpinner,
                     success:function(src,status,xhr) {
                         editor.setValue(src);
-                        getHoverDocs(editor);
                     },
                     error:function(a,status,err) {
                         alert("Error retrieving shared code: " + (err?err:status));
@@ -106,8 +103,7 @@ function complete(editor){
         },
         contentType:'application/x-www-form-urlencoded; charset=UTF-8',
         data: { 
-        	ceylon:code, 
-        	module:getModuleCode(),
+        	ceylon:code,
         	r: cursor.line+2,
         	c: cursor.ch-1
         }
@@ -190,7 +186,7 @@ function translate(onTranslation) {
   var code = getEditCode();
   if (code != oldcode) {
       clearEditMarkers();
-      translateCode(code, true, true, onTranslation);
+      translateCode(code, true, onTranslation);
   } else {
       if (onTranslation) {
           onTranslation();
@@ -201,7 +197,7 @@ function translate(onTranslation) {
 //Wraps the contents of the editor in a function and sends it to the server for compilation.
 //On response, executes the script if compilation was OK, otherwise shows errors.
 //In any case it sets the hover docs if available.
-function translateCode(code, doShowCode, doShowDocs, onTranslation) {
+function translateCode(code, doShowCode, onTranslation) {
     clearOutput();
     transok = false;
     var compileHandler = function(json, status, xhr) {
@@ -209,7 +205,6 @@ function translateCode(code, doShowCode, doShowDocs, onTranslation) {
         var translatedcode=json['code'];
         if (translatedcode) {
             showCode(translatedcode);
-            showDocs(json['code_docs'], json['code_refs']);
             try {
                 globalEval(translatedcode);
                 transok = true;
@@ -225,7 +220,6 @@ function translateCode(code, doShowCode, doShowDocs, onTranslation) {
             var errs = json['errors'];
             if (errs) {
                 showErrors(errs);
-                showDocs(json['code_docs'], json['code_refs']);
             }
         }
     };
@@ -242,7 +236,7 @@ function translateCode(code, doShowCode, doShowDocs, onTranslation) {
             alert("An error occurred while compiling your code: " + err?err:status);
         },
         contentType:'application/x-www-form-urlencoded; charset=UTF-8',
-        data:{ceylon:code, module:getModuleCode()}
+        data:{ceylon:code}
     });
 }
 
@@ -253,7 +247,7 @@ function run() {
 
 //Sends the given code to the server for compilation and it successful, runs the resulting js.
 function runCode(code) {
-  translateCode(code, false, false, afterTranslate);
+  translateCode(code, false, afterTranslate);
 }
 
 //This function is called if compilation runs OK
@@ -310,7 +304,6 @@ function editCode(key) {
         success:function(json, status, xhr) {
             clearEditMarkers();
             editor.setValue(json['src']);
-            showDocs(json['docs'], json['refs']);
             editor.focus();
         },
         error:function(xhr, status, err) {
@@ -334,10 +327,6 @@ function setEditCode(src) {
 	    editor.setValue(src);
 	    editor.focus();
 	}
-}
-
-function getModuleCode() {
-	return "module web_ide_script '1.0.0' {}";
 }
 
 //Puts the specified text in the result element.
@@ -406,11 +395,41 @@ function globalEval(src) {
 function getHoverDocs(cm) {
     var code = "void run_script() {\n" + cm.getValue() + "}";
     var docHandler = function(json, status, xhr) {
-        if (json && json['docs'] && json['refs']) {
-            showDocs(json['docs'], json['refs']);
+        if (json && json['name']) {
+            if (json['doc']) {
+
+                var pos = editor.cursorCoords();
+                var help = document.createElement("div");
+                help.className = "help";
+                help.innerHTML = json['doc'];
+                help.style.left = pos.x + "px";
+                help.style.top = pos.yBot + "px";
+                document.body.appendChild(help);
+                var done = false;
+                function close() {
+                    if (done) return;
+                    done = true;
+                    jQuery("body").unbind('keydown', close);
+                    jQuery("body").unbind('click', close);
+                    help.parentNode.removeChild(help);
+                }
+                jQuery("body").keydown(close);
+                jQuery("body").click(close);
+                help.focus();
+
+            } else if (json['name'].startsWith("ceylon.language::")) {
+                var tok = json['name'].substring(17);
+                if (json['type'] === 'interface' || json['type'] === 'class') {
+                    console.log("URL http://modules.ceylon-lang.org/test/ceylon/language/0.5/module-doc/"
+                        + json['type'] + "_" + tok + ".html");
+                } else {
+                    console.log("URL http://modules.ceylon-lang.org/test/ceylon/language/0.5/module-doc/index.html#" + tok);
+                }
+            }
         }
     };
     document.getElementById('run_ceylon').disabled=true;
+    var cursor = editor.getCursor();
     jquery.ajax('hoverdoc', {
         cache:false, type:'POST',
         dataType:'json',
@@ -423,6 +442,10 @@ function getHoverDocs(cm) {
             alert("An error occurred while retrieving documentation for your code: " + err?err:status);
         },
         contentType:'application/x-www-form-urlencoded; charset=UTF-8',
-        data:{ceylon:code, module:getModuleCode()}
+        data:{
+            ceylon:code,
+            r: cursor.line+2,
+            c: cursor.ch-1
+        }
     });
 }
