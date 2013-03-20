@@ -21,7 +21,10 @@
 }
 .CodeMirror pre {
   padding: 0 4px; /* Horizontal padding of content */
-  margin-left:0;
+}
+
+div.CodeMirror pre {
+  margin-left:2px;
   padding-left:0;
   border-left:0px;
 }
@@ -34,7 +37,7 @@
 
 .CodeMirror-gutters {
   border-right: 1px solid #ddd;
-  background-color: bisque;
+  background-color: floralwhite;
 }
 .CodeMirror-linenumbers {}
 .CodeMirror-linenumber {
