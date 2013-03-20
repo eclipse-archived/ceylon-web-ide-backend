@@ -18,6 +18,8 @@ import javax.servlet.http.HttpServletResponse;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
+import com.github.rjeschke.txtmark.Configuration;
+import com.github.rjeschke.txtmark.Processor;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.model.Annotation;
 import com.redhat.ceylon.compiler.typechecker.model.Declaration;
@@ -27,6 +29,8 @@ import com.redhat.ceylon.js.util.ServletUtils;
 
 @WebServlet("/hoverdoc")
 public class DocServlet extends HttpServlet {
+
+    private static final Configuration MD_CONF = Configuration.builder().forceExtentedProfile().setEncoding("UTF-8").build();
 
     private static final long serialVersionUID = 1L;
     //Here we cache the code for the examples, so that it's only compiled the first time someone asks for it.
@@ -141,7 +145,7 @@ public class DocServlet extends HttpServlet {
                             if (doc.charAt(0) == '"' && doc.charAt(doc.length()-1) == '"') {
                                 doc = doc.substring(1, doc.length()-1);
                             }
-                            json.put("doc", doc);
+                            json.put("doc", Processor.process(doc, MD_CONF));
                         }
                     }
                 }
