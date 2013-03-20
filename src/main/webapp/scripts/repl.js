@@ -393,7 +393,7 @@ function globalEval(src) {
 }
 
 function getHoverDocs(cm) {
-    var code = "void run_script() {\n" + cm.getValue() + "}";
+    var code = getEditCode();
     var docHandler = function(json, status, xhr) {
         if (json && json['name']) {
             if (json['doc']) {
