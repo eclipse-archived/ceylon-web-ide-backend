@@ -94,8 +94,8 @@
 
 .cm-invalidchar {color: #f00;}
 
-div.CodeMirror span.CodeMirror-matchingbracket {color: #0f0;}
-div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
+div.CodeMirror span.CodeMirror-matchingbracket {color: purple;}
+div.CodeMirror span.CodeMirror-nonmatchingbracket {color: red;}
 
 /* STOP */
 
