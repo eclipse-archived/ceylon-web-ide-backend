@@ -33,11 +33,12 @@ require(["ceylon/language/0.5/ceylon.language-0.5", 'jquery'],
             var donde=document.getElementById('edit_ceylon');
             editor = CodeMirror.fromTextArea(donde,{
                 mode:'ceylon',
+                gutters:["CodeMirror-error-gutter", "CodeMirror-gutter"],
                 lineNumbers:true,
                 indentUnit: 4,
                 extraKeys:{
-                    "Ctrl-D":function(cm){ getHoverDocs(cm); },
-                    "Cmd-D":function(cm){ getHoverDocs(cm); },
+                    "Ctrl-D":function(cm){ fetchDoc(cm); },
+                    "Cmd-D":function(cm){ fetchDoc(cm); },
                     "Ctrl-B":function(instance){ run(); },
                     "Cmd-B":function(instance){ run(); },
                     "Ctrl-.":function(){complete(editor);},
@@ -152,34 +153,20 @@ function showErrors(errors, docs, refs) {
             var errmsg = escapeHtml(err.msg);
             printError((err.from.line-1) + ":" + err.from.ch + " - " + err.msg);
             //This is to add a marker in the gutter
-            editor.setMarker(err.from.line-2, '<img title="'+errmsg+'" src="images/error.gif"/>&nbsp;<b>%N%</b>');
+            var img = document.createElement('img');
+            img.title=errmsg;
+            img.src="images/error.gif";
+            editor.setGutterMarker(err.from.line-2, 'CodeMirror-error-gutter', img);
             //This is to modify the style (underline or whatever)
-            var marker=editor.markText({line:err.from.line-2,ch:err.from.ch},{line:err.to.line-2,ch:err.to.ch+1},"cm-error");
+            var marker=editor.markText({line:err.from.line-2,ch:err.from.ch},{line:err.to.line-2,ch:err.to.ch+1},{className:"cm-error"});
             markers.push(marker);
             //And this is for the hover
             var estilo="ceylonerr_r"+err.from.line+"_c"+err.from.ch;
-            marker=editor.markText({line:err.from.line-2,ch:err.from.ch},{line:err.to.line-2,ch:err.to.ch+1},estilo);
+            marker=editor.markText({line:err.from.line-2,ch:err.from.ch},{line:err.to.line-2,ch:err.to.ch+1},{className:estilo});
             markers.push(marker);
             bindings.push(estilo);
             jquery("."+estilo).attr("title", errmsg);
         }
-    }
-}
-//Adds hover documentation to the specified text fragments.
-function showDocs(docs, refs) {
-    var estilos={};
-    for (var i=0; i<refs.length;i++) {
-        var ref=refs[i];
-        if (ref.from.line > 1) {
-            var estilo="ceylondoc_r"+ref.from.line+"_c"+ref.from.ch;
-            var mark = editor.markText({line:ref.from.line-2,ch:ref.from.ch},{line:ref.to.line-2,ch:ref.to.ch+1},estilo);
-            markers.push(mark);
-            bindings.push(estilo);
-            estilos[estilo]=ref.ref;
-        }
-    }
-    for (var $$ in estilos) {
-        jquery("."+$$).attr("title", docs[estilos[$$]]);
     }
 }
 
@@ -342,9 +329,7 @@ function showCode(code) {
 
 //Clears all error markers and hover docs.
 function clearEditMarkers() {
-    for (var i=0; i<editor.lineCount();i++) {
-        editor.clearMarker(i);
-    }
+    editor.clearGutter('CodeMirror-error-gutter');
     for (var i=0; i<markers.length;i++) {
         markers[i].clear();
     }
@@ -396,18 +381,18 @@ function globalEval(src) {
     fn();
 }
 
-function getHoverDocs(cm) {
+function fetchDoc(cm) {
     var code = getEditCode();
     var docHandler = function(json, status, xhr) {
         if (json && json['name']) {
             if (json['doc']) {
 
-                var pos = editor.cursorCoords();
+                var pos = editor.cursorCoords(true);
                 var help = document.createElement("div");
                 help.className = "help infront";
                 help.innerHTML = json['doc'];
-                help.style.left = pos.x + "px";
-                help.style.top = pos.yBot + "px";
+                help.style.left = pos.left + "px";
+                help.style.top = pos.bottom + "px";
                 document.body.appendChild(help);
                 var done = false;
                 function close() {

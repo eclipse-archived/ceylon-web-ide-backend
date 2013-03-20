@@ -56,8 +56,8 @@
       opt.innerHTML = completions[i].display;
     }
     var pos = editor.cursorCoords();
-    complete.style.left = pos.x + "px";
-    complete.style.top = pos.yBot + "px";
+    complete.style.left = pos.left + "px";
+    complete.style.top = pos.bottom + "px";
     document.body.appendChild(complete);
 
     // now place the help window
