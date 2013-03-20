@@ -124,13 +124,13 @@
     	// update the help
     	help.innerHTML = completions[selectedIndex].help;
     }
-    var fuckingStop=false;
+    var prettyPleaseStop=false;
     function keydown(event){
-        fuckingStop=false;
+        prettyPleaseStop=false;
     	function prevent(){
             event.preventDefault();
             event.stopPropagation();
-            fuckingStop=true;
+            prettyPleaseStop=true;
     	}
     	
     	var code = event.which;
@@ -226,7 +226,7 @@
     // capture keys
     jQuery(input).keydown(keydown);
     jQuery(input).keypress(function(event){
-        if (fuckingStop)return;
+        if (prettyPleaseStop) return;
     	var char = String.fromCharCode(event.which);
 		editor.replaceRange(char, {line: cursor.line, ch: insertionPoint++});
 		filter += char;
