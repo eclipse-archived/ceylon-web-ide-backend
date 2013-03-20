@@ -17,17 +17,16 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
 import com.redhat.ceylon.compiler.Options;
-import com.redhat.ceylon.compiler.js.DocVisitor;
 import com.redhat.ceylon.compiler.js.JsCompiler;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.analyzer.UsageWarning;
-import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
 import com.redhat.ceylon.compiler.typechecker.model.Module;
 import com.redhat.ceylon.compiler.typechecker.parser.RecognitionError;
 import com.redhat.ceylon.compiler.typechecker.tree.AnalysisMessage;
 import com.redhat.ceylon.compiler.typechecker.tree.Message;
 import com.redhat.ceylon.js.util.CompilerUtils;
 import com.redhat.ceylon.js.util.DocUtils;
+import com.redhat.ceylon.js.util.ServletUtils;
 
 /**
  * Servlet implementation class CeylonToJSTranslationServlet
@@ -41,7 +40,6 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
 	/** Compiles Ceylon code and returns the resulting Javascript, along with its hover help docs.
 	 * Expects the following keys:
 	 * ceylon - The Ceylon code to compile
-	 * module - The code for the module.ceylon file
 	 * Returns a JSON object with the following keys:
 	 * code_docs - a list of the doc descriptions
 	 * code_refs - a list of maps, each map contains keys "ref" with the index of the doc in the code_docs list,
@@ -53,22 +51,11 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	    try {
     	    String script = request.getParameter("ceylon");
-            String module = request.getParameter("module");
-    	    ScriptFile src = new ScriptFile("ROOT",
-    	            new ScriptFile("web_ide_script",
-    	                    new ScriptFile("SCRIPT.ceylon", script),
-    	                    new ScriptFile("module.ceylon", module)
-    	            )
-    	    );
+    	    final ScriptFile src = CompilerUtils.createScriptSource(script);
 
     	    TypeChecker typeChecker = CompilerUtils.getTypeChecker(request.getServletContext(), src);
             typeChecker.process();
             
-            //While we're at it, get the docs
-            final DocVisitor doccer = new DocVisitor();
-            for (PhasedUnit pu: typeChecker.getPhasedUnits().getPhasedUnits()) {
-                pu.getCompilationUnit().visit(doccer);
-            }
             //Run the compiler, if typechecker returns no errors.
             final CharArrayWriter out = new CharArrayWriter(script.length()*2);
             JsCompiler compiler = new JsCompiler(typeChecker, opts) {
@@ -90,8 +77,6 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             //Don't rely on result flag, check errors instead
             compiler.generate();
             final JSONObject resp = new JSONObject();
-            resp.put("code_docs", doccer.getDocs());
-            resp.put("code_refs", DocUtils.referenceMapToList(doccer.getLocations()));
             //Put errors in this list
             JSONArray errs = new JSONArray();
             for (Message err : compiler.listErrors()) {
@@ -110,11 +95,7 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             }
             //final CharArrayWriter swriter = new CharArrayWriter(script.length()*2);
             //json.encode(resp, swriter);
-            final String enc = resp.toJSONString();//swriter.toString();
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.setContentLength(enc.getBytes("UTF-8").length);
-            response.getWriter().print(enc);
+            ServletUtils.sendResponse(resp, response);
 	    } catch (Exception ex) {
             response.setStatus(500);
             String msg = ex.getMessage();
