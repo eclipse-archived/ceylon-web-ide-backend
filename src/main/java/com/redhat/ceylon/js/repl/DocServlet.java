@@ -3,6 +3,8 @@ package com.redhat.ceylon.js.repl;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 
 import javax.servlet.ServletConfig;
@@ -16,13 +18,12 @@ import javax.servlet.http.HttpServletResponse;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
-import com.redhat.ceylon.compiler.js.DocVisitor;
-import com.redhat.ceylon.compiler.loader.JsModuleManagerFactory;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
-import com.redhat.ceylon.compiler.typechecker.TypeCheckerBuilder;
-import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
+import com.redhat.ceylon.compiler.typechecker.model.Annotation;
+import com.redhat.ceylon.compiler.typechecker.model.Declaration;
+import com.redhat.ceylon.compiler.typechecker.tree.Node;
 import com.redhat.ceylon.js.util.CompilerUtils;
-import com.redhat.ceylon.js.util.DocUtils;
+import com.redhat.ceylon.js.util.ServletUtils;
 
 @WebServlet("/hoverdoc")
 public class DocServlet extends HttpServlet {
@@ -30,18 +31,12 @@ public class DocServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     //Here we cache the code for the examples, so that it's only compiled the first time someone asks for it.
     private HashMap<String, JSONObject> examples = new HashMap<String, JSONObject>();
-    public static final JsModuleManagerFactory MMF = new JsModuleManagerFactory("UTF-8");
-    private static ScriptFile exampleModuleFile = null;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         try {
-            long t0 = System.currentTimeMillis();
             System.err.println("Loading and compiling all examples...");
-            exampleModuleFile = new ScriptFile("module.ceylon", getFileContent(config.getServletContext(), "module"));
-            long t1 = System.currentTimeMillis();
-            System.err.println("Module file loaded in " + (t1-t0) + " millis");
-            t0 = System.currentTimeMillis();
+            final long t0 = System.currentTimeMillis();
             for (String path : config.getServletContext().getResourcePaths("/examples")) {
                 if (path.endsWith(".ceylon") && !path.equals("/examples/module.ceylon")) {
                     path = path.substring(10, path.length()-7);
@@ -49,38 +44,11 @@ public class DocServlet extends HttpServlet {
                     loadExample(config.getServletContext(), path);
                 }
             }
-            t1 = System.currentTimeMillis();
+            final long t1 = System.currentTimeMillis();
             System.err.println("Examples loaded and compiled in " + (t1-t0) + " millis");
         } catch (IOException ex) {
             throw new ServletException("Cannot load module.ceylon for examples", ex);
         }
-    }
-
-    /** Documents the code already processed by the typechecker.
-     * @param tc The typechecker that has already processed the source code.
-     * @param src The Ceylon source, in its original form (without wrapping in a function).
-     * @return A map with the docs found for tokens in the code and the positions for said docs. */
-    private JSONObject compile(TypeChecker tc) {
-        //Retrieve docs
-        DocVisitor dv = new DocVisitor();
-        for (PhasedUnit pu: tc.getPhasedUnits().getPhasedUnits()) {
-            pu.getCompilationUnit().visit(dv);
-        }
-        //Send as JSON
-        JSONObject docs = new JSONObject();
-        docs.put("docs", dv.getDocs());
-        docs.put("refs", DocUtils.referenceMapToList(dv.getLocations()));
-        return docs;
-    }
-
-    private void sendResponse(JSONObject docs, HttpServletResponse response) throws IOException {
-        String resp = docs.toJSONString();
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        //Unicode chars cause problems with length so we have to count bytes here
-        response.setContentLength(resp.getBytes().length);
-        response.getWriter().print(resp);
-        response.getWriter().flush();
     }
 
     private JSONObject loadExample(ServletContext cxt, String key) throws IOException {
@@ -89,16 +57,7 @@ public class DocServlet extends HttpServlet {
             synchronized (examples) {
                 if (example == null) {
                     String src = getFileContent(cxt, key);
-                    String wrappedSrc = new StringBuilder(
-                        "void run_script(){\n")
-                        .append(src).append("\n}").toString();
-                    //Run the typechecker
-                    TypeChecker typeChecker = CompilerUtils.getTypeChecker(cxt, new ScriptFile("ROOT",
-                            new ScriptFile("web_ide_script", exampleModuleFile,
-                                new ScriptFile("SCRIPT.ceylon", wrappedSrc))
-                            ));
-                    typeChecker.process();
-                    example = compile(typeChecker);
+                    example = new JSONObject();
                     example.put("src", src);
                     examples.put(key, example);
                 }
@@ -113,7 +72,7 @@ public class DocServlet extends HttpServlet {
             throws ServletException, IOException {
         String key = req.getParameter("key");
         try {
-            sendResponse(loadExample(req.getServletContext(), key), resp);
+            ServletUtils.sendResponse(loadExample(req.getServletContext(), key), resp);
         } catch (RuntimeException ex) {
             resp.setStatus(500);
             JSONArray error = new JSONArray();
@@ -129,21 +88,67 @@ public class DocServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            String script = request.getParameter("ceylon");
-            String module = request.getParameter("module");
-            ScriptFile src = new ScriptFile("ROOT",
-                    new ScriptFile("web_ide_script",
-                            new ScriptFile("SCRIPT.ceylon", script),
-                            new ScriptFile("module.ceylon", module)
-                    )
-            );
+            final String script = request.getParameter("ceylon");
+            final int row = Integer.parseInt(request.getParameter("r"));
+            final int col = Integer.parseInt(request.getParameter("c"));
+            final ScriptFile src = CompilerUtils.createScriptSource(script);
             //Run the typechecker
-            TypeChecker typeChecker = new TypeCheckerBuilder()
-                    .addSrcDirectory(src)
-                    .moduleManagerFactory(MMF)
-                    .getTypeChecker();
+            final TypeChecker typeChecker = CompilerUtils.getTypeChecker(request.getServletContext(), src);
             typeChecker.process();
-            sendResponse(compile(typeChecker), response);
+            final AutocompleteVisitor visitor = new AutocompleteVisitor(row, col, typeChecker);
+            final Node node = visitor.findNode(AutocompleteVisitor.SCRIPT_VAL);
+            Declaration decl = null;
+            String doc = null;
+            if (node != null) {
+                try {
+                    try {
+                        Method m = node.getClass().getMethod("getDeclaration");
+                        Object d = m.invoke(node);
+                        if (d instanceof Declaration) {
+                            decl = (Declaration)d;
+                        }
+                    } catch (NoSuchMethodException ex) {
+                        try {
+                            Method m = node.getClass().getMethod("getDeclarationModel");
+                            Object d = m.invoke(node);
+                            if (d instanceof Declaration) {
+                                decl = (Declaration)d;
+                            }
+                        } catch (NoSuchMethodException e1) {
+                            //no hubo nada
+                        }
+                    }
+                } catch (IllegalAccessException e) {
+                    //nothing
+                } catch (InvocationTargetException e) {
+                    //nothing
+                }
+            }
+            JSONObject json = new JSONObject();
+            if (decl != null) {
+                json.put("name", decl.getQualifiedNameString());
+                if (false){//decl.getQualifiedNameString().startsWith("ceylon.language::")) {
+                    if (decl instanceof com.redhat.ceylon.compiler.typechecker.model.Class
+                            || decl instanceof com.redhat.ceylon.compiler.typechecker.model.ClassAlias) {
+                        json.put("type", "class");
+                    } else if (decl instanceof com.redhat.ceylon.compiler.typechecker.model.Interface
+                            || decl instanceof com.redhat.ceylon.compiler.typechecker.model.InterfaceAlias) {
+                        json.put("type", "interface");
+                    }
+                } else {
+                    //Only return doc for declarations that are not part of the language module
+                    for (Annotation ann : decl.getAnnotations()) {
+                        if ("doc".equals(ann.getName()) && !ann.getPositionalArguments().isEmpty()) {
+                            doc = ann.getPositionalArguments().get(0);
+                            if (doc.charAt(0) == '"' && doc.charAt(doc.length()-1) == '"') {
+                                doc = doc.substring(1, doc.length()-1);
+                            }
+                            json.put("doc", doc);
+                        }
+                    }
+                }
+            }
+            ServletUtils.sendResponse(json, response);
         } catch (RuntimeException ex) {
             response.setStatus(500);
             JSONArray sb = new JSONArray();
