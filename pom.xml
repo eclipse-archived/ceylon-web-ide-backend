@@ -74,6 +74,14 @@
       <type>jar</type>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>txtmark</groupId>
+      <artifactId>txtmark</artifactId>
+      <version>0.8</version>
+      <type>jar</type>
+      <scope>system</scope>
+      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/txtmark-0.8-c0dcd373ce.jar</systemPath>
+    </dependency>
   </dependencies>
   <profiles>
     <profile>
