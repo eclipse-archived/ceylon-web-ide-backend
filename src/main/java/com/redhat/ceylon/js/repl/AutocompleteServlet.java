@@ -26,7 +26,6 @@ public class AutocompleteServlet extends HttpServlet {
     /** Receives a block of Ceylon code and a location, and returns a list of the possible completions for the token
      * at said location. The following keys must be present in the request:
      * ceylon - The Ceylon code to analyze
-     * module - The code for the module.ceylon file
      * r  - The row where the token to complete is located
      * c  - The column where the token to complete is located
      *
@@ -41,15 +40,9 @@ public class AutocompleteServlet extends HttpServlet {
             throws ServletException, IOException {
         try {
             String script = req.getParameter("ceylon");
-            String module = req.getParameter("module");
-            int locRow = Integer.parseInt(req.getParameter("r"));
-            int locCol = Integer.parseInt(req.getParameter("c"));
-            ScriptFile src = new ScriptFile("ROOT",
-                    new ScriptFile("web_ide_script",
-                            new ScriptFile("SCRIPT.ceylon", script),
-                            new ScriptFile("module.ceylon", module)
-                    )
-            );
+            final int locRow = Integer.parseInt(req.getParameter("r"));
+            final int locCol = Integer.parseInt(req.getParameter("c"));
+            final ScriptFile src = CompilerUtils.createScriptSource(script);
             //Run the typechecker
             TypeChecker typeChecker = CompilerUtils.getTypeChecker(req.getServletContext(), src);
             typeChecker.process();
@@ -64,12 +57,7 @@ public class AutocompleteServlet extends HttpServlet {
             //Now get the suggestions for node at the specified location
             //So of course first we have to find said node
             final AutocompleteVisitor assistant = new AutocompleteVisitor(locRow, locCol, typeChecker);
-            assistant.findNode(new AutocompleteUnitValidator() {
-                @Override
-                public boolean processUnit(PhasedUnit pu) {
-                    return "SCRIPT.ceylon".equals(pu.getUnitFile().getName());
-                }
-            });
+            assistant.findNode(AutocompleteVisitor.SCRIPT_VAL);
             jsr.put("opts", assistant.getCompletions());
             final String enc = jsr.toJSONString();
             resp.setContentLength(enc.length());
