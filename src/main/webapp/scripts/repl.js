@@ -152,7 +152,7 @@ function showErrors(errors, docs, refs) {
             var estilo="ceylonerr_r"+err.from.line+"_c"+err.from.ch;
             printError("--- " + err.msg + " (at " + (err.from.line-1) + ":" + err.from.ch + ")");
             //This is to add a marker in the gutter
-            editor.setMarker(err.from.line-2, '<img src="images/error.gif" class="'+estilo+'"/><b>%N%</b>');
+            editor.setMarker(err.from.line-2, '<span class="'+estilo+'"><img src="images/error.gif"/>&nbsp;<b>%N%</b></span>');
             //This is to modify the style (underline or whatever)
             var marker=editor.markText({line:err.from.line-2,ch:err.from.ch},{line:err.to.line-2,ch:err.to.ch+1},"cm-error");
             markers.push(marker);
