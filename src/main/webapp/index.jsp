@@ -20,7 +20,7 @@
         #output, #edit_ceylon {
             border-width: 1px;
             border-style: solid;
-            width: 600px;
+            width: 620px;
             height: 220px;
             padding: 2px;
             overflow: auto;

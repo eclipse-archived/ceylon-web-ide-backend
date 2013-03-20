@@ -31,8 +31,8 @@
         #output, #edit_ceylon {
             border-width: 1px;
             border-style: solid;
-            width: 600px;
-            height: 180px;
+            width: 620px;
+            height: 220px;
             padding: 2px;
             overflow: auto;
             background: white;
