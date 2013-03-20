@@ -34,6 +34,7 @@ require(["ceylon/language/0.5/ceylon.language-0.5", 'jquery'],
             editor = CodeMirror.fromTextArea(donde,{
                 mode:'ceylon',
                 lineNumbers:true,
+                indentUnit: 4,
                 extraKeys:{
                     "Ctrl-D":function(cm){ getHoverDocs(cm); },
                     "Cmd-D":function(cm){ getHoverDocs(cm); },
