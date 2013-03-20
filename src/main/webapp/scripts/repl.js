@@ -149,7 +149,7 @@ function showErrors(errors, docs, refs) {
         var err = errors[i];
         if (err.from.line > 1) {
             var errmsg = escapeHtml(err.msg);
-            printError("--- " + err.msg + " (at " + (err.from.line-1) + ":" + err.from.ch + ")");
+            printError((err.from.line-1) + ":" + err.from.ch + " - " + err.msg);
             //This is to add a marker in the gutter
             editor.setMarker(err.from.line-2, '<img title="'+errmsg+'" src="images/error.gif"/>&nbsp;<b>%N%</b>');
             //This is to modify the style (underline or whatever)
