@@ -32,7 +32,7 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
     };
   }();
 
-  var isOperatorChar = /[+\-*&%=\^\~<>!?|]/;
+  var isOperatorChar = /[+\-*&%=\^\~<>!?|:]/;
 
   function chain(stream, state, f) {
     state.tokenize = f;
