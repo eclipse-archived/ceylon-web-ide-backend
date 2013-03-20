@@ -4,6 +4,10 @@
   /* Set height, width, borders, and global font properties here */
   font-family: monospace;
   height: 300px;
+  border:1px solid black; 
+  width:600px; 
+  height:200px; 
+  background:white;
 }
 .CodeMirror-scroll {
   /* Set scrolling behaviour here */
@@ -17,6 +21,9 @@
 }
 .CodeMirror pre {
   padding: 0 4px; /* Horizontal padding of content */
+  margin-left:0;
+  padding-left:0;
+  border-left:0px;
 }
 
 .CodeMirror-scrollbar-filler {
@@ -27,7 +34,7 @@
 
 .CodeMirror-gutters {
   border-right: 1px solid #ddd;
-  background-color: #f7f7f7;
+  background-color: bisque;
 }
 .CodeMirror-linenumbers {}
 .CodeMirror-linenumber {
@@ -36,6 +43,9 @@
   text-align: right;
   color: #999;
 }
+
+.CodeMirror-gutter { cursor:pointer; }
+.CodeMirror-error-gutter { width:10px; cursor:pointer; }
 
 /* CURSOR */
 
