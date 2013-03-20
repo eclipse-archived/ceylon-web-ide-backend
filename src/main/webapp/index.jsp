@@ -79,10 +79,8 @@
         <input type="text" id="shareurl" name="shareurl" value="" size="45" disabled="true">
         </div>
     </form>
-    <hr class="cantseeme">
     <pre id="result" class="cantseeme">
-    </pre>
-    
+    </pre>    
     <div id="output">
     </div>
     
@@ -114,10 +112,11 @@
     </ol>
 </div>
 <div class="point-light-end"/>
-    <br><br>
+    <div style="text-align:center;padding-top:50px;">
     <a href="https://twitter.com/ceylonlang" class="twitter-follow-button" data-show-count="false" data-size="large">Follow @ceylonlang</a>
 <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-    <br>
+    </div>
+    <div>
     <Google+ Badge -+->
     <link href="https://plus.google.com/102481741611133754149" rel="publisher" />
     <script type="text/javascript">
@@ -129,8 +128,8 @@
         s.parentNode.insertBefore(po, s);
         })();
     </script>
-
     <g:plus href="https://plus.google.com/102481741611133754149" width="300" height="131" theme="light"></g:plus>
+    </div>
 
 </div>
 
