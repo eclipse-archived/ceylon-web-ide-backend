@@ -60,10 +60,12 @@
 
 /* DEFAULT THEME */
 
-.cm-s-default .cm-keyword {color: #708;}
+.cm-s-default .cm-keyword {color: darkmagenta; font-weight: bold;}
 .cm-s-default .cm-atom {color: #219;}
 .cm-s-default .cm-number {color: blue;}
 .cm-s-default .cm-def {color: #00f;}
+.cm-s-default .cm-classname {color: darkblue;}
+.cm-s-default .cm-annotation {color: darkcyan;}
 .cm-s-default .cm-variable {color: black;}
 .cm-s-default .cm-variable-2 {color: #05a;}
 .cm-s-default .cm-variable-3 {color: #085;}
