@@ -103,38 +103,26 @@
 </div>
 
 <div id="sidebar">
-<div id="sidebar-block">
+<div class="point-light-top"/>
+<div class="sidebar-block">
     <h3 id="news">Try out a sample:</h3>
-	<hr>
     <div class="news_entry"><a href="#" onClick="return editCode('hello_world')">Hello World</a></div>
-	<hr>
     <div class="news_entry"><a href="#" onClick="return editCode('basics')">Basics</a></div>
-	<hr>
     <div class="news_entry"><a href="#" onClick="return editCode('null_and_union')">Null values and union types</a></div>
-	<hr>
     <div class="news_entry"><a href="#" onClick="return editCode('classes_and_functions')">Classes and functions 1</a></div>
-	<hr>
     <div class="news_entry"><a href="#" onClick="return editCode('interfaces')">Interfaces and mixin inheritance</a></div>
-    <hr>
     <div class="news_entry"><a href="#" onClick="return editCode('classes_and_functions2')">Classes and functions 2</a></div>
-    <hr>
     <div class="news_entry"><a href="#" onClick="return editCode('collections')">Collections and sequence comprehensions</a></div>
-    <hr>
     <div class="news_entry"><a href="#" onClick="return editCode('named_arguments')">Named argument syntax</a></div>
-    <hr>
     <div class="news_entry"><a href="#" onClick="return editCode('generics')">Type parameters</a></div>
-    <hr>
     <div class="news_entry"><a href="#" onClick="return editCode('switch1')">Enumerations and the switch statement</a></div>
-    <hr>
     <div class="news_entry"><a href="#" onClick="return editCode('interop')">Interoperability</a></div>
-    <hr>
     <div class="news_entry"><a href="#" onClick="return editCode('request')">Interoperability 2</a></div>
-    <hr>
     <div class="news_entry"><a href="#" onClick="return editCode('operators')">Operator polymorphism</a></div>
-    <hr>
     <div class="news_entry"><a href="#" onClick="return editCode('game_of_life')">Game of Life</a></div>
-    <hr>
 
+</div>
+<div class="point-light-end"/>
     <br><br>
     <a href="https://twitter.com/ceylonlang" class="twitter-follow-button" data-show-count="false" data-size="large">Follow @ceylonlang</a>
 <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
@@ -153,7 +141,6 @@
 
     <g:plus href="https://plus.google.com/102481741611133754149" width="300" height="131" theme="light"></g:plus>
 
-</div>
 </div>
 
 </div>
