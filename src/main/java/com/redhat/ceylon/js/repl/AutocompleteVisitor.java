@@ -199,7 +199,7 @@ public class AutocompleteVisitor extends Visitor {
             display.append(TYPE).append(c.getName()).append(END);
             addParameterLists(display, insert, c.getParameterLists());
             move = c.getName().length() + 1;
-        }else if(declaration instanceof Value || declaration instanceof Getter || declaration instanceof Setter){
+        }else if(declaration instanceof Value || declaration instanceof Setter){
             insert.append(declaration.getName());
             display.append(declaration.getName());
             display.append(" : ").append(type(((TypedDeclaration)declaration).getType()));
@@ -282,4 +282,12 @@ public class AutocompleteVisitor extends Visitor {
             return true;
         }
     }
+
+    public static final AutocompleteUnitValidator SCRIPT_VAL = new AutocompleteUnitValidator() {
+        @Override
+        public boolean processUnit(PhasedUnit pu) {
+            return "SCRIPT.ceylon".equals(pu.getUnitFile().getName());
+        }
+    };
+
 }
