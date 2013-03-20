@@ -49,6 +49,10 @@
     <script type="text/javascript" src="scripts/codemirror.js" charset="utf-8"></script>
     <script type="text/javascript" src="scripts/autocomplete.js" charset="utf-8"></script>
     <script type="text/javascript" src="scripts/mode/ceylon/ceylon.js" charset="utf-8"></script>
+    <script type="text/javascript" src="scripts/acive-line.js" charset="utf-8"></script>
+    <script type="text/javascript" src="scripts/closebrackets.js" charset="utf-8"></script>
+    <script type="text/javascript" src="scripts/match-highlighter.js" charset="utf-8"></script>
+    <script type="text/javascript" src="scripts/matchbrackets.js" charset="utf-8"></script>
     <link rel="stylesheet" href="scripts/codemirror.css" />
     <style type="text/css">
         .CodeMirror {border: 1px solid black;width:600px;height:200px;background:#ffffff;}
