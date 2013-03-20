@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.redhat.ceylon.js.util.ServletUtils;
+
 /** This servlet receives code, stores it under a key and returns that key.
  * 
  * @author Enrique Zamudio
@@ -26,7 +28,6 @@ public class CodeSharingServlet extends HttpServlet {
             throws ServletException, IOException {
         String code = req.getParameter("ceylon");
         String text = "";
-        resp.setContentType("text/plain");
         if (code != null) {
             code = code.trim();
             //check it's not ridiculously big to avoid DoS
@@ -45,9 +46,7 @@ public class CodeSharingServlet extends HttpServlet {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             text = "No code received.";
         }
-        resp.setContentLength(text.length());
-        resp.getWriter().write(text);
-        resp.getWriter().flush();
+        ServletUtils.sendStringResponse(text, "text/plain", resp);
     }
     
     // Try to retrieve to visitor's IP address
@@ -77,10 +76,7 @@ public class CodeSharingServlet extends HttpServlet {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             code = "No code snippet was found under the specified key.";
         }
-        resp.setContentType("text/plain");
-        resp.setContentLength(code.length());
-        resp.getWriter().write(code);
-        resp.getWriter().flush();
+        ServletUtils.sendStringResponse(code, "text/plain", resp);
     }
 
 }

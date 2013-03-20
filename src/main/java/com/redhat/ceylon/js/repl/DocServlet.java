@@ -77,9 +77,7 @@ public class DocServlet extends HttpServlet {
             resp.setStatus(500);
             JSONArray error = new JSONArray();
             error.add(String.format("Service error: %s", ex.getMessage()));
-            final String enc = error.toJSONString();
-            resp.setContentLength(enc.length());
-            resp.getWriter().print(enc);
+            ServletUtils.sendResponse(error, resp);
         }
     }
 
@@ -153,9 +151,7 @@ public class DocServlet extends HttpServlet {
             response.setStatus(500);
             JSONArray sb = new JSONArray();
             sb.add(String.format("Service error: %s", ex.getMessage()));
-            final String enc = sb.toJSONString();
-            response.setContentLength(enc.length());
-            response.getWriter().print(enc);
+            ServletUtils.sendResponse(sb, response);
         }
     }
 

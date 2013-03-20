@@ -14,9 +14,9 @@ import net.minidev.json.JSONObject;
 import com.redhat.ceylon.compiler.js.DocVisitor;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
-import com.redhat.ceylon.js.repl.AutocompleteVisitor.AutocompleteUnitValidator;
 import com.redhat.ceylon.js.util.CompilerUtils;
 import com.redhat.ceylon.js.util.DocUtils;
+import com.redhat.ceylon.js.util.ServletUtils;
 
 @WebServlet("/assist")
 public class AutocompleteServlet extends HttpServlet {
@@ -59,25 +59,18 @@ public class AutocompleteServlet extends HttpServlet {
             final AutocompleteVisitor assistant = new AutocompleteVisitor(locRow, locCol, typeChecker);
             assistant.findNode(AutocompleteVisitor.SCRIPT_VAL);
             jsr.put("opts", assistant.getCompletions());
-            final String enc = jsr.toJSONString();
-            resp.setContentLength(enc.length());
-            resp.getWriter().print(enc);
+            ServletUtils.sendResponse(jsr, resp);
         } catch (NumberFormatException ex) {
             resp.setStatus(500);
             final JSONArray errs = new JSONArray();
             errs.add("Current location wasn't provided.");
-            final String enc = errs.toJSONString();
-            resp.setContentLength(enc.length());
-            resp.getWriter().print(enc);
+            ServletUtils.sendResponse(errs, resp);
         } catch (Exception ex) {
             resp.setStatus(500);
             final JSONArray sb = new JSONArray();
             sb.add(String.format("Service error: %s", ex.getMessage()));
-            final String enc = sb.toJSONString();
-            resp.setContentLength(enc.length());
-            resp.getWriter().print(enc);
+            ServletUtils.sendResponse(sb, resp);
         }
-        resp.getWriter().flush();
     }
 
 }

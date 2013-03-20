@@ -105,11 +105,8 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             ex.printStackTrace(System.out);
             JSONArray errs = new JSONArray();
             errs.add(String.format("Service error: %s", msg));
-            final String enc = errs.toJSONString();
-            response.setContentLength(enc.length());
-            response.getWriter().print(enc);
+            ServletUtils.sendResponse(errs, response);
 	    }
-        response.getWriter().flush();
 	}
 
     private JSONObject encodeError(Message err) {
