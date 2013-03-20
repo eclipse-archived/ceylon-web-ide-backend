@@ -55,9 +55,9 @@
     <script type="text/javascript" src="scripts/matchbrackets.js" charset="utf-8"></script>
     <link rel="stylesheet" href="scripts/codemirror.css" />
     <style type="text/css">
-        .CodeMirror {border: 1px solid black;width:600px;height:200px;background:#ffffff;}
-        .CodeMirror-gutter {cursor: pointer;}
-        .CodeMirror-error-gutter { width: 10px; cursor:pointer; }
+        .CodeMirror { border:1px solid black; width:600px; height:200px; background:white; }
+        .CodeMirror-gutter { cursor:pointer; }
+        .CodeMirror-error-gutter { width:10px; cursor:pointer; }
     </style>
     <script type="text/javascript" src="scripts/require-jquery.js" data-main="scripts/repl.js"></script>
     <link rel='stylesheet' type='text/css' href='autocomplete.css'/>
