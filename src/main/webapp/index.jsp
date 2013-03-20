@@ -9,8 +9,6 @@
         <link href='http://ceylon-lang.org/stylesheets/ie.css' media='screen, projection' rel='stylesheet' type='text/css' />
     <![endif]-->
     <style type="text/css">
-        #result {
-        }
         .cantseeme {
             <% if (request.getParameter("showcode") == null) { %>
             display: none;
@@ -38,37 +36,6 @@
         .jsc_error {
             color: red;
         }
-        /*.editerror {
-            background-image: url(images/underline.gif);
-            background-position: bottom;
-            background-repeat: repeat-x;
-        }
-        span.ceylondoc {
-            position: relative;
-        }
-        
-        span.ceylondoc a span {
-            display: none;
-        }
-        
-        span.ceylondoc a:hover {
-            font-size: 99%;
-            font-color: #000000;
-        }
-        
-        span.ceylondoc a:hover span { 
-            display: block; 
-            position: absolute; 
-            margin-top: 10px; 
-            margin-left: -10px; 
-            width: auto; padding: 5px; 
-            z-index: 100; 
-            color: #000000; 
-            background: #FFFFAA; 
-            font: 12px "Arial", sans-serif;
-            text-align: left; 
-            text-decoration: none;
-        }*/
         div.CodeMirror pre {
             margin-left:0;
             padding-left:0;
