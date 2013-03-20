@@ -79,7 +79,7 @@
 
     <h1 id="hdr_title">Ceylon Web Runner</h1>
     <form>
-        <p style="padding:0px;margin:0px;font-size:12px;">Autocompletion: <code>&#x2303;.</code> / <code>&#x2318;.</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Documentation: <code>&#x2303;D</code> / <code>&#x2318;D</code></p>
+        <p style="padding:0px;margin:0px;font-size:12px;">Autocompletion: <code>&#x2303;.</code> / <code>&#x2318;.</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Documentation: <code>&#x2303;D</code> / <code>&#x2318;D</code></p>
         <textarea id="edit_ceylon"></textarea>
         <div style="text-align:center">
         <input type="button" class="bubble-button" id="run_ceylon" name="run_ceylon" value="Run" onClick="run()">
@@ -106,21 +106,22 @@
 <div class="point-light-top"/>
 <div class="sidebar-block">
     <h3 id="news">Try out a sample:</h3>
-    <div class="news_entry"><a href="#" onClick="return editCode('hello_world')">Hello World</a></div>
-    <div class="news_entry"><a href="#" onClick="return editCode('basics')">Basics</a></div>
-    <div class="news_entry"><a href="#" onClick="return editCode('null_and_union')">Null values and union types</a></div>
-    <div class="news_entry"><a href="#" onClick="return editCode('classes_and_functions')">Classes and functions 1</a></div>
-    <div class="news_entry"><a href="#" onClick="return editCode('interfaces')">Interfaces and mixin inheritance</a></div>
-    <div class="news_entry"><a href="#" onClick="return editCode('classes_and_functions2')">Classes and functions 2</a></div>
-    <div class="news_entry"><a href="#" onClick="return editCode('collections')">Collections and sequence comprehensions</a></div>
-    <div class="news_entry"><a href="#" onClick="return editCode('named_arguments')">Named argument syntax</a></div>
-    <div class="news_entry"><a href="#" onClick="return editCode('generics')">Type parameters</a></div>
-    <div class="news_entry"><a href="#" onClick="return editCode('switch1')">Enumerations and the switch statement</a></div>
-    <div class="news_entry"><a href="#" onClick="return editCode('interop')">Interoperability</a></div>
-    <div class="news_entry"><a href="#" onClick="return editCode('request')">Interoperability 2</a></div>
-    <div class="news_entry"><a href="#" onClick="return editCode('operators')">Operator polymorphism</a></div>
-    <div class="news_entry"><a href="#" onClick="return editCode('game_of_life')">Game of Life</a></div>
-
+    <ol>
+    <li class="news_entry"><a href="#" onClick="return editCode('hello_world')">Hello World</a></li>
+    <li class="news_entry"><a href="#" onClick="return editCode('basics')">Basics</a></li>
+    <li class="news_entry"><a href="#" onClick="return editCode('null_and_union')">Null values and union types</a></li>
+    <li class="news_entry"><a href="#" onClick="return editCode('classes_and_functions')">Classes and functions 1</a></li>
+    <li class="news_entry"><a href="#" onClick="return editCode('interfaces')">Interfaces and mixin inheritance</a></li>
+    <li class="news_entry"><a href="#" onClick="return editCode('classes_and_functions2')">Classes and functions 2</a></li>
+    <li class="news_entry"><a href="#" onClick="return editCode('collections')">Collections and sequence comprehensions</a></li>
+    <li class="news_entry"><a href="#" onClick="return editCode('named_arguments')">Named argument syntax</a></li>
+    <li class="news_entry"><a href="#" onClick="return editCode('generics')">Type parameters</a></li>
+    <li class="news_entry"><a href="#" onClick="return editCode('switch1')">Enumerations and the switch statement</a></li>
+    <li class="news_entry"><a href="#" onClick="return editCode('interop')">Interoperability</a></li>
+    <li class="news_entry"><a href="#" onClick="return editCode('request')">Interoperability 2</a></li>
+    <li class="news_entry"><a href="#" onClick="return editCode('operators')">Operator polymorphism</a></li>
+    <li class="news_entry"><a href="#" onClick="return editCode('game_of_life')">Game of Life</a></li>
+    </ol>
 </div>
 <div class="point-light-end"/>
     <br><br>
