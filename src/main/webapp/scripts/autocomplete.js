@@ -41,7 +41,7 @@
 
     // Build the select widget
     var complete = document.createElement("div");
-    complete.className = "CodeMirror-completions";
+    complete.className = "popupWithHelp infront";
     
     var input = document.createElement("input");
     complete.appendChild(input);
@@ -218,7 +218,7 @@
     // now do a hack to close the dialog on clicks that happen outside the completion
     // window
     function bodyClick(event){
-    	if(jQuery(event.target).closest(".CodeMirror-completions").size() == 0){
+    	if(jQuery(event.target).closest(".popupWithHelp").size() == 0){
     		close();
     	}
     }

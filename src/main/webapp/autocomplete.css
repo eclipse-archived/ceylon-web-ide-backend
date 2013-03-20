@@ -40,17 +40,20 @@
 .popup > .selected span {
     color: white;
 }
-.CodeMirror-completions {
-    overflow: hidden;
-    position: absolute;
-    width: 750px;
-    height: 200px;
+.infront {
     z-index: 200;
     -moz-box-shadow: 0 0 7px grey;
     -webkit-box-shadow: 0 0 7px grey;
     box-shadow: 0 0 7px grey;
 }
-.CodeMirror-completions > input {
+
+.popupWithHelp {
+    overflow: hidden;
+    position: absolute;
+    width: 750px;
+    height: 200px;
+}
+.popupWithHelp > input {
     position: absolute;
     width: 1em;
     height: 10px;

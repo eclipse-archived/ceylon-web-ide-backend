@@ -403,7 +403,7 @@ function getHoverDocs(cm) {
 
                 var pos = editor.cursorCoords();
                 var help = document.createElement("div");
-                help.className = "help";
+                help.className = "help infront";
                 help.innerHTML = json['doc'];
                 help.style.left = pos.x + "px";
                 help.style.top = pos.yBot + "px";
