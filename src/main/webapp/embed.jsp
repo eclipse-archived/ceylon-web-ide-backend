@@ -42,14 +42,14 @@
             font-family: Menlo, Monaco, Courier, monospace;
             font-size: 85%;
         }
-        /*.jsc_msg {
+        .jsc_msg {
             color: gray;
             font-size: small;
         }
         .jsc_error {
             color: red;
         }
-        .editerror {
+        /*.editerror {
             background-image: url(images/underline.gif);
             background-position: bottom;
             background-repeat: repeat-x;
