@@ -150,9 +150,12 @@ function showErrors(errors, docs, refs) {
         if (err.from.line > 1) {
             var errmsg = escapeHtml(err.msg);
             printError("--- " + err.msg + " (at " + (err.from.line-1) + ":" + err.from.ch + ")");
-            editor.setMarker(err.from.line-2, '<span class="ceylondoc"><a href="javascript:void(0);"><font color="#ff0000"><b>%N%</b></font><span>'+errmsg+'</span></a></span>');
-            var marker=editor.markText({line:err.from.line-2,ch:err.to.line.ch},{line:err.to.line-2,ch:err.to.ch+1},"editerror");
+            //This is to add a marker in the gutter
+            editor.setMarker(err.from.line-2, '<span class="ceylondoc"><a href="javascript:void(0);"><font color="#ff0000"><b>&#x2717;&nbsp;%N%</b></font><span>'+errmsg+'</span></a></span>');
+            //This is to modify the style (underline or whatever)
+            var marker=editor.markText({line:err.from.line-2,ch:err.from.ch},{line:err.to.line-2,ch:err.to.ch+1},"cm-error");
             markers.push(marker);
+            //And this is for the hover
             var estilo="ceylonerr_r"+err.from.line+"_c"+err.from.ch;
             marker=editor.markText({line:err.from.line-2,ch:err.from.ch},{line:err.to.line-2,ch:err.to.ch+1},estilo);
             markers.push(marker);
