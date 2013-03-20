@@ -49,7 +49,7 @@
     <script type="text/javascript" src="scripts/codemirror.js" charset="utf-8"></script>
     <script type="text/javascript" src="scripts/autocomplete.js" charset="utf-8"></script>
     <script type="text/javascript" src="scripts/mode/ceylon/ceylon.js" charset="utf-8"></script>
-    <script type="text/javascript" src="scripts/acive-line.js" charset="utf-8"></script>
+    <script type="text/javascript" src="scripts/active-line.js" charset="utf-8"></script>
     <script type="text/javascript" src="scripts/closebrackets.js" charset="utf-8"></script>
     <script type="text/javascript" src="scripts/match-highlighter.js" charset="utf-8"></script>
     <script type="text/javascript" src="scripts/matchbrackets.js" charset="utf-8"></script>
