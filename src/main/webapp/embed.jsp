@@ -42,7 +42,7 @@
             font-family: Menlo, Monaco, Courier, monospace;
             font-size: 85%;
         }
-        .jsc_msg {
+        /*.jsc_msg {
             color: gray;
             font-size: small;
         }
@@ -79,7 +79,7 @@
             font: 12px "Arial", sans-serif;
             text-align: left; 
             text-decoration: none;
-        }
+        }*/
         div.CodeMirror pre {
             margin-left:0;
             padding-left:0;
