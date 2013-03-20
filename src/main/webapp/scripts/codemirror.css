@@ -24,9 +24,9 @@
 }
 
 div.CodeMirror pre {
-  margin-left:2px;
-  padding-left:0;
-  border-left:0px;
+  margin-left:0;
+  padding-left:4px;
+  border-left:0;
 }
 
 .CodeMirror-scrollbar-filler {
@@ -36,7 +36,7 @@ div.CodeMirror pre {
 /* GUTTER */
 
 .CodeMirror-gutters {
-  border-right: 1px solid #ddd;
+  border-right: 1px dotted #999;
   background-color: floralwhite;
 }
 .CodeMirror-linenumbers {}

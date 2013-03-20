@@ -82,10 +82,10 @@
     <hr class="cantseeme">
     <pre id="result" class="cantseeme">
     </pre>
-    <hr>
+    
     <div id="output">
     </div>
-    <hr>
+    
     <div>The <a href="http://github.com/ceylon/ceylon-web-ide-backend">Ceylon Web Runner</a>
     is powered by <a href="http://github.com/ceylon/ceylon-js">Ceylon JS</a> and 
     <a href="http://openshift.redhat.com">OpenShift</a>.</div>
