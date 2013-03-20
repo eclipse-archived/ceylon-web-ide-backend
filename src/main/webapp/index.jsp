@@ -24,7 +24,7 @@
             height: 220px;
             padding: 2px;
             overflow: auto;
-            background: #ffffff;
+            background: white;
             white-space: pre-wrap;
             font-family: Menlo, Monaco, Courier, monospace;
             font-size: 85%;

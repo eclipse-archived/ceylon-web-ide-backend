@@ -31,11 +31,11 @@
         #output, #edit_ceylon {
             border-width: 1px;
             border-style: solid;
-            width: 100%;
-            height: 220px;
+            width: 600px;
+            height: 180px;
             padding: 2px;
             overflow: auto;
-            background: #ffffff;
+            background: white;
             white-space: pre-wrap;
             font-family: Menlo, Monaco, Courier, monospace;
             font-size: 85%;
