@@ -21,7 +21,7 @@
     height: 200px;
     top: 0px;
     left: 400px;
-    background: #BBDDFF;
+    background: #D0E0FF;
     text-shadow: none;
     overflow: auto;
     color: black;
@@ -34,8 +34,18 @@
     -webkit-box-shadow: 0 0 7px grey;
     box-shadow: 0 0 7px grey;
 }
-.help p:first-child { margin-top:0px !important;}
-.help pre { border:none; } 
+.help p:first-child { 
+    margin-top:0px !important;
+}
+.help pre { 
+    border:none !important; 
+    font-size:100% !important; 
+    color:darkblue !important;
+}
+.help p code, .help ul code, .help ol code {
+    color: darkblue !important;
+}
+
 .popup > div {
     white-space: pre;
 }
