@@ -9,6 +9,7 @@ import java.util.Set;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
+import com.github.rjeschke.txtmark.Processor;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnits;
@@ -167,7 +168,7 @@ public class AutocompleteVisitor extends Visitor {
     private JSONObject translateCompletion(DeclarationWithProximity value) {
         JSONObject completion = new JSONObject();
         translateCompletion(completion, value.getDeclaration());
-        completion.put("help", getDoc(value.getDeclaration()));
+        completion.put("help", Processor.process(getDoc(value.getDeclaration()), DocServlet.MD_CONF));
         return completion;
     }
 
