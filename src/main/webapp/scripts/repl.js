@@ -259,6 +259,8 @@ function afterTranslate() {
         if (!clprinted) {
             printSystem("Script ended with no output");
         }
+        var _out = jquery("#output");
+        _out.scrollTop(_out[0].scrollHeight);
     }
 }
 
