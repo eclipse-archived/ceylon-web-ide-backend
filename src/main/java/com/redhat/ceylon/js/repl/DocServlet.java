@@ -30,7 +30,7 @@ import com.redhat.ceylon.js.util.ServletUtils;
 @WebServlet("/hoverdoc")
 public class DocServlet extends HttpServlet {
 
-    private static final Configuration MD_CONF = Configuration.builder().forceExtentedProfile().setEncoding("UTF-8").build();
+    static final Configuration MD_CONF = Configuration.builder().forceExtentedProfile().setEncoding("UTF-8").build();
 
     private static final long serialVersionUID = 1L;
     //Here we cache the code for the examples, so that it's only compiled the first time someone asks for it.
