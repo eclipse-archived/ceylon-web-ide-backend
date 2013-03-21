@@ -68,8 +68,4 @@
 }
 .popupWithHelp > input {
     position: absolute;
-    width: 1em;
-    height: 10px;
-    left: -2em;
-    visibility:hidden;
 }
