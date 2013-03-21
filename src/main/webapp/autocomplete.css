@@ -35,7 +35,7 @@
     box-shadow: 0 0 7px grey;
 }
 .help p:first-child { margin-top:0px !important;}
-
+.help .syntaxhighlighter .lines { border:none; } 
 .popup > div {
     white-space: pre;
 }
