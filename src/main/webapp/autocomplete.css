@@ -34,7 +34,7 @@
     -webkit-box-shadow: 0 0 7px grey;
     box-shadow: 0 0 7px grey;
 }
-.help p { margin-top:0px !important;}
+.help p:first-child { margin-top:0px !important;}
 
 .popup > div {
     white-space: pre;
