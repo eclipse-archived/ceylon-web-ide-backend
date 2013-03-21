@@ -1,8 +1,8 @@
 // Game of Life 2.4
 
-value pwidth = 600;   // Width of drawing area in pixels
+value pwidth = 620;   // Width of drawing area in pixels
 value pheight = 300;  // Height of drawing area in pixels
-value gwidth = 120;   // Number of cells horizontally and vertically
+value gwidth = 124;   // Number of cells horizontally and vertically
 value gheight = 60;   // Number of cells horizontally and vertically
 
 abstract class State() of alive | resurrected | moribund | dead {}
