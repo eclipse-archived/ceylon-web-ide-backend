@@ -18,11 +18,10 @@
             display: none;
         }
         #output, #edit_ceylon {
-            border-width: 1px;
-            border-style: solid;
+            border: 1px solid black;
             width: 620px;
             height: 220px;
-            padding: 2px;
+            padding-left: 4px;
             overflow: auto;
             background: white;
             white-space: pre-wrap;
