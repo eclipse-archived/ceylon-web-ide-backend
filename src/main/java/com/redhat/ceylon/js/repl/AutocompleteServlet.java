@@ -15,7 +15,6 @@ import com.redhat.ceylon.compiler.js.DocVisitor;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
 import com.redhat.ceylon.js.util.CompilerUtils;
-import com.redhat.ceylon.js.util.DocUtils;
 import com.redhat.ceylon.js.util.ServletUtils;
 
 @WebServlet("/assist")
@@ -52,8 +51,6 @@ public class AutocompleteServlet extends HttpServlet {
                 pu.getCompilationUnit().visit(doccer);
             }
             final JSONObject jsr = new JSONObject();
-            jsr.put("code_docs", doccer.getDocs());
-            jsr.put("code_refs", DocUtils.referenceMapToList(doccer.getLocations()));
             //Now get the suggestions for node at the specified location
             //So of course first we have to find said node
             final AutocompleteVisitor assistant = new AutocompleteVisitor(locRow, locCol, typeChecker);
