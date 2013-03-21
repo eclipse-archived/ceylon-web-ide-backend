@@ -39,7 +39,7 @@ require(["ceylon/language/0.5/ceylon.language-0.5", 'jquery'],
                 matchBrackets:true,
                 styleActiveLine:true,
                 autoCloseBrackets:true,
-                highlightSelectionMatches:true,
+                //highlightSelectionMatches:true,
                 extraKeys:{
                     "Ctrl-D":function(cm){ fetchDoc(cm); },
                     "Cmd-D":function(cm){ fetchDoc(cm); },
