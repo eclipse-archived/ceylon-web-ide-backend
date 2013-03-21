@@ -11,6 +11,9 @@
     font-family: Menlo, Monaco, Courier, monospace;
     padding-left:2px;
     font-size: 85%;
+    -moz-box-shadow: 0 0 7px grey;
+    -webkit-box-shadow: 0 0 7px grey;
+    box-shadow: 0 0 7px grey;
 }
 
 .help {
@@ -26,7 +29,10 @@
     font-family: Arial, Helvetica, sans-serif;
     font-size: 12px;
     padding-left: 2px;
-    resize:vertical;
+    resize:both;
+    -moz-box-shadow: 0 0 7px grey;
+    -webkit-box-shadow: 0 0 7px grey;
+    box-shadow: 0 0 7px grey;
 }
 .help p { margin-top:0px !important;}
 
@@ -42,9 +48,6 @@
 }
 .infront {
     z-index: 200;
-    -moz-box-shadow: 0 0 7px grey;
-    -webkit-box-shadow: 0 0 7px grey;
-    box-shadow: 0 0 7px grey;
 }
 
 .popupWithHelp {
@@ -58,4 +61,5 @@
     width: 1em;
     height: 10px;
     left: -2em;
+    visibility:hidden;
 }
