@@ -78,7 +78,7 @@
 
     <form>
         <p style="padding:0px;margin:0px;font-size:12px;width:620px">
-        <span>Autocompletion: <code>&#x2303;.</code> / <code>&#x2318;.</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Documentation: <code>&#x2303;D</code> / <code>&#x2318;D</code></span>
+        <span>Autocompletion: <code>Ctrl-.</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Documentation: <code>Ctrl-D</code></span>
         <span style="float:right;"><a href="http://try.ceylon-lang.org" onclick="parent.location='http://try.ceylon-lang.org'">Try Ceylon Web Runner</a></span></p>
         <textarea id="edit_ceylon"></textarea>
         <div style="text-align:center; padding-top:5px; padding-bottom:5px;">

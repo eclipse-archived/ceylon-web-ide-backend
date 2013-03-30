@@ -68,7 +68,7 @@
 
     <h1 id="hdr_title">Ceylon Web Runner</h1>
     <form>
-        <p style="padding:0px;margin:0px;font-size:12px;">Autocompletion: <code>&#x2303;.</code> / <code>&#x2318;.</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Documentation: <code>&#x2303;D</code> / <code>&#x2318;D</code></p>
+        <span>Autocompletion: <code>Ctrl-.</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Documentation: <code>Ctrl-D</code></span>
         <textarea id="edit_ceylon"></textarea>
         <div style="text-align:center; padding-top:5px; padding-bottom:5px;">
         <input type="button" class="bubble-button" id="run_ceylon" name="run_ceylon" value="Run" onClick="run()">
