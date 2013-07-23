@@ -22,5 +22,6 @@
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/com.redhat.ceylon.module-resolver-0.5.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/com.redhat.ceylon.typechecker-0.5.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/com.redhat.ceylon.common-0.5.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/txtmark-0.8-c0dcd373ce.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
