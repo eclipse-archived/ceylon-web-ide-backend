@@ -2,7 +2,7 @@ apply plugin:'war'
 version=1.0
 ext.projectName='repl'
 defaultTasks 'war'
-ext.ceylonVersion='0.5'
+ext.ceylonVersion='0.6'
 ext.ceylonDistRepo='../ceylon-dist/dist/repo'
 
 repositories {
@@ -17,7 +17,7 @@ dependencies {
 	providedCompile 'mongo:mongo:2.7.3'
 	providedCompile 'github:txtmark:0.8:c0dcd373ce'
 	providedCompile 'org.jboss.spec:jboss-javaee-6.0:1.0.0.Final'
-	testCompile 'junit:junit:4.10', "ceylon:com.redhat.ceylon.common:${ceylonVersion}"
+	testCompile 'junit:junit:4.+', "ceylon:com.redhat.ceylon.common:${ceylonVersion}"
 }
 
 task copylangmod(type:Copy) {
@@ -53,5 +53,5 @@ task copylibs(type:Copy, dependsOn:[copyJsCompiler,copyCommon,copyTypechecker,co
 war.baseName='repl'
 //tasks.compileJava.dependsOn(copylibs)
 task wrapper(type: Wrapper) {
-    gradleVersion = '1.4'
+    gradleVersion = '1.7'
 }

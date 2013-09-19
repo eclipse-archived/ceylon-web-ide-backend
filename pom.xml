@@ -38,26 +38,26 @@
     <dependency>
       <groupId>ceylon</groupId>
       <artifactId>module-resolver</artifactId>
-      <version>0.5</version>
+      <version>0.6</version>
       <type>jar</type>
       <scope>system</scope>
-      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.module-resolver-0.5.jar</systemPath>
+      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.module-resolver-0.6.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>ceylon</groupId>
       <artifactId>typechecker</artifactId>
-      <version>0.5</version>
+      <version>0.6</version>
       <type>jar</type>
       <scope>system</scope>
-      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.typechecker-0.5.jar</systemPath>
+      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.typechecker-0.6.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>ceylon</groupId>
       <artifactId>jscompiler</artifactId>
-      <version>0.5</version>
+      <version>0.6</version>
       <type>jar</type>
       <scope>system</scope>
-      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.compiler.js-0.5.jar</systemPath>
+      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.compiler.js-0.6.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>org.mongodb</groupId>
