@@ -18,6 +18,7 @@ import net.minidev.json.JSONObject;
 
 import com.redhat.ceylon.compiler.Options;
 import com.redhat.ceylon.compiler.js.JsCompiler;
+import com.redhat.ceylon.compiler.js.JsOutput;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.analyzer.UsageWarning;
 import com.redhat.ceylon.compiler.typechecker.model.Module;
@@ -58,10 +59,11 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             
             //Run the compiler, if typechecker returns no errors.
             final CharArrayWriter out = new CharArrayWriter(script.length()*2);
+            out.write("var exports={};");
             JsCompiler compiler = new JsCompiler(typeChecker, opts) {
                 //Override the inner output class to use the in-memory writer
-                class JsMemoryOutput extends JsCompiler.JsOutput {
-                    JsMemoryOutput(Module m) throws IOException { super(m); }
+                class JsMemoryOutput extends JsOutput {
+                    JsMemoryOutput(Module m) throws IOException { super(m, "UTF-8"); }
                     @Override protected Writer getWriter() { return out; }
                 }
                 @Override
