@@ -12,11 +12,11 @@ object moribund extends State() {}
 object dead extends State() {}
 
 class Cell(x, y) {
-    doc "The x position of the Cell inside the Grid"
+    "The x position of the Cell inside the Grid"
     shared Integer x;
-    doc "The y position of the Cell inside the Grid."
+    "The y position of the Cell inside the Grid."
     shared Integer y;
-    doc "The current state of the Cell"
+    "The current state of the Cell"
     shared variable State state = dead;
 
     // All the neighbouring cells
@@ -108,9 +108,9 @@ class Cell(x, y) {
 }
 
 class Grid(width, height) {
-    doc "The number of columns of the Grid"
+    "The number of columns of the Grid"
     shared Integer width;
-    doc "The number of rows of the Grid"
+    "The number of rows of the Grid"
     shared Integer height;
     
     // The list of alive cells
@@ -180,7 +180,7 @@ class Grid(width, height) {
             c.kill();
         }
         // Set the global list of alive cells
-        _living = join(alives, resurrections);
+        _living = concatenate(alives, resurrections);
         
         return [resurrections, moribunds];
     }
@@ -255,9 +255,9 @@ void draw() {
         prevDead = dead.size;
     }
     dynamic {
-        value canvas = document.getElementById("lifegrid");
+        dynamic canvas = document.getElementById("lifegrid");
         if (exists canvas) {
-            value ctx = canvas.getContext("2d");
+            dynamic ctx = canvas.getContext("2d");
             
             void drawCell(Cell c) {
                 if (c.state == alive) {
@@ -283,19 +283,19 @@ void draw() {
 
 dynamic {
     if (!document.getElementById("lifegrid") exists) {
-        value canvas = document.createElement("canvas");
+        dynamic canvas = document.createElement("canvas");
         canvas.setAttribute("id", "lifegrid");
         canvas.setAttribute("width", pwidth);
         canvas.setAttribute("height", pheight);
-        value corePage = document.getElementById("core-page");
+        dynamic corePage = document.getElementById("core-page");
         corePage.insertBefore(canvas, corePage.childNodes[3]);
-        value ctx = canvas.getContext("2d");
+        dynamic ctx = canvas.getContext("2d");
         ctx.fillStyle = "#FFFFFF";
         ctx.fillRect(0, 0, pwidth, pheight);
     }
 
     setOnStop(void() {
-        value canvas = document.getElementById("lifegrid");
+        dynamic canvas = document.getElementById("lifegrid");
         if (exists canvas) {
             canvas.parentNode.removeChild(canvas);
         }

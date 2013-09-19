@@ -1,7 +1,7 @@
-doc "This interface represents a customer of the shop."
+"This interface represents a customer of the shop."
 interface Customer {
  
-    doc "The name of the customer."
+    "The name of the customer."
     shared formal String name;
  
     // Interfaces may define concrete implementations of methods
@@ -26,7 +26,7 @@ print("Customer: ``batman.description``");
 // Interfaces also can satisfy one or more parent interfaces.
 interface RegisteredCustomer satisfies Customer {
  
-    doc "The unique customer ID"
+    "The unique customer ID"
     shared formal Integer id;
  
     // Override the inherited default implementation.
@@ -37,14 +37,14 @@ interface RegisteredCustomer satisfies Customer {
 // A second specialization of the Customer interface
 interface CartOwner satisfies Customer {
  
-    doc "Number of items in the shopping cart"
+    "Number of items in the shopping cart"
     shared formal Integer numberOfItems;
  
     // Again, we override the inherited implementation
     shared actual default String description
             => "'``name``' (``numberOfItems`` items)";
  
-    doc "The customer buys the items in the cart."
+    "The customer buys the items in the cart."
     shared default void checkOut() {
        print("'``name``' buys ``numberOfItems`` items.");
     }

@@ -3,7 +3,7 @@
 // on the server and displays it in the console
 dynamic {
   print("Sending request...");
-  value req = XMLHttpRequest();      
+  dynamic req = XMLHttpRequest();      
   req.onreadystatechange = void() {
     if (req.readyState==4) {
       print(req.status==200

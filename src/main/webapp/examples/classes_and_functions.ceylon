@@ -28,7 +28,7 @@ class SimpleProduct(String name, Float price) {
     // visible, otherwise they are private to the class.
     shared Boolean inStock() => quantity > 0;
 
-    doc "Determines if the product is free of charge"
+    "Determines if the product is free of charge"
     shared Boolean isFree() {
        // class parameters are visible everywhere inside the body
        return price == 0.0;
@@ -40,8 +40,8 @@ print("free: ``trompon.isFree()``");
 
 // Let's improve this with some nice Ceylon features!
 
-doc "Abstract base class for products"
-by "superuser"
+"Abstract base class for products"
+by("superuser")
 abstract class Product(name, price) {
  
     // We can turn parameters into attributes using the syntax
@@ -68,8 +68,8 @@ abstract class Product(name, price) {
     //or: shared default Boolean inStock => quantity > 0;
 }
  
-doc "Concrete implementation of `Product`"
-see (Product)
+"Concrete implementation of `Product`"
+see (`class Product`)
 class ProductInDatabase(String name, Float price)
             extends Product(name, price) {
               

@@ -3,8 +3,8 @@
 Integer i = 3;
 String s = i.string;
 
-doc "Declarations can be documented using the `doc` annotation.
-     Note that string literals can span several lines."
+"Declarations can be documented using the `doc` annotation.
+ Note that string literals can span several lines."
 Boolean b = (i == 3);
 
 // An attribute annotated "variable" can be re-assigned after it
