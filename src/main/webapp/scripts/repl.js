@@ -12,7 +12,7 @@ var jquery;
 var editor;
 var clprinted;
 
-require(["ceylon/language/0.6/ceylon.language-0.6", 'jquery'],
+require(["ceylon/language/0.6.1/ceylon.language-0.6.1", 'jquery'],
     function(clang, $) {
         jquery=$;
         $(document).ready(function() {
