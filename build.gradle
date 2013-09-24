@@ -2,7 +2,7 @@ apply plugin:'war'
 version=1.0
 ext.projectName='repl'
 defaultTasks 'war'
-ext.ceylonVersion='0.6'
+ext.ceylonVersion='0.6.1'
 ext.ceylonDistRepo='../ceylon-dist/dist/repo'
 
 repositories {
