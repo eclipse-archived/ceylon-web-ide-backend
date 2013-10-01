@@ -19,9 +19,9 @@
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/antlr-3.4.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/json-smart-1.1.1.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/txtmark-0.8-c0dcd373ce.jar"/>
-	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/com.redhat.ceylon.common-0.6.jar"/>
-	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/com.redhat.ceylon.compiler.js-0.6.jar"/>
-	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/com.redhat.ceylon.module-resolver-0.6.jar"/>
-	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/com.redhat.ceylon.typechecker-0.6.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/com.redhat.ceylon.common-0.6.1.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/com.redhat.ceylon.compiler.js-0.6.1.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/com.redhat.ceylon.module-resolver-0.6.1.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/com.redhat.ceylon.typechecker-0.6.1.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
