@@ -22,7 +22,7 @@ if (nonempty animals) {
     for (animal in animals.rest) {
         process.write(", ``animal``");
     }
-    process.write(process.newline);
+    process.write(operatingSystem.newline);
 }
 
 // A String is a sequence of characters:

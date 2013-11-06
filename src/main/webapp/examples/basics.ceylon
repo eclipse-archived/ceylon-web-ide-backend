@@ -16,7 +16,7 @@ f = 2.0^0.5; // exponentiation
 print("The square root of 2 is ``f``");
 
 // With the "value" keyword the type is inferred by the compiler.
-value t1 = process.milliseconds;
+value t1 = system.milliseconds;
 print(className(t1));
 
 // some control structures:
@@ -30,4 +30,4 @@ while (f < 1_000_000.0) {
         }
     }
 }
-print("f=``f`` (``process.milliseconds-t1``ms)");
+print("f=``f`` (``system.milliseconds-t1``ms)");
