@@ -3,8 +3,6 @@ package com.redhat.ceylon.js.repl;
 import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -35,8 +33,7 @@ import com.redhat.ceylon.js.util.ServletUtils;
 @WebServlet("/translate")
 public class CeylonToJSTranslationServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-    private final Options opts = Options.parse(new ArrayList<String>(Arrays.asList(
-            "-optimize", "-compact", "-src", ".", "-nomodule")));
+    private final Options opts = new Options().indent(false).comment(false).modulify(false).addSrc(".");
 
 	/** Compiles Ceylon code and returns the resulting Javascript, along with its hover help docs.
 	 * Expects the following keys:
