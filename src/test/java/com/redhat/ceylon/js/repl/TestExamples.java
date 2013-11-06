@@ -60,11 +60,8 @@ public class TestExamples {
             }
             fout.close();
         }
-        args.addAll(Arrays.asList("-src", tmpRoot.getAbsolutePath(),
-                "-optimize", "-src", "src/main/ceylon",
-                "-rep", "src/main/webapp/scripts/modules",
-                "-out", tmpout.getAbsolutePath()));
-        Options opts = Options.parse(args);
+        Options opts = new Options().outDir(tmpout.getAbsolutePath()).addSrc("src/main/ceylon")
+                .addSrc(tmpRoot.getAbsolutePath()).addRepo("src/main/webapp/scripts/modules");
         final RepositoryManager repoman = CeylonUtils.repoManager()
                 .systemRepo(opts.getSystemRepo())
                 .userRepos(opts.getRepos())
