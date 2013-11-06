@@ -22,6 +22,8 @@
             <fileset dir="${ceylon.repo.dir}">
                 <include name="ceylon/language/**/*.js" />
                 <include name="ceylon/language/**/*.js.sha1" />
+                <include name="ceylon/language/**/*.src" />
+                <include name="ceylon/language/**/*.src.sha1" />
                 <include name="com/redhat/ceylon/common/**/*.jar" />
                 <include name="com/redhat/ceylon/common/**/*.jar.sha1" />
                 <include name="com/redhat/ceylon/typechecker/**/*.jar" />
