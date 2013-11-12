@@ -12,13 +12,13 @@
     <property name="web.repo.dir" value="${web.inf.dir}/ceylon-repo/system" />
 
     <target name="update" description="Update the JARs and CARs needed for the Web IDE">
-        <copy todir="${web.modules.dir}">
+        <copy todir="${web.modules.dir}" overwrite="true">
             <fileset dir="${ceylon.repo.dir}">
                 <include name="ceylon/language/**/*.js" />
                 <include name="ceylon/language/**/*.js.sha1" />
             </fileset>
         </copy>
-        <copy todir="${web.repo.dir}">
+        <copy todir="${web.repo.dir}" overwrite="true">
             <fileset dir="${ceylon.repo.dir}">
                 <include name="ceylon/language/**/*.js" />
                 <include name="ceylon/language/**/*.js.sha1" />
@@ -34,7 +34,7 @@
                 <include name="com/redhat/ceylon/compiler/js/**/*.jar.sha1" />
             </fileset>
         </copy>
-        <copy todir="${web.lib.dir}">
+        <copy todir="${web.lib.dir}" overwrite="true">
             <fileset dir="${ceylon.repo.dir}/com/redhat/ceylon/common/${ceylon.version}">
                 <include name="*.jar" />
             </fileset>
