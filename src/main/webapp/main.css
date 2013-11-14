@@ -984,6 +984,15 @@ form.bp textarea {
   background-repeat: repeat-x;
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FF62C462', endColorstr='#FF51A351', GradientType=0);
 }
+#primary-content .bubble-button:disabled {
+  background-color: #7b7b7b;
+  background-image: -moz-linear-gradient(top, #828282, #717171);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#828282), to(#717171));
+  background-image: -webkit-linear-gradient(top, #828282, #717171);
+  background-image: -o-linear-gradient(top, #828282, #717171);
+  background-image: linear-gradient(to bottom, #828282, #717171);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FF828282', endColorstr='#FF717171', GradientType=0);
+}
 /* line 498 */
 #primary-content .bubble-button:hover {
   color: #aaddff;

@@ -38,8 +38,24 @@
         input.bubble-button {
             border-style:none;
         }
+		.spinner {
+		  display: inline-block;
+		  opacity: 0;
+		  width: 0;
+		
+		  -webkit-transition: opacity 0.25s, width 0.25s;
+		  -moz-transition: opacity 0.25s, width 0.25s;
+		  -o-transition: opacity 0.25s, width 0.25s;
+		  transition: opacity 0.25s, width 0.25s;
+		}
+		.has-spinner.active {
+		  cursor:progress;
+		}
+		.has-spinner.active .spinner {
+		  opacity: 1;
+		  width: auto; /* This doesn't work, just fix for unkown width elements */
+		}
     </style>
-    <script type="text/javascript" src="scripts/spin.js" charset="utf-8"></script>
     <script type="text/javascript" src="scripts/codemirror.js" charset="utf-8"></script>
     <script type="text/javascript" src="scripts/autocomplete.js" charset="utf-8"></script>
     <script type="text/javascript" src="scripts/mode/ceylon/ceylon.js" charset="utf-8"></script>
@@ -50,6 +66,7 @@
     <link rel="stylesheet" href="scripts/codemirror.css" />
     <script type="text/javascript" src="scripts/require-jquery.js" data-main="scripts/repl.js"></script>
     <link rel='stylesheet' type='text/css' href='autocomplete.css'/>
+    <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css">
 
 </head>
 <body class="bp">
@@ -58,7 +75,7 @@
 <div class="header-bar"><div id="header">
   <a id="header-logo" href="."><h1 id="ceylon">Ceylon</h1></a>
   <div id="header-tagline">
-	<p id="say_more_more_clearly">Say more, more clearly</p>
+    <p id="say_more_more_clearly">Say more, more clearly</p>
   </div>
 </div></div>
 
@@ -71,10 +88,10 @@
         <span>Autocompletion: <code>Ctrl-.</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Documentation: <code>Ctrl-D</code></span>
         <textarea id="edit_ceylon"></textarea>
         <div style="text-align:center; padding-top:5px; padding-bottom:5px;">
-        <input type="button" class="bubble-button" id="run_ceylon" name="run_ceylon" value="Run" onClick="run()">
-        <input type="button" class="bubble-button invis" id="stop_ceylon" name="stop_ceylon" value="Stop" onClick="stop()">
-        <input type="button" class="bubble-button" value="Clear Output" onClick="clearOutput()">
-        <input type="button" class="bubble-button" id="share_src" name="share_src" value="Share Code" onClick="shareSource()">
+        <button class="bubble-button has-spinner" id="run_ceylon" name="run_ceylon" onClick="run()"><span class="spinner"><i class="icon-spin icon-refresh"> </i></span>Run</button>
+        <button class="bubble-button invis" id="stop_ceylon" name="stop_ceylon" onClick="stop()">Stop</button>
+        <button class="bubble-button" onClick="clearOutput()">Clear Output</button>
+        <button class="bubble-button" id="share_src" name="share_src" onClick="shareSource()">Share Code</button>
         <input type="text" id="shareurl" name="shareurl" value="" size="45" disabled="true">
         </div>
     </form>

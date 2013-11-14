@@ -6,11 +6,10 @@ require.config({
     waitSeconds: 15
 });
 
-var spin;
-var waitSpin;
 var jquery;
 var editor;
 var clprinted;
+var spinCount = 0;
 
 require(["ceylon/language/1.0.0/ceylon.language-1.0.0", 'jquery'],
     function(clang, $) {
@@ -26,10 +25,7 @@ require(["ceylon/language/1.0.0/ceylon.language-1.0.0", 'jquery'],
                 printOutputLine(x.string);
             };
             console && console.log("ceylon.language.print() patched OK");
-            spin = Spinner({
-                lines:12, length:20, width:10, radius:25, color:'#000',
-                speed:1, trail:50, shadow:true, hwaccel:false
-            });
+            $('form').submit(false);
             var donde=document.getElementById('edit_ceylon');
             editor = CodeMirror.fromTextArea(donde,{
                 mode:'ceylon',
@@ -135,15 +131,22 @@ function shareSource() {
         data:{ceylon:editor.getValue()}
     });
 }
-//Starts the spinner at the center of the page.
+
 function startSpinner() {
-    waitSpin = spin.spin(document.getElementById('primary-content'));
+    var button = $('#run_ceylon');
+    button.attr('disabled','disabled');
+    button.addClass('active');
+    spinCount++;
 }
-//Hides the spinner that should be spinning at the center of the page.
+
 function stopSpinner() {
-    document.getElementById('run_ceylon').disabled=false;
-    waitSpin && waitSpin.stop();
-    editor.focus();
+    spinCount--;
+    if (spinCount == 0) {
+        var button = $('#run_ceylon');
+        button.removeAttr('disabled');
+        button.removeClass('active');
+        editor.focus();
+    }
 }
 
 var oldcode, transok;
