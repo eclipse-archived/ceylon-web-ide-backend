@@ -3,6 +3,7 @@ package com.redhat.ceylon.js.repl;
 import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Collection;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -54,31 +55,39 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
     	    TypeChecker typeChecker = CompilerUtils.getTypeChecker(request.getServletContext(), src);
             typeChecker.process();
             
-            //Run the compiler, if typechecker returns no errors.
             final CharArrayWriter out = new CharArrayWriter(script.length()*2);
             out.write("var exports={};");
-            JsCompiler compiler = new JsCompiler(typeChecker, opts) {
-                //Override the inner output class to use the in-memory writer
-                class JsMemoryOutput extends JsOutput {
-                    JsMemoryOutput(Module m) throws IOException { super(m, "UTF-8"); }
-                    @Override protected Writer getWriter() { return out; }
-                }
-                @Override
-                protected JsOutput newJsOutput(Module m) throws IOException {
-                    return new JsMemoryOutput(m);
-                }
-                //Override this to avoid generating artifacts
-                protected void finish() throws IOException {
-                    out.flush();
-                    out.close();
-                }
-            }.stopOnErrors(true);
-            //Don't rely on result flag, check errors instead
-            compiler.generate();
-            final JSONObject resp = new JSONObject();
-            //Put errors in this list
+            //Run the compiler, if typechecker returns no errors.
+            Collection<Message> messages = null;
+            if (typeChecker.getErrors() == 0) {
+                JsCompiler compiler = new JsCompiler(typeChecker, opts) {
+                    //Override the inner output class to use the in-memory writer
+                    class JsMemoryOutput extends JsOutput {
+                        JsMemoryOutput(Module m) throws IOException { super(m, "UTF-8"); }
+                        @Override protected Writer getWriter() { return out; }
+                    }
+                    @Override
+                    protected JsOutput newJsOutput(Module m) throws IOException {
+                        return new JsMemoryOutput(m);
+                    }
+                    //Override this to avoid generating artifacts
+                    protected void finish() throws IOException {
+                        out.flush();
+                        out.close();
+                    }
+                }.stopOnErrors(true);
+                //Don't rely on result flag, check errors instead
+                compiler.generate();
+                //Put errors in this list
+                messages = compiler.listErrors();
+            } else {
+                CollectErrorVisitor vis = new CollectErrorVisitor(typeChecker);
+                messages = vis.listErrors();
+            }
+            
+            // Collect any errors
             JSONArray errs = new JSONArray();
-            for (Message err : compiler.listErrors()) {
+            for (Message err : messages) {
                 if (!(err instanceof UsageWarning)) {
                     Map<String, Object> encoded = encodeError(err);
                     if (!errs.contains(encoded)) {
@@ -86,6 +95,8 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
                     }
                 }
             }
+            
+            final JSONObject resp = new JSONObject();
             if (errs.isEmpty()) {
                 resp.put("code", out.toString());
             } else {
