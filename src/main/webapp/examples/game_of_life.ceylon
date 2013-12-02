@@ -5,7 +5,7 @@ value pheight = 300;  // Height of drawing area in pixels
 value gwidth = 124;   // Number of cells horizontally and vertically
 value gheight = 60;   // Number of cells horizontally and vertically
 
-abstract class State() of alive | resurrected | moribund | dead {}
+abstract class State() {}
 object alive extends State() {}
 object resurrected extends State() {}
 object moribund extends State() {}
