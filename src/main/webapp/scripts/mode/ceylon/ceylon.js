@@ -100,6 +100,7 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
     }
     else if (ch == '/') {
       if (stream.eat('*')) {
+        state.commentLevel=1;
         return chain(stream, state, jsTokenComment);
       }
       else if (stream.eat('/')) {
@@ -192,8 +193,13 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
     var last, ch;
     while (ch = stream.next()) {
       if (ch == '/' && last == '*') {
-        state.tokenize = jsTokenBase;
-        break;
+        state.commentLevel--;
+        if (state.commentLevel<=0) {
+          state.tokenize = jsTokenBase;
+          break;
+        }
+      } else if (ch == '*' && last == '/') {
+        state.commentLevel++;
       }
       last = ch;
     }
