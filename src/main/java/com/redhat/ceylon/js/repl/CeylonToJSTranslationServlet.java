@@ -39,18 +39,20 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
 	/** Compiles Ceylon code and returns the resulting Javascript, along with its hover help docs.
 	 * Expects the following keys:
 	 * ceylon - The Ceylon code to compile
+	 * tc - Optional parameter. If specified, the value is ignored and only a typecheck is performed, no compilation.
+	 *
 	 * Returns a JSON object with the following keys:
-	 * code_docs - a list of the doc descriptions
-	 * code_refs - a list of maps, each map contains keys "ref" with the index of the doc in the code_docs list,
-	 *             "from" and "to" with the location of the token corresponding to that doc.
 	 * code - The javascript code compiled from the Ceylon code.
 	 * errors - A list of errors, each error is a map with the keys "msg", "code",
 	 *          "from" and optionally "to" (for the error location).
+	 *
+	 * If the tc option was specified, then only the errors key is returned.
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	    try {
     	    String script = request.getParameter("ceylon");
     	    final ScriptFile src = CompilerUtils.createScriptSource(script);
+    	    final boolean typecheckOnly = request.getParameter("tc") != null;
 
     	    TypeChecker typeChecker = CompilerUtils.getTypeChecker(request.getServletContext(), src);
             typeChecker.process();
@@ -59,7 +61,7 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             out.write("var exports={};");
             //Run the compiler, if typechecker returns no errors.
             Collection<Message> messages = null;
-            if (typeChecker.getErrors() == 0) {
+            if (typeChecker.getErrors() == 0 && !typecheckOnly) {
                 JsCompiler compiler = new JsCompiler(typeChecker, opts) {
                     //Override the inner output class to use the in-memory writer
                     class JsMemoryOutput extends JsOutput {
@@ -96,7 +98,7 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             }
             
             final JSONObject resp = new JSONObject();
-            if (errs.isEmpty()) {
+            if (errs.isEmpty() && !typecheckOnly) {
                 resp.put("code", out.toString());
             } else {
                 //Print out errors

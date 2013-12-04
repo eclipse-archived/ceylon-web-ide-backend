@@ -10,6 +10,15 @@ var jquery;
 var editor;
 var clprinted;
 var spinCount = 0;
+var live_tc={
+  status:0,
+  last:Date.now(),
+  clear:function clear() {
+    live_tc.status=1;
+    live_tc.last=Date.now();
+    live_tc.text=editor.getValue();
+  }
+};
 
 require(["ceylon/language/1.0.0/ceylon.language-1.0.0", 'jquery', 'jquery-ui-1.9.2'],
     function(clang, $, jqui) {
@@ -95,6 +104,30 @@ require(["ceylon/language/1.0.0/ceylon.language-1.0.0", 'jquery', 'jquery-ui-1.9
             	runCode(wrapCode('print("Ceylon ``language.version`` \\"``language.versionName``\\"");'));
                 editCode('hello_world');
             }
+            editor.on('change',function(){live_tc.last=Date.now();});
+            window.setInterval(function(){
+              if (live_tc.status==1 && editor.getValue()!=live_tc.text && Date.now()-live_tc.last>5000) {
+                console.log("typecheck muthafucka!");
+                live_tc.text=editor.getValue();
+                live_tc.last=Date.now();
+    $.ajax('translate', {
+        cache:false, type:'POST',
+        dataType:'json',
+        timeout:5000,
+        success:function(json, status, xhr) {
+            var errs = json['errors'];
+            if (errs && errs.length>0) {
+                showErrors(errs);
+            } else {
+                clearEditMarkers();
+            }
+        },
+        error:function() {},
+        contentType:'application/x-www-form-urlencoded; charset=UTF-8',
+        data:{tc:1,ceylon:wrapCode(live_tc.text)}
+    });
+              }
+            },1000);
         });
     }
 );
@@ -313,6 +346,7 @@ function editCode(key) {
     //Make sure we don't do anything until we have an editor
     if (!editor) return false;
     //Retrieve code
+    live_tc.status=2;
     jquery.ajax('hoverdoc?key='+key, {
         cache:true,
         dataType:'json',
@@ -324,9 +358,11 @@ function editCode(key) {
             clearEditMarkers();
             editor.setValue(json['src']);
             editor.focus();
+            live_tc.clear();
         },
         error:function(xhr, status, err) {
             alert("error retrieving '" + key + "'example: " + err?err:status);
+            live_tc.clear();
         }
     });
 }
@@ -412,6 +448,7 @@ function globalEval(src) {
 function fetchDoc(cm) {
     var code = getEditCode();
     var docHandler = function(json, status, xhr) {
+        live_tc.status=1;
         if (json && json['name']) {
             if (json['doc']) {
 
@@ -447,6 +484,7 @@ function fetchDoc(cm) {
     };
     document.getElementById('run_ceylon').disabled=true;
     var cursor = editor.getCursor();
+    live_tc.status=3;
     jquery.ajax('hoverdoc', {
         cache:false, type:'POST',
         dataType:'json',
@@ -457,6 +495,7 @@ function fetchDoc(cm) {
         error:function(xhr,status,err){
             transok=false;
             alert("An error occurred while retrieving documentation for your code: " + err?err:status);
+            live_tc.status=1;
         },
         contentType:'application/x-www-form-urlencoded; charset=UTF-8',
         data:{
