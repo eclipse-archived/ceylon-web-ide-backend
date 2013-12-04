@@ -18,15 +18,21 @@ public class CompilerUtils {
     public static final JsModuleManagerFactory MMF = new JsModuleManagerFactory("UTF-8");
     public static final ScriptFile MODULE_FILE = new ScriptFile("module.ceylon",
             "module web_ide_script \"1.0.0\" {}");
+    private static final List<String> extraUserRepos = new ArrayList<String>();
 
     private CompilerUtils() {
     }
 
     public static TypeChecker getTypeChecker(ServletContext ctx, ScriptFile src) {
-        //Create the repo manager with a link to our local repository
-        String repoPath = ctx.getRealPath("/WEB-INF/ceylon-repo/system");
-        List<String> extraUserRepos = new ArrayList<String>();
-        extraUserRepos.add(repoPath);
+        if (extraUserRepos.isEmpty()) {
+            synchronized(extraUserRepos) {
+                if (extraUserRepos.isEmpty()) {
+                    //Create the repo manager with a link to our local repository
+                    String repoPath = ctx.getRealPath("/WEB-INF/ceylon-repo/system");
+                    extraUserRepos.add(repoPath);
+                }
+            }
+        }
         RepositoryManager repositoryManager = CeylonUtils.repoManager()
                 .extraUserRepos(extraUserRepos )
                 .logger(new LeakingLogger())

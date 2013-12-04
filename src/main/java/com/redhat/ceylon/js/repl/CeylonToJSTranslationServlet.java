@@ -81,8 +81,7 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
                 //Put errors in this list
                 messages = compiler.listErrors();
             } else {
-                CollectErrorVisitor vis = new CollectErrorVisitor(typeChecker);
-                messages = vis.listErrors();
+                messages = new CollectErrorVisitor(typeChecker).listErrors();
             }
             
             // Collect any errors
@@ -103,8 +102,6 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
                 //Print out errors
                 resp.put("errors", errs);
             }
-            //final CharArrayWriter swriter = new CharArrayWriter(script.length()*2);
-            //json.encode(resp, swriter);
             ServletUtils.sendResponse(resp, response);
 	    } catch (Exception ex) {
             response.setStatus(500);
