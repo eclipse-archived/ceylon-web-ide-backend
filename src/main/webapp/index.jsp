@@ -19,14 +19,18 @@
         }
         #output, #edit_ceylon {
             border: 1px solid black;
-            width: 620px;
+            width:  620px;
             height: 220px;
             padding-left: 4px;
             overflow: auto;
             background: white;
             white-space: pre-wrap;
             font-family: Menlo, Monaco, Courier, monospace;
-            font-size: 85%;
+            font-size:   85%;
+            min-width: 290px;
+            max-width: 900px;
+            min-height: 58px;
+            max-height:800px;
         }
         .jsc_msg {
             color: gray;
@@ -66,6 +70,7 @@
     <link rel="stylesheet" href="scripts/codemirror.css" />
     <script type="text/javascript" src="scripts/require-jquery.js" data-main="scripts/repl.js"></script>
     <link rel='stylesheet' type='text/css' href='autocomplete.css'/>
+    <link rel='stylesheet' type='text/css' href='scripts/jquery-ui-1.9.2.custom.css'/>
     <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css">
 
 </head>
@@ -81,7 +86,7 @@
 
 <div id="primary-content">
 
-<div id="core-page">
+<div id="core-page" style="min-width:290px;max-width:900px;min-height:570px">
 
     <h1 id="hdr_title">Ceylon Web Runner</h1>
     <form>

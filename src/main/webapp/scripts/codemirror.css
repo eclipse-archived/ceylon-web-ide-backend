@@ -4,13 +4,19 @@
   /* Set height, width, borders, and global font properties here */
   font-family: monospace;
   border:1px solid black; 
-  width:620px; 
   height:220px; 
+  min-height:58px;
+  max-height:620px; 
+  width:620px;
+  min-width:290px;
+  max-width:900px;
   background:white;
+  overflow:auto;
 }
 .CodeMirror-scroll {
   /* Set scrolling behaviour here */
-  overflow: auto;
+  border:1px solid black; 
+  overflow:auto;
 }
 
 /* PADDING */

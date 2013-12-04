@@ -11,8 +11,8 @@ var editor;
 var clprinted;
 var spinCount = 0;
 
-require(["ceylon/language/1.0.0/ceylon.language-1.0.0", 'jquery'],
-    function(clang, $) {
+require(["ceylon/language/1.0.0/ceylon.language-1.0.0", 'jquery', 'jquery-ui-1.9.2'],
+    function(clang, $, jqui) {
         jquery=$;
         $(document).ready(function() {
             console && console.log("Ceylon language module loaded OK");
@@ -45,6 +45,25 @@ require(["ceylon/language/1.0.0/ceylon.language-1.0.0", 'jquery'],
                     "Cmd-.":function(){complete(editor);}
                 }
             });
+
+    $(".CodeMirror").resizable({
+      stop: function() { editor.refresh(); },
+      resize: function() {
+        $(".CodeMirror-scroll").height($(this).height());
+        $(".CodeMirror-scroll").width($(this).width());
+        $('#output').width($(this).width());
+        $('#core-page').width($(this).width());
+        editor.refresh();
+      }
+    });
+    $('#output').resizable({
+      stop: function() { editor.refresh(); },
+      resize:function(){
+        $(".CodeMirror-scroll").width($(this).width());
+        editor.refresh();
+      }
+    });
+
             $('#shareurl').focus(function(){ jquery(this).select(); });
             $('#shareurl').hide();
             var key = location.href.split('#');
