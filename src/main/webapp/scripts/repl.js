@@ -136,6 +136,7 @@ require(["ceylon/language/1.0.0/ceylon.language-1.0.0", 'jquery', 'jquery-ui-1.9
 function complete(editor){
 	var cursor = editor.getCursor();
     var code = getEditCode();
+    live_tc.status=4;
     jQuery.ajax('assist', {
         cache:false, type:'POST',
         dataType:'json',
@@ -154,6 +155,7 @@ function complete(editor){
         error:function(xhr, status, err) {
         	stopSpinner();
             alert("An error occurred while compiling your code: " + err?err:status);
+            live_tc.status=1;
         },
         contentType:'application/x-www-form-urlencoded; charset=UTF-8',
         data: { 

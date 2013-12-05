@@ -189,11 +189,14 @@
     	}
     }
     function close() {
-      if (done) return;
+      if (done) {
+        return;
+      }
       done = true;
       jQuery(input).unbind('keydown', keydown);
       jQuery("body").unbind('click', bodyClick);
       complete.parentNode.removeChild(complete);
+      live_tc.status=1;
     }
     function pick() {
       insert(completions[selectedIndex]);
@@ -226,7 +229,9 @@
     // capture keys
     jQuery(input).keydown(keydown);
     jQuery(input).keypress(function(event){
-        if (prettyPleaseStop) return;
+        if (prettyPleaseStop) {
+          return;
+        }
     	var char = String.fromCharCode(event.which);
 		editor.replaceRange(char, {line: cursor.line, ch: insertionPoint++});
 		filter += char;
