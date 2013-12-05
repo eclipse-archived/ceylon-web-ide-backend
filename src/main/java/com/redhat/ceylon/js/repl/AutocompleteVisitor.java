@@ -75,7 +75,7 @@ public class AutocompleteVisitor extends Visitor {
     }
 
     public Node findNode() {
-        return findNode(new DefaultAutocompleteUnitValidator());
+        return findNode(SCRIPT_VAL);
     }
 
     /** Checks if the identifier contains the location we're interested in. */
@@ -160,7 +160,10 @@ public class AutocompleteVisitor extends Visitor {
             Map<String, DeclarationWithProximity> comps) {
         JSONArray completions = new JSONArray();
         for(Map.Entry<String, DeclarationWithProximity> entry : comps.entrySet()){
-            completions.add(translateCompletion(entry.getValue()));
+            final JSONObject completion = translateCompletion(entry.getValue());
+            if (!completions.contains(completion)) {
+                completions.add(completion);
+            }
         }
         return completions;
     }
@@ -274,13 +277,6 @@ public class AutocompleteVisitor extends Visitor {
     /** Callbacks can implement this to tell the visitor if a unit should be processed or not. */
     public interface AutocompleteUnitValidator {
         public boolean processUnit(PhasedUnit pu);
-    }
-
-    private class DefaultAutocompleteUnitValidator implements AutocompleteUnitValidator {
-        @Override
-        public boolean processUnit(PhasedUnit pu) {
-            return true;
-        }
     }
 
     public static final AutocompleteUnitValidator SCRIPT_VAL = new AutocompleteUnitValidator() {
