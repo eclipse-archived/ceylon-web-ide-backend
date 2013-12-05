@@ -81,10 +81,11 @@
     var selectedIndex = 0;
     var insertionPoint = cursor.ch;
     var done = false;
-    
+
     function completionMatches(index){
-    	return filter.length == 0 
-			|| completions[index].insert.toLowerCase().indexOf(filter.toLowerCase()) == 0;
+      if (filter.length==0)return true;
+      return filter.length==0 ||
+          completions[index].insert.toLowerCase().indexOf(filter.toLowerCase()) == 0;
     }
     function updateFilter(){
     	var $children = jQuery(sel).children();
@@ -101,8 +102,10 @@
 			}
     		$line.removeClass("selected");
     	});
-    	if(selectedIndex != -1)
+    	if(selectedIndex != -1) {
     		$children.eq(selectedIndex).addClass("selected");
+            selectionChanged();
+        }
     }
     function selectionChanged(){
     	// update the selected class
@@ -144,18 +147,32 @@
     		// Enter
     		pick();
     	}else if(code == 40){
-    		prevent();
-    		// Down
-    		while(selectedIndex < completions.length - 1) {
+          prevent();
+          // Down
+          var elems = jQuery(sel).children();
+          var lastVisible=-1;
+          var whatev=completions.length-1;
+          while (lastVisible<0) {
+            if (elems.eq(whatev).is(':visible'))lastVisible=whatev;
+            whatev--;
+          }
+    		while(selectedIndex < lastVisible) {
     		    selectedIndex++;
     			if(completionMatches(selectedIndex))
     				break;
     		}
     		selectionChanged();
     	}else if(code == 38){
-    		prevent();
-    		// Up
-    		while(selectedIndex > 0) {
+          prevent();
+          // Up
+          var elems = jQuery(sel).children();
+          var firstVisible=-1;
+          var whatev=0;
+          while (firstVisible<0) {
+            if (elems.eq(whatev).is(':visible'))firstVisible=whatev;
+            whatev++;
+          }
+    		while(selectedIndex > firstVisible) {
     		    selectedIndex--;
     			if(completionMatches(selectedIndex))
     				break;
