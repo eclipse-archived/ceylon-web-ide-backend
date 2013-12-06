@@ -19,6 +19,7 @@ var live_tc={
     live_tc.text=editor.getValue();
   }
 };
+var closePopups=undefined;
 
 require(["ceylon/language/1.0.0/ceylon.language-1.0.0", 'jquery', 'jquery-ui-1.9.2'],
     function(clang, $, jqui) {
@@ -105,6 +106,10 @@ require(["ceylon/language/1.0.0/ceylon.language-1.0.0", 'jquery', 'jquery-ui-1.9
                 editCode('hello_world');
             }
             editor.on('change',function(){live_tc.last=Date.now();});
+            editor.on('cursorActivity',function(){
+              if (closePopups)closePopups();
+              closePopups=undefined;
+            });
             window.setInterval(function(){
               if (live_tc.status==1 && editor.getValue()!=live_tc.text && Date.now()-live_tc.last>5000) {
                 console.log("typecheck muthafucka!");
@@ -471,6 +476,7 @@ function fetchDoc(cm) {
                 }
                 jQuery("body").keydown(close);
                 jQuery("body").click(close);
+                closePopups=close;
                 help.focus();
 
             } else if (json['name'].startsWith("ceylon.language::")) {

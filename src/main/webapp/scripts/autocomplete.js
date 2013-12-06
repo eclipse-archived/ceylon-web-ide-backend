@@ -89,6 +89,7 @@
     }
     function updateFilter(){
     	var $children = jQuery(sel).children();
+        var oldsi=selectedIndex;
     	selectedIndex = -1;
     	$children.each(function (index, line){
     		var $line = jQuery(line);
@@ -104,7 +105,7 @@
     	});
     	if(selectedIndex != -1) {
     		$children.eq(selectedIndex).addClass("selected");
-            selectionChanged();
+            if (selectedIndex!=oldsi)selectionChanged();
         }
     }
     function selectionChanged(){
@@ -215,6 +216,7 @@
       complete.parentNode.removeChild(complete);
       live_tc.status=1;
     }
+    closePopups=close;
     function pick() {
       insert(completions[selectedIndex]);
       close();
