@@ -60,7 +60,7 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
   function jsTokenBase(stream, state) {
     var ch = stream.next();
     if (ch == '"' || ch == '`' && stream.eat('`')) {
-      if (stream.eat('""')) {
+      if (stream.match('""')) {
           return chain(stream, state, jsTokenVerbatim);
       }
       else {
