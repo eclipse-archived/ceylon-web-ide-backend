@@ -58,7 +58,7 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             typeChecker.process();
             
             final CharArrayWriter out = new CharArrayWriter(script.length()*2);
-            out.write("var exports={};");
+            out.write("var ex$={};");
             //Run the compiler, if typechecker returns no errors.
             Collection<Message> messages = null;
             if (typeChecker.getErrors() == 0 && !typecheckOnly) {
@@ -67,6 +67,9 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
                     class JsMemoryOutput extends JsOutput {
                         JsMemoryOutput(Module m) throws IOException { super(m, "UTF-8"); }
                         @Override protected Writer getWriter() { return out; }
+                        public void encodeModel() throws IOException {
+                            out.write("{}");
+                        };
                     }
                     @Override
                     protected JsOutput newJsOutput(Module m) throws IOException {
