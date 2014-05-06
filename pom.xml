@@ -38,7 +38,7 @@
     <dependency>
       <groupId>ceylon</groupId>
       <artifactId>common</artifactId>
-      <version>1.0.0</version>
+      <version>1.1.0</version>
       <type>jar</type>
       <scope>system</scope>
       <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.common-1.0.0.jar</systemPath>
@@ -46,7 +46,7 @@
     <dependency>
       <groupId>ceylon</groupId>
       <artifactId>module-resolver</artifactId>
-      <version>1.0.0</version>
+      <version>1.1.0</version>
       <type>jar</type>
       <scope>system</scope>
       <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.module-resolver-1.0.0.jar</systemPath>
@@ -54,7 +54,7 @@
     <dependency>
       <groupId>ceylon</groupId>
       <artifactId>typechecker</artifactId>
-      <version>1.0.0</version>
+      <version>1.1.0</version>
       <type>jar</type>
       <scope>system</scope>
       <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.typechecker-1.0.0.jar</systemPath>
@@ -62,7 +62,7 @@
     <dependency>
       <groupId>ceylon</groupId>
       <artifactId>jscompiler</artifactId>
-      <version>1.0.0</version>
+      <version>1.1.0</version>
       <type>jar</type>
       <scope>system</scope>
       <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.compiler.js-1.0.0.jar</systemPath>
