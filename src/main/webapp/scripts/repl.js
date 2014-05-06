@@ -21,7 +21,7 @@ var live_tc={
 };
 var closePopups=undefined;
 
-require(["ceylon/language/1.0.0/ceylon.language-1.0.0", 'jquery', 'jquery-ui-1.9.2'],
+require(["ceylon/language/1.1.0/ceylon.language-1.1.0", 'jquery', 'jquery-ui-1.9.2'],
     function(clang, $, jqui) {
         jquery=$;
         $(document).ready(function() {
