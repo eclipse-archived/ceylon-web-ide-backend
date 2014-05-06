@@ -20,14 +20,7 @@ class Cell(x, y) {
     shared variable State state = dead;
 
     // All the neighbouring cells
-    late shared Cell ul;
-    late shared Cell uc;
-    late shared Cell ur;
-    late shared Cell l;
-    late shared Cell r;
-    late shared Cell bl;
-    late shared Cell bc;
-    late shared Cell br;
+    late shared [Cell,Cell,Cell,Cell,Cell,Cell,Cell,Cell] neighbors;
 
     variable Integer nroNeighbours = 0;
 
@@ -48,22 +41,10 @@ class Cell(x, y) {
             return;
         }
         state = newState;
-        nroNeighbours = (ul.state == alive then 1 else 0)
-            + (uc.state == alive then 1 else 0)
-            + (ur.state == alive then 1 else 0)
-            + (l.state == alive then 1 else 0)
-            + (r.state == alive then 1 else 0)
-            + (bl.state == alive then 1 else 0)
-            + (bc.state == alive then 1 else 0)
-            + (br.state == alive then 1 else 0);
-        ul.nroNeighbours += dN;
-        uc.nroNeighbours += dN;
-        ur.nroNeighbours += dN;
-        l.nroNeighbours += dN;
-        r.nroNeighbours += dN;
-        bl.nroNeighbours += dN;
-        bc.nroNeighbours += dN;
-        br.nroNeighbours += dN;
+        nroNeighbours = neighbors.count((Cell c) => c.state == alive);
+        for (c in neighbors) {
+            c.nroNeighbours += dN;
+        }
     }
     
     shared State nextState {
@@ -90,17 +71,8 @@ class Cell(x, y) {
     }
 
     shared Cell[] resurrections() {
-        variable Cell[] result = {};
-        if (state == resurrected) { result = result.withTrailing(this); }
-        if (ul.canResurrect()) { result = result.withTrailing(ul); }
-        if (uc.canResurrect()) { result = result.withTrailing(uc); }
-        if (ur.canResurrect()) { result = result.withTrailing(ur); }
-        if (l.canResurrect()) { result = result.withTrailing(l); }
-        if (r.canResurrect()) { result = result.withTrailing(r); }
-        if (bl.canResurrect()) { result = result.withTrailing(bl); }
-        if (bc.canResurrect()) { result = result.withTrailing(bc); }
-        if (br.canResurrect()) { result = result.withTrailing(br); }
-        return result;
+        value result = [ for (c in neighbors) if (c.canResurrect()) c ];
+        return state == resurrected then result.withLeading(this) else result;
     }
     
     shared actual String string =>
@@ -133,14 +105,8 @@ class Grid(width, height) {
     for (y in 0:height) {
         for (x in 0:width) {
             value c = cell(x, y);
-            c.ul = cell(x - 1, y - 1);
-            c.uc = cell(x, y - 1);
-            c.ur = cell(x + 1, y - 1);
-            c.l = cell(x - 1, y);
-            c.r = cell(x + 1, y);
-            c.bl = cell(x - 1, y + 1);
-            c.bc = cell(x, y + 1);
-            c.br = cell(x + 1, y + 1);
+            c.neighbors = [ cell(x - 1, y - 1), cell(x, y - 1), cell(x + 1, y - 1), cell(x - 1, y),
+                cell(x + 1, y), cell(x - 1, y + 1), cell(x, y + 1), cell(x + 1, y + 1) ];
         }
     }
  
@@ -156,20 +122,11 @@ class Grid(width, height) {
         // one for the ones that will die. At the same time
         // we construct a third list with dead cells that
         // will be resurrected
-        variable Cell[] alives = [];
-        variable Cell[] moribunds = [];
-        value seq = SequenceBuilder<Cell>();
-        for (c in _living) {
-            if (c.state == alive) {
-                if (c.nextState == alive) {
-                    alives = alives.withTrailing(c);
-                } else if (c.nextState == moribund) {
-                    moribunds = moribunds.withTrailing(c);
-                }
-            }
-            seq.appendAll(c.resurrections());
-        }
-        Cell[] resurrections = seq.sequence;
+        value alives = [ for (c in _living)
+          if (c.state == alive && c.nextState == alive) c ];
+        value moribunds = [ for (c in _living)
+          if (c.state == alive && c.nextState == moribund) c ];
+        value resurrections = [ for (c in _living) for (r in c.resurrections()) r ];
         
         // And resurrect the dead ones
         for (c in resurrections) {
@@ -186,15 +143,9 @@ class Grid(width, height) {
     }
 }
 
-Integer getTime() {
-    dynamic {
-        return Date().getTime();
-    }
-}
-
 // George Marsaglia's Random Number Generator
-variable Integer m_w = getTime() / 13;
-variable Integer m_z = getTime() / 648;
+variable Integer m_w = system.milliseconds / 13;
+variable Integer m_z = system.milliseconds / 648;
 Float random() {
     m_z = 36969 * m_z.and(2^15-1) + m_z.rightLogicalShift(16);
     m_w = 18000 * m_w.and(2^15-1) + m_w.rightLogicalShift(16);
@@ -220,7 +171,7 @@ value cwidth = pwidth / gwidth;
 value cheight = pheight / gheight;
 
 variable value count = 0;
-variable value start = getTime();
+variable value start = system.milliseconds;
 variable value prevNew = -1;
 variable value prevDead = -1;
 variable value prevCount = 0;
@@ -236,7 +187,7 @@ void draw() {
     value newCells = newXdead[0];
     value deadCells = newXdead[1];
     count++;
-    value runtime = (getTime() - start);
+    value runtime = (system.milliseconds - start);
     value fps = count.float / (runtime.float / 1000.0);
     if (prevCount >= 0 && count % 100 == 0) {
         print("draw (new=``newCells.size``, dead=``deadCells.size``, count=``count``, fps=``fps``)");
