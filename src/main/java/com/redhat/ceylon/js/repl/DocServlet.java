@@ -3,9 +3,11 @@ package com.redhat.ceylon.js.repl;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -15,26 +17,18 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-
-import com.github.rjeschke.txtmark.Configuration;
-import com.github.rjeschke.txtmark.Processor;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
-import com.redhat.ceylon.compiler.typechecker.model.Annotation;
 import com.redhat.ceylon.compiler.typechecker.model.Declaration;
-import com.redhat.ceylon.compiler.typechecker.tree.Node;
 import com.redhat.ceylon.js.util.CompilerUtils;
+import com.redhat.ceylon.js.util.DocUtils;
 import com.redhat.ceylon.js.util.ServletUtils;
 
 @WebServlet("/hoverdoc")
 public class DocServlet extends HttpServlet {
 
-    static final Configuration MD_CONF = Configuration.builder().forceExtentedProfile().setEncoding("UTF-8").build();
-
     private static final long serialVersionUID = 1L;
     //Here we cache the code for the examples, so that it's only compiled the first time someone asks for it.
-    private HashMap<String, JSONObject> examples = new HashMap<String, JSONObject>();
+    private HashMap<String, Map<String,Object>> examples = new HashMap<String, Map<String,Object>>();
 
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -55,13 +49,13 @@ public class DocServlet extends HttpServlet {
         }
     }
 
-    private JSONObject loadExample(ServletContext cxt, String key) throws IOException {
-        JSONObject example = examples.get(key);
+    private Map<String,Object> loadExample(ServletContext cxt, String key) throws IOException {
+        Map<String,Object> example = examples.get(key);
         if (example == null) {
             synchronized (examples) {
                 if (example == null) {
                     String src = getFileContent(cxt, key);
-                    example = new JSONObject();
+                    example = new HashMap<String, Object>(2);
                     example.put("src", src);
                     examples.put(key, example);
                 }
@@ -79,7 +73,7 @@ public class DocServlet extends HttpServlet {
             ServletUtils.sendResponse(loadExample(req.getServletContext(), key), resp);
         } catch (RuntimeException ex) {
             resp.setStatus(500);
-            JSONArray error = new JSONArray();
+            List<String> error = new ArrayList<String>(1);
             error.add(String.format("Service error: %s", ex.getMessage()));
             ServletUtils.sendResponse(error, resp);
         }
@@ -94,68 +88,14 @@ public class DocServlet extends HttpServlet {
             final int row = Integer.parseInt(request.getParameter("r"));
             final int col = Integer.parseInt(request.getParameter("c"));
             final ScriptFile src = CompilerUtils.createScriptSource(script);
-            //Run the typechecker
-            final TypeChecker typeChecker = CompilerUtils.getTypeChecker(request.getServletContext(), src);
-            typeChecker.process();
-            final AutocompleteVisitor visitor = new AutocompleteVisitor(row, col, typeChecker);
-            final Node node = visitor.findNode(AutocompleteVisitor.SCRIPT_VAL);
-            Declaration decl = null;
-            String doc = null;
-            if (node != null) {
-                try {
-                    try {
-                        Method m = node.getClass().getMethod("getDeclaration");
-                        Object d = m.invoke(node);
-                        if (d instanceof Declaration) {
-                            decl = (Declaration)d;
-                        }
-                    } catch (NoSuchMethodException ex) {
-                        try {
-                            Method m = node.getClass().getMethod("getDeclarationModel");
-                            Object d = m.invoke(node);
-                            if (d instanceof Declaration) {
-                                decl = (Declaration)d;
-                            }
-                        } catch (NoSuchMethodException e1) {
-                            //no hubo nada
-                        }
-                    }
-                } catch (IllegalAccessException e) {
-                    //nothing
-                } catch (InvocationTargetException e) {
-                    //nothing
-                }
-            }
-            JSONObject json = new JSONObject();
-            if (decl != null) {
-                json.put("name", decl.getQualifiedNameString());
-                if (false){//decl.getQualifiedNameString().startsWith("ceylon.language::")) {
-                    if (decl instanceof com.redhat.ceylon.compiler.typechecker.model.Class
-                            || decl instanceof com.redhat.ceylon.compiler.typechecker.model.ClassAlias) {
-                        json.put("type", "class");
-                    } else if (decl instanceof com.redhat.ceylon.compiler.typechecker.model.Interface
-                            || decl instanceof com.redhat.ceylon.compiler.typechecker.model.InterfaceAlias) {
-                        json.put("type", "interface");
-                    }
-                } else {
-                    //Only return doc for declarations that are not part of the language module
-                    for (Annotation ann : decl.getAnnotations()) {
-                        if ("doc".equals(ann.getName()) && !ann.getPositionalArguments().isEmpty()) {
-                            doc = ann.getPositionalArguments().get(0);
-                            if (doc.charAt(0) == '"' && doc.charAt(doc.length()-1) == '"') {
-                                doc = doc.substring(1, doc.length()-1);
-                            }
-                            json.put("doc", Processor.process(doc, MD_CONF));
-                        }
-                    }
-                }
-            }
-            ServletUtils.sendResponse(json, response);
+            Declaration decl = DocUtils.findDeclaration(
+                    CompilerUtils.getTypeChecker(request.getServletContext(), src), row, col);
+            final Map<String,Object> docs = decl == null ? new HashMap<String, Object>() : DocUtils.getDocs(decl);
+            ServletUtils.sendResponse(docs, response);
         } catch (RuntimeException ex) {
             response.setStatus(500);
-            JSONArray sb = new JSONArray();
-            sb.add(String.format("Service error: %s", ex.getMessage()));
-            ServletUtils.sendResponse(sb, response);
+            ServletUtils.sendResponse(Collections.singletonList(
+                    String.format("Service error: %s", ex.getMessage())), response);
         }
     }
 
