@@ -25,7 +25,8 @@ public class TestDoc {
             {"void f(){print(1);}", "ceylon.language::print", 1, 13, true},//false },
             {"void f(){String{'a','b'};}", "ceylon.language::String", 1, 13, true},//false },
             {"void f(){print(larger);}", "ceylon.language::larger", 1, 18, true},//false },
-            {"\"local test\"\nshared void test(){}", "web_ide_script::test", 2, 15, true }
+            {"void f(){\nvalue i=[1,2].size;}", "ceylon.language::Iterable.size", 2, 17, true},//false },
+            {"\"local test\"\nvoid test(){}", "web_ide_script::test", 2, 8, true }
         });
     }
 
