@@ -1,6 +1,8 @@
 package com.redhat.ceylon.js.util;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -21,12 +23,12 @@ public final class ServletUtils {
         response.getWriter().flush();
     }
 
-    public static void sendResponse(JSONObject obj, HttpServletResponse response) throws IOException {
-        sendStringResponse(obj.toJSONString(), "application/json", response);
+    public static void sendResponse(final Map<String,Object> obj, final HttpServletResponse response) throws IOException {
+        sendStringResponse(JSONObject.toJSONString(obj), "application/json", response);
     }
 
-    public static void sendResponse(JSONArray arr, HttpServletResponse response) throws IOException {
-        sendStringResponse(arr.toJSONString(), "application/json", response);
+    public static void sendResponse(final List<String> arr, HttpServletResponse response) throws IOException {
+        sendStringResponse(JSONArray.toJSONString(arr), "application/json", response);
     }
 
 }

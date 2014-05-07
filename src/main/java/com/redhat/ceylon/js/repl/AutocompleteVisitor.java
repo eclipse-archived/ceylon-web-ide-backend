@@ -1,13 +1,11 @@
 package com.redhat.ceylon.js.repl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
 
 import com.github.rjeschke.txtmark.Processor;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
@@ -30,6 +28,7 @@ import com.redhat.ceylon.compiler.typechecker.tree.Node;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.Identifier;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.QualifiedMemberExpression;
 import com.redhat.ceylon.compiler.typechecker.tree.Visitor;
+import com.redhat.ceylon.js.util.DocUtils;
 
 /** A visitor that can return a list of suggestions given a location on the AST.
  * 
@@ -135,7 +134,7 @@ public class AutocompleteVisitor extends Visitor {
     }
 
     /** Looks for declarations matching the node's text and returns them as strings. */
-    public JSONArray getCompletions() {
+    public List<Map<String,Object>> getCompletions() {
         Map<String, DeclarationWithProximity> comps = new HashMap<String, DeclarationWithProximity>();
         if (node != null) {
             HashSet<PhasedUnit> units = new HashSet<PhasedUnit>();
@@ -156,11 +155,11 @@ public class AutocompleteVisitor extends Visitor {
         return translateCompletions(comps);
     }
 
-    private JSONArray translateCompletions(
+    private List<Map<String,Object>> translateCompletions(
             Map<String, DeclarationWithProximity> comps) {
-        JSONArray completions = new JSONArray();
+        List<Map<String,Object>> completions = new ArrayList<Map<String,Object>>(comps.size());
         for(Map.Entry<String, DeclarationWithProximity> entry : comps.entrySet()){
-            final JSONObject completion = translateCompletion(entry.getValue());
+            final Map<String,Object> completion = translateCompletion(entry.getValue());
             if (!completions.contains(completion)) {
                 completions.add(completion);
             }
@@ -168,10 +167,10 @@ public class AutocompleteVisitor extends Visitor {
         return completions;
     }
 
-    private JSONObject translateCompletion(DeclarationWithProximity value) {
-        JSONObject completion = new JSONObject();
+    private Map<String,Object> translateCompletion(DeclarationWithProximity value) {
+        Map<String,Object> completion = new HashMap<String, Object>(4);
         translateCompletion(completion, value.getDeclaration());
-        completion.put("help", Processor.process(getDoc(value.getDeclaration()), DocServlet.MD_CONF));
+        completion.put("help", Processor.process(getDoc(value.getDeclaration()), DocUtils.MD_CONF));
         return completion;
     }
 
@@ -180,7 +179,7 @@ public class AutocompleteVisitor extends Visitor {
     private final static String TYPE = "<span class='cm-classname'>";
     private final static String END = "</span>";
     
-    private void translateCompletion(JSONObject completion,
+    private void translateCompletion(Map<String,Object> completion,
             Declaration declaration) {
         StringBuilder insert = new StringBuilder();
         StringBuilder display = new StringBuilder();

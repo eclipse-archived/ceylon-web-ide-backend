@@ -3,7 +3,11 @@ package com.redhat.ceylon.js.repl;
 import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -11,9 +15,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
 
 import com.redhat.ceylon.compiler.Options;
 import com.redhat.ceylon.compiler.js.JsCompiler;
@@ -90,7 +91,7 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             }
             
             // Collect any errors
-            JSONArray errs = new JSONArray();
+            List<Map<String,Object>> errs = new ArrayList<Map<String,Object>>(messages.size());
             for (Message err : messages) {
                 if (!(err instanceof UsageWarning)) {
                     Map<String, Object> encoded = encodeError(err);
@@ -100,7 +101,7 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
                 }
             }
             
-            final JSONObject resp = new JSONObject();
+            final Map<String,Object> resp = new HashMap<String, Object>(1);
             if (errs.isEmpty() && !typecheckOnly) {
                 resp.put("code", out.toString());
             } else {
@@ -115,14 +116,13 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
                 msg = ex.getClass().getName();
             }
             ex.printStackTrace(System.out);
-            JSONArray errs = new JSONArray();
-            errs.add(String.format("Service error: %s", msg));
-            ServletUtils.sendResponse(errs, response);
+            ServletUtils.sendResponse(Collections.singletonList(
+                    String.format("Service error: %s", msg)), response);
 	    }
 	}
 
-    private JSONObject encodeError(Message err) {
-        JSONObject errmsg = new JSONObject();
+    private Map<String,Object> encodeError(Message err) {
+        final Map<String,Object> errmsg = new HashMap<String, Object>(4);
         errmsg.put("msg", err.getMessage());
         errmsg.put("code", err.getCode());
         if (err instanceof AnalysisMessage) {

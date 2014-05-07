@@ -1,15 +1,15 @@
 package com.redhat.ceylon.js.repl;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
 
 import com.redhat.ceylon.compiler.js.DocVisitor;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
@@ -50,7 +50,7 @@ public class AutocompleteServlet extends HttpServlet {
             for (PhasedUnit pu: typeChecker.getPhasedUnits().getPhasedUnits()) {
                 pu.getCompilationUnit().visit(doccer);
             }
-            final JSONObject jsr = new JSONObject();
+            final Map<String,Object> jsr = new HashMap<String, Object>(1);
             //Now get the suggestions for node at the specified location
             //So of course first we have to find said node
             final AutocompleteVisitor assistant = new AutocompleteVisitor(locRow, locCol, typeChecker);
@@ -59,14 +59,11 @@ public class AutocompleteServlet extends HttpServlet {
             ServletUtils.sendResponse(jsr, resp);
         } catch (NumberFormatException ex) {
             resp.setStatus(500);
-            final JSONArray errs = new JSONArray();
-            errs.add("Current location wasn't provided.");
-            ServletUtils.sendResponse(errs, resp);
+            ServletUtils.sendResponse(Collections.singletonList("Current location wasn't provided."), resp);
         } catch (Exception ex) {
             resp.setStatus(500);
-            final JSONArray sb = new JSONArray();
-            sb.add(String.format("Service error: %s", ex.getMessage()));
-            ServletUtils.sendResponse(sb, resp);
+            ServletUtils.sendResponse(Collections.singletonList(
+                    String.format("Service error: %s", ex.getMessage())), resp);
         }
     }
 
