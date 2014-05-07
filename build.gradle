@@ -12,6 +12,7 @@ repositories {
 
 dependencies {
 	providedCompile "ceylon:com.redhat.ceylon.typechecker:${ceylonVersion}", "ceylon:com.redhat.ceylon.compiler.js:${ceylonVersion}",
+		"ceylon:com.redhat.ceylon.common:${ceylonVersion}",
 		"ceylon:com.redhat.ceylon.module-resolver:${ceylonVersion}", "antlr:antlr:3.4",
 		'net.minidev.json:json-smart:1.1.1'
 	providedCompile 'mongo:mongo:2.7.3'
