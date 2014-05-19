@@ -35,8 +35,12 @@ void printTree(Node root) {
 }
 printTree(tree);
 
-// Object enumerations are also possible:
-abstract class Color(name) of red | green | blue {
+// Object enumerations are also possible;
+// however, they currently don't work in the web IDE due to
+// https://github.com/ceylon/ceylon-web-ide-backend/issues/58
+// Note that this is only a restriction of the web IDE:
+// it works on both the Java and JavaScript backends.
+abstract class Color(name) /* of red | green | blue */ {
     shared String name;
 }
 object red extends Color("red") {}
