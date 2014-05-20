@@ -1,3 +1,5 @@
+//$ webrun_full_script
+
 // Interfaces and abstract classes can specify a list of
 // implementing types.
 abstract class Node() of Leaf | Branch {}
@@ -33,7 +35,6 @@ void printTree(Node root) {
     // required because the specified cases are sufficient: 
     //else {}
 }
-printTree(tree);
 
 // Object enumerations are also possible:
 abstract class Color(name) of red | green | blue {
@@ -51,4 +52,8 @@ void testSize(Integer x) {
     case (larger) { print("``x`` is larger than 5"); }
     case (equal) { print("x is exactly 5"); }
 }
-testSize(42);
+
+void run_script() {
+    printTree(tree);
+    testSize(42);
+}

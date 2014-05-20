@@ -379,7 +379,42 @@ function getEditCode() {
 }
 
 function wrapCode(code) {
-    return "void run_script(){\n" + code + "\n}";
+	if (!isFullScript(code)) {
+		return "void run_script(){\n" + code + "\n}";
+	} else {
+		return code;
+	}
+}
+
+function isFullScript(code) {
+	var i;
+	var hdr = extractHeaderComments(code);
+	for (i = 0; i < hdr.length; ++i) {
+		var line = hdr[i];
+		if (line == "webrun_full_script") {
+			return true;
+		}
+	}
+	return false;
+}
+
+function extractHeaderComments(code) {
+	var result = [];
+	var i;
+	var lines = code.split("\n");
+	for (i = 0; i < lines.length; ++i) {
+	    var line = lines[i].trimLeft();
+	    if (line != "") {
+	        if (line.indexOf("//$") == 0) {
+	            // Not using trim() because it somehow doesn't work
+		        line = line.substr(3).trimLeft().trimRight();
+		        result.push(line);
+	        } else {
+                break;
+	        }
+	    }
+	}
+	return result;
 }
 
 function setEditCode(src) {
