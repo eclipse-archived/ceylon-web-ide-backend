@@ -41,7 +41,7 @@
       <version>1.1.0</version>
       <type>jar</type>
       <scope>system</scope>
-      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.common-1.0.0.jar</systemPath>
+      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.common-1.1.0.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>ceylon</groupId>
@@ -49,7 +49,7 @@
       <version>1.1.0</version>
       <type>jar</type>
       <scope>system</scope>
-      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.module-resolver-1.0.0.jar</systemPath>
+      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.module-resolver-1.1.0.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>ceylon</groupId>
@@ -57,7 +57,7 @@
       <version>1.1.0</version>
       <type>jar</type>
       <scope>system</scope>
-      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.typechecker-1.0.0.jar</systemPath>
+      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.typechecker-1.1.0.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>ceylon</groupId>
@@ -65,7 +65,7 @@
       <version>1.1.0</version>
       <type>jar</type>
       <scope>system</scope>
-      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.compiler.js-1.0.0.jar</systemPath>
+      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.compiler.js-1.1.0.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>org.mongodb</groupId>
