@@ -112,7 +112,7 @@ require(["ceylon/language/1.1.0/ceylon.language-1.1.0", 'jquery', 'jquery-ui-1.9
             });
             window.setInterval(function(){
               if (live_tc.status==1 && editor.getValue()!=live_tc.text && Date.now()-live_tc.last>5000) {
-                console.log("typecheck muthafucka!");
+                console.log("typechecking...");
                 live_tc.text=editor.getValue();
                 live_tc.last=Date.now();
     $.ajax('translate', {
