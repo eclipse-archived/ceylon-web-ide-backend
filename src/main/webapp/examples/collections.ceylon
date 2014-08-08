@@ -1,6 +1,6 @@
 // A constant, read-only sequence of values:
 String[] animals = [ "elephant", "parrot", "giraffe" ];
-String[] none = {}; // empty sequence
+String[] none = []; // empty sequence
 
 // Accessing the sequence returns an optional value (String?)
 print("First: ``animals.first else "none"``");
