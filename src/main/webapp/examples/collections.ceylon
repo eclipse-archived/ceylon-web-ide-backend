@@ -7,7 +7,7 @@ print("First: ``animals.first else "none"``");
 print("Second: ``animals[1] else "none"``");
 print("Fourth: ``animals[3] else "none"``");
 
-// Check if the sequence in non-empty:
+// Check if the sequence is non-empty:
 if (nonempty animals) {
     // Now ".first" and ".last" return String:
     print("First: ``animals.first``");
