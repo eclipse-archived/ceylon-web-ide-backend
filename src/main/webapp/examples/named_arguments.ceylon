@@ -44,7 +44,7 @@ Stock stock = Stock {
 
 // A list of items can be assigned to a sequenced parameter
 // directly by name:
-Product[] toys = { /*...*/ };
+{Product*} toys = { /*...*/ };
 Group toysGroup = Group { name = "Toys"; products = toys; };
 
 // But we are not restricted to simple static data, like XML.

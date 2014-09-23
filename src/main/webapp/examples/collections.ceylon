@@ -46,7 +46,7 @@ list(*animals);
 print(", ".join(animals));
 
 // "entries" creates a sequence of entries (type Integer->String)
-for (i->animal in entries(animals)) {
+for (i->animal in animals.indexed) {
     print("``i+1``.``animal``");
 }
 

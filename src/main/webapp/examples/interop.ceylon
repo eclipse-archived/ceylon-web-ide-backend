@@ -8,7 +8,8 @@ dynamic {
     headerNode.textContent = "Who needs JavaScript?";
 
     dynamic nodes = document.getElementsByTagName("A");
-    for (i in 0..nodes.length-1) {
+    Integer nodesLength = nodes.length;
+    for (i in 0..nodesLength-1) {
         dynamic elem = nodes.item(i);
         String oldText = elem.textContent;
         print(oldText);

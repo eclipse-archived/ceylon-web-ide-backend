@@ -30,8 +30,8 @@ obj2.f("hi"); // no conflict, a String is an Object
 
 // We can specify bounds for the type parameter:
 class Tools<out Num>(Num x, Num y)
-            given Num satisfies Scalar<Num> {
-    // We know that x and y are numbers (type Scalar<Num>),
+            given Num satisfies Number<Num> {
+    // We know that x and y are numbers (type Number<Num>),
     // so we can use the corresponding operations/methods.
     shared Num dist() => (x < y) then (y-x) else (x-y);
 }

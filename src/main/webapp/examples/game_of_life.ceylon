@@ -86,7 +86,7 @@ class Grid(width, height) {
     shared Integer height;
     
     // The list of alive cells
-    variable Cell[] _living = {};
+    variable Cell[] _living = [];
     
     shared Cell[] living {
         return _living;
