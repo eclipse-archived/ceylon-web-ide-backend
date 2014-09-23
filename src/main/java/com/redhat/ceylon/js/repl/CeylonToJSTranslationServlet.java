@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.redhat.ceylon.compiler.Options;
 import com.redhat.ceylon.compiler.js.JsCompiler;
+import com.redhat.ceylon.compiler.js.JsIdentifierNames;
 import com.redhat.ceylon.compiler.js.JsOutput;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.analyzer.UsageWarning;
@@ -35,7 +36,7 @@ import com.redhat.ceylon.js.util.ServletUtils;
 @WebServlet("/translate")
 public class CeylonToJSTranslationServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-    private final Options opts = new Options().indent(false).comment(false).modulify(false).addSrc(".");
+    private final Options opts = new Options().indent(false).comment(false).modulify(false).addSrcDir(".");
 
 	/** Compiles Ceylon code and returns the resulting Javascript, along with its hover help docs.
 	 * Expects the following keys:
@@ -68,7 +69,7 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
                     class JsMemoryOutput extends JsOutput {
                         JsMemoryOutput(Module m) throws IOException { super(m, "UTF-8"); }
                         @Override protected Writer getWriter() { return out; }
-                        public void encodeModel() throws IOException {
+                        @Override public void encodeModel(final JsIdentifierNames names) throws IOException {
                             out.write("{}");
                         };
                     }

@@ -53,8 +53,8 @@ public class AutocompleteServlet extends HttpServlet {
             final Map<String,Object> jsr = new HashMap<String, Object>(1);
             //Now get the suggestions for node at the specified location
             //So of course first we have to find said node
-            final AutocompleteVisitor assistant = new AutocompleteVisitor(locRow, locCol, typeChecker);
-            assistant.findNode(AutocompleteVisitor.SCRIPT_VAL);
+            final Autocompleter assistant = new Autocompleter(locRow, locCol, typeChecker);
+            assistant.findNode(Autocompleter.SCRIPT_VAL);
             jsr.put("opts", assistant.getCompletions());
             ServletUtils.sendResponse(jsr, resp);
         } catch (NumberFormatException ex) {

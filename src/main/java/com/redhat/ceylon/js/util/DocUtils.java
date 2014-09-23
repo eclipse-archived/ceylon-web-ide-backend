@@ -16,7 +16,7 @@ import com.redhat.ceylon.compiler.typechecker.model.ClassOrInterface;
 import com.redhat.ceylon.compiler.typechecker.model.Declaration;
 import com.redhat.ceylon.compiler.typechecker.model.Value;
 import com.redhat.ceylon.compiler.typechecker.tree.Node;
-import com.redhat.ceylon.js.repl.AutocompleteVisitor;
+import com.redhat.ceylon.js.repl.Autocompleter;
 
 /** Hover docs utilities.
  * 
@@ -66,8 +66,8 @@ public class DocUtils {
         //Run the typechecker
         typeChecker.process();
         //Find the node at the specified position
-        final AutocompleteVisitor visitor = new AutocompleteVisitor(row, col, typeChecker);
-        final Node node = visitor.findNode(AutocompleteVisitor.SCRIPT_VAL);
+        final Autocompleter visitor = new Autocompleter(row, col, typeChecker);
+        final Node node = visitor.findNode(Autocompleter.SCRIPT_VAL);
         if (node != null) {
             //Return its declaration
             try {
