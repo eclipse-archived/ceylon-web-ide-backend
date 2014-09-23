@@ -19,7 +19,7 @@ import com.redhat.ceylon.js.util.CompilerUtils;
 @RunWith(Parameterized.class)
 public class TestAutocomplete {
 
-    private final AutocompleteVisitor assist;
+    private final Autocompleter assist;
     private final String nodeText;
     private final String checkCompletion;
 
@@ -39,7 +39,7 @@ public class TestAutocomplete {
         tc.process();
         nodeText = text;
         checkCompletion = found;
-        assist = new AutocompleteVisitor(1, text.length()-1, tc);
+        assist = new Autocompleter(1, text.length()-1, tc);
     }
 
     @Test
@@ -49,7 +49,7 @@ public class TestAutocomplete {
         Assert.assertNotNull("No node found at " + assist.getRow() + ":" + assist.getColumn() + " for text " + nodeText, node);
         //Check that the node we found is the one we were actually looking for
         Assert.assertTrue(checkCompletion.startsWith(assist.getTextAtLocation()));
-        List<Map<String,Object>> comps = assist.getCompletions();
+        List<Map<String,Object>> comps = assist.getCompletionsAsMap();
         String found = null;
         for (Map<String,Object> o : comps) {
             String comp = (String)o.get("insert");

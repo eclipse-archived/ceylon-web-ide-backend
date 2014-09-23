@@ -6,7 +6,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
 import org.junit.Test;
 
@@ -26,7 +25,6 @@ public class TestExamples {
     @Test
     public void testExamples() throws IOException {
         final File srcdir = new File("src/main/webapp/examples");
-        ArrayList<String> args = new ArrayList<String>();
         File tmpout = File.createTempFile("ceylon", "out");
         tmpout.delete();
         tmpout.mkdir();
@@ -59,12 +57,12 @@ public class TestExamples {
             }
             fout.close();
         }
-        Options opts = new Options().outDir(tmpout.getAbsolutePath()).addSrc("src/main/ceylon")
-                .addSrc(tmpRoot.getAbsolutePath()).addRepo("src/main/webapp/scripts/modules");
+        Options opts = new Options().outRepo(tmpout.getAbsolutePath()).addSrcDir("src/main/ceylon")
+                .addSrcDir(tmpRoot.getAbsolutePath()).addRepo("src/main/webapp/scripts/modules");
         final RepositoryManager repoman = CeylonUtils.repoManager()
                 .systemRepo(opts.getSystemRepo())
                 .userRepos(opts.getRepos())
-                .outRepo(opts.getOutDir())
+                .outRepo(opts.getOutRepo())
                 .buildManager();
         TypeCheckerBuilder tcb = new TypeCheckerBuilder()
                 .addSrcDirectory(tmpRoot)
