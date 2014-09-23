@@ -60,19 +60,24 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             typeChecker.process();
             
             final CharArrayWriter out = new CharArrayWriter(script.length()*2);
+            //Override the inner output class to use the in-memory writer
+            class JsMemoryOutput extends JsOutput {
+                JsMemoryOutput(Module m) throws IOException { super(m, "UTF-8"); }
+                @Override protected Writer getWriter() { return out; }
+                @Override public void encodeModel(final JsIdentifierNames names) throws IOException {
+                    out("\nvar _CTM$;function $CCMM$(){if (_CTM$===undefined)_CTM$=require('",
+                            JsCompiler.scriptPath(module), "-model').$CCMM$;return _CTM$;}\n");
+                    getWriter().write("ex$.$CCMM$=$CCMM$;\n");
+                    Module clm = module.getLanguageModule();
+                    clalias = names.moduleAlias(clm) + ".";
+                    require(clm, names);
+                };
+            }
             out.write("var ex$={};");
             //Run the compiler, if typechecker returns no errors.
             Collection<Message> messages = null;
             if (typeChecker.getErrors() == 0 && !typecheckOnly) {
                 JsCompiler compiler = new JsCompiler(typeChecker, opts) {
-                    //Override the inner output class to use the in-memory writer
-                    class JsMemoryOutput extends JsOutput {
-                        JsMemoryOutput(Module m) throws IOException { super(m, "UTF-8"); }
-                        @Override protected Writer getWriter() { return out; }
-                        @Override public void encodeModel(final JsIdentifierNames names) throws IOException {
-                            out.write("{}");
-                        };
-                    }
                     @Override
                     protected JsOutput newJsOutput(Module m) throws IOException {
                         return new JsMemoryOutput(m);
