@@ -55,7 +55,7 @@ public class AutocompleteServlet extends HttpServlet {
             //So of course first we have to find said node
             final Autocompleter assistant = new Autocompleter(locRow, locCol, typeChecker);
             assistant.findNode(Autocompleter.SCRIPT_VAL);
-            jsr.put("opts", assistant.getCompletions());
+            jsr.put("opts", assistant.getCompletionsAsMap());
             ServletUtils.sendResponse(jsr, resp);
         } catch (NumberFormatException ex) {
             resp.setStatus(500);
