@@ -129,6 +129,7 @@
     <li class="news_entry"><a href="#" onClick="return editCode('interop')">Interoperability</a></li>
     <li class="news_entry"><a href="#" onClick="return editCode('request')">Interoperability 2</a></li>
     <li class="news_entry"><a href="#" onClick="return editCode('operators')">Operator polymorphism</a></li>
+    <li class="news_entry"><a href="#" onClick="return editCode('metamodel')">Type-safe Metamodel</a></li>
     <li class="news_entry"><a href="#" onClick="return editCode('game_of_life')">Game of Life</a></li>
     </ol>
 </div>
