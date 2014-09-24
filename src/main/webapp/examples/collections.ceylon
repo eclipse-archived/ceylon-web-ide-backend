@@ -45,7 +45,7 @@ list(*animals);
 // Simpler way to print the elements comma-separated:
 print(", ".join(animals));
 
-// "entries" creates a sequence of entries (type Integer->String)
+// "indexed" creates a sequence of entries (type Integer->String)
 for (i->animal in animals.indexed) {
     print("``i+1``.``animal``");
 }
@@ -81,3 +81,7 @@ list(for (a in animals) a+" egg");
 
 // Comprehension with nested loop and condition:
 list(for (i in 1..3) for (j in 1..3) if ((i+j)%2 == 0) i*j);
+
+// Comprehension can also start with a condition
+print("Nothing will be printed");
+list(if (animals.size > 3) for (a in animals) a);
