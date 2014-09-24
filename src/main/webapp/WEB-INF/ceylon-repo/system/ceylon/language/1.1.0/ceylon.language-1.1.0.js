@@ -5093,7 +5093,7 @@ function $_false() {return false;}
 initType($_false, "ceylon.language::false", $_Boolean);
 $_false.$crtmm$=function(){return{'super':{t:$_Boolean},mod:$CCMM$,pa:65,d:['$','false']}};
 Boolean.prototype.getT$name = function() {
-return (this.valueOf()?$_true:$_false).$$.T$name;
+return 'ceylon.language::Boolean';
 }
 Boolean.prototype.getT$all = function() {
 return (this.valueOf()?$_true:$_false).$$.T$all;
@@ -5336,7 +5336,7 @@ return st.t;
 }
 mm=getrtmm$$(st.t);
 }
-mm=getrtmm$(ta);
+mm=getrtmm$$(ta);
 var sts=mm['sts'];
 if (sts) for(var i=0;i<sts.length;i++) {
 st=sts[i];
@@ -5811,9 +5811,9 @@ atr$(that,'hash',function(){return coihash$(that);},undefined,dummy.$prop$getHas
 atr$(that,'declaration',function(){return coimoddcl$(that);},undefined,dummy.$prop$getDeclaration.$crtmm$);
 atr$(that,'container',function(){return coicont$(that); },undefined,dummy.$prop$getContainer.$crtmm$);
 atr$(that,'typeArguments',function(){return coitarg$(that);},undefined,dummy.$prop$getTypeArguments.$crtmm$);
-atr$(that,'extendedType',function(){return coiexttype$(that); },undefined,dummy.$prop$getExtendedType.$crtm$);
-atr$(that,'satisfiedTypes',function(){return coisattype$(that); },undefined,dummy.$prop$getSatisfiedTypes.$crtm$);
-atr$(that,'caseValues',function(){return coicase$(that); },undefined,dummy.$prop$getCaseValues.$crtm$);
+atr$(that,'extendedType',function(){return coiexttype$(that); },undefined,dummy.$prop$getExtendedType.$crtmm$);
+atr$(that,'satisfiedTypes',function(){return coisattype$(that); },undefined,dummy.$prop$getSatisfiedTypes.$crtmm$);
+atr$(that,'caseValues',function(){return coicase$(that); },undefined,dummy.$prop$getCaseValues.$crtmm$);
 } else {
 that=new AppliedInterface$jsint.$$;
 }
@@ -6183,12 +6183,13 @@ throw TypeApplicationException$meta$model("Missing type argument for "+tp);
 var _tp = mm.tp[tp];
 var _t = typeArgs.$_get(i).tipo;
 _ta[tp]={t:_t};
-if ((_tp.sts && _tp.sts.length>0) || (_tp.of && _tp.of.length > 0)) {
-var restraints=(_tp.sts && _tp.sts.length>0)?_tp.sts:_tp.of;
-for (var j=0; j<restraints.length;j++) {
-var _r=restraints[j];if (typeof(_r)==='function')_r=getrtmm$$(_r).$t;
-if (!extendsType(_ta[tp],_r))
-throw TypeApplicationException$meta$model("Type argument for " + tp + " violates type parameter constraints");
+if (_tp.sts) {
+if (!extendsType(_ta[tp],{t:'i',l:_tp.sts})){
+throw TypeApplicationException$meta$model("Type argument for " + mm.d[mm.d.length-1] + "." + tp.substring(0,tp.indexOf('$')) + " violates type parameter constraints (satisfied)");
+}
+} else if (_tp.of) {
+if (!extendsType(_ta[tp],{t:'u',l:_tp.of})){
+throw TypeApplicationException$meta$model("Type argument for " + mm.d[mm.d.length-1] + "." + tp.substring(0,tp.indexOf('$')) + " violates type parameter constraints (enumerated)");
 }
 }
 i++;
@@ -6214,7 +6215,7 @@ var _pkg = getModules$meta().find(_m['$mod-name'],_m['$mod-version']).findPackag
 return OpenFunction(_pkg, $$appliedMethod.tipo);
 },undefined,function(){return{mod:$CCMM$,$t:{t:FunctionDeclaration$meta$declaration},$cont:AppliedMethod,an:function(){return[shared(),actual()];},d:['ceylon.language.meta.model','Method','$at','declaration']};});
 atr$($$appliedMethod,'type',function(){
-return typeLiteral$meta({Type$typeLiteral:(this.$$targs$$&&this.$$targs$$.Container$Method)||mm.$t});
+return typeLiteral$meta({Type$typeLiteral:restype$(this.$$targs$$.Container$Method,this.$$targs$$.Type$Method||mm.$t)});
 },undefined,function(){return{mod:$CCMM$,$t:{t:Type$meta$model,a:{Type$Type:'Type'}},$cont:AppliedMethod,an:function(){return[shared(),actual()];},d:['ceylon.language.meta.model','Method','$at','type']};});
 atr$($$appliedMethod,'typeArguments',function(){
 return funtypearg$($$appliedMethod);
@@ -6251,44 +6252,43 @@ return AppliedMethod;
 }
 ex$.$init$AppliedMethod$meta$model=$init$AppliedMethod;
 $init$AppliedMethod();
-function AppliedAttribute(pname, atr,$$targs$$,$$appliedAttribute){
+function AppliedAttribute(pname, atr,$$targs$$,that){
 if (!$$targs$$.Get$AppliedAttribute)$$targs$$.Get$AppliedAttribute=$$targs$$.Get$Attribute;
 if (!$$targs$$.Set$AppliedAttribute)$$targs$$.Set$AppliedAttribute=$$targs$$.Set$Attribute;
 if (!$$targs$$.Container$AppliedAttribute)$$targs$$.Container$AppliedAttribute=$$targs$$.Container$Attribute;
 $init$AppliedAttribute();
-if ($$appliedAttribute===undefined) {
-$$appliedAttribute=function(x){return AppliedValue$jsint(x,atr,
+if (that===undefined) {
+that=function(x){return AppliedValue$jsint(x,atr,
 {Get$AppliedValue:$$targs$$.Get$AppliedAttribute,Set$AppliedValue:$$targs$$.Set$AppliedAttribute,
 Container$AppliedValue:$$targs$$.Container$AppliedAttribute});};
-$$appliedAttribute.$$=AppliedAttribute.$$;
+that.$$=AppliedAttribute.$$;
 var dummy=new AppliedAttribute.$$;
-$$appliedAttribute.getT$all=function(){return dummy.getT$all();};
-$$appliedAttribute.getT$name=function(){return dummy.getT$name();};
+that.getT$all=function(){return dummy.getT$all();};
+that.getT$name=function(){return dummy.getT$name();};
 }
-Attribute$meta$model($$appliedAttribute.$$targs$$===undefined?$$targs$$:{Get$Attribute:$$appliedAttribute.$$targs$$.Get$AppliedAttribute,
-Set$Attribute:$$appliedAttribute.$$targs$$.Set$AppliedAttribute,
-Container$Attribute:$$appliedAttribute.$$targs$$.Container$AppliedAttribute},$$appliedAttribute);
-set_type_args($$appliedAttribute,$$targs$$,AppliedAttribute);
-$$appliedAttribute.tipo=atr;
-$$appliedAttribute.pname=pname;
-atr$($$appliedAttribute,'type',function(){
+Attribute$meta$model(that.$$targs$$===undefined?$$targs$$:{Get$Attribute:that.$$targs$$.Get$AppliedAttribute,
+Set$Attribute:that.$$targs$$.Set$AppliedAttribute,
+Container$Attribute:that.$$targs$$.Container$AppliedAttribute},that);
+set_type_args(that,$$targs$$,AppliedAttribute);
+that.tipo=atr;
+that.pname=pname;
+atr$(that,'type',function(){
 var t = getrtmm$$(atr);
 if (t===undefined)throw Exception("Attribute reference not found. Metamodel doesn't work in modules compiled in lexical scope style.");
-t=t.$t;
-return typeLiteral$meta({Type$typeLiteral:t});
+return typeLiteral$meta({Type$typeLiteral:restype$($$targs$$.Container$Attribute,t.$t)});
 },undefined,function(){return{mod:$CCMM$,$t:{t:Type$meta$model,a:{Type$Type:'Get$Attribute'}},$cont:AppliedAttribute,an:function(){return[shared(),actual()];},d:['ceylon.language.meta.model','Attribute','$at','type']};});
-atr$($$appliedAttribute,'declaration',function(){
+atr$(that,'declaration',function(){
 var mm = getrtmm$$(atr);
 var _m = typeof(mm.mod)==='function'?mm.mod():mm.mod;
 var pkg = getModules$meta().find(_m['$mod-name'],_m['$mod-version']).findPackage(mm.d[0]);
 return OpenValue$jsint(pkg, atr);
 },undefined,function(){return{mod:$CCMM$,$t:{t:ValueDeclaration$meta$declaration},$cont:AppliedAttribute,an:function(){return[shared(),actual()];},d:['ceylon.language.meta.model','Attribute','$at','declaration']};});
-$$appliedAttribute.$_bind=function(cont){
+that.$_bind=function(cont){
 return AppliedValue$jsint(cont,atr,{Get$AppliedValue:$$targs$$.Get$AppliedAttribute,
 Set$AppliedValue:$$targs$$.Set$AppliedAttribute,
 Container$AppliedValue:$$targs$$.Container$AppliedAttribute});
 }
-atr$($$appliedAttribute,'string',function(){
+atr$(that,'string',function(){
 var c=getrtmm$$(atr).$cont;
 if (typeof(c.$crtmm$)==='function')c.$crtmm$=c.$crtmm$();
 if (!c)return qname$(atr);
@@ -6309,10 +6309,13 @@ qn+=">";
 qn+="."+pname;
 return qn;
 },undefined,function(){return{mod:$CCMM$,$t:{t:$_String},d:['$','Object','$at','string']};});
-$$appliedAttribute.equals=function(o) {
+atr$(that,'container',function(){
+return AppliedValue$jsint.$$.prototype.$prop$getContainer.get.call(this);
+},undefined,function(){return{mod:$CCMM$,$t:{t:Type$meta$model,a:{Type$Type:{t:Anything}}},$cont:AppliedAttribute,pa:67,d:['ceylon.language.jsint','Member','$at','container']};});
+that.equals=function(o) {
 return is$(o,{t:AppliedAttribute}) && o.tipo===atr;
 }
-return $$appliedAttribute;
+return that;
 }
 AppliedAttribute.$crtmm$=function(){return{mod:$CCMM$,'super':{t:Basic},tp:{Get:{dv:'out','def':{t:Anything}},Set:{dv:'in','def':{t:Nothing}},Container:{dv:'in'}},sts:[{t:Attribute$meta$model,a:{Get:'Get',Set:'Set',Container:'Container'}}],pa:1,d:['ceylon.language.meta.model','Attribute']};};
 ex$.AppliedAttribute=AppliedAttribute;
@@ -6781,7 +6784,7 @@ var anns=allann$(mm);
 if (anns && coi$is$anns(anns,ats)) {
 var atname=mm.d[mm.d.length-1];
 if (atname.indexOf('$')>0)atname=atname.substring(0,atname.indexOf('$'));
-mems.push(AppliedAttribute(atname,_tipo.$$.prototype[m],{Container$Attribute:{t:mm.$cont},Get$Attribute:mm.$t,Set$Attribute:setter?mm.$t:{t:Nothing}}));
+mems.push(AppliedAttribute(atname,_tipo.$$.prototype[m],{Container$Attribute:{t:coi.tipo},Get$Attribute:mm.$t,Set$Attribute:setter?mm.$t:{t:Nothing}}));
 }
 }
 }
@@ -6835,12 +6838,12 @@ if (mm && mm.d && mm.d[mm.d.length-2]=='$m') {
 if (noInherit && mm.$cont!==coi.tipo)continue;
 if (!extendsType(mm.$t,$$$mptypes.Type$getMethods))continue;
 var anns=allann$(mm);
-if (anns && coi$is$anns(anns,ats) && validate$params(mm.ps,$$$mptypes.Arguments$getMethods,'',1)) {
+if (!mm.tp && anns && coi$is$anns(anns,ats) && validate$params(mm.ps,$$$mptypes.Arguments$getMethods,'',1)) {
 var types=[].rt$({t:Type$meta$model,a:{Type:{t:Anything}}});
 if (mm.ps) for (var i=0; i<mm.ps.length;i++) {
 types.push(typeLiteral$meta({Type$typeLiteral:mm.ps[i].$t}));
 }
-mems.push(AppliedMethod(mem, types, {Container$Method:{t:_tipo},Type$Method:mm.$t,Arguments$Method:$$$mptypes.Arguments$getMethods}));
+mems.push(AppliedMethod(mem,undefined,{Container$Method:{t:_tipo},Type$Method:mm.$t,Arguments$Method:types}));
 }
 }
 }
@@ -7332,6 +7335,53 @@ return ValParamDecl;
 }
 ex$.$init$ValParamDecl=$init$ValParamDecl;
 $init$ValParamDecl();
+function thutarg$(t) {
+if (typeof t === 'string')return true;
+if (t.t === 'u' || t.t === 'i') {
+for (var i=0; i < t.l.length; i++){
+if (thutarg$(t.l[i]))return true;
+}
+} else if (t.a){
+for (var i in t.a){
+if (thutarg$(t.a[i]))return true;
+}
+}
+return false;
+}
+function restype$(root,t) {
+if (!thutarg$(t))return t;
+if (typeof t === 'string'){
+function ft$(rt) {
+var mm=getrtmm$$(rt.t?rt.t:rt);
+if (mm && mm.sts) {
+for (var i=0;i<mm.sts.length;i++){
+var st=mm.sts[i];
+if (st.a && st.a[t]){
+return st.a[t];
+}
+}
+for (i=0;i<mm.sts.length;i++){
+st=ft$(mm.sts[i]);
+if (st)return st;
+}
+}
+}
+return restype$(root,ft$(root));
+}
+var r={t:t.t};
+if (t.t === 'u' || t.t === 'i'){
+r.l=[];
+for (var i=0;i<t.l.length;i++){
+r.l.push(restype$(root,t.l[i]));
+}
+} else if (t.a){
+r.a={};
+for (var i in t.a){
+r.a[i]=restype$(root,t.a[i]);
+}
+}
+return r;
+}
 ex$.$mod$ans$=function(){return[doc("The Ceylon language module containing the core definitions \nreferred to by the [language specification][spec], along \nwith some basic functionality of use to most programs:\n\n- The [[root package|package ceylon.language]] defines \n  general-purpose functionality including support for \n  [[numbers|Numeric]] and [[character strings|String]], \n  [[streams|Iterable]] and [[sequences|Sequential]], \n  [[exceptions|Throwable]], and [[null values|Null]].\n- The Ceylon _metamodel_ is defined in \n  [[package ceylon.language.meta]] and its subpackages \n  [[package ceylon.language.meta.model]] and \n  [[package ceylon.language.meta.declaration]], which\n  define interfaces for interacting with applied types and \n  unapplied type declarations respectively.\n\nThis module defines an abstraction over the basic \nfacilities of the Java or JavaScript virtual machine, \ncontaining only functionality that can be easily \nimplemented on both platforms. Thus, certain functionality, \nfor example, concurrency, for which there is no common\nvirtual machine-agnostic model, is not covered by the\nlanguage module.\n\nThe language module is an implicit dependency of every\nother Ceylon module, and may not be explicitly imported.\n\n[spec]: http://ceylon-lang.org/documentation/current/spec"),by(["Gavin King","Tom Bentley","Tako Schotanus","Stephane Epardaud","Enrique Zamudio"].rt$({t:$_String})),license("http://www.apache.org/licenses/LICENSE-2.0.html")];};ex$.$pkg$ans$ceylon$language=function(){return[doc("The root package of the Ceylon language module, functioning\nas the core of the [Ceylon platform][sdk], and covering the \nfollowing areas of functionality:\n\n- the foundational types [[Anything]], [[Object]], and \n  [[Null]], and a [[logical boolean|Boolean]] type,\n- abstractions of [[numeric|Numeric]] types, along with\n  basic types representing [[integral|Integer]] and \n  [[floating point|Float]] values,\n- [[characters|Character]] and [[character strings|String]],\n- [[unsigned bytes|Byte]],\n- support for functional programming with \n  [[streams|Iterable]],\n- abstract interfaces for unmodifiable [[lists|List]],\n  [[sets|Set]], and [[maps|Map]],\n- a low-level abstraction of native [[arrays|Array]],\n- immutable [[sequences|Sequential]], [[ranges|Range]], and\n  [[tuples|Tuple]], which provide the foundation for \n  representing [[function types|Callable]] and lists of\n  function arguments,\n- generic higher-order functions, including for function \n  [[composition|compose]] and [[partial application|curry]],\n- [[exceptions|Throwable]] and support for management of\n  heavyweight [[destroyable|Destroyable]] and \n  [[obtainable|Obtainable]] objects,\n- support for loading [[resources|Resource]] packaged with\n  a module,\n- access to information about the current \n  [[virtual machine|runtime]], [[system|system]],\n  [[process]], and [[operating system|system]], and\n- support for definition of [[annotations|Annotation]].\n\nFinally, this module defines the [[most useful and\ninteresting void function of all time ever|print]].\n\nDeclarations belonging to this package need not be \nexplicitly imported by other source files.\n\n[sdk]: https://modules.ceylon-lang.org/categories/SDK"),by(["Gavin King","Tom Bentley","Tako Schotanus","Stephane Epardaud","Enrique Zamudio"].rt$({t:$_String})),shared()];};ex$.$pkg$ans$ceylon$language$meta=function(){return[doc("The Ceylon metamodel base package.\n\nThe Ceylon metamodel allows you to: \n\n* dynamically inspect modules, packages, functions, values and types, \n* invoke functions and class initialisers, or read and write values, and\n* inspect the annotations on program elements.\n\n### A little bit of terminology\n\nThere are a few concepts and terms in the Ceylon metamodel API that you should be familiar with:\n\n- A _declaration_ is the definition of a Ceylon construct, such as a module, package, value, function\n  or class. Declarations are singletons: there is only a single instance of a given class declaration,\n  for example. You can inspect declarations to get information about how they were defined by their\n  author. You cannot directly invoke function or class declarations, but you can _apply_ them to get\n  a _model_ that you can invoke.\n- A _model_ is a Ceylon definition that represents a declaration where all the type variables have\n  been bound to _closed type_ values. You can query models for their member models and you can directly\n  invoke models.\n- A _closed type_ is a type which does not contain any unbound type variables.\n- An _open type_ is a type which may contain unbound type variables.\n\nFor example, given the following Ceylon program:\n\n    shared abstract class MyList<T>() satisfies List<T>{}\n\nThe declaration of `MyList` represents the class declaration and contains the information that it is\n`abstract` and that it satisfies the `List<T>` open type. That type is open because it contains an\nunbound type variable `T`, which is not bound when we inspect the `MyList` class declaration.\n\nGiven an particular instance of `MyList`, we can query its (closed) type with the [[type]] function,\nand we obtain a closed type representing (for example) `MyList<Integer>`. Object instances necessarily\nhave a closed type at runtime, since in order to instantiate an object, all type arguments must be\nprovided and known during instantiation, so the type of an object instance at runtime is necessarily\na closed type: they cannot contain unbound type variables.\n\nClosed types that represent class or interfaces are also models. For example, the closed type of our\n`MyList<Integer>` instance is both a closed type and a class model: you can query its satisfied types\nand find that it satisfies `List<Integer>` closed type and model (as opposed to the class declaration\nof `MyList` which satisfies the `List<T>` open type). You can also invoke that model to obtain a new\ninstance of `MyList<Integer>`.\n\n### Model and declaration literals\n\nCeylon supports getting declaration values using either the declaration API or using declaration\nliterals:\n\n- <code>\\`module ceylon.file\\`</code> returns the [[Module|ceylon.language.meta.declaration::Module]] \n  declaration which corresponds to the `ceylon.file` module you imported in your module descriptor.\n- <code>\\`package ceylon.language.meta\\`</code> returns the [[Package|ceylon.language.meta.declaration::Package]]\n  declaration from your current module imports.\n- <code>\\`interface List\\`</code> returns the [[InterfaceDeclaration|ceylon.language.meta.declaration::InterfaceDeclaration]] \n  for the [[List|ceylon.language::List]] type.\n- <code>\\`class Integer\\`</code> returns the [[ClassDeclaration|ceylon.language.meta.declaration::ClassDeclaration]] \n  for the [[Integer|ceylon.language::Integer]] type.\n- <code>\\`function type\\`</code> returns the [[FunctionDeclaration|ceylon.language.meta.declaration::FunctionDeclaration]] \n  for the [[type]] function. Similarly <code>\\`function List.shorterThan\\`</code> for methods.\n- <code>\\`value modules\\`</code> returns the [[ValueDeclaration|ceylon.language.meta.declaration::ValueDeclaration]] \n  for the [[modules]] value. Similarly <code>\\`function List.size\\`</code> for attributes.\n- <code>\\`alias AliasName\\`</code> returns the [[AliasDeclaration|ceylon.language.meta.declaration::AliasDeclaration]]\n  for the `AliasName` type alias. \n- <code>\\`given T\\`</code> returns the [[TypeParameter|ceylon.language.meta.declaration::TypeParameter]] \n  for the `T` type parameter.\n\nNote that declaration literals cannot have type arguments specified on types or methods, as declarations are not types.\n\nYou can also get access to closed types and model using either the model API or using literals: \n\n- <code>\\`List&lt;Integer>\\`</code> returns the [[Interface|ceylon.language.meta.model::Interface]] model and \n  closed type for the [[List|ceylon.language::List]] type applied with the [[Integer|ceylon.language::Integer]] type argument.\n- <code>\\`Integer\\`</code> returns the [[Class|ceylon.language.meta.model::Class]] model and closed type \n  for the [[Integer|ceylon.language::Integer]] type.\n- <code>\\`type&lt;Integer>\\`</code> returns the [[Function|ceylon.language.meta.model::Function]] model \n  for the [[type]] function applied with the [[Integer|ceylon.language::Integer]] type argument.\n  Similarly <code>\\`List&lt;Integer>.shorterThan\\`</code> for method models.\n- <code>\\`modules\\`</code> returns the [[Value|ceylon.language.meta.model::Value]] model \n  for the [[modules]] value. Similarly <code>\\`List&lt;Integer>.size\\`</code> for attribute models.\n- <code>\\`A & B\\`</code> returns a [[IntersectionType|ceylon.language.meta.model::IntersectionType]]\n  for the `A & B` intersection type.\n- <code>\\`A | B\\`</code> returns a [[UnionType|ceylon.language.meta.model::UnionType]]\n  for the `A | B` union type.\n- <code>\\`T\\`</code> returns a [[Type|ceylon.language.meta.model::Type]] representing the runtime type \n  argument value for the `T` type parameter.\n\nNotice that all model and close type literals must be applied with all required type arguments.\n\n### Accessing the metamodel using the API\n\nAside from declaration and model literals there are several ways you can start using the metamodel API:\n\n- The [[modules]] object contains a list of all currently loaded [[Module|ceylon.language.meta.declaration::Module]]\n  declarations. Note that these contain even modules you did not import as it contains all transitive\n  dependencies, and may contain multiple different versions of the same module.\n- The [[type]] function will return the closed type of the given instance, which can only be a\n  [[ClassModel|ceylon.language.meta.model::ClassModel]] since only classes can be instantiated.\n- The [[typeLiteral]] function is the functional equivalent to closed type literals: it turns a type argument\n  value into a metamodel closed type.\n- The [declaration](declaration/index.html) package contains all the declaration and open types.\n- The [model](model/index.html) package contains all the model and closed types.\n\n### Inspecting annotations\n\nConstrained annotations can be inspected using the [[annotations]] \nfunction, like this:\n\n    // Does the process declaration have the Shared annotation?\n    value isShared = annotations(`Shared`, `value process`) exists;\n\nor the related [[optionalAnnotation]] and [[sequencedAnnotations]] functions.\n\nNote that annotations are queried for via their \n[[ceylon.language::Annotation]] type, \nnot by the annotation constructor which was used to annotate \nthe program element.\n"),by(["Gavin King","Stephane Epardaud"].rt$({t:$_String})),shared()];};ex$.$pkg$ans$ceylon$language$meta$model=function(){return[doc("The Ceylon metamodel closed type and model package.\n\nAs described in the [ceylon.language.meta](../index.html) documentation, this package contains all\nthe types that represent Ceylon closed types and models.\n\n### Usage example\n\nThe following code will list all the value declarations in the `ceylon.language` package and print their\ncurrent value:\n\n    Package languagePackage = `package ceylon.language`;\n    ValueDeclaration[] valueDeclarations = languagePackage.members<ValueDeclaration>();\n    Value<Anything>[] valueModels = valueDeclarations*.apply<Anything>();\n    for(val in valueModels){\n        // skip the nothing value which cannot be read\n        if(val.type != `Nothing`){\n            print(val.get());\n        }\n    }\n\nThe following code will iterate all the class declarations in the `ceylon.language` package that\nare not abstract, anonymous or annotations, and that have no type parameters nor initialiser\nparameters. For each matching class, we will apply it to get a class model which we can then\nuse to instantiate the class and display its instance:\n\n    for(decl in `package ceylon.language`.members<ClassDeclaration>()){\n        if(!decl.abstract \n                && !decl.anonymous \n                && !decl.annotation\n                && decl.parameterDeclarations.empty\n                && decl.typeParameterDeclarations.empty){\n            Class<Object,[]> classModel = decl.classApply<Object,[]>();\n            Object instance = classModel();\n            print(\"Instance of ``decl.name`` is: ``instance``\");\n        }\n    }\n"),by(["Gavin King","Stephane Epardaud"].rt$({t:$_String})),shared()];};ex$.$pkg$ans$ceylon$language$meta$declaration=function(){return[doc("The Ceylon metamodel open type and declaration package.\n\nAs described in the [ceylon.language.meta](../index.html) documentation, this package contains all\nthe types that represent Ceylon declarations and open types.\n\n### Usage example\n\nThe following code will list all the classes in the `ceylon.language` package and print their\nextended type:\n\n    for(decl in `package ceylon.language`.members<ClassDeclaration>()){\n        if(exists extendedType = decl.extendedType){\n            print(\"Class ``decl.name`` extends: ``extendedType``\");\n        }else{\n            print(\"Class ``decl.name`` does not extend anything\");\n        }\n    }\n\nThe following code will iterate all the class declarations in the `ceylon.language` package that\nare not abstract, anonymous or annotations, and that have no type parameters nor initialiser\nparameters. For each matching class, we will apply it to get a class model which we can then\nuse to instantiate the class and display its instance:\n\n    for(decl in `package ceylon.language`.members<ClassDeclaration>()){\n        if(!decl.abstract \n                && !decl.anonymous \n                && !decl.annotation\n                && decl.parameterDeclarations.empty\n                && decl.typeParameterDeclarations.empty){\n            Class<Object,[]> classModel = decl.classApply<Object,[]>();\n            Object instance = classModel();\n            print(\"Instance of ``decl.name`` is: ``instance``\");\n        }\n    }\n"),by(["Gavin King","Stephane Epardaud"].rt$({t:$_String})),shared()];};
 var properties = {};
 if (typeof navigator !== "undefined") {
@@ -7600,6 +7650,10 @@ if((($15v).valueOf()==(0).valueOf())){return "0";}var $15y=getEmpty();function s
 }}$15y=$15y.follow($164,{Other$follow:{t:Character}});$160=$160.plus($163).divided($15w);}if(($15v<0)){$15y=$15y.follow(Character(45,true),{Other$follow:{t:Character}});}return $_String($15y);}
 ex$.formatInteger=formatInteger;formatInteger.$crtmm$=function(){return{mod:$CCMM$,$t:{t:$_String},ps:[{nm:'integer',mt:'prm',$t:{t:Integer},an:function(){return[doc("The integer value to format.")];}},{nm:'radix',mt:'prm',def:1,$t:{t:Integer},an:function(){return[doc$($CCMM$,'$:formatInteger:$at:radix$jgf323')];}}],pa:1,an:function(){return[doc$($CCMM$,'$:formatInteger'),$_throws($init$OpenClass$jsint()(lmp$(ex$,'$'),AssertionError),"if [[radix]] is not between [[minRadix]] and \n[[maxRadix]]"),see([$init$OpenFunction()(lmp$(ex$,'$'),parseInteger)].rt$({t:FunctionDeclaration$meta$declaration}))];},d:['$','formatInteger']};};function parseBoolean($167){var $168=$167;if($168==="true") {return true;}else if($168==="false") {return false;}else {return null;}}
 ex$.parseBoolean=parseBoolean;parseBoolean.$crtmm$=function(){return{mod:$CCMM$,$t:{t:'u',l:[{t:Null},{t:$_Boolean}]},ps:[{nm:'string',mt:'prm',$t:{t:$_String}}],pa:1,an:function(){return[doc$($CCMM$,'$:parseBoolean')];},d:['$','parseBoolean']};};function className(obj) {
+if (obj===null) return 'ceylon.language::Null';
+if (obj===undefined) return "JavaScript UNDEFINED";
+if (obj===true) return 'ceylon.language::true';
+if (obj===false) return 'ceylon.language::false';
 function _typename(t) {
 if (t.t==='i' || t.t==='u') {
 var _sep = t.t==='i'?'&':'|';
@@ -7622,8 +7676,6 @@ tn += '>';
 return tn;
 }
 }
-if (obj === null) return 'ceylon.language::Null';
-if (obj === undefined) return "JavaScript UNDEFINED";
 var tn = obj.getT$name === undefined ? 'UNKNOWN' : obj.getT$name();
 if (tn === 'UNKNOWN') {
 if (typeof obj === 'function') {
