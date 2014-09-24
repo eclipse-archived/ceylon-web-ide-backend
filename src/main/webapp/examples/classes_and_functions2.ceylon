@@ -9,9 +9,11 @@ Float(Float, Float) f2 = f1;
 // We can also write:
 Float f3(Float x, Float y) => f1(x,y);
 
-// Function references can be used like any other value,
-// for instance as arguments or return values:
-Float(Float, Float) makeFunc(Float(Float) f) {
+"Function references can be used like any other value,
+ for instance as arguments or return values"
+Float(Float, Float) makeFunc(
+        "Notice the Return(Param) syntax, this is a value parameter"
+        Float(Float) f) {
     // Nested functions can access data from the surrounding
     // function:
     Float ret(Float x, Float y) => average(f(x), f(y));
@@ -26,12 +28,16 @@ print("doubleAvg(1.0, 7.0) = ``doubleAvg(1.0, 7.0)``");
 // For instance, Float has a method "times":
 print("Should be the same: ``makeFunc(2.0.times)(1.0, 7.0)``");
 
-// We can further improve this using anonymous functions:
-function makeFunc2(Float(Float) f) {
+"We can further improve this using anonymous functions"
+function makeFunc2(
+        "This alternate syntax makes it a Callable parameter"
+        Float f(Float g)) {
     // This is equivalent to "ret" in makeFunc above:
     return (Float x, Float y) => average(f(x), f(y));
 }
-value squareAvg = makeFunc2((Float n) => n^2);
+"Because makeFunc2 param uses Callable syntax,
+ the type parameter can be inferred here"
+value squareAvg = makeFunc2((n) => n^2);
 print("squareAvg(1.0, 7.0) = ``squareAvg(1.0, 7.0)``");
 
 // A different and rather elegant and approach is to define a
