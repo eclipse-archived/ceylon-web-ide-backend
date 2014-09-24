@@ -119,6 +119,7 @@
     <li class="news_entry"><a href="#" onClick="return editCode('hello_world')">Hello World</a></li>
     <li class="news_entry"><a href="#" onClick="return editCode('basics')">Basics</a></li>
     <li class="news_entry"><a href="#" onClick="return editCode('null_and_union')">Null values and union types</a></li>
+    <li class="news_entry"><a href="#" onClick="return editCode('conditions')">Conditions and assertions</a></li>
     <li class="news_entry"><a href="#" onClick="return editCode('classes_and_functions')">Classes and functions 1</a></li>
     <li class="news_entry"><a href="#" onClick="return editCode('interfaces')">Interfaces and mixin inheritance</a></li>
     <li class="news_entry"><a href="#" onClick="return editCode('classes_and_functions2')">Classes and functions 2</a></li>
