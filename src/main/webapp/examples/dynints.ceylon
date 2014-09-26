@@ -6,7 +6,7 @@ dynamic DataHolder {
   shared formal dynamic data;
 }
 
-"Dynamic interfaces can extend other dynamic interfaces"
+"Dynamic interfaces can satisfy other dynamic interfaces"
 dynamic Node satisfies DataHolder {
   "This interface contains a typed member"
   shared formal Array<Node> children;
