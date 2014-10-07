@@ -26,7 +26,6 @@
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/mongo-2.7.3.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/antlr-3.4.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/json-smart-1.1.1.jar"/>
-	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/txtmark-0.8-c0dcd373ce.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/com.redhat.ceylon.common-1.1.0.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/com.redhat.ceylon.compiler.js-1.1.0.jar" sourcepath="/ceylon-js"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/com.redhat.ceylon.module-resolver-1.1.0.jar"/>
@@ -36,10 +35,7 @@
 			<attribute name="owner.project.facets" value="jst.web"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/java-1.7.0-openjdk-1.7.0.60-2.4.7.4.fc20.x86_64">
-		<attributes>
-			<attribute name="owner.project.facets" value="java"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/txtmark-0.11.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
