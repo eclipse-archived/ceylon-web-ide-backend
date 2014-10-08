@@ -3913,6 +3913,7 @@ atr$(ClassOrInterfaceDeclaration$meta$declaration.$$.prototype,'container',funct
 if (this.$parent)return this.$parent;
 var mm=getrtmm$$(this.tipo);
 var _c=mm.$cont;
+if (_c===0)return this.containingPackage;
 if (_c) {
 if (_c.t === undefined && _c.get && _c.$crtmm$) {
 return OpenValue$jsint(this.containingPackage, _c);
@@ -6037,7 +6038,11 @@ return f._decl;
 atr$(f,'container',function(){
 if (o===undefined)return f.containingPackage;
 if (f.$parent===undefined) {
+if (mm.$cont===0) {
+f.$parent=f.containingPackage;
+} else {
 f.$parent=type$meta(o,{Type$type:mm.$cont});
+}
 }
 return f.$parent;
 },undefined,function(){return{mod:$CCMM$,$t:{t:'u',l:[{t:Null},{t:Type$meta$model,a:{Type$Type:{t:Anything}}}]},$cont:AppliedFunction,d:['ceylon.language.meta.model','Model','$at','container']};});
@@ -6236,7 +6241,7 @@ atr$($$appliedMethod,'string',function(){
 return funmodstr$($$appliedMethod);
 },undefined,$_Object({}).$prop$getString.$crtmm$);
 atr$($$appliedMethod,'container',function(){
-if (this.toplevel)return this.containingPackage;
+if (this.toplevel || getrtmm$$(this.tipo).$cont===0)return this.containingPackage;
 if (this.$parent===undefined)this.$parent=typeLiteral$meta({Type$typeLiteral:getrtmm$$(this.tipo).$cont});
 return this.$parent;
 },undefined,function(){return{mod:$CCMM$,$t:{t:'u',l:[{t:Null},{t:Type$meta$model,a:{Type$Type:{t:Anything}}}]},$cont:AppliedMethod,d:['ceylon.language.meta.model','Model','$at','container']};});
@@ -6495,7 +6500,8 @@ throw Exception("FunctionModel.typeArguments-we don't have a metamodel!");
 function coicont$(coi) {
 if (coi.$parent)return coi.$parent;
 var cont = getrtmm$$(coi.tipo).$cont;
-if (cont === undefined)return null;
+if (cont===undefined)return null;
+if (cont===0)return coi.containingPackage;
 var cmm=getrtmm$$(cont);
 var _t={t:cont};
 var _out=undefined;
@@ -6994,7 +7000,7 @@ return false;
 $$openFunction.equals.$crtmm$=function(){return{mod:$CCMM$,$t:{t:$_Boolean},d:['$','Object','$m','equals']};}
 atr$($$openFunction,'container',function(){
 if (this.$parent)return this.$parent;
-if (this.toplevel)return this.containingPackage;
+if (this.toplevel || this.tipo.$crtmm$.$cont===0)return this.containingPackage;
 return typeLiteral$meta({Type$typeLiteral:this.tipo.$crtmm$.$cont});
 },undefined,function(){return{mod:$CCMM$,$t:{t:'u',l:[{t:NestableDeclaration$meta$declaration},{t:Package$meta$declaration}]},d:['ceylon.language.meta.declaration','NestableDeclaration','$at','container']};});
 atr$($$openFunction,'annotation',function(){
@@ -7128,7 +7134,7 @@ throw Error("OpenValue.openType-we don't have a metamodel!");
 },undefined,function(){return{mod:$CCMM$,$t:{t:$_Boolean},$cont:OpenValue$jsint,pa:67,d:['ceylon.language.jsint','OpenValue','$at','default']};});atr$(openValue$,'shared',function(){return (getrtmm$$(this.tipo).pa&1) > 0;
 },undefined,function(){return{mod:$CCMM$,$t:{t:$_Boolean},$cont:OpenValue$jsint,pa:67,d:['ceylon.language.jsint','OpenValue','$at','shared']};});atr$(openValue$,'toplevel',function(){return this.toplevel_;
 },undefined,function(){return{mod:$CCMM$,$t:{t:$_Boolean},$cont:OpenValue$jsint,pa:67,d:['ceylon.language.jsint','OpenValue','$at','toplevel']};});atr$(openValue$,'container',function(){if (this.$parent)return this.$parent;
-if (this.toplevel)return this.containingPackage;
+if (this.toplevel || this.tipo.$crtmm$.$cont===0)return this.containingPackage;
 return typeLiteral$meta({Type$typeLiteral:this.tipo.$crtmm$.$cont});
 },undefined,function(){return{mod:$CCMM$,$t:{t:'u',l:[{t:Package$meta$declaration},{t:NestableDeclaration$meta$declaration}]},$cont:OpenValue$jsint,pa:67,d:['ceylon.language.jsint','OpenValue','$at','container']};});atr$(openValue$,'qualifiedName',function(){return qname$(this.tipo);
 },undefined,function(){return{mod:$CCMM$,$t:{t:$_String},$cont:OpenValue$jsint,pa:67,d:['ceylon.language.jsint','OpenValue','$at','qualifiedName']};});openValue$.equals=function(o) {
