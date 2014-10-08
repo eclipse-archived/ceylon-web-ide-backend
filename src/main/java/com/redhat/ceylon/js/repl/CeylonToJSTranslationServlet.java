@@ -20,6 +20,7 @@ import com.redhat.ceylon.compiler.Options;
 import com.redhat.ceylon.compiler.js.JsCompiler;
 import com.redhat.ceylon.compiler.js.JsIdentifierNames;
 import com.redhat.ceylon.compiler.js.JsOutput;
+import com.redhat.ceylon.compiler.loader.ModelEncoder;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.analyzer.UsageWarning;
 import com.redhat.ceylon.compiler.typechecker.model.Module;
@@ -64,14 +65,10 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             class JsMemoryOutput extends JsOutput {
                 JsMemoryOutput(Module m) throws IOException { super(m, "UTF-8"); }
                 @Override protected Writer getWriter() { return out; }
-                @Override public void encodeModel(final JsIdentifierNames names) throws IOException {
-                    out("\nvar _CTM$;function $CCMM$(){if (_CTM$===undefined)_CTM$=require('",
-                            JsCompiler.scriptPath(module), "-model').$CCMM$;return _CTM$;}\n");
-                    getWriter().write("ex$.$CCMM$=$CCMM$;\n");
-                    Module clm = module.getLanguageModule();
-                    clalias = names.moduleAlias(clm) + ".";
-                    require(clm, names);
-                };
+                @Override protected void writeModelFile() throws IOException {}
+                @Override protected void writeModelRetriever() throws IOException {
+                    ModelEncoder.encodeModel(mmg.getModel(), out);
+                }
             }
             out.write("var ex$={};");
             //Run the compiler, if typechecker returns no errors.
