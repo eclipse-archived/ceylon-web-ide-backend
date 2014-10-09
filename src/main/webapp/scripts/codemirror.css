@@ -78,7 +78,7 @@ div.CodeMirror pre {
 
 /* DEFAULT THEME */
 
-.cm-s-default .cm-keyword {color: rgb(76,76,76);font-weight:bold;}
+.cm-s-default .cm-keyword {color: rgb(76,76,76);/*font-weight:bold;*/}
 .cm-s-default .cm-atom {color: #219;}
 .cm-s-default .cm-number {color: blue;}
 .cm-s-default .cm-def {color: #00f;}
