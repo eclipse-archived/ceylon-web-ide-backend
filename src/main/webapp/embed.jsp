@@ -39,7 +39,7 @@
             background: white;
             white-space: pre-wrap;
             font-family: Inconsolata, Monaco, Courier, monospace;
-            font-size: 85%;
+            font-size: 14px;
         }
         .jsc_msg {
             color: gray;

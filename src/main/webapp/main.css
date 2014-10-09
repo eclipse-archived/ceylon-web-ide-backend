@@ -119,7 +119,6 @@ body.bp {
   line-height: 1.5;
   font-family: 'Source Sans Pro', Arial, 'Helvetica Neue', Helvetica, sans-serif;
   color: #333333;
-  font-size: 75%;
   font-size: 15px;
   color: #2c2c2c;
   background-color: white;
@@ -500,13 +499,13 @@ body.bp pre {
   padding-left: 10px;
   font-family: Inconsolata, Monaco, Courier, monospace;
   font-style: normal;
-  font-size: 85%;
+  font-size: 14px;
 }
 /* line 103 */
 body.bp p code, body.bp ul code, body.bp ol code {
   font-family: Inconsolata, Monaco, Courier, monospace;
   font-style: normal;
-  font-size: 90%;
+  font-size: 14px;
   color: #2E5C00;
 }
 /* line 112 */

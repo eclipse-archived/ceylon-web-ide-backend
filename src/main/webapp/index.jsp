@@ -28,7 +28,7 @@
             background: white;
             white-space: pre-wrap;
             font-family: Inconsolata, Monaco, Courier, monospace;
-            font-size: 85%;
+            font-size: 14px;
             min-width: 290px;
             max-width: 900px;
             min-height: 58px;
