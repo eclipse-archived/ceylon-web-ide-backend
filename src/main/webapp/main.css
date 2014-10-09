@@ -624,6 +624,14 @@ form.bp textarea {
   width: 325px;
   display: block;
   float: left;
+  /* for high resolution display */
+  @media only screen and (min--moz-device-pixel-ratio: 2),
+  only screen and (-o-min-device-pixel-ratio: 2/1),
+  only screen and (-webkit-min-device-pixel-ratio: 2),
+  only screen and (min-device-pixel-ratio: 2) {
+    background: url("http://ceylon-lang.org/images/ceylon-logo-2x.png") no-repeat 0px 0px;
+    background-size: 325px 100px;
+  }
 }
 /* line 169 */
 #header #header-logo h1 {
