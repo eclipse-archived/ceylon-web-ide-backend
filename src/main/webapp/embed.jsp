@@ -5,6 +5,8 @@
     <title>Ceylon Web Runner</title>
     
     <link rel='stylesheet' media='screen, projection' type='text/css' href='main.css'/>
+    <link rel='stylesheet' type='text/css'
+         href='http://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Sans|PT+Sans:700|Inconsolata|Inconsolata:700'/>
     <!--[if lt IE 8]>
         <link href='http://ceylon-lang.org/stylesheets/ie.css' media='screen, projection' rel='stylesheet' type='text/css' />
     <![endif]-->
@@ -36,7 +38,7 @@
             overflow: auto;
             background: white;
             white-space: pre-wrap;
-            font-family: Menlo, Monaco, Courier, monospace;
+            font-family: Inconsolata, Monaco, Courier, monospace;
             font-size: 85%;
         }
         .jsc_msg {
