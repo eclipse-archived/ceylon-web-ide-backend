@@ -29,14 +29,14 @@ public class MongoStorage implements CodeStorage {
 
     public MongoStorage() throws UnknownHostException, MongoException {
         System.out.println("Using MongoDB storage");
-        String host = System.getenv("OPENSHIFT_NOSQL_DB_HOST");
-        String sport = System.getenv("OPENSHIFT_NOSQL_DB_PORT");
+        String host = System.getenv("OPENSHIFT_MONGODB_DB_HOST");
+        String sport = System.getenv("OPENSHIFT_MONGODB_DB_PORT");
         String dbname = System.getenv("OPENSHIFT_GEAR_NAME");
         if (dbname==null) {
             dbname="ceyloncodez";
         }
-        String user = System.getenv("OPENSHIFT_NOSQL_DB_USERNAME");
-        String password = System.getenv("OPENSHIFT_NOSQL_DB_PASSWORD");
+        String user = System.getenv("OPENSHIFT_MONGODB_DB_USERNAME");
+        String password = System.getenv("OPENSHIFT_MONGODB_DB_PASSWORD");
         int port = sport == null ? 27017 : Integer.decode(sport);
         if (host == null) {
             host = "127.0.0.1";
