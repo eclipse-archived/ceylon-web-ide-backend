@@ -117,11 +117,10 @@ form.inline p {
 /* line 27 */
 body.bp {
   line-height: 1.5;
-  font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+  font-family: 'Source Sans Pro', Arial, 'Helvetica Neue', Helvetica, sans-serif;
   color: #333333;
   font-size: 75%;
   font-size: 15px;
-  font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
   color: #2c2c2c;
   background-color: white;
   font-weight: 400;
@@ -246,7 +245,7 @@ body.bp pre {
 }
 /* line 71, /usr/lib64/ruby/gems/1.8/gems/compass-0.11.7/frameworks/blueprint/stylesheets/blueprint/_typography.scss */
 body.bp pre, body.bp code, body.bp tt {
-  font: 1em "andale mono", "lucida console", monospace;
+  font-family: Inconsolata, Monaco, Courier, monospace;
   line-height: 1.5;
 }
 /* line 72, /usr/lib64/ruby/gems/1.8/gems/compass-0.11.7/frameworks/blueprint/stylesheets/blueprint/_typography.scss */
@@ -493,20 +492,19 @@ body.bp ul li, body.bp ol li {
   margin-bottom: 0.3em;
 }
 /* line 90 */
-body.bp pre,
-body.bp .syntaxhighlighter .lines {
+body.bp pre {
   margin-left: 10px;
   margin-top: 0px;
   margin-bottom: 0px;
   border-left: 5px solid #f0f0f0;
   padding-left: 10px;
-  font-family: Menlo, Monaco, Courier, monospace;
+  font-family: Inconsolata, Monaco, Courier, monospace;
   font-style: normal;
   font-size: 85%;
 }
 /* line 103 */
 body.bp p code, body.bp ul code, body.bp ol code {
-  font-family: Menlo, Monaco, Courier, monospace;
+  font-family: Inconsolata, Monaco, Courier, monospace;
   font-style: normal;
   font-size: 90%;
   color: #2E5C00;
@@ -964,7 +962,7 @@ form.bp textarea {
 }
 /* line 475 */
 #primary-content .bubble-button {
-  font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
+  font-family: 'Source Sans Pro', Arial, 'Helvetica Neue', Helvetica, sans-serif;
   font-weight: normal;
   font-size: 15px;
   text-decoration: none;
