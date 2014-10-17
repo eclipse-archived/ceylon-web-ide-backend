@@ -47,7 +47,7 @@ public class TestDoc {
     @Test
     public void testDocumentation() {
         TypeChecker tc = new TypeCheckerBuilder().verbose(false).addSrcDirectory(
-                CompilerUtils.createScriptSource(code)).getTypeChecker();
+                CompilerUtils.createScriptSource(null, code)).getTypeChecker();
         tc.process();
         final Declaration d = DocUtils.findDeclaration(tc, row, col);
         Assert.assertNotNull("Can't find declaration", d);

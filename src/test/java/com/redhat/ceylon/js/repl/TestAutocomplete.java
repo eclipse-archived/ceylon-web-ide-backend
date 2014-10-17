@@ -35,7 +35,7 @@ public class TestAutocomplete {
     }
 
     public TestAutocomplete(String text, String found) {
-        TypeChecker tc = new TypeCheckerBuilder().verbose(false).addSrcDirectory(CompilerUtils.createScriptSource(text)).getTypeChecker();
+        TypeChecker tc = new TypeCheckerBuilder().verbose(false).addSrcDirectory(CompilerUtils.createScriptSource(null, text)).getTypeChecker();
         tc.process();
         nodeText = text;
         checkCompletion = found;
