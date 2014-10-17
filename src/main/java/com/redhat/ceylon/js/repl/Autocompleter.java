@@ -187,7 +187,7 @@ public class Autocompleter extends AutocompleteVisitor {
     public static final AutocompleteUnitValidator SCRIPT_VAL = new AutocompleteUnitValidator() {
         @Override
         public boolean processUnit(PhasedUnit pu) {
-            return "SCRIPT.ceylon".equals(pu.getUnitFile().getName());
+            return !"module.ceylon".equals(pu.getUnitFile().getName());
         }
     };
 
