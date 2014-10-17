@@ -1,3 +1,5 @@
+//$webrun_wrapped
+shared void run(){
 //You can use normal conditions as in any other language
 value nums = 1..10;
 if (nums.size == 10) {
@@ -49,3 +51,4 @@ print(fifth-2);
 assert(is [Anything*] onums,
        exists ultimo=onums.last);
 print("last == ``ultimo``");
+}

@@ -1,3 +1,5 @@
+//$webrun_wrapped
+shared void run(){
 // Ceylon allows generic types and functions, i.e. they may have
 // type parameters:
 class Generic<Item>(item) {
@@ -41,3 +43,4 @@ print("t1.dist() = ``t1.dist()``");
 // Let the compiler infer the types:
 value t2 = Tools(814, 5);
 print("t2.dist() = ``t2.dist()`` (type ``className(t2.dist())``)");
+}

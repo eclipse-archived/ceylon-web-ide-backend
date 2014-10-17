@@ -1,3 +1,5 @@
+//$webrun_wrapped
+shared void run(){
 "You can get the metamodel of a class like this"
 value stringType = `String`;
 
@@ -53,3 +55,4 @@ value sharedAttribs = stringType.getAttributes<String,Anything,Nothing>(
                           `SharedAnnotation`);
 print([ for (a in sharedAttribs)
             if (a.type == stringType) a ]);
+}

@@ -1,3 +1,5 @@
+//$webrun_wrapped
+shared void run(){
 class SimpleClass() {
     shared String upper(Integer x) {
         return "INT ``x``";
@@ -16,3 +18,4 @@ function f(Integer i) => x.upper(i);
 higher(f);
 //Even pass an anonymous function
 higher((Integer x) => "inline ``x``!");
+}

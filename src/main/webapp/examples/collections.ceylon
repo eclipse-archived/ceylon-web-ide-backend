@@ -1,3 +1,5 @@
+//$webrun_wrapped
+shared void run(){
 // A constant, read-only sequence of values:
 String[] animals = [ "elephant", "parrot", "giraffe" ];
 String[] none = []; // empty sequence
@@ -85,3 +87,4 @@ list(for (i in 1..3) for (j in 1..3) if ((i+j)%2 == 0) i*j);
 // Comprehension can also start with a condition
 print("Nothing will be printed");
 list(if (animals.size > 3) for (a in animals) a);
+}

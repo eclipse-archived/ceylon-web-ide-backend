@@ -1,3 +1,5 @@
+//$webrun_wrapped
+shared void run(){
 // The classic "hello world" in Ceylon
 print("Hello world!");
 
@@ -9,3 +11,4 @@ print("Hello ``str``!");
 // It is converted to JavaScript and runs directly in your browser!
 
 // Select a sample on the right to load it into this editor.
+}

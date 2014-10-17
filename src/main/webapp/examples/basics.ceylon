@@ -1,3 +1,5 @@
+//$webrun_wrapped
+shared void run(){
 // Any object can be converted to a string using ".string".
 // There are no special primitive types, even numbers are objects.
 Integer i = 3;
@@ -31,3 +33,4 @@ while (f < 1_000_000.0) {
     }
 }
 print("f=``f`` (``system.milliseconds-t1``ms)");
+}

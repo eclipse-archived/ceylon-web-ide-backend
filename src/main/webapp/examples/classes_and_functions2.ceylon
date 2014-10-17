@@ -1,3 +1,5 @@
+//$webrun_wrapped
+shared void run(){
 // We can use a reference to a function as a value:
 Float average(Float x, Float y) => (x + y) * 0.5;
 value f1 = average;
@@ -90,3 +92,4 @@ class Outer(Float(Float, Float) func) {
 Outer o = Outer(average);
 Outer.Inner i = o.Inner();
 print("Outer(average).Inner().f() = ``i.f()``");
+}

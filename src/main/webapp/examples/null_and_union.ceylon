@@ -1,3 +1,5 @@
+//$webrun_wrapped
+shared void run(){
 // The following is an error because null is not a String.
 //String s = null;  //ERROR!
 
@@ -49,4 +51,5 @@ if (is Integer y = x) {
 String|Null optional = s1; // equivalent to type "String?"
 if (is Null optional) {
     print("optional is null");
+}
 }

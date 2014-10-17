@@ -1,5 +1,3 @@
-//$ webrun_full_script
-
 // Interfaces and abstract classes can specify a list of
 // implementing types.
 abstract class Node() of Leaf | Branch {}
@@ -53,7 +51,7 @@ void testSize(Integer x) {
     case (equal) { print("x is exactly 5"); }
 }
 
-void run_script() {
+void run() {
     printTree(tree);
     testSize(42);
 }

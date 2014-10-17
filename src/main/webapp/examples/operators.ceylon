@@ -1,3 +1,5 @@
+//$webrun_wrapped
+shared void run(){
 // Operators are associated to specific interfaces. A type that
 // satisfies such an interface can be used with the respective
 // operators.
@@ -31,3 +33,4 @@ void cmp2(Product x, Product y) {
     case (equal) { print("``x`` == ``y``"); }
 }
 cmp(bee, frog);
+}

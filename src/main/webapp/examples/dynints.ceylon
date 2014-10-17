@@ -1,3 +1,5 @@
+//$webrun_wrapped
+shared void run(){
 "You can define a dynamic interface, so you can use
  conformant instances outside of dynamic blocks"
 dynamic DataHolder {
@@ -42,3 +44,4 @@ dynamic {
   print("Data of first child: ``k.data``");
 }
 print("Next child should be null: ``n.children[1] else "NULL"``");
+}

@@ -1,3 +1,5 @@
+//$webrun_wrapped
+shared void run(){
 "This interface represents a customer of the shop."
 interface Customer {
  
@@ -87,3 +89,4 @@ value catwoman = PetShopCustomer(1, "Catwoman");
 print("Customer: ``catwoman``"); // automatically uses ".string"
 catwoman.numberOfItems = 3;
 catwoman.checkOut();
+}

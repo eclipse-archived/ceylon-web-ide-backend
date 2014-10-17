@@ -1,3 +1,5 @@
+//$webrun_wrapped
+shared void run(){
 // The JVM backend of the Ceylon compiler provides good
 // interoperability with Java, so that programs can use the JDK.
 // Interoperability with JavaScript is also provided, mainly
@@ -19,4 +21,5 @@ dynamic {
             elem.textContent = "*``oldText``*";
         }
     }
+}
 }

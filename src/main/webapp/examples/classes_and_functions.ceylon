@@ -1,3 +1,5 @@
+//$webrun_wrapped
+shared void run(){
 // Functions use the familiar C/Java syntax:
 Float mean(Float x, Float y) {
     return ((x*x + y*y) / 2) ^ 0.5;
@@ -116,3 +118,4 @@ void order(Product|String product, Integer count=1,
 }
 
 order(polly, 28, "I like birds");
+}

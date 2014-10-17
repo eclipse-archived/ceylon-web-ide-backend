@@ -1,3 +1,5 @@
+//$webrun_wrapped
+shared void run(){
 void greet(String name="World") {
     print("Hello, ``name``!");
 }
@@ -8,3 +10,4 @@ greet();
 greet("yourself");
 shout(null);
 shout("yourself");
+}
