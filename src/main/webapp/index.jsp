@@ -19,7 +19,7 @@
         .invis {
             display: none;
         }
-        #output, #edit_ceylon {
+        #output, #edit_ceylon, #edit_module {
             border: 1px solid black;
             width:  620px;
             height: 220px;
@@ -33,6 +33,15 @@
             max-width: 900px;
             min-height: 58px;
             max-height:800px;
+        }
+        #edit_module {
+            height: 100px;
+        }
+        .alignLeft {
+            float: left;
+        }
+        .alignRight {
+            float: right;
         }
         .jsc_msg {
             color: gray;
@@ -93,14 +102,30 @@
 
     <h1 id="hdr_title">Ceylon Web Runner</h1>
     <form>
-        <span>Autocompletion: <code>Ctrl-.</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Documentation: <code>Ctrl-D</code></span>
-        <textarea id="edit_ceylon"></textarea>
+        <div id="edit_module_div" class="invis">
+            <div>
+                <span class="alignLeft">Code editor -- Autocompletion: <code>Ctrl-.</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Documentation: <code>Ctrl-D</code></span>
+                <span class="alignRight invis"><input type="checkbox" id="fullmodule" onclick="toggleFullModule()" disabled/>full module</span>
+                <div style="clear: both"></div>
+            </div>
+            <textarea id="edit_module"></textarea>
+        </div>
+        <div id="edit_ceylon_div">
+            <div>
+                <span class="alignLeft">Code editor -- Autocompletion: <code>Ctrl-.</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Documentation: <code>Ctrl-D</code></span>
+                <span class="alignRight"><input type="checkbox" id="fullscript" onclick="toggleFullScript()" disabled/>full script&nbsp;&nbsp;
+                <input type="checkbox" id="imports" onclick="toggleImports()" disabled/>imports</span>
+                <div style="clear: both"></div>
+            </div>
+            <textarea id="edit_ceylon"></textarea>
+        </div>
         <div style="text-align:center; padding-top:5px; padding-bottom:5px;">
-        <button class="bubble-button has-spinner" id="run_ceylon" name="run_ceylon" onClick="run()"><span class="spinner"><i class="icon-spin icon-refresh"> </i></span>Run</button>
+        <button class="bubble-button has-spinner" id="run_ceylon" name="run_ceylon" onClick="performRun()"><span class="spinner"><i class="icon-spin icon-refresh"> </i></span>Run</button>
         <button class="bubble-button invis" id="stop_ceylon" name="stop_ceylon" onClick="stop()">Stop</button>
-        <button class="bubble-button" onClick="clearOutput()">Clear Output</button>
+        <button class="bubble-button" onClick="doReset()">Reset</button>
         <button class="bubble-button" id="share_src" name="share_src" onClick="shareSource()">Share Code</button>
-        <input type="text" id="shareurl" name="shareurl" value="" size="45" disabled="true">
+        <input class="invis" type="text" id="shareurl" name="shareurl" onClick="this.focus();this.select()" value="" size="45" readonly="readonly">
+        <a class="invis" href="#" target="gistlink" id="gistlink">Gist</a>
         </div>
     </form>
     <pre id="result" class="cantseeme">
@@ -136,6 +161,8 @@
     <li class="news_entry"><a href="#" onClick="return editCode('operators')">Operator polymorphism</a></li>
     <li class="news_entry"><a href="#" onClick="return editCode('metamodel')">Type-safe Metamodel</a></li>
     <li class="news_entry"><a href="#" onClick="return editCode('game_of_life')">Game of Life</a></li>
+    <li class="news_entry"><a href="#" onClick="return editCode('importtest1')">Simple Import Test</a></li>
+    <li class="news_entry"><a href="#" onClick="return editCode('importtest2')">Advanced Import Test</a></li>
     </ol>
 </div>
 <div class="point-light-end"/>
