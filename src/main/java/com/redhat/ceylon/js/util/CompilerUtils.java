@@ -47,15 +47,53 @@ public class CompilerUtils {
         return typeCheckerBuilder.getTypeChecker();
     }
 
-    /** Create a script file with a directory containing the module.ceylon and
-     * a script.ceylon with the specified string as its content. */
-    public static ScriptFile createScriptSource(String content) {
-        return new ScriptFile("ROOT",
-                new ScriptFile("web_ide_script",
-                        new ScriptFile("SCRIPT.ceylon", content),
-                        CompilerUtils.MODULE_FILE
-                )
-        );
+    /**
+     * Creates an in-memory directory hierarchy containing the scripts that get passed.
+     * If a single script gets passed we create our own empty `module.ceylon` script
+     * with the given module name.
+     * If the given module name is `null` the default name "web_ide_script" will be used.
+     * When several scripts get passed the first one will be assumed to be the
+     * module descriptor.
+     */
+    public static ScriptFile createScriptSource(String modName, String script, String... scripts) {
+        // If we have a "script" we just add it as the first element of the "scripts" array
+        // (this is all just to make the usage if this method a bit easier, it's better to
+        // have a bit more complexity here instead of at all the call sites)
+        if (script != null) {
+            if (scripts != null && scripts.length > 0) {
+                String[] tmp = new String[scripts.length + 1];
+                tmp[0] = script;
+                System.arraycopy(scripts, 0, tmp, 1, scripts.length);
+                scripts = tmp;
+            } else {
+                scripts = new String[] {script};
+            }
+        }
+        // First we create an array holding the scripts themselves
+        ScriptFile[] files;
+        if (scripts.length > 1) {
+            files = new ScriptFile[scripts.length];
+            files[0] = new ScriptFile("module.ceylon", scripts[0]);
+            for (int i=1; i < scripts.length; i++) {
+                files[i] = new ScriptFile("SCRIPT" + i + ".ceylon", scripts[i]);
+            }
+        } else {
+            files = new ScriptFile[] {
+                    CompilerUtils.MODULE_FILE,
+                    new ScriptFile("SCRIPT.ceylon", scripts[0])
+            };
+        }
+        // Make sure we have a module name
+        if (modName == null) {
+            modName = "web_ide_script";
+        }
+        // Now we create the module hierarchy
+        String modParts[] = modName.split("\\.");
+        for (int i = modParts.length - 1; i >= 0; i--) {
+            files = new ScriptFile[] { new ScriptFile(modParts[i], files) };
+        }
+        // And finally the root to hold it all 
+        return new ScriptFile("ROOT", files);
     }
 
 }
