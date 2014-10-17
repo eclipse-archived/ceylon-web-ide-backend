@@ -104,7 +104,7 @@
     <form>
         <div id="edit_module_div" class="invis">
             <div>
-                <span class="alignLeft">Code editor -- Autocompletion: <code>Ctrl-.</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Documentation: <code>Ctrl-D</code></span>
+                <span class="alignLeft">Module editor -- Autocompletion: <code>Ctrl-.</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Documentation: <code>Ctrl-D</code></span>
                 <span class="alignRight invis"><input type="checkbox" id="fullmodule" onclick="toggleFullModule()" disabled/>full module</span>
                 <div style="clear: both"></div>
             </div>
