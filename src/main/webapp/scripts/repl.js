@@ -2,7 +2,13 @@ var markers=[];
 var bindings=[];
 
 require.config({
-    baseUrl: "scripts/modules",
+    baseUrl: "http://modules.ceylon-lang.org/repo/1",
+    paths : {
+        "ceylon/language/1.1.0/ceylon.language-1.1.0" : window.location.pathname + "scripts/modules/ceylon/language/1.1.0/ceylon.language-1.1.0",
+        "ceylon/language/1.1.0/ceylon.language-1.1.0-model" : window.location.pathname + "scripts/modules/ceylon/language/1.1.0/ceylon.language-1.1.0-model",
+        "jquery" : window.location.pathname + "scripts/jquery-1.11.1.min",
+        "jquery-ui" : window.location.pathname + "scripts/jquery-ui-1.11.2.min",
+    },
     waitSeconds: 15
 });
 
@@ -17,11 +23,12 @@ var live_tc={
     live_tc.status=1;
     live_tc.last=Date.now();
     live_tc.text=editor.getValue();
+    live_tc.modtext=modeditor.getValue();
   }
 };
 var closePopups=undefined;
 
-require(["ceylon/language/1.1.0/ceylon.language-1.1.0", 'jquery', 'jquery-ui-1.9.2'],
+require(["ceylon/language/1.1.0/ceylon.language-1.1.0", 'jquery', 'jquery-ui'],
     function(clang, $, jqui) {
         jquery=$;
         $(document).ready(function() {

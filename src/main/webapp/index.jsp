@@ -70,9 +70,10 @@
     <!--script type="text/javascript" src="scripts/match-highlighter.js" charset="utf-8"></script-->
     <script type="text/javascript" src="scripts/matchbrackets.js" charset="utf-8"></script>
     <link rel="stylesheet" href="scripts/codemirror.css" />
-    <script type="text/javascript" src="scripts/require-jquery.js" data-main="scripts/repl.js"></script>
+    <script type="text/javascript" src="scripts/require.js" data-main="scripts/repl.js"></script>
     <link rel='stylesheet' type='text/css' href='autocomplete.css'/>
-    <link rel='stylesheet' type='text/css' href='scripts/jquery-ui-1.9.2.custom.css'/>
+    <link rel='stylesheet' type='text/css' href='scripts/jquery-ui-1.11.2.css'/>
+    <link rel='stylesheet' type='text/css' href='scripts/jquery-ui-1.11.2.structure.css'/>
     <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css">
 
 </head>
