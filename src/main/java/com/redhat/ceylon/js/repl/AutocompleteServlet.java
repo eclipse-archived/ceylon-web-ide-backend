@@ -38,10 +38,12 @@ public class AutocompleteServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         try {
-            String script = req.getParameter("ceylon");
+            String modName = req.getParameter("modname");
+            String modScript = req.getParameter("module");
+            String[] scripts = req.getParameterValues("ceylon");
             final int locRow = Integer.parseInt(req.getParameter("r"));
             final int locCol = Integer.parseInt(req.getParameter("c"));
-            final ScriptFile src = CompilerUtils.createScriptSource(script);
+            final ScriptFile src = CompilerUtils.createScriptSource(modName, modScript, scripts);
             //Run the typechecker
             TypeChecker typeChecker = CompilerUtils.getTypeChecker(req.getServletContext(), src);
             typeChecker.process();
