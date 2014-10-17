@@ -18,7 +18,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.redhat.ceylon.compiler.Options;
 import com.redhat.ceylon.compiler.js.JsCompiler;
-import com.redhat.ceylon.compiler.js.JsIdentifierNames;
 import com.redhat.ceylon.compiler.js.JsOutput;
 import com.redhat.ceylon.compiler.loader.ModelEncoder;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
@@ -53,14 +52,16 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	    try {
-    	    String script = request.getParameter("ceylon");
-    	    final ScriptFile src = CompilerUtils.createScriptSource(script);
+            String modName = request.getParameter("modname");
+            String modScript = request.getParameter("module");
+    	    String[] scripts = request.getParameterValues("ceylon");
+    	    final ScriptFile src = CompilerUtils.createScriptSource(modName, modScript, scripts);
     	    final boolean typecheckOnly = request.getParameter("tc") != null;
 
     	    TypeChecker typeChecker = CompilerUtils.getTypeChecker(request.getServletContext(), src);
             typeChecker.process();
             
-            final CharArrayWriter out = new CharArrayWriter(script.length()*2);
+            final CharArrayWriter out = new CharArrayWriter(sumSizes(scripts)*2);
             //Override the inner output class to use the in-memory writer
             class JsMemoryOutput extends JsOutput {
                 JsMemoryOutput(Module m) throws IOException { super(m, "UTF-8"); }
@@ -122,6 +123,14 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             ServletUtils.sendResponse(Collections.singletonList(
                     String.format("Service error: %s", msg)), response);
 	    }
+	}
+	
+	private int sumSizes(String[] strings) {
+	    int result = 0;
+	    for (String s : strings) {
+	        result += s.length();
+	    }
+	    return result;
 	}
 
     private Map<String,Object> encodeError(Message err) {
