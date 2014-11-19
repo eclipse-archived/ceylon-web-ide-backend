@@ -4,7 +4,6 @@
   /* Set height, width, borders, and global font properties here */
   font-family: Inconsolata, Monaco, Courier, monospace;
   border:1px solid black; 
-  height:220px; 
   min-height:58px;
   max-height:620px; 
   width:620px;

@@ -101,6 +101,7 @@
 <div id="core-page" style="min-width:290px;max-width:900px;min-height:570px">
 
     <h1 id="hdr_title">Ceylon Web Runner</h1>
+    <a href="https://github.com/login/oauth/authorize?client_id=ef3727725eeee1d1bae2&scope=gist&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fweb-ide-backend%2Fgithubauth.html&state=xyz" target="githubauth">Log in to GitHub</a>
     <form>
         <div id="edit_module_div" class="invis">
             <div>
