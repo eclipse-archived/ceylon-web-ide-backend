@@ -16,13 +16,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.redhat.ceylon.compiler.Options;
+import com.redhat.ceylon.compiler.js.util.Options;
 import com.redhat.ceylon.compiler.js.JsCompiler;
-import com.redhat.ceylon.compiler.js.JsOutput;
+import com.redhat.ceylon.compiler.js.util.JsOutput;
 import com.redhat.ceylon.compiler.loader.ModelEncoder;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.analyzer.UsageWarning;
-import com.redhat.ceylon.compiler.typechecker.model.Module;
+import com.redhat.ceylon.model.typechecker.model.Module;
 import com.redhat.ceylon.compiler.typechecker.parser.RecognitionError;
 import com.redhat.ceylon.compiler.typechecker.tree.AnalysisMessage;
 import com.redhat.ceylon.compiler.typechecker.tree.Message;
@@ -36,7 +36,7 @@ import com.redhat.ceylon.js.util.ServletUtils;
 @WebServlet("/translate")
 public class CeylonToJSTranslationServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-    private final Options opts = new Options().indent(false).comment(false).modulify(false).addSrcDir(".");
+    private final Options opts = new Options().comment(false).modulify(false).addSrcDir(".");
 
 	/** Compiles Ceylon code and returns the resulting Javascript, along with its hover help docs.
 	 * Expects the following keys:
@@ -65,7 +65,7 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             //Override the inner output class to use the in-memory writer
             class JsMemoryOutput extends JsOutput {
                 JsMemoryOutput(Module m) throws IOException { super(m, "UTF-8"); }
-                @Override protected Writer getWriter() { return out; }
+                @Override public Writer getWriter() { return out; }
                 @Override protected void writeModelFile() throws IOException {}
                 @Override protected void writeModelRetriever() throws IOException {
                     ModelEncoder.encodeModel(mmg.getModel(), out);
