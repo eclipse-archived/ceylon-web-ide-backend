@@ -4,8 +4,8 @@ var bindings=[];
 require.config({
     baseUrl: "http://modules.ceylon-lang.org/repo/1",
     paths : {
-        "ceylon/language/1.1.0/ceylon.language-1.1.0" : window.location.pathname + "scripts/modules/ceylon/language/1.1.0/ceylon.language-1.1.0",
-        "ceylon/language/1.1.0/ceylon.language-1.1.0-model" : window.location.pathname + "scripts/modules/ceylon/language/1.1.0/ceylon.language-1.1.0-model",
+        "ceylon/language/1.1.1/ceylon.language-1.1.1" : window.location.pathname + "scripts/modules/ceylon/language/1.1.1/ceylon.language-1.1.1",
+        "ceylon/language/1.1.1/ceylon.language-1.1.1-model" : window.location.pathname + "scripts/modules/ceylon/language/1.1.1/ceylon.language-1.1.1-model",
         "jquery" : window.location.pathname + "scripts/jquery-1.11.1.min",
         "jquery-ui" : window.location.pathname + "scripts/jquery-ui-1.11.2.min",
     },
@@ -29,16 +29,16 @@ var live_tc={
 };
 var closePopups=undefined;
 
-require(["ceylon/language/1.1.0/ceylon.language-1.1.0", 'jquery', 'jquery-ui'],
+require(["ceylon/language/1.1.1/ceylon.language-1.1.1", 'jquery', 'jquery-ui'],
     function(clang, $, jqui) {
         jquery=$;
         $(document).ready(function() {
             console && console.log("Ceylon language module loaded OK");
-            clang.getProcess().write = function(x){
+            clang.$_process().write = function(x){
                 clprinted=true;
                 printOutput(x.string);
             };
-            clang.getProcess().writeLine = function(x){
+            clang.$_process().writeLine = function(x){
                 clprinted=true;
                 printOutputLine(x.string);
             };
