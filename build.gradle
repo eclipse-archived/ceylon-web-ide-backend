@@ -11,14 +11,17 @@ repositories {
 }
 
 dependencies {
-	providedCompile "ceylon:com.redhat.ceylon.typechecker:${ceylonVersion}", "ceylon:com.redhat.ceylon.compiler.js:${ceylonVersion}",
-		"ceylon:com.redhat.ceylon.model:${ceylonVersion}", "ceylon:com.redhat.ceylon.common:${ceylonVersion}",
-		"ceylon:com.redhat.ceylon.module-resolver:${ceylonVersion}", "antlr:antlr:3.4",
-		'net.minidev.json:json-smart:1.1.1'
-	providedCompile 'mongo:mongo:2.7.3'
-	providedCompile 'github:txtmark:0.11'
-	providedCompile 'org.jboss.spec:jboss-javaee-6.0:1.0.0.Final'
-	testCompile 'junit:junit:4.+', "ceylon:com.redhat.ceylon.common:${ceylonVersion}"
+    providedCompile "ceylon:com.redhat.ceylon.typechecker:${ceylonVersion}",
+        "ceylon:com.redhat.ceylon.compiler.js:${ceylonVersion}",
+        "ceylon:com.redhat.ceylon.model:${ceylonVersion}",
+        "ceylon:com.redhat.ceylon.common:${ceylonVersion}",
+        "ceylon:com.redhat.ceylon.module-resolver:${ceylonVersion}",
+        "antlr:antlr:3.4",
+        "net.minidev.json:json-smart:1.1.1",
+        "mongo:mongo:2.7.3",
+        "github:txtmark:0.11",
+        "org.jboss.spec:jboss-javaee-6.0:1.0.0.Final"
+    testCompile 'junit:junit:4.+', "ceylon:com.redhat.ceylon.common:${ceylonVersion}"
 }
 
 task copylangmod(type:Copy) {
