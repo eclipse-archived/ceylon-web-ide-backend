@@ -11,19 +11,19 @@ import com.redhat.ceylon.compiler.js.AutocompleteVisitor;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnits;
-import com.redhat.ceylon.compiler.typechecker.model.Annotation;
-import com.redhat.ceylon.compiler.typechecker.model.Class;
-import com.redhat.ceylon.compiler.typechecker.model.ClassOrInterface;
-import com.redhat.ceylon.compiler.typechecker.model.Declaration;
-import com.redhat.ceylon.compiler.typechecker.model.DeclarationWithProximity;
-import com.redhat.ceylon.compiler.typechecker.model.Method;
-import com.redhat.ceylon.compiler.typechecker.model.Parameter;
-import com.redhat.ceylon.compiler.typechecker.model.ParameterList;
-import com.redhat.ceylon.compiler.typechecker.model.ProducedType;
-import com.redhat.ceylon.compiler.typechecker.model.Setter;
-import com.redhat.ceylon.compiler.typechecker.model.TypeParameter;
-import com.redhat.ceylon.compiler.typechecker.model.TypedDeclaration;
-import com.redhat.ceylon.compiler.typechecker.model.Value;
+import com.redhat.ceylon.model.typechecker.model.Annotation;
+import com.redhat.ceylon.model.typechecker.model.Class;
+import com.redhat.ceylon.model.typechecker.model.ClassOrInterface;
+import com.redhat.ceylon.model.typechecker.model.Declaration;
+import com.redhat.ceylon.model.typechecker.model.DeclarationWithProximity;
+import com.redhat.ceylon.model.typechecker.model.Function;
+import com.redhat.ceylon.model.typechecker.model.Parameter;
+import com.redhat.ceylon.model.typechecker.model.ParameterList;
+import com.redhat.ceylon.model.typechecker.model.Type;
+import com.redhat.ceylon.model.typechecker.model.Setter;
+import com.redhat.ceylon.model.typechecker.model.TypeParameter;
+import com.redhat.ceylon.model.typechecker.model.TypedDeclaration;
+import com.redhat.ceylon.model.typechecker.model.Value;
 import com.redhat.ceylon.compiler.typechecker.tree.Node;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.QualifiedMemberExpression;
 import com.redhat.ceylon.js.util.DocUtils;
@@ -48,10 +48,10 @@ public class Autocompleter extends AutocompleteVisitor {
         Map<String, DeclarationWithProximity> comps = new HashMap<String, DeclarationWithProximity>();
         if (getNodeAtLocation() != null) {
             HashSet<PhasedUnit> units = new HashSet<PhasedUnit>();
-            HashSet<com.redhat.ceylon.compiler.typechecker.model.Package> packs = new HashSet<>();
+            HashSet<com.redhat.ceylon.model.typechecker.model.Package> packs = new HashSet<>();
             if (getNodeAtLocation() instanceof QualifiedMemberExpression) {
                 QualifiedMemberExpression exp = (QualifiedMemberExpression)getNodeAtLocation();
-                ProducedType type = exp.getPrimary().getTypeModel();
+                Type type = exp.getPrimary().getTypeModel();
                 Map<String, DeclarationWithProximity> c2 = type.getDeclaration().getMatchingMemberDeclarations(
                         getNodeAtLocation().getUnit(), null, getTextAtLocation(), 0);
                 comps.putAll(c2);
@@ -95,8 +95,8 @@ public class Autocompleter extends AutocompleteVisitor {
         StringBuilder insert = new StringBuilder();
         StringBuilder display = new StringBuilder();
         int move;
-        if(declaration instanceof Method){
-            Method m = (Method)declaration;
+        if(declaration instanceof Function){
+            Function m = (Function)declaration;
             insert.append(m.getName());
             display.append(VARIABLE).append(m.getName()).append(END);
             addTypeParameters(display, insert, m.getTypeParameters());
@@ -167,8 +167,8 @@ public class Autocompleter extends AutocompleteVisitor {
         }
     }
 
-    private String type(ProducedType type) {
-        return type.getProducedTypeName();
+    private String type(Type type) {
+        return type.asQualifiedString();
     }
 
     private String getDoc(Declaration declaration) {

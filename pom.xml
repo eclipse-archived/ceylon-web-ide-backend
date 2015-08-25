@@ -38,34 +38,42 @@
     <dependency>
       <groupId>ceylon</groupId>
       <artifactId>common</artifactId>
-      <version>1.1.0</version>
+      <version>1.1.1</version>
       <type>jar</type>
       <scope>system</scope>
-      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.common-1.1.0.jar</systemPath>
+      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.common-1.1.1.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>ceylon</groupId>
       <artifactId>module-resolver</artifactId>
-      <version>1.1.0</version>
+      <version>1.1.1</version>
       <type>jar</type>
       <scope>system</scope>
-      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.module-resolver-1.1.0.jar</systemPath>
+      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.module-resolver-1.1.1.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>ceylon</groupId>
+      <artifactId>model</artifactId>
+      <version>1.1.1</version>
+      <type>jar</type>
+      <scope>system</scope>
+      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.model-1.1.1.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>ceylon</groupId>
       <artifactId>typechecker</artifactId>
-      <version>1.1.0</version>
+      <version>1.1.1</version>
       <type>jar</type>
       <scope>system</scope>
-      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.typechecker-1.1.0.jar</systemPath>
+      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.typechecker-1.1.1.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>ceylon</groupId>
       <artifactId>jscompiler</artifactId>
-      <version>1.1.0</version>
+      <version>1.1.1</version>
       <type>jar</type>
       <scope>system</scope>
-      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.compiler.js-1.1.0.jar</systemPath>
+      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.redhat.ceylon.compiler.js-1.1.1.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>org.mongodb</groupId>

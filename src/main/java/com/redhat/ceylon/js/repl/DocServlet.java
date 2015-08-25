@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.redhat.ceylon.compiler.typechecker.model.Declaration;
+import com.redhat.ceylon.model.typechecker.model.Declaration;
 import com.redhat.ceylon.js.util.CompilerUtils;
 import com.redhat.ceylon.js.util.DocUtils;
 import com.redhat.ceylon.js.util.ServletUtils;

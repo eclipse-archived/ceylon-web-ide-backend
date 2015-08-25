@@ -11,10 +11,10 @@ import com.github.rjeschke.txtmark.Configuration;
 import com.github.rjeschke.txtmark.Processor;
 import com.redhat.ceylon.common.Versions;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
-import com.redhat.ceylon.compiler.typechecker.model.Annotation;
-import com.redhat.ceylon.compiler.typechecker.model.ClassOrInterface;
-import com.redhat.ceylon.compiler.typechecker.model.Declaration;
-import com.redhat.ceylon.compiler.typechecker.model.Value;
+import com.redhat.ceylon.model.typechecker.model.Annotation;
+import com.redhat.ceylon.model.typechecker.model.ClassOrInterface;
+import com.redhat.ceylon.model.typechecker.model.Declaration;
+import com.redhat.ceylon.model.typechecker.model.Value;
 import com.redhat.ceylon.compiler.typechecker.tree.Node;
 import com.redhat.ceylon.js.repl.Autocompleter;
 
@@ -107,7 +107,7 @@ public class DocUtils {
             if (d.isToplevel()) {
                 if (d instanceof ClassOrInterface) {
                     sb.append(d.getName()).append(".type.html");
-                } else if (d instanceof com.redhat.ceylon.compiler.typechecker.model.Method) {
+                } else if (d instanceof com.redhat.ceylon.model.typechecker.model.Function) {
                     sb.append("index.html#").append(d.getName());
                 } else if (d instanceof Value) {
                     sb.append(d.getName()).append(".object.html");

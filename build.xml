@@ -22,20 +22,21 @@
             <fileset dir="${ceylon.repo.dir}">
                 <include name="ceylon/language/**/*.js" />
                 <include name="ceylon/language/**/*.js.sha1" />
-                <include name="ceylon/language/**/*.src" />
-                <include name="ceylon/language/**/*.src.sha1" />
                 <include name="com/redhat/ceylon/common/**/*.jar" />
                 <include name="com/redhat/ceylon/common/**/*.jar.sha1" />
+                <include name="com/redhat/ceylon/model/**/*.jar" />
+                <include name="com/redhat/ceylon/model/**/*.jar.sha1" />
                 <include name="com/redhat/ceylon/typechecker/**/*.jar" />
                 <include name="com/redhat/ceylon/typechecker/**/*.jar.sha1" />
                 <include name="com/redhat/ceylon/module-resolver/**/*.jar" />
                 <include name="com/redhat/ceylon/module-resolver/**/*.jar.sha1" />
-                <include name="com/redhat/ceylon/compiler/js/**/*.jar" />
-                <include name="com/redhat/ceylon/compiler/js/**/*.jar.sha1" />
             </fileset>
         </copy>
         <copy todir="${web.lib.dir}" overwrite="true">
             <fileset dir="${ceylon.repo.dir}/com/redhat/ceylon/common/${ceylon.version}">
+                <include name="*.jar" />
+            </fileset>
+            <fileset dir="${ceylon.repo.dir}/com/redhat/ceylon/model/${ceylon.version}">
                 <include name="*.jar" />
             </fileset>
             <fileset dir="${ceylon.repo.dir}/com/redhat/ceylon/typechecker/${ceylon.version}">

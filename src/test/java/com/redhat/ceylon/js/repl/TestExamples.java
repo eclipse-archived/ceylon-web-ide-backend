@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import com.redhat.ceylon.cmr.api.RepositoryManager;
 import com.redhat.ceylon.cmr.ceylon.CeylonUtils;
-import com.redhat.ceylon.compiler.Options;
+import com.redhat.ceylon.compiler.js.util.Options;
 import com.redhat.ceylon.compiler.loader.JsModuleManagerFactory;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.TypeCheckerBuilder;
@@ -38,16 +38,30 @@ public class TestExamples {
         int count=0;
         File tmpsrc = new File(tmpRoot, "web_ide_script");
         tmpsrc.mkdir();
-        //Contents of each file need to be inside a top-level method
+        Options opts = new Options().outRepo(tmpout.getAbsolutePath()).addSrcDir("src/main/ceylon")
+                .addSrcDir(tmpRoot.getAbsolutePath()).addRepo("src/main/webapp/scripts/modules");
+        final RepositoryManager repoman = CeylonUtils.repoManager()
+                .systemRepo(opts.getSystemRepo())
+                .userRepos(opts.getRepos())
+                .outRepo(opts.getOutRepo())
+                .buildManager();
         for (File f : srcdir.listFiles()) {
+            if (f.isDirectory()) {
+                System.out.println("Skipping directory " + f);
+                continue;
+            }
             File dst = new File(tmpsrc, f.getName());
             PrintWriter fout = new PrintWriter(new FileWriter(dst));
             boolean isSpecial = f.getName().equals("module.ceylon") || f.getName().equals("package.ceylon");
+            BufferedReader fin = new BufferedReader(new FileReader(f));
+            String jsline = fin.readLine();
+            //Contents of each file need to be inside a top-level method
+            //Unless it's marked like this
+            isSpecial |= "//$webrun_wrapped".equals(jsline) || jsline.startsWith("import ");
             if (!isSpecial) {
                 fout.printf("shared void caca_%d(){", count++);
             }
-            BufferedReader fin = new BufferedReader(new FileReader(f));
-            String jsline = null;
+            fout.println(jsline);
             while ((jsline = fin.readLine()) != null) {
                 fout.println(jsline);
             }
@@ -56,20 +70,14 @@ public class TestExamples {
                 fout.println("}");
             }
             fout.close();
-        }
-        Options opts = new Options().outRepo(tmpout.getAbsolutePath()).addSrcDir("src/main/ceylon")
-                .addSrcDir(tmpRoot.getAbsolutePath()).addRepo("src/main/webapp/scripts/modules");
-        final RepositoryManager repoman = CeylonUtils.repoManager()
-                .systemRepo(opts.getSystemRepo())
-                .userRepos(opts.getRepos())
-                .outRepo(opts.getOutRepo())
-                .buildManager();
-        TypeCheckerBuilder tcb = new TypeCheckerBuilder()
+            TypeCheckerBuilder tcb = new TypeCheckerBuilder()
                 .addSrcDirectory(tmpRoot)
                 .moduleManagerFactory(new JsModuleManagerFactory("UTF-8"));
-        tcb.setRepositoryManager(repoman);
-        TypeChecker tc = tcb.getTypeChecker();
-        tc.process();
+            tcb.setRepositoryManager(repoman);
+            TypeChecker tc = tcb.getTypeChecker();
+            tc.process();
+            dst.delete();
+        }
     }
 
 }

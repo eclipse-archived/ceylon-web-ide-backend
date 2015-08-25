@@ -26,24 +26,21 @@ class Cell(x, y) {
 
     variable Integer nroNeighbours = 0;
 
-    shared void setup() {
+    shared void setup() =>
         update(resurrected, 0);
-    }
 
-    shared void resurrect() {
+    shared void resurrect() =>
         update(alive, 1);
-    }
 
-    shared void kill() {
+    shared void kill() =>
         update(dead, -1);
-    }
 
     void update(State newState, Integer dN) {
         if (state == newState) {
             return;
         }
         state = newState;
-        nroNeighbours = neighbors.count((Cell c) => c.state == alive);
+        nroNeighbours = neighbors.count((c) => c.state == alive);
         for (c in neighbors) {
             c.nroNeighbours += dN;
         }
@@ -87,12 +84,10 @@ class Grid(width, height) {
     "The number of rows of the Grid"
     shared Integer height;
     
-    // The list of alive cells
+    "The list of alive cells"
     variable Cell[] _living = [];
     
-    shared Cell[] living {
-        return _living;
-    }
+    shared Cell[] living => _living;
     
     // Create the grid
     value cells = Array{for(y in 0:height) for(x in 0:width) Cell(x, y)};
@@ -120,7 +115,7 @@ class Grid(width, height) {
     
     shared [Cell[], Cell[]] evolve() {
         // Pass through the list of living cells and split
-        // it in teo: one for the ones that stay alive and
+        // it in two: one for the ones that stay alive and
         // one for the ones that will die. At the same time
         // we construct a third list with dead cells that
         // will be resurrected

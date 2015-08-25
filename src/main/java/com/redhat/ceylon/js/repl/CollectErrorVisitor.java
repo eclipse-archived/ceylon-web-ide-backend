@@ -26,11 +26,10 @@ import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.analyzer.UsageWarning;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
 import com.redhat.ceylon.compiler.typechecker.tree.Message;
-import com.redhat.ceylon.compiler.typechecker.tree.NaturalVisitor;
 import com.redhat.ceylon.compiler.typechecker.tree.Node;
 import com.redhat.ceylon.compiler.typechecker.tree.Visitor;
 
-public class CollectErrorVisitor extends Visitor implements NaturalVisitor {
+public class CollectErrorVisitor extends Visitor {
     private TypeChecker typeChecker;
     private List<Message> errors;
     

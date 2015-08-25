@@ -77,4 +77,8 @@ public class ScriptFile implements VirtualFile {
             return super.equals(obj);
         }
     }
+    @Override
+    public int compareTo(VirtualFile o) {
+        return -1;
+    }
 }
