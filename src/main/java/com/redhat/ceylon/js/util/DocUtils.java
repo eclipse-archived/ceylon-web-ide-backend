@@ -107,7 +107,7 @@ public class DocUtils {
             if (d.isToplevel()) {
                 if (d instanceof ClassOrInterface) {
                     sb.append(d.getName()).append(".type.html");
-                } else if (d instanceof com.redhat.ceylon.model.typechecker.model.Method) {
+                } else if (d instanceof com.redhat.ceylon.model.typechecker.model.Function) {
                     sb.append("index.html#").append(d.getName());
                 } else if (d instanceof Value) {
                     sb.append(d.getName()).append(".object.html");

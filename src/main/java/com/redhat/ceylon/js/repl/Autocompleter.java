@@ -16,10 +16,10 @@ import com.redhat.ceylon.model.typechecker.model.Class;
 import com.redhat.ceylon.model.typechecker.model.ClassOrInterface;
 import com.redhat.ceylon.model.typechecker.model.Declaration;
 import com.redhat.ceylon.model.typechecker.model.DeclarationWithProximity;
-import com.redhat.ceylon.model.typechecker.model.Method;
+import com.redhat.ceylon.model.typechecker.model.Function;
 import com.redhat.ceylon.model.typechecker.model.Parameter;
 import com.redhat.ceylon.model.typechecker.model.ParameterList;
-import com.redhat.ceylon.model.typechecker.model.ProducedType;
+import com.redhat.ceylon.model.typechecker.model.Type;
 import com.redhat.ceylon.model.typechecker.model.Setter;
 import com.redhat.ceylon.model.typechecker.model.TypeParameter;
 import com.redhat.ceylon.model.typechecker.model.TypedDeclaration;
@@ -51,7 +51,7 @@ public class Autocompleter extends AutocompleteVisitor {
             HashSet<com.redhat.ceylon.model.typechecker.model.Package> packs = new HashSet<>();
             if (getNodeAtLocation() instanceof QualifiedMemberExpression) {
                 QualifiedMemberExpression exp = (QualifiedMemberExpression)getNodeAtLocation();
-                ProducedType type = exp.getPrimary().getTypeModel();
+                Type type = exp.getPrimary().getTypeModel();
                 Map<String, DeclarationWithProximity> c2 = type.getDeclaration().getMatchingMemberDeclarations(
                         getNodeAtLocation().getUnit(), null, getTextAtLocation(), 0);
                 comps.putAll(c2);
@@ -95,8 +95,8 @@ public class Autocompleter extends AutocompleteVisitor {
         StringBuilder insert = new StringBuilder();
         StringBuilder display = new StringBuilder();
         int move;
-        if(declaration instanceof Method){
-            Method m = (Method)declaration;
+        if(declaration instanceof Function){
+            Function m = (Function)declaration;
             insert.append(m.getName());
             display.append(VARIABLE).append(m.getName()).append(END);
             addTypeParameters(display, insert, m.getTypeParameters());
@@ -167,8 +167,8 @@ public class Autocompleter extends AutocompleteVisitor {
         }
     }
 
-    private String type(ProducedType type) {
-        return type.getProducedTypeName();
+    private String type(Type type) {
+        return type.asQualifiedString();
     }
 
     private String getDoc(Declaration declaration) {
