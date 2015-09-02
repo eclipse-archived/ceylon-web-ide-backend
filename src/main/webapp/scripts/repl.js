@@ -8,6 +8,7 @@ require.config({
         "ceylon/language/1.1.1/ceylon.language-1.1.1-model" : window.location.pathname + "scripts/modules/ceylon/language/1.1.1/ceylon.language-1.1.1-model",
         "jquery" : window.location.pathname + "scripts/jquery-1.11.1.min",
         "jquery-ui" : window.location.pathname + "scripts/jquery-ui-1.11.2.min",
+        "jquery-cookie" : window.location.pathname + "scripts/jquery-cookie-1.4.1",
     },
     waitSeconds: 15
 });
@@ -29,8 +30,8 @@ var live_tc={
 };
 var closePopups=undefined;
 
-require(["ceylon/language/1.1.1/ceylon.language-1.1.1", 'jquery', 'jquery-ui'],
-    function(clang, $, jqui) {
+require(["ceylon/language/1.1.1/ceylon.language-1.1.1", 'jquery', 'jquery-ui', 'jquery-cookie'],
+    function(clang, $, jqui, jqcookie) {
         jquery=$;
         $(document).ready(function() {
             console && console.log("Ceylon language module loaded OK");
@@ -116,6 +117,7 @@ require(["ceylon/language/1.1.1/ceylon.language-1.1.1", 'jquery', 'jquery-ui'],
               }
             });
 
+            showGitHubConnect();
             $('#shareurl').focus(function(){ jquery(this).select(); });
             $('#shareurl').hide();
             var key = location.href.split('#');
@@ -150,6 +152,7 @@ require(["ceylon/language/1.1.1/ceylon.language-1.1.1", 'jquery', 'jquery-ui'],
             } else {
             	runCode(wrapCode('print("Ceylon ``language.version`` \\"``language.versionName``\\"");'));
                 editCode('hello_world');
+                listGists();
             }
             editor.on('change',function(){live_tc.last=Date.now();});
             editor.on('cursorActivity',function(){
@@ -249,6 +252,14 @@ function complete(editor){
     });
 }
 
+function showGitHubConnect() {
+    if ($.cookie("githubauth") == null) {
+        $("#ghconnect").html('<a href="https://github.com/login/oauth/authorize?client_id=ef3727725eeee1d1bae2&scope=gist&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fweb-ide-backend%2Fgithubauth.html&state=xyz" target="githubauth">Connect to GitHub</a>');
+    } else {
+        $("#ghconnect").html('<a href="#" onclick="$.removeCookie(\'githubauth\', { path: \'/\' }); window.location.reload()">Disconnect from GitHub</a>');
+    }
+}
+
 //Stores the code on the server and displays a URL with the key to retrieve it
 function shareSource() {
     function showUrl(json, status, xhr) {
@@ -258,16 +269,20 @@ function shareSource() {
         jquery('#shareurl').val(url);
         jquery('#shareurl').show();
         jquery('#shareurl').focus();
-        //createComment(json.id);
+        createComment(json.id);
+    }
+    function showError(xhr, status, err) {
+        printError("Error storing Gist: " + (err?err:status));
+        live_tc.clear();
     }
     var files;
     if ($("#edit_module_div").is(":visible")) {
         files = {
-            "module.ceylon": {
-                "content": getModuleCode()
-            },
             "script.ceylon": {
                 "content": getEditCode()
+            },
+            "module.ceylon": {
+                "content": getModuleCode()
             }
         };
     } else {
@@ -277,44 +292,85 @@ function shareSource() {
             }
         };
     }
-    jquery.ajax({
-        url: "https://api.github.com/gists",
-        cache:false,
-        type:'POST',
-        dataType:'json',
-        timeout:20000,
-        beforeSend:startSpinner,
-        complete:stopSpinner,
-        success:showUrl,
-        error:function(xhr, status, err) {
-            printError("Error storing Gist: " + (err?err:status));
-            live_tc.clear();
-        },
-        contentType: 'application/json; charset=utf-8',
-        data:JSON.stringify({
-            "description": "Code shared by the Ceylon Web Runner at " + window.location.origin + window.location.pathname,
-            "public": true,
-            "files": files
-        })
-    });
+    var data = {
+        "description": "Code shared by the Ceylon Web Runner at " + window.location.origin + window.location.pathname,
+        "public": true,
+        "files": files
+    };
+    github("https://api.github.com/gists", "POST", data, showUrl, showError);
 }
 
-//Creates a commit for the given Gist with a link to the Web Runner
-// FIXME: This doesn't work right now, probably needs authentication
+// Creates a commit for the given Gist with a link to the Web Runner
 function createComment(id) {
-    jquery.ajax({
-        url: "https://api.github.com/gists/" + id + "/comments",
-        cache:false,
-        type:'POST',
-        dataType:'json',
-        timeout:20000,
-        beforeSend:startSpinner,
-        complete:stopSpinner,
-        contentType: 'application/json; charset=utf-8',
-        data:{
-            "body": "Try this online at " + window.location.origin + window.location.pathname + "?gist=" + id,
+    // Check that we have a valid GitHub token
+    var token = $.cookie("githubauth");
+    if (token) {
+        var data = {
+            "body": "[Click here](" + window.location.origin + window.location.pathname + "?gist=" + id + ") to run this code online",
         }
-    });
+        github("https://api.github.com/gists/" + id + "/comments", "POST", data);
+    }
+}
+
+function listGists() {
+    function showGist(index, item) {
+        console.log(item);
+        var desc = item.description.substring(19);
+        $('#yrcode').append('<li class="news_entry"><a href="#" onClick="return editGist(\'' + item.id + '\')">' + desc + '</a></li>');
+        $('#yrcodehdr').show();
+        $('#yrcode').show();
+    }
+    
+    function filterGist(index, item) {
+        if (item.description.startsWith("Ceylon Web Runner: ")) {
+            var show = false;
+            $.each(item.files, function(idx, itm) {
+                if (idx.endsWith(".ceylon")) {
+                    show = true;
+                }
+            });
+            if (show) {
+                showGist(index, item);
+            }
+        }
+    }
+    
+    function showGists(json, status, xhr) {
+        $.each(json, filterGist);
+    }
+    
+    // Check that we have a valid GitHub token
+    var token = $.cookie("githubauth");
+    if (token) {
+        github("https://api.github.com/gists", "GET", {}, showGists);
+    }
+}
+
+function github(url, method, data, onSuccess, onError) {
+    var token = $.cookie("githubauth");
+    var hdr = {};
+    if (token) {
+        hdr = { "Authorization": "token " + token };
+    }
+    var args = {
+        "url": url,
+        cache: false,
+        type: method,
+        dataType: 'json',
+        timeout: 20000,
+        beforeSend: startSpinner,
+        complete: stopSpinner,
+        contentType: 'application/json; charset=utf-8',
+        headers: hdr,
+        data: JSON.stringify(data)
+    };
+    if (onSuccess != null) {
+        args["success"] = onSuccess;
+    }
+    if (onError != null) {
+        args["error"] = onError;
+    }
+    jquery.ajax(args);
 }
 
 function startSpinner() {
