@@ -254,7 +254,7 @@ function complete(editor){
 
 function showGitHubConnect() {
     if ($.cookie("githubauth") == null) {
-        $("#ghconnect").html('<a href="https://github.com/login/oauth/authorize?client_id=ef3727725eeee1d1bae2&scope=gist&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fweb-ide-backend%2Fgithubauth.html&state=xyz" target="githubauth">Connect to GitHub</a>');
+        $("#ghconnect").html('<a href="https://github.com/login/oauth/authorize?client_id=ef3727725eeee1d1bae2&scope=gist&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fweb-ide-backend%2Fgithubauth&state=xyz" target="githubauth">Connect to GitHub</a>');
     } else {
         $("#ghconnect").html('<a href="#" onclick="$.removeCookie(\'githubauth\', { path: \'/\' }); window.location.reload()">Disconnect from GitHub</a>');
     }

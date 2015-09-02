@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
 
-@WebServlet("/githubauth.html")
+@WebServlet("/githubauth")
 public class GitHubAuthServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
