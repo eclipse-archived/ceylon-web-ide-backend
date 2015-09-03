@@ -1,5 +1,7 @@
 var markers=[];
 var bindings=[];
+var githubEtags={};
+var githubCache={};
 
 require.config({
     baseUrl: "http://modules.ceylon-lang.org/repo/1",
@@ -297,7 +299,7 @@ function shareSource() {
         "public": true,
         "files": files
     };
-    github("https://api.github.com/gists", "POST", data, showUrl, showError);
+    github("gists", "POST", data, showUrl, showError);
 }
 
 // Creates a commit for the given Gist with a link to the Web Runner
@@ -308,13 +310,12 @@ function createComment(id) {
         var data = {
             "body": "[Click here](" + window.location.origin + window.location.pathname + "?gist=" + id + ") to run this code online",
         }
-        github("https://api.github.com/gists/" + id + "/comments", "POST", data);
+        github("gists/" + id + "/comments", "POST", data);
     }
 }
 
 function listGists() {
     function showGist(index, item) {
-        console.log(item);
         var desc = item.description.substring(19);
         $('#yrcode').append('<li class="news_entry"><a href="#" onClick="return editGist(\'' + item.id + '\')">' + desc + '</a></li>');
         $('#yrcodehdr').show();
@@ -342,34 +343,75 @@ function listGists() {
     // Check that we have a valid GitHub token
     var token = $.cookie("githubauth");
     if (token) {
-        github("https://api.github.com/gists", "GET", {}, showGists);
+        github("gists", "GET", {}, showGists);
     }
 }
 
 function github(url, method, data, onSuccess, onError) {
+    var key = url + JSON.stringify(data);
+    
+    function stripEtag(tag) {
+        if (tag != null) {
+            if (tag.startsWith("W/")) {
+                tag = tag.substring(2);
+            }
+        }
+        return tag;
+    }
+    function handleSuccess(json, status, xhr) {
+        if (method == "GET") {
+            console.log(xhr.getAllResponseHeaders());
+            var etag = stripEtag(xhr.getResponseHeader("ETag"));
+            if (etag != null) {
+                if (xhr.status == 304) {
+                    json = githubCache[etag];
+                } else if (xhr.status == 200) {
+                    githubEtags[key] = etag;
+                    githubCache[etag] = json;
+                }
+            }
+        }
+        if (onSuccess != null) {
+            onSuccess(json, status, xhr);
+        }
+    }
+    
     var token = $.cookie("githubauth");
-    var hdr = {};
+    var hdr = {
+        "Accept": "application/vnd.github.v3+json",
+        "User-Agent": "Ceylon-Web-Runner-1.1.1"
+    };
     if (token) {
         hdr = { "Authorization": "token " + token };
     }
     var args = {
-        "url": url,
-        cache: false,
+        "url": "https://api.github.com/" + url,
         type: method,
+        cache: false,
         dataType: 'json',
         timeout: 20000,
         beforeSend: startSpinner,
         complete: stopSpinner,
-        contentType: 'application/json; charset=utf-8',
         headers: hdr,
+        success: handleSuccess,
         data: JSON.stringify(data)
     };
-    if (onSuccess != null) {
-        args["success"] = onSuccess;
+    if (method == "GET") {
+        var etag = githubEtags[key];
+        if (etag != null) {
+            hdr["If-None-Match"] = etag;
+        }
+        args["data"] = data;
+    } else if (method == "POST") {
+        args["contentType"] = 'application/json; charset=utf-8';
+        args["data"] = JSON.stringify(data);
+    } else {
+        throw "Unsupported method " + method;
     }
     if (onError != null) {
         args["error"] = onError;
     }
+    console.log(args);
     jquery.ajax(args);
 }
 
@@ -589,25 +631,19 @@ function editCode(key) {
 
 //Retrieves the specified code from GitHub
 function editGist(key) {
-  //Make sure we don't do anything until we have an editor
-  if (!editor) return false;
-  //Retrieve code
-  live_tc.status=2;
-  jquery.ajax({
-      url: "https://api.github.com/gists/" + key,
-      cache:true,
-      dataType:'json',
-      timeout:20000,
-      beforeSend:startSpinner,
-      complete:stopSpinner,
-      success:function(json, status, xhr) {
-          setEditorSourcesFromGist(json);
-      },
-      error:function(xhr, status, err) {
-          printError("Error retrieving Gist '" + key + "': " + (err?err:status));
-          live_tc.clear();
-      }
-  });
+    function onSuccess(json, status, xhr) {
+        setEditorSourcesFromGist(json);
+    }
+    function onError(xhr, status, err) {
+        printError("Error retrieving Gist '" + key + "': " + (err?err:status));
+        live_tc.clear();
+    }
+    
+    //Make sure we don't do anything until we have an editor
+    if (!editor) return false;
+    //Retrieve code
+    live_tc.status=2;
+    github("gists/" + key, "GET", {}, onSuccess, onError);
 }
 
 function setEditorSourcesFromGist(json) {
