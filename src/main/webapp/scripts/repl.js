@@ -11,6 +11,7 @@ require.config({
         "jquery" : window.location.pathname + "scripts/jquery-1.11.1.min",
         "jquery-ui" : window.location.pathname + "scripts/jquery-ui-1.11.2.min",
         "jquery-cookie" : window.location.pathname + "scripts/jquery-cookie-1.4.1",
+        "github" : window.location.pathname + "scripts/github",
     },
     waitSeconds: 15
 });
@@ -32,8 +33,8 @@ var live_tc={
 };
 var closePopups=undefined;
 
-require(["ceylon/language/1.1.1/ceylon.language-1.1.1", 'jquery', 'jquery-ui', 'jquery-cookie'],
-    function(clang, $, jqui, jqcookie) {
+require(["ceylon/language/1.1.1/ceylon.language-1.1.1", 'jquery', 'jquery-ui', 'jquery-cookie', 'github'],
+    function(clang, $, jqui, jqcookie, gh) {
         jquery=$;
         $(document).ready(function() {
             console && console.log("Ceylon language module loaded OK");
@@ -365,7 +366,7 @@ function github(url, method, data, onSuccess, onError) {
             if (etag != null) {
                 if (xhr.status == 304) {
                     json = githubCache[etag];
-                } else if (xhr.status == 200) {
+                } else if (xhr.status >= 200 && xhr.status <= 299) {
                     githubEtags[key] = etag;
                     githubCache[etag] = json;
                 }
