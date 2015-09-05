@@ -1,7 +1,5 @@
 var markers=[];
 var bindings=[];
-var githubEtags={};
-var githubCache={};
 
 require.config({
     baseUrl: "http://modules.ceylon-lang.org/repo/1",
@@ -17,6 +15,7 @@ require.config({
 });
 
 var jquery;
+var github;
 var editor;
 var modeditor;
 var clprinted;
@@ -36,6 +35,19 @@ var closePopups=undefined;
 require(["ceylon/language/1.1.1/ceylon.language-1.1.1", 'jquery', 'jquery-ui', 'jquery-cookie', 'github'],
     function(clang, $, jqui, jqcookie, gh) {
         jquery=$;
+        var auth;
+        var token = $.cookie("githubauth");
+        if (token != null) {
+            auth = new gh.Authentication({
+                type: "oauth",
+                token: token
+            });
+        }
+        github = new gh.GitHub({
+            beforeSend: startSpinner,
+            complete: stopSpinner,
+            authentication: auth
+        });
         $(document).ready(function() {
             console && console.log("Ceylon language module loaded OK");
             clang.$_process().write = function(x){
@@ -265,14 +277,14 @@ function showGitHubConnect() {
 
 //Stores the code on the server and displays a URL with the key to retrieve it
 function shareSource() {
-    function showUrl(json, status, xhr) {
-        var url = window.location.origin + window.location.pathname + "?gist=" + json.id;
-        jquery('#gistlink').attr('href', json.html_url);
+    function showUrl(gist) {
+        var url = window.location.origin + window.location.pathname + "?gist=" + gist.data.id;
+        jquery('#gistlink').attr('href', gist.data.html_url);
         jquery('#gistlink').show();
         jquery('#shareurl').val(url);
         jquery('#shareurl').show();
         jquery('#shareurl').focus();
-        createComment(json.id);
+        createComment(gist);
     }
     function showError(xhr, status, err) {
         printError("Error storing Gist: " + (err?err:status));
@@ -300,120 +312,56 @@ function shareSource() {
         "public": true,
         "files": files
     };
-    github("gists", "POST", data, showUrl, showError);
+    github.createGist({
+        data: data,
+        success: showUrl,
+        error: showError
+    });
 }
 
 // Creates a commit for the given Gist with a link to the Web Runner
-function createComment(id) {
+function createComment(gist) {
     // Check that we have a valid GitHub token
     var token = $.cookie("githubauth");
     if (token) {
         var data = {
             "body": "[Click here](" + window.location.origin + window.location.pathname + "?gist=" + id + ") to run this code online",
         }
-        github("gists/" + id + "/comments", "POST", data);
+        gist.createComment({
+            data: data
+        });
     }
 }
 
 function listGists() {
-    function showGist(index, item) {
-        var desc = item.description.substring(19);
-        $('#yrcode').append('<li class="news_entry"><a href="#" onClick="return editGist(\'' + item.id + '\')">' + desc + '</a></li>');
+    function showGist(gist) {
+        var desc = gist.data.description.substring(19);
+        $('#yrcode').append('<li class="news_entry"><a href="#" onClick="return editGist(\'' + gist.data.id + '\')">' + desc + '</a></li>');
         $('#yrcodehdr').show();
         $('#yrcode').show();
     }
     
-    function filterGist(index, item) {
-        if (item.description.startsWith("Ceylon Web Runner: ")) {
+    function filterGist(gist) {
+        if (gist.data.description.startsWith("Ceylon Web Runner: ")) {
             var show = false;
-            $.each(item.files, function(idx, itm) {
+            $.each(gist.data.files, function(idx, itm) {
                 if (idx.endsWith(".ceylon")) {
                     show = true;
                 }
             });
-            if (show) {
-                showGist(index, item);
-            }
+            return show;
         }
-    }
-    
-    function showGists(json, status, xhr) {
-        $.each(json, filterGist);
+        return false;
     }
     
     // Check that we have a valid GitHub token
     var token = $.cookie("githubauth");
     if (token) {
-        github("gists", "GET", {}, showGists);
+        github.listGists({
+            accept: filterGist,
+            onGist: showGist
+        });
     }
-}
-
-function github(url, method, data, onSuccess, onError) {
-    var key = url + JSON.stringify(data);
-    
-    function stripEtag(tag) {
-        if (tag != null) {
-            if (tag.startsWith("W/")) {
-                tag = tag.substring(2);
-            }
-        }
-        return tag;
-    }
-    function handleSuccess(json, status, xhr) {
-        if (method == "GET") {
-            console.log(xhr.getAllResponseHeaders());
-            var etag = stripEtag(xhr.getResponseHeader("ETag"));
-            if (etag != null) {
-                if (xhr.status == 304) {
-                    json = githubCache[etag];
-                } else if (xhr.status >= 200 && xhr.status <= 299) {
-                    githubEtags[key] = etag;
-                    githubCache[etag] = json;
-                }
-            }
-        }
-        if (onSuccess != null) {
-            onSuccess(json, status, xhr);
-        }
-    }
-    
-    var token = $.cookie("githubauth");
-    var hdr = {
-        "Accept": "application/vnd.github.v3+json",
-        "User-Agent": "Ceylon-Web-Runner-1.1.1"
-    };
-    if (token) {
-        hdr = { "Authorization": "token " + token };
-    }
-    var args = {
-        "url": "https://api.github.com/" + url,
-        type: method,
-        cache: false,
-        dataType: 'json',
-        timeout: 20000,
-        beforeSend: startSpinner,
-        complete: stopSpinner,
-        headers: hdr,
-        success: handleSuccess,
-        data: JSON.stringify(data)
-    };
-    if (method == "GET") {
-        var etag = githubEtags[key];
-        if (etag != null) {
-            hdr["If-None-Match"] = etag;
-        }
-        args["data"] = data;
-    } else if (method == "POST") {
-        args["contentType"] = 'application/json; charset=utf-8';
-        args["data"] = JSON.stringify(data);
-    } else {
-        throw "Unsupported method " + method;
-    }
-    if (onError != null) {
-        args["error"] = onError;
-    }
-    console.log(args);
-    jquery.ajax(args);
 }
 
 function startSpinner() {
@@ -632,8 +580,8 @@ function editCode(key) {
 
 //Retrieves the specified code from GitHub
 function editGist(key) {
-    function onSuccess(json, status, xhr) {
-        setEditorSourcesFromGist(json);
+    function onSuccess(gist) {
+        setEditorSourcesFromGist(gist.data);
     }
     function onError(xhr, status, err) {
         printError("Error retrieving Gist '" + key + "': " + (err?err:status));
@@ -644,7 +592,11 @@ function editGist(key) {
     if (!editor) return false;
     //Retrieve code
     live_tc.status=2;
-    github("gists/" + key, "GET", {}, onSuccess, onError);
+    github.getGist({
+        id: key,
+        success: onSuccess,
+        error: onError
+    });
 }
 
 function setEditorSourcesFromGist(json) {
