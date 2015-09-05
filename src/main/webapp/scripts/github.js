@@ -287,7 +287,7 @@
                 }
             }
             
-            this.github._call({
+            that.github._call({
                 url: "gists/" + that.data.id,
                 method: "DELETE",
                 authentication: args.authentication,
@@ -317,7 +317,7 @@
                 }
             }
             
-            this.github._call({
+            that.github._call({
                 url: "gists/" + that.data.id + "/comments",
                 method: "POST",
                 data: args.data,
@@ -362,7 +362,7 @@
             } else {
                 throw "Removing comments not supported for " + item.constructor.name;
             }
-            this.github._call({
+            that.github._call({
                 url: url,
                 method: "DELETE",
                 authentication: args.authentication,
