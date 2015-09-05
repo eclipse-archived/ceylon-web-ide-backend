@@ -592,8 +592,7 @@ function editGist(key) {
     if (!editor) return false;
     //Retrieve code
     live_tc.status=2;
-    github.getGist({
-        id: key,
+    github.gist(key).fetch({
         success: onSuccess,
         error: onError
     });

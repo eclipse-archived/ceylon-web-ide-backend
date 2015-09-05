@@ -81,39 +81,15 @@
             });
         }
         
-        // Get a single Gist
-        //  args.id - The id of the Gist to retrieve
-        //  args.revision - Optional SHA of the revision to retrieve
-        //  args.success - Optional callback to be called on successful
-        //     termination of the remote call
-        //  args.error - Optional callback to be called on erroneous
-        //     termination of the remote call
-        //  args.authentication - Optional Authentication to use for the
-        //     remote call
-        GitHub.prototype.getGist = function(args) {
+        // Create a dummy Gist that can be used for operations
+        // like `edit()` and `remove()` that only need an id
+        //  id - The id of a Gist
+        GitHub.prototype.gist = function(id) {
             that = this;
-            if (args.id == null) {
-                throw "Missing required `args.id`";
+            if (id == null) {
+                throw "Missing required `id`";
             }
-            
-            function handleGist(json, status, xhr) {
-                if (args.success != null) {
-                    var gist = new Gist(that, json);
-                    args.success(gist);
-                }
-            }
-            
-            var url = "gists/" + args.id;
-            if (args.revision != null) {
-                url = url + "/" + args.revision;
-            }
-            this._call({
-                url: url,
-                method: "GET",
-                authentication: args.authentication,
-                success: handleGist,
-                error: args.error
-            });
+            return new Gist(that, { id: id, _incomplete: true });
         }
         
         // Create a Gist
@@ -266,6 +242,72 @@
         function Gist(github, data) {
             this.github = github;
             this.data = data;
+        }
+        
+        // Fetch the Gist
+        //  args.revision - Optional SHA of the revision to retrieve
+        //  args.success - Optional callback to be called on successful
+        //     termination of the remote call
+        //  args.error - Optional callback to be called on erroneous
+        //     termination of the remote call
+        //  args.authentication - Optional Authentication to use for the
+        //     remote call
+        Gist.prototype.fetch = function(args) {
+            that = this;
+            
+            function handleGist(json, status, xhr) {
+                that.data = json;
+                delete that.data._incomplete;
+                if (args.success != null) {
+                    args.success(that);
+                }
+            }
+            
+            if (that.data._incomplete) {
+                var url = "gists/" + that.data.id;
+                if (args.revision != null) {
+                    url = url + "/" + args.revision;
+                }
+                that.github._call({
+                    url: url,
+                    method: "GET",
+                    authentication: args.authentication,
+                    success: handleGist,
+                    error: args.error
+                });
+            }
+        }
+        
+        // Edit a Gist
+        //  args.data - The data used to edit the Gist, see
+        //     https://developer.github.com/v3/gists/#edit-a-gist
+        //  args.success - Optional callback to be called on successful
+        //     termination of the remote call
+        //  args.error - Optional callback to be called on erroneous
+        //     termination of the remote call
+        //  args.authentication - Optional Authentication to use for the
+        //     remote call
+        Gist.prototype.edit = function(args) {
+            that = this;
+            if (args.data == null) {
+                throw "Missing required `args.data`";
+            }
+            
+            function handleGist(json, status, xhr) {
+                that.data = json;
+                if (args.success != null) {
+                    args.success(that);
+                }
+            }
+            
+            that.github._call({
+                url: "gists/" + that.data.id,
+                method: "PATCH",
+                data: args.data,
+                authentication: args.authentication,
+                success: handleGist,
+                error: args.error
+            });
         }
         
         // Remove a Gist
