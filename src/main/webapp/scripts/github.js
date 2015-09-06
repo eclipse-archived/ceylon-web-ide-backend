@@ -46,8 +46,8 @@
                 config.userAgent = "Ceylon-Web-Runner-1.1.1";
             }
             
-            this.githubEtags={};
-            this.githubCache={};
+            this._etags = {};
+            this._cache = {};
         }
         
         // List Gists
@@ -171,10 +171,10 @@
                     var etag = stripEtag(xhr.getResponseHeader("ETag"));
                     if (etag != null) {
                         if (xhr.status == 304) {
-                            json = that.githubCache[etag];
+                            json = that._cache[etag];
                         } else if (xhr.status >= 200 && xhr.status <= 299) {
-                            that.githubEtags[key] = etag;
-                            that.githubCache[etag] = json;
+                            that._etags[key] = etag;
+                            that._cache[etag] = json;
                         }
                     }
                 }
@@ -210,7 +210,7 @@
                 jqargs.password = auth.password;
             }
             if (args.method == "GET") {
-                var etag = that.githubEtags[key];
+                var etag = that._etags[key];
                 if (etag != null) {
                     hdr["If-None-Match"] = etag;
                 }
