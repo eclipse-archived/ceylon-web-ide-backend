@@ -65,6 +65,7 @@
             }
             
             function filterGist(index, item) {
+                item["_state"] = "summary";
                 var gist = new Gist(that, item);
                 if (args.accept == null || args.accept(gist)) {
                     args.onGist(gist);
@@ -91,7 +92,7 @@
             if (id == null) {
                 throw "Missing required `id`";
             }
-            return new Gist(that, { id: id, _incomplete: true });
+            return new Gist(that, { id: id, _state: "idonly" });
         }
         
         // Create a Gist
@@ -259,13 +260,13 @@
             
             function handleGist(json, status, xhr) {
                 that.data = json;
-                delete that.data._incomplete;
+                delete that.data._state;
                 if (args.success != null) {
                     args.success(that);
                 }
             }
             
-            if (that.data._incomplete) {
+            if (that.data._state) {
                 var url = "gists/" + that.data.id;
                 if (args.revision != null) {
                     url = url + "/" + args.revision;
