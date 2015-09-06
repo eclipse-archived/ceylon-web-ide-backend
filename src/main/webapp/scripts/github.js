@@ -19,6 +19,8 @@
         //     remote calls. Can be overridden in each specific function call.
         //     Set to `null` in a function call if you don't want authentication
         //     even if set on the base GitHub object
+        //  config.debug = Optional boolean to turn on debugging mode that
+        //     logs certain operations to the console
         //////////////////////////////////////////////////////////////////////
         function GitHub(config) {
             if (config == null) {
@@ -163,8 +165,8 @@
                 return tag;
             }
             function handleSuccess(json, status, xhr) {
+                if (that.config.debug) { console.log(xhr.getAllResponseHeaders()); }
                 if (args.method == "GET") {
-                    console.log(xhr.getAllResponseHeaders());
                     var etag = stripEtag(xhr.getResponseHeader("ETag"));
                     if (etag != null) {
                         if (xhr.status == 304) {
@@ -229,7 +231,7 @@
             if (args.error != null) {
                 jqargs.error = args.error;
             }
-            console.log(jqargs);
+            if (that.config.debug) { console.log(jqargs); }
             $.ajax(jqargs);
         }
         
