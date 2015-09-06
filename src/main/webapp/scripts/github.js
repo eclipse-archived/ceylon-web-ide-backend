@@ -335,7 +335,7 @@
                 url: "gists/" + that.data.id,
                 method: "DELETE",
                 authentication: args.authentication,
-                success: handleComment,
+                success: handleRemove,
                 error: args.error
             });
         }
