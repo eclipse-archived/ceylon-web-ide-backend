@@ -125,9 +125,13 @@
         <button class="bubble-button has-spinner" id="run_ceylon" name="run_ceylon" onClick="performRun()"><span class="spinner"><i class="icon-spin icon-refresh"> </i></span>Run</button>
         <button class="bubble-button invis" id="stop_ceylon" name="stop_ceylon" onClick="stop()">Stop</button>
         <button class="bubble-button" onClick="doReset()">Reset</button>
-        <button class="bubble-button" id="share_src" name="share_src" onClick="shareSource()">Share Code</button>
-        <input class="invis" type="text" id="shareurl" name="shareurl" onClick="this.focus();this.select()" value="" size="45" readonly="readonly">
-        <a class="invis" href="#" target="gistlink" id="gistlink">Gist</a>
+        <button class="bubble-button" id="share_src" name="share_src" onClick="shareSource()">Share</button>
+        <button class="bubble-button invis" id="save_src" name="save_src" onClick="saveSource()">Save Code</button>
+        <button class="bubble-button invis" id="update_src" name="update_src" onClick="updateSource()">Update Code</button>
+        <input class="invis" type="text" id="gistname" name="gistname" value="" size="20">
+        <a class="invis" href="#" id="shareurl" title="Direct link to this page pre-filled with the current code">Link</a>
+        <a class="invis" href="#" target="gistlink" id="gistlink" title="Link to the shared code on GitHub">Gist</a>
+        <a class="invis" href="#" id="deletegist" onClick="deleteGist(); return false;" title="Remove the shared code from GitHub">Delete</a>
         </div>
     </form>
     <pre id="result" class="cantseeme">

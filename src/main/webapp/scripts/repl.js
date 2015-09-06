@@ -16,6 +16,7 @@ require.config({
 
 var jquery;
 var github;
+var selectedGist;
 var editor;
 var modeditor;
 var clprinted;
@@ -46,7 +47,8 @@ require(["ceylon/language/1.1.1/ceylon.language-1.1.1", 'jquery', 'jquery-ui', '
         github = new gh.GitHub({
             beforeSend: startSpinner,
             complete: stopSpinner,
-            authentication: auth
+            authentication: auth,
+            debug: true
         });
         $(document).ready(function() {
             console && console.log("Ceylon language module loaded OK");
@@ -133,8 +135,13 @@ require(["ceylon/language/1.1.1/ceylon.language-1.1.1", 'jquery', 'jquery-ui', '
             });
 
             showGitHubConnect();
-            $('#shareurl').focus(function(){ jquery(this).select(); });
+            $('#share_src').show();
+            $('#save_src').hide();
+            $('#update_src').hide();
+            $('#gistname').hide();
             $('#shareurl').hide();
+            $('#gistlink').hide();
+            $('#deletegist').hide();
             var key = location.href.split('#');
             if (key.length == 2 && key[1].toString().trim().length > 16) {
                 //retrieve code
@@ -167,8 +174,8 @@ require(["ceylon/language/1.1.1/ceylon.language-1.1.1", 'jquery', 'jquery-ui', '
             } else {
             	runCode(wrapCode('print("Ceylon ``language.version`` \\"``language.versionName``\\"");'));
                 editCode('hello_world');
-                listGists();
             }
+            listGists();
             editor.on('change',function(){live_tc.last=Date.now();});
             editor.on('cursorActivity',function(){
               if (closePopups)closePopups();
@@ -275,21 +282,57 @@ function showGitHubConnect() {
     }
 }
 
-//Stores the code on the server and displays a URL with the key to retrieve it
-function shareSource() {
-    function showUrl(gist) {
-        var url = window.location.origin + window.location.pathname + "?gist=" + gist.data.id;
-        jquery('#gistlink').attr('href', gist.data.html_url);
-        jquery('#gistlink').show();
-        jquery('#shareurl').val(url);
-        jquery('#shareurl').show();
-        jquery('#shareurl').focus();
-        createComment(gist);
+function showGist(gist) {
+    selectedGist = gist;
+    var url = window.location.origin + window.location.pathname + "?gist=" + gist.data.id;
+    jquery('#share_src').hide();
+    jquery('#save_src').hide();
+    jquery('#update_src').show();
+    jquery('#gistname').val(gist.data.description.substr(19));
+    jquery('#gistname').show();
+    jquery('#gistlink').attr('href', gist.data.html_url);
+    jquery('#gistlink').show();
+    jquery('#shareurl').attr('href', url);
+    jquery('#shareurl').show();
+    var token = $.cookie("githubauth");
+    if (token) {
+        jquery('#deletegist').show();
     }
-    function showError(xhr, status, err) {
+}
+
+function shareSource() {
+    jquery('#share_src').hide();
+    jquery('#save_src').show();
+    jquery('#gistname').val("Code snippet");
+    jquery('#gistname').show();
+}
+
+//Stores the code on the server and displays a URL with the key to retrieve it
+function saveSource() {
+    function onSuccess(gist) {
+        showGist(gist);
+        createComment(gist);
+        updateGists();
+    }
+    function onError(xhr, status, err) {
         printError("Error storing Gist: " + (err?err:status));
         live_tc.clear();
     }
+    var files = getGistFiles();
+    var title = jquery('#gistname').val();
+    var data = {
+        "description": "Ceylon Web Runner: " + title,
+        "public": true,
+        "files": files
+    };
+    github.createGist({
+        data: data,
+        success: onSuccess,
+        error: onError
+    });
+}
+
+function getGistFiles() {
     var files;
     if ($("#edit_module_div").is(":visible")) {
         files = {
@@ -307,16 +350,7 @@ function shareSource() {
             }
         };
     }
-    var data = {
-        "description": "Code shared by the Ceylon Web Runner at " + window.location.origin + window.location.pathname,
-        "public": true,
-        "files": files
-    };
-    github.createGist({
-        data: data,
-        success: showUrl,
-        error: showError
-    });
+    return files;
 }
 
 // Creates a commit for the given Gist with a link to the Web Runner
@@ -325,7 +359,7 @@ function createComment(gist) {
     var token = $.cookie("githubauth");
     if (token) {
         var data = {
-            "body": "[Click here](" + window.location.origin + window.location.pathname + "?gist=" + id + ") to run this code online",
+            "body": "[Click here](" + window.location.origin + window.location.pathname + "?gist=" + gist.data.id + ") to run this code online",
         }
         gist.createComment({
             data: data
@@ -333,8 +367,52 @@ function createComment(gist) {
     }
 }
 
+function updateSource() {
+    function onSuccess(gist) {
+        showGist(gist);
+        updateGists();
+    }
+    function onError(xhr, status, err) {
+        printError("Error storing Gist: " + (err?err:status));
+        live_tc.clear();
+    }
+    var files = getGistFiles();
+    var title = jquery('#gistname').val();
+    var data = {
+        "description": "Ceylon Web Runner: " + title,
+        "files": files
+    };
+    selectedGist.edit({
+        data: data,
+        success: onSuccess,
+        error: onError
+    });
+}
+
+function deleteGist() {
+    function onRemove(gist) {
+        doReset();
+        updateGists();
+    }
+    if (selectedGist != null && confirm("Do you really want to delete this Gist?")) {
+        selectedGist.remove({
+            success: onRemove
+        });
+    }
+}
+
+function updateGists() {
+    listGists();
+}
+
 function listGists() {
+    var first = true;
+    
     function showGist(gist) {
+        if (first) {
+            $('#yrcode').empty();
+            first = false;
+        }
         var desc = gist.data.description.substring(19);
         $('#yrcode').append('<li class="news_entry"><a href="#" onClick="return editGist(\'' + gist.data.id + '\')">' + desc + '</a></li>');
         $('#yrcodehdr').show();
@@ -569,6 +647,7 @@ function editCode(key) {
         complete:stopSpinner,
         contentType:'application/x-www-form-urlencoded; charset=UTF-8',
         success:function(json, status, xhr) {
+            doReset();
             setEditorSourcesFromGist(json);
         },
         error:function(xhr, status, err) {
@@ -582,6 +661,7 @@ function editCode(key) {
 function editGist(key) {
     function onSuccess(gist) {
         setEditorSourcesFromGist(gist.data);
+        showGist(gist);
     }
     function onError(xhr, status, err) {
         printError("Error retrieving Gist '" + key + "': " + (err?err:status));
@@ -716,12 +796,18 @@ function showCode(code) {
 }
 
 function doReset() {
+    selectedGist = null;
     oldcode = "";
     oldmodcode = "";
     clearOutput();
     clearEditMarkers();
+    jquery('#share_src').show();
+    jquery('#save_src').hide();
+    jquery('#update_src').hide();
+    jquery('#gistname').hide();
     jquery('#gistlink').hide();
     jquery('#shareurl').hide();
+    jquery('#deletegist').hide();
 }
 
 //Clears all error markers and hover docs.
