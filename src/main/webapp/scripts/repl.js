@@ -298,6 +298,7 @@ function showGist(gist) {
     if (token) {
         jquery('#deletegist').show();
     }
+    handleGistNameChange();
 }
 
 function shareSource() {
@@ -305,6 +306,7 @@ function shareSource() {
     jquery('#save_src').show();
     jquery('#gistname').val("Code snippet");
     jquery('#gistname').show();
+    handleGistNameChange();
 }
 
 //Stores the code on the server and displays a URL with the key to retrieve it
@@ -440,6 +442,13 @@ function listGists() {
             onGist: showGist
         });
     }
+}
+
+function handleGistNameChange() {
+    var name = $("#gistname").val();
+    var disabled = (name == "");
+    jquery('#save_src').prop('disabled', disabled)
+    jquery('#update_src').prop('disabled', disabled)
 }
 
 function startSpinner() {

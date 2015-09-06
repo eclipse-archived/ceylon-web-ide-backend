@@ -128,7 +128,7 @@
         <button class="bubble-button" id="share_src" name="share_src" onClick="shareSource()">Share</button>
         <button class="bubble-button invis" id="save_src" name="save_src" onClick="saveSource()">Save Code</button>
         <button class="bubble-button invis" id="update_src" name="update_src" onClick="updateSource()">Update Code</button>
-        <input class="invis" type="text" id="gistname" name="gistname" value="" size="20">
+        <input class="invis" type="text" id="gistname" name="gistname" value="" size="20" oninput="handleGistNameChange(this)">
         <a class="invis" href="#" id="shareurl" title="Direct link to this page pre-filled with the current code">Link</a>
         <a class="invis" href="#" target="gistlink" id="gistlink" title="Link to the shared code on GitHub">Gist</a>
         <a class="invis" href="#" id="deletegist" onClick="deleteGist(); return false;" title="Remove the shared code from GitHub">Delete</a>
