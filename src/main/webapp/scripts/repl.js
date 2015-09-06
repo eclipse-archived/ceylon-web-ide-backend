@@ -48,7 +48,7 @@ require(["ceylon/language/1.1.1/ceylon.language-1.1.1", 'jquery', 'jquery-ui', '
             beforeSend: startSpinner,
             complete: stopSpinner,
             authentication: auth,
-            debug: true
+            debug: false
         });
         $(document).ready(function() {
             console && console.log("Ceylon language module loaded OK");

@@ -166,7 +166,7 @@
                 return tag;
             }
             function handleSuccess(json, status, xhr) {
-                if (that.config.debug) { console.log(xhr.getAllResponseHeaders()); }
+                if (that.config.debug) { console.log("Status: " + xhr.status + "\n", xhr.getAllResponseHeaders(), json); }
                 if (args.method == "GET") {
                     var etag = stripEtag(xhr.getResponseHeader("ETag"));
                     if (etag != null) {
