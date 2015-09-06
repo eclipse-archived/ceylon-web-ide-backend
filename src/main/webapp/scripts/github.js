@@ -59,7 +59,7 @@
         //  args.authentication - Optional Authentication to use for the
         //     remote call
         GitHub.prototype.listGists = function(args) {
-            that = this;
+            var that = this;
             if (args.onGist == null) {
                 throw "Missing required `args.onGist`";
             }
@@ -87,7 +87,7 @@
         // like `edit()` and `remove()` that only need an id
         //  id - The id of a Gist
         GitHub.prototype.gist = function(id) {
-            that = this;
+            var that = this;
             if (id == null) {
                 throw "Missing required `id`";
             }
@@ -103,7 +103,7 @@
         //  args.authentication - Optional Authentication to use for the
         //     remote call
         GitHub.prototype.createGist = function(args) {
-            that = this;
+            var that = this;
             if (args.data == null) {
                 throw "Missing required `args.data`";
             }
@@ -146,7 +146,7 @@
         //  args.authentication - Optional Authentication to use for the
         //     remote call
         GitHub.prototype._call = function(args) {
-            that = this;
+            var that = this;
             if (args.url == null) {
                 throw "Missing required `args.url`";
             }
@@ -255,7 +255,7 @@
         //  args.authentication - Optional Authentication to use for the
         //     remote call
         Gist.prototype.fetch = function(args) {
-            that = this;
+            var that = this;
             
             function handleGist(json, status, xhr) {
                 that.data = json;
@@ -290,7 +290,7 @@
         //  args.authentication - Optional Authentication to use for the
         //     remote call
         Gist.prototype.edit = function(args) {
-            that = this;
+            var that = this;
             if (args.data == null) {
                 throw "Missing required `args.data`";
             }
@@ -320,7 +320,7 @@
         //  args.authentication - Optional Authentication to use for the
         //     remote call
         Gist.prototype.remove = function(args) {
-            that = this;
+            var that = this;
             if (args.authentication == null && that.github.config.authentication == null) {
                 throw "Authentication required";
             }
@@ -349,7 +349,7 @@
         //  args.authentication - Optional Authentication to use for the
         //     remote call
         Gist.prototype.createComment = function(args) {
-            that = this;
+            var that = this;
             if (args.data == null) {
                 throw "Missing required `args.data`";
             }
@@ -392,7 +392,7 @@
         //  args.authentication - Optional Authentication to use for the
         //     remote call
         Comment.prototype.remove = function(args) {
-            that = this;
+            var that = this;
             
             function handleRemove(json, status, xhr) {
                 if (args.success != null) {
