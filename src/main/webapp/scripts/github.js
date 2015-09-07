@@ -75,7 +75,7 @@
                 $.each(json, filterGist);
             }
             
-            this._call({
+            that._call({
                 url: "gists",
                 method: "GET",
                 authentication: args.authentication,
@@ -119,7 +119,7 @@
                 }
             }
             
-            this._call({
+            that._call({
                 url: "gists",
                 method: "POST",
                 data: args.data,
@@ -185,7 +185,7 @@
             
             var hdr = {
                 "Accept": "application/vnd.github.v3+json",
-                "User-Agent": this.config.userAgent
+                "User-Agent": that.config.userAgent
             };
             var auth = args.authentication;
             if (typeof auth === "undefined") {
