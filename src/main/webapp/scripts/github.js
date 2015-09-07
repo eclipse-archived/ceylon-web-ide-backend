@@ -50,40 +50,6 @@
             this._cache = {};
         }
         
-        // List Gists
-        //  args.onGist - Callback to be called for each Gist that has been retrieved
-        //  args.accept - Optional filter function that when passed a `Gist` object
-        //     returns a boolean indicating if the given Gist should be accepted or not
-        //  args.error - Optional callback to be called on erroneous
-        //     termination of the remote call
-        //  args.authentication - Optional Authentication to use for the
-        //     remote call
-        GitHub.prototype.listGists = function(args) {
-            var that = this;
-            if (args.onGist == null) {
-                throw "Missing required `args.onGist`";
-            }
-            
-            function filterGist(index, item) {
-                item["_state"] = "summary";
-                var gist = new Gist(that, item);
-                if (args.accept == null || args.accept(gist)) {
-                    args.onGist(gist);
-                }
-            }
-            function handleGists(json, status, xhr) {
-                $.each(json, filterGist);
-            }
-            
-            that._call({
-                url: "gists",
-                method: "GET",
-                authentication: args.authentication,
-                success: handleGists,
-                error: args.onError
-            });
-        }
-        
         // Create a dummy Gist that can be used for operations
         // like `edit()` and `remove()` that only need an id
         //  id - The id of a Gist
@@ -127,6 +93,55 @@
                 success: handleGist,
                 error: args.error
             });
+        }
+        
+        // Returns a List object that can be used to iterate over Gists
+        //  args.pageSize - Optional page size to use for the list requests.
+        //     NB: not all list queries support this parameter see GitHub API docs
+        //  args.maxRequests - Optional number indicating the maximum number of
+        //     remote calls the function `each()` will make (default 5)
+        //  args.error - Optional callback to be called on erroneous
+        //     termination of the remote call
+        //  args.authentication - Optional Authentication to use for the
+        //     remote call
+        GitHub.prototype.gists = function(args) {
+            var that = this;
+            if (args == null) {
+                args = {};
+            }
+            
+            function decodeGist(json) {
+                json["_state"] = "summary";
+                return new Gist(that, json);
+            }
+            
+            return that._list({
+                url: "gists",
+                decode: decodeGist,
+                pageSize: args.pageSize,
+                maxRequests: args.maxRequests,
+                authentication: args.authentication,
+                error: args.error
+            });
+        }
+        
+        // Private function that handles remote calls returning lists.
+        // Returns an object that can be used to iterate over the items.
+        //  args.url - The URL part that added to the `config.rootUrl`
+        //     forms the actual URL to use for the remote list call
+        //  args.decode - Optional decoder function that takes a JSON object
+        //     and returns a user-defined object
+        //  args.pageSize - Optional page size to use for the list requests.
+        //     NB: not all list queries support this parameter see GitHub API docs
+        //  args.maxRequests - Optional number indicating the maximum number of
+        //     remote calls the function `each()` will make (default 5)
+        //  args.error - Optional callback to be called on erroneous
+        //     termination of any remote calls
+        //  args.authentication - Optional Authentication to use for the
+        //     remote calls
+        GitHub.prototype._list = function(args) {
+            var that = this;
+            return new List(that, args);
         }
         
         // Private function that handles the actual remote calls
@@ -417,6 +432,151 @@
         }
         
         //////////////////////////////////////////////////////////////////////
+        // Object for handling lists
+        //  data.url - The URL part that added to the `config.rootUrl`
+        //     forms the actual URL to use for the remote list call
+        //  data.decode - Optional decoder function that takes a JSON object
+        //     and returns a user-defined object
+        //  data.pageSize - Optional page size to use for the list requests.
+        //     NB: not all list queries support this parameter see GitHub API docs
+        //  data.maxRequests - Optional number indicating the maximum number of
+        //     remote calls the function `each()` will make (default 5)
+        //  data.error - Optional callback to be called on erroneous
+        //     termination of any remote calls
+        //  data.authentication - Optional Authentication to use for the
+        //     remote calls
+        //////////////////////////////////////////////////////////////////////
+        function List(github, data) {
+            this.github = github;
+            this.data = data;
+            if (data.url == null) {
+                throw "Missing required `data.url`";
+            }
+            if (data.maxRequests == null) {
+                data.maxRequests = 5;
+            }
+            
+            this.pages = [];
+            this.pageCount = -1;
+            this.size = 0;
+        }
+
+        List.prototype.hasMoreElements = function(args) {
+            return this.pageCount < 0;
+        }
+        
+        // Iterate over the elements in a remote list automatically fetching
+        // pages of information one at a time by making remote remote calls.
+        // Can also be called by just passing a function directly as its
+        // first and only argument or by passing an object:
+        //  args.func - The function to call for each element in the list
+        //  args.page - Optional starting page (default 1)
+        //  args.finish - Optional function to call at the end of the
+        //     iteration
+        List.prototype.each = function(args) {
+            var that = this;
+
+            var func, page, requestCount;
+            if (typeof args === "function") {
+                func = args;
+                page = 1;
+                requestCount = 0;
+            } else {
+                if (args.func == null) {
+                    throw "Missing required `args.func`";
+                }
+                func = args.func;
+                page = args.page || 1;
+                requestCount = args._requestCount || 0;
+            }
+            
+            var idx = 0;
+            if (page != null && page > 0) {
+                idx = page - 1;
+            }
+            var i;
+            var items = that.pages[idx];
+            while (items != null) {
+                for (i = 0; i < items.length; i++) {
+                    if (func(items[i]) == false) {
+                        return;
+                    }
+                }
+                idx++;
+                items = that.pages[idx];
+            }
+            
+            function continueEach(is) {
+                that.size += is.length;
+                that.each({
+                    func: func,
+                    finish: args.finish,
+                    page: idx + 1,
+                    _requestCount: requestCount + 1
+                });
+            }
+            
+            if (requestCount < that.data.maxRequests && (that.pageCount < 0 || idx < that.pageCount)) {
+                that._fetch({
+                    page: idx + 1,
+                    success: continueEach
+                });
+            } else if (args.finish != null) {
+                args.finish(that);
+            }
+        }
+        
+        // Private function that fetches a page of data from a remote list
+        //  args.success - Callback to be called on successful
+        //     termination of the remote call
+        //  args.page - Optional page number to fetch (default 1)
+        List.prototype._fetch = function(args) {
+            var that = this;
+            if (args.success == null) {
+                throw "Missing required `args.success`";
+            }
+            
+            var idx = 0;
+            if (args.page != null && args.page > 0) {
+                idx = args.page - 1;
+            }
+            if (that.pages[idx] != null) {
+                return;
+            }
+            
+            function handleList(json, status, xhr) {
+                var items = [];
+                $.each(json, function(index, item) {
+                    item["_state"] = "summary";
+                    if (that.data.decode != null) {
+                        // We have a decoder that turns JSON into Objects
+                        item = that.data.decode(item);
+                    }
+                    items.push(item);
+                });
+                that.pages[idx] = items;
+                var link = xhr.getResponseHeader("Link");
+                if (link == null || link.indexOf('rel="next"') < 0) {
+                    that.pageCount = idx + 1;
+                }
+                args.success(items);
+            }
+            
+            var url = addParam(that.data.url, "page", idx + 1);
+            if (that.data.pageSize != null) {
+                url = addParam(url, "per_page", that.data.pageSize);
+            }
+            
+            that.github._call({
+                url: url,
+                method: "GET",
+                authentication: that.data.authentication,
+                success: handleList,
+                error: that.data.error
+            });
+        }
+        
+        //////////////////////////////////////////////////////////////////////
         // Object used for authentication
         //  data.type - Either "basic" or "oauth"
         // For "basic":
@@ -431,6 +591,14 @@
             this.username = data.username;
             this.password = data.password;
             this.token = data.token;
+        }
+        
+        function addParam(url, name, value) {
+            if (url.indexOf("?") >= 0) {
+                return url + "&" + name + "=" + value;
+            } else {
+                return url + "?" + name + "=" + value;
+            }
         }
         
         exports.GitHub = GitHub;
