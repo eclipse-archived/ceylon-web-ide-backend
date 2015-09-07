@@ -151,6 +151,7 @@
     <h3 id="yrcodehdr" class="invis">Your code:</h3>
     <ol id="yrcode" class="invis">
     </ol>
+    <a id="yrcodemore" class="invis" href="#" onCLick="">more...</a>
     <h3 id="news">Try out a sample:</h3>
     <ol>
     <li class="news_entry"><a href="#" onClick="return editCode('hello_world')">Hello World</a></li>

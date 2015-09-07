@@ -407,8 +407,8 @@ function updateGists() {
     listGists();
 }
 
-function listGists() {
-    var first = true;
+function listGists(page) {
+    var first = (page == null || page == 1);
     
     function showGist(gist) {
         if (first) {
@@ -421,7 +421,7 @@ function listGists() {
         $('#yrcode').show();
     }
     
-    function filterGist(gist) {
+    function acceptGist(gist) {
         if (gist.data.description.startsWith("Ceylon Web Runner: ")) {
             var show = false;
             $.each(gist.data.files, function(idx, itm) {
@@ -434,12 +434,29 @@ function listGists() {
         return false;
     }
     
+    function handleGist(gist) {
+        if (acceptGist(gist)) {
+            showGist(gist);
+        }
+    }
+    
+    function onEnd(list) {
+        if (list.hasMoreElements()) {
+            $('#yrcodemore').click(function() { return listGists(list.pages.length + 1); });
+            $('#yrcodemore').show();
+        } else {
+            $('#yrcodemore').hide();
+        }
+    }
+    
     // Check that we have a valid GitHub token
     var token = $.cookie("githubauth");
     if (token) {
-        github.listGists({
-            accept: filterGist,
-            onGist: showGist
+        var gistsIter = github.gists();
+        gistsIter.each({
+            func: handleGist,
+            finish: onEnd,
+            page: page
         });
     }
 }
