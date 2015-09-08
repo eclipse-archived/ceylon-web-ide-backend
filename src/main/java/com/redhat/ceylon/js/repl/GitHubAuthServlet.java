@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -22,6 +24,8 @@ import net.minidev.json.JSONValue;
 public class GitHubAuthServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
+    
+    private final static Logger log = Logger.getLogger(GitHubAuthServlet.class.getName()); 
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -32,7 +36,7 @@ public class GitHubAuthServlet extends HttpServlet {
             // We get a temporary code
             String tmpcode = req.getParameter("code");
             if (tmpcode != null) {
-                System.err.println("GitHubAuth: temporary code: " + tmpcode);
+                log.info("GitHubAuth: temporary code: " + tmpcode);
                 // Exchange it for a permanent access token by:
                 // First creating a request URL
                 StringBuilder buf = new StringBuilder();
@@ -52,7 +56,7 @@ public class GitHubAuthServlet extends HttpServlet {
                 buf.append("&code=");
                 buf.append(tmpcode);
                 buf.append("&state=xyz");
-                System.err.println("GitHubAuth: request token: " + buf.toString());
+                log.info("GitHubAuth: request token: " + buf.toString());
                 URL url = new URL(buf.toString());
                 // Then sending the request to GitHub
                 HttpURLConnection con = (HttpURLConnection)url.openConnection();
@@ -62,7 +66,7 @@ public class GitHubAuthServlet extends HttpServlet {
                 try (InputStream is = con.getInputStream()) {
                     // Reading GitHub's response
                     String json = readAll(is);
-                    System.err.println("GitHubAuth: response: " + json);
+                    log.info("GitHubAuth: response: " + json);
                     // Extracting the access token
                     JSONObject result = (JSONObject)JSONValue.parse(json);
                     String token = (String)result.get("access_token");
@@ -75,7 +79,7 @@ public class GitHubAuthServlet extends HttpServlet {
                     out.print("window.opener.location.reload();");
                 }
             } else {
-                System.err.println("GitHubAuth: no temprorary code received");
+                log.info("GitHubAuth: no temprorary code received");
             }
         } catch (Exception ex) {
             // Ignore any errors
