@@ -47,7 +47,7 @@ public class GitHubAuthServlet extends HttpServlet {
                     
                     Map<String, String> env = System.getenv();
                     for (String k : env.keySet()) {
-                        log.info("ENV: " + k + " = " + env.get(k));
+                        log.severe("ENV: " + k + " = " + env.get(k));
                     }
                 }
                 buf.append("?client_id=");
