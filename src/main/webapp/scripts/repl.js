@@ -9,6 +9,7 @@ require.config({
         "jquery" : window.location.pathname + "scripts/jquery-1.11.1.min",
         "jquery-ui" : window.location.pathname + "scripts/jquery-ui-1.11.2.min",
         "jquery-cookie" : window.location.pathname + "scripts/jquery-cookie-1.4.1",
+        "perfect-scrollbar-jquery" : window.location.pathname + "scripts/perfect-scrollbar.jquery.min",
         "github" : window.location.pathname + "scripts/github",
     },
     waitSeconds: 15
@@ -33,8 +34,8 @@ var live_tc={
 };
 var closePopups=undefined;
 
-require(["ceylon/language/1.1.1/ceylon.language-1.1.1", 'jquery', 'jquery-ui', 'jquery-cookie', 'github'],
-    function(clang, $, jqui, jqcookie, gh) {
+require(["ceylon/language/1.1.1/ceylon.language-1.1.1", 'jquery', 'jquery-ui', 'jquery-cookie', 'perfect-scrollbar-jquery', 'github'],
+    function(clang, $, jqui, jqcookie, jqscrollbar, gh) {
         jquery=$;
         var auth;
         var token = $.cookie("githubauth");
@@ -134,6 +135,8 @@ require(["ceylon/language/1.1.1/ceylon.language-1.1.1", 'jquery', 'jquery-ui', '
               }
             });
 
+            $('#sidebarblock').perfectScrollbar();
+            
             showGitHubConnect();
             $('#share_src').show();
             $('#save_src').hide();

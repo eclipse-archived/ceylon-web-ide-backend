@@ -1123,12 +1123,15 @@ form.bp textarea {
 }
 /* line 601 */
 #primary-content .sidebar-block {
+  height: 400px;
+  position: relative;
+  overflow: hidden;
   -moz-border-radius: 15px;
   border-radius: 15px;
   font-size: 14px;
   text-shadow: white 1px 1px 0px;
   padding: 1.5em;
-  margin: 0em 1.75em;
+  margin: 0em 0m;
   border-left: 1px solid #c7d8d8;
   border-right: 1px solid #c7d8d8;
   background: url("http://ceylon-lang.org/images/sidebar_bkg_elephant.png") no-repeat 0px 0px #d4e5e5;

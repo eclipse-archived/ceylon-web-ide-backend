@@ -83,7 +83,13 @@
     <link rel='stylesheet' type='text/css' href='autocomplete.css'/>
     <link rel='stylesheet' type='text/css' href='scripts/jquery-ui-1.11.2.css'/>
     <link rel='stylesheet' type='text/css' href='scripts/jquery-ui-1.11.2.structure.css'/>
+    <link rel='stylesheet' type='text/css' href='scripts/perfect-scrollbar.css'/>
     <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css">
+    <style type="text/css">
+        .ps-container > .ps-scrollbar-y-rail {
+          right: 8px;
+        }
+    </style>
 
 </head>
 
@@ -147,33 +153,35 @@
 
 <div id="sidebar">
 <div class="point-light-top"/>
-<div class="sidebar-block">
-    <h3 id="yrcodehdr" class="invis">Your code:</h3>
-    <ol id="yrcode" class="invis">
-    </ol>
-    <a id="yrcodemore" class="invis" href="#" onCLick="">more...</a>
-    <h3 id="news">Try out a sample:</h3>
-    <ol>
-    <li class="news_entry"><a href="#" onClick="return editCode('hello_world')">Hello World</a></li>
-    <li class="news_entry"><a href="#" onClick="return editCode('basics')">Basics</a></li>
-    <li class="news_entry"><a href="#" onClick="return editCode('null_and_union')">Null values and union types</a></li>
-    <li class="news_entry"><a href="#" onClick="return editCode('conditions')">Conditions and assertions</a></li>
-    <li class="news_entry"><a href="#" onClick="return editCode('classes_and_functions')">Classes and functions 1</a></li>
-    <li class="news_entry"><a href="#" onClick="return editCode('interfaces')">Interfaces and mixin inheritance</a></li>
-    <li class="news_entry"><a href="#" onClick="return editCode('classes_and_functions2')">Classes and functions 2</a></li>
-    <li class="news_entry"><a href="#" onClick="return editCode('collections')">Collections and sequence comprehensions</a></li>
-    <li class="news_entry"><a href="#" onClick="return editCode('named_arguments')">Named argument syntax</a></li>
-    <li class="news_entry"><a href="#" onClick="return editCode('generics')">Type parameters</a></li>
-    <li class="news_entry"><a href="#" onClick="return editCode('switch1')">Enumerations and the switch statement</a></li>
-    <li class="news_entry"><a href="#" onClick="return editCode('interop')">Interoperability</a></li>
-    <li class="news_entry"><a href="#" onClick="return editCode('request')">Interoperability 2</a></li>
-    <li class="news_entry"><a href="#" onClick="return editCode('dynints')">Dynamic interfaces</a></li>
-    <li class="news_entry"><a href="#" onClick="return editCode('operators')">Operator polymorphism</a></li>
-    <li class="news_entry"><a href="#" onClick="return editCode('metamodel')">Type-safe Metamodel</a></li>
-    <li class="news_entry"><a href="#" onClick="return editCode('game_of_life')">Game of Life</a></li>
-    <li class="news_entry"><a href="#" onClick="return editCode('importtest1')">Simple Import Test</a></li>
-    <li class="news_entry"><a href="#" onClick="return editCode('importtest2')">Advanced Import Test</a></li>
-    </ol>
+<div id="sidebarblock" class="sidebar-block">
+    <div>
+        <h3 id="yrcodehdr" class="invis">Your code:</h3>
+        <ol id="yrcode" class="invis">
+        </ol>
+        <a id="yrcodemore" class="invis" href="#" onCLick="">more...</a>
+        <h3 id="news">Try out a sample:</h3>
+        <ol>
+        <li class="news_entry"><a href="#" onClick="return editCode('hello_world')">Hello World</a></li>
+        <li class="news_entry"><a href="#" onClick="return editCode('basics')">Basics</a></li>
+        <li class="news_entry"><a href="#" onClick="return editCode('null_and_union')">Null values and union types</a></li>
+        <li class="news_entry"><a href="#" onClick="return editCode('conditions')">Conditions and assertions</a></li>
+        <li class="news_entry"><a href="#" onClick="return editCode('classes_and_functions')">Classes and functions 1</a></li>
+        <li class="news_entry"><a href="#" onClick="return editCode('interfaces')">Interfaces and mixin inheritance</a></li>
+        <li class="news_entry"><a href="#" onClick="return editCode('classes_and_functions2')">Classes and functions 2</a></li>
+        <li class="news_entry"><a href="#" onClick="return editCode('collections')">Collections and sequence comprehensions</a></li>
+        <li class="news_entry"><a href="#" onClick="return editCode('named_arguments')">Named argument syntax</a></li>
+        <li class="news_entry"><a href="#" onClick="return editCode('generics')">Type parameters</a></li>
+        <li class="news_entry"><a href="#" onClick="return editCode('switch1')">Enumerations and the switch statement</a></li>
+        <li class="news_entry"><a href="#" onClick="return editCode('interop')">Interoperability</a></li>
+        <li class="news_entry"><a href="#" onClick="return editCode('request')">Interoperability 2</a></li>
+        <li class="news_entry"><a href="#" onClick="return editCode('dynints')">Dynamic interfaces</a></li>
+        <li class="news_entry"><a href="#" onClick="return editCode('operators')">Operator polymorphism</a></li>
+        <li class="news_entry"><a href="#" onClick="return editCode('metamodel')">Type-safe Metamodel</a></li>
+        <li class="news_entry"><a href="#" onClick="return editCode('game_of_life')">Game of Life</a></li>
+        <li class="news_entry"><a href="#" onClick="return editCode('importtest1')">Simple Import Test</a></li>
+        <li class="news_entry"><a href="#" onClick="return editCode('importtest2')">Advanced Import Test</a></li>
+        </ol>
+    </div>
 </div>
 <div class="point-light-end"/>
     <div style="text-align:center;padding-top:50px;">
