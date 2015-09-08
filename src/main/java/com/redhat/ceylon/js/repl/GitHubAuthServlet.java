@@ -44,6 +44,11 @@ public class GitHubAuthServlet extends HttpServlet {
                 String clientId = System.getenv("GITHUB_CLIENTID");
                 if (clientId == null) {
                     clientId = "ef3727725eeee1d1bae2"; // Test ID
+                    
+                    Map<String, String> env = System.getenv();
+                    for (String k : env.keySet()) {
+                        log.info("ENV: " + k + " = " + env.get(k));
+                    }
                 }
                 buf.append("?client_id=");
                 buf.append(clientId);
