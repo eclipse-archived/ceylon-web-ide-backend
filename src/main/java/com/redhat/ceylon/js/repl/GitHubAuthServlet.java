@@ -31,47 +31,51 @@ public class GitHubAuthServlet extends HttpServlet {
         try {
             // We get a temporary code
             String tmpcode = req.getParameter("code");
-            System.err.println("GitHubAuth: temporary code: " + tmpcode);
-            // Exchange it for a permanent access token by:
-            // First creating a request URL
-            StringBuilder buf = new StringBuilder();
-            buf.append("https://github.com/login/oauth/access_token");
-            String clientId = System.getenv("GITHUB_CLIENTID");
-            if (clientId == null) {
-                clientId = "ef3727725eeee1d1bae2"; // Test ID
-            }
-            buf.append("?client_id=");
-            buf.append(clientId);
-            String clientSecret = System.getenv("GITHUB_CLIENTSECRET");
-            if (clientSecret == null) {
-                clientSecret = "2bbf6b4cc39dc9015c8de4c83e92cc6bab620151"; // Test secret
-            }
-            buf.append("&client_secret=");
-            buf.append(clientSecret);
-            buf.append("&code=");
-            buf.append(tmpcode);
-            buf.append("&state=xyz");
-            System.err.println("GitHubAuth: request token: " + buf.toString());
-            URL url = new URL(buf.toString());
-            // Then sending the request to GitHub
-            HttpURLConnection con = (HttpURLConnection)url.openConnection();
-            con.addRequestProperty("Accept", "application/json");
-            con.setUseCaches(false);
-            con.setAllowUserInteraction(false);
-            try (InputStream is = con.getInputStream()) {
-                // Reading GitHub's response
-                String json = readAll(is);
-                System.err.println("GitHubAuth: response: " + json);
-                // Extracting the access token
-                JSONObject result = (JSONObject)JSONValue.parse(json);
-                String token = (String)result.get("access_token");
-                // And finally storing the token in a cookie
-                Cookie c = new Cookie("githubauth", token);
-                c.setPath("/");
-                c.setMaxAge(30 * 24 * 60 * 60); // 30 days
-                resp.addCookie(c);
-                // Write a script to the out put that tells the original page to reload itself
-                out.print("window.opener.location.reload();");
+            if (tmpcode != null) {
+                System.err.println("GitHubAuth: temporary code: " + tmpcode);
+                // Exchange it for a permanent access token by:
+                // First creating a request URL
+                StringBuilder buf = new StringBuilder();
+                buf.append("https://github.com/login/oauth/access_token");
+                String clientId = System.getenv("GITHUB_CLIENTID");
+                if (clientId == null) {
+                    clientId = "ef3727725eeee1d1bae2"; // Test ID
+                }
+                buf.append("?client_id=");
+                buf.append(clientId);
+                String clientSecret = System.getenv("GITHUB_CLIENTSECRET");
+                if (clientSecret == null) {
+                    clientSecret = "2bbf6b4cc39dc9015c8de4c83e92cc6bab620151"; // Test secret
+                }
+                buf.append("&client_secret=");
+                buf.append(clientSecret);
+                buf.append("&code=");
+                buf.append(tmpcode);
+                buf.append("&state=xyz");
+                System.err.println("GitHubAuth: request token: " + buf.toString());
+                URL url = new URL(buf.toString());
+                // Then sending the request to GitHub
+                HttpURLConnection con = (HttpURLConnection)url.openConnection();
+                con.addRequestProperty("Accept", "application/json");
+                con.setUseCaches(false);
+                con.setAllowUserInteraction(false);
+                try (InputStream is = con.getInputStream()) {
+                    // Reading GitHub's response
+                    String json = readAll(is);
+                    System.err.println("GitHubAuth: response: " + json);
+                    // Extracting the access token
+                    JSONObject result = (JSONObject)JSONValue.parse(json);
+                    String token = (String)result.get("access_token");
+                    // And finally storing the token in a cookie
+                    Cookie c = new Cookie("githubauth", token);
+                    c.setPath("/");
+                    c.setMaxAge(30 * 24 * 60 * 60); // 30 days
+                    resp.addCookie(c);
+                    // Write a script to the out put that tells the original page to reload itself
+                    out.print("window.opener.location.reload();");
+                }
+            } else {
+                System.err.println("GitHubAuth: no temprorary code received");
             }
         } catch (Exception ex) {
             // Ignore any errors
