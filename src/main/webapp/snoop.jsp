@@ -278,7 +278,7 @@ MemoryPoolMXBean item = (MemoryPoolMXBean) iter.next();
 	}
 %>
 
-
+<%-- Too dangerous for live systems
 <%
     e = System.getProperties().keys();
     if(e != null && e.hasMoreElements()) {
@@ -331,6 +331,7 @@ MemoryPoolMXBean item = (MemoryPoolMXBean) iter.next();
 <%
     }
 %>
+--%>
 
 </BODY>
 </HTML>
