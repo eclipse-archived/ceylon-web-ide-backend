@@ -8,8 +8,11 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Map;
+import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.Cookie;
@@ -26,6 +29,13 @@ public class GitHubAuthServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     
     private final static Logger log = Logger.getLogger(GitHubAuthServlet.class.getName()); 
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        initLogger(log, false);
+        super.log("GitHubAuthServlet initialized");
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -108,4 +118,16 @@ public class GitHubAuthServlet extends HttpServlet {
         return buf.toString();
     }
 
+    private static void initLogger(Logger logger, boolean verbose) {
+        boolean handlersExists = false;
+        for (Handler handler : logger.getHandlers()) {
+            handlersExists = true;
+
+            if (verbose) {
+                handler.setLevel(Level.ALL);
+            } else {
+                handler.setLevel(Level.INFO);
+            }
+        }
+    }
 }
