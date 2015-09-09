@@ -165,7 +165,8 @@ require(["ceylon/language/1.1.1/ceylon.language-1.1.1", 'jquery', 'jquery-ui', '
             } else if (location.href.indexOf('?src=') > 0) {
                 //Code is directly in URL
                 key = location.href.slice(location.href.indexOf('?src=')+5);
-                setEditorSources(decodeURIComponent(key));
+                var code = decodeURIComponent(key);
+                setEditorSources(codePrefix + code + codePostfix);
             } else if (location.href.indexOf('?sample=') > 0) {
                 //Retrieve code from the given sample id
                 key = location.href.slice(location.href.indexOf('?sample=')+8);
