@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -30,6 +29,7 @@ public class GitHubAuthServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        resp.setContentType("text/html");
         PrintWriter out = resp.getWriter();
         out.print("<html><body><script>");
         try {
