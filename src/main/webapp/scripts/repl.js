@@ -715,7 +715,7 @@ function setEditorSourcesFromGist(json) {
         if (json.files.hasOwnProperty(key)) {
             if (key == "module.ceylon") {
                 modsrc = json.files[key].content;
-            } else {
+            } else if (key.endsWith(".ceylon")) {
                 src = json.files[key].content;
             }
         }
