@@ -1,3 +1,5 @@
+"use strict";
+
 (function(define) {
     define(function(require, exports, module) {
         $ = require("jquery");

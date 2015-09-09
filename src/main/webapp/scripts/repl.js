@@ -1,3 +1,5 @@
+"use strict";
+
 var markers=[];
 var bindings=[];
 
