@@ -280,7 +280,7 @@ function complete(editor){
 function showGitHubConnect() {
     if ($.cookie("githubauth") == null) {
         var redirect = window.location.origin + window.location.pathname + "githubauth";
-        var url = "https://github.com/login/oauth/authorize?client_id=ef3727725eeee1d1bae2&scope=gist&state=xyz&redirect_uri=" + encodeURIComponent(redirect);
+        var url = "https://github.com/login/oauth/authorize?client_id=" + clientid + "&scope=gist&state=xyz&redirect_uri=" + encodeURIComponent(redirect);
         $("#ghconnect").html('<a href="' + url + '" target="githubauth">Connect to GitHub</a>');
     } else {
         $("#ghconnect").html('<a href="#" onclick="$.removeCookie(\'githubauth\', { path: \'/\' }); window.location.reload()">Disconnect from GitHub</a>');

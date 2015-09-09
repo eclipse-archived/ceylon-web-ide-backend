@@ -4,6 +4,13 @@
     <meta charset="utf-8">
     <title>Ceylon Web Runner</title>
     
+    <script>
+    var clientid = "<%= System.getenv("GITHUB_CLIENTID") %>";
+    if (clientid == "null") {
+            clientid = "ef3727725eeee1d1bae2";
+    }
+    </script>
+    
     <link rel='stylesheet' media='screen, projection' type='text/css' href='main.css'/>
     <link rel='stylesheet' type='text/css'
          href='http://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Sans|PT+Sans:700|Inconsolata|Inconsolata:700'/>
