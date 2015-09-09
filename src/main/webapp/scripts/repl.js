@@ -877,6 +877,7 @@ function escapeHtml(html) {
 // soruces and finally execute the "func()" that was passed.
 // Quite a bit of jumping through hoops to get this all to work
 function loadModuleAsString(src, func) {
+    startSpinner();
     delete window.ex$;
     delete window._CTM$;
     delete window.$CCMM$;
@@ -893,6 +894,10 @@ function loadModuleAsString(src, func) {
                     if (func) {
                         func();
                     }
+                    stopSpinner();
+                }, function(err) {
+                    stopSpinner();
+                    printError(err);
                 });
                 return;
             }
@@ -902,6 +907,7 @@ function loadModuleAsString(src, func) {
     if (func) {
         func();
     }
+    stopSpinner();
 }
 
 function globalEval(src) {
