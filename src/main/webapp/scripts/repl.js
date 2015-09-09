@@ -145,35 +145,18 @@ require(["ceylon/language/1.1.1/ceylon.language-1.1.1", 'jquery', 'jquery-ui', '
             $('#shareurl').hide();
             $('#gistlink').hide();
             $('#deletegist').hide();
-            var key = location.href.split('#');
-            if (key.length == 2 && key[1].toString().trim().length > 16) {
-                //retrieve code
-                key = key[1];
-                $.ajax('share?key='+key, {
-                    cache:false,
-                    dataType:'text',
-                    timeout:20000,
-                    beforeSend:startSpinner,
-                    complete:stopSpinner,
-                    success:function(src,status,xhr) {
-                        setEditorSources(src);
-                    },
-                    error:function(a,status,err) {
-                        alert("Error retrieving shared code: " + (err?err:status));
-                    }
-                });
-            } else if (location.href.indexOf('?src=') > 0) {
+            if (location.href.indexOf('?src=') > 0) {
                 //Code is directly in URL
-                key = location.href.slice(location.href.indexOf('?src=')+5);
+                var key = location.href.slice(location.href.indexOf('?src=')+5);
                 var code = decodeURIComponent(key);
                 setEditorSources(codePrefix + code + codePostfix);
             } else if (location.href.indexOf('?sample=') > 0) {
                 //Retrieve code from the given sample id
-                key = location.href.slice(location.href.indexOf('?sample=')+8);
+                var key = location.href.slice(location.href.indexOf('?sample=')+8);
                 editCode(key);
             } else if (location.href.indexOf('?gist=') > 0) {
                 //Retrieve code from the given sample id
-                key = location.href.slice(location.href.indexOf('?gist=')+6);
+                var key = location.href.slice(location.href.indexOf('?gist=')+6);
                 editGist(key);
             } else {
             	runCode(wrapCode('print("Ceylon ``language.version`` \\"``language.versionName``\\"");'));
