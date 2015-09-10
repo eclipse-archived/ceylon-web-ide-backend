@@ -203,7 +203,8 @@ void draw() {
         prevDead = deadCells.size;
     }
     dynamic {
-        dynamic canvas = document.getElementById("lifegrid");
+        dynamic doc = window.parent.document;
+        dynamic canvas = doc.getElementById("lifegrid");
         if (exists canvas) {
             dynamic ctx = canvas.getContext("2d");
             
@@ -230,12 +231,13 @@ void draw() {
 }
 
 dynamic {
-    if (!document.getElementById("lifegrid") exists) {
-        dynamic canvas = document.createElement("canvas");
+    dynamic doc = window.parent.document;
+    if (!doc.getElementById("lifegrid") exists) {
+        dynamic canvas = doc.createElement("canvas");
         canvas.setAttribute("id", "lifegrid");
         canvas.setAttribute("width", pwidth);
         canvas.setAttribute("height", pheight);
-        dynamic corePage = document.getElementById("core-page");
+        dynamic corePage = doc.getElementById("core-page");
         corePage.insertBefore(canvas, corePage.childNodes[3]);
         dynamic ctx = canvas.getContext("2d");
         ctx.fillStyle = "#FFFFFF";
@@ -243,7 +245,8 @@ dynamic {
     }
 
     setOnStop(void() {
-        dynamic canvas = document.getElementById("lifegrid");
+        dynamic doc = window.parent.document;
+        dynamic canvas = doc.getElementById("lifegrid");
         if (exists canvas) {
             canvas.parentNode.removeChild(canvas);
         }
