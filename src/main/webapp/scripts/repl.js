@@ -1,205 +1,202 @@
 "use strict";
 
-var markers=[];
-var bindings=[];
+var markers = [];
+var bindings = [];
 
-require.config({
-    baseUrl: "http://modules.ceylon-lang.org/repo/1",
-    paths : {
-        "ceylon/language/1.1.1/ceylon.language-1.1.1" : window.location.pathname + "scripts/modules/ceylon/language/1.1.1/ceylon.language-1.1.1",
-        "ceylon/language/1.1.1/ceylon.language-1.1.1-model" : window.location.pathname + "scripts/modules/ceylon/language/1.1.1/ceylon.language-1.1.1-model",
-        "jquery" : window.location.pathname + "scripts/jquery-1.11.1.min",
-        "jquery-ui" : window.location.pathname + "scripts/jquery-ui-1.11.2.min",
-        "jquery-cookie" : window.location.pathname + "scripts/jquery-cookie-1.4.1",
-        "perfect-scrollbar-jquery" : window.location.pathname + "scripts/perfect-scrollbar.jquery.min",
-        "github" : window.location.pathname + "scripts/github",
-    },
-    waitSeconds: 15
-});
-
-var jquery;
 var github;
 var selectedGist;
 var editor;
 var modeditor;
-var clprinted;
+var outputwin;
+var outputdoc;
 var spinCount = 0;
-var live_tc={
-  status:0,
-  last:Date.now(),
-  clear:function clear() {
-    live_tc.status=1;
-    live_tc.last=Date.now();
-    live_tc.text=editor.getValue();
-    live_tc.modtext=modeditor.getValue();
-  }
+var live_tc = {
+    status:0,
+    last:Date.now(),
+    clear:function clear() {
+        live_tc.status = 1;
+        live_tc.last = Date.now();
+        live_tc.text = editor.getValue();
+        live_tc.modtext = modeditor.getValue();
+    }
 };
-var closePopups=undefined;
+var closePopups = undefined;
 
-require(["ceylon/language/1.1.1/ceylon.language-1.1.1", 'jquery', 'jquery-ui', 'jquery-cookie', 'perfect-scrollbar-jquery', 'github'],
-    function(clang, $, jqui, jqcookie, jqscrollbar, gh) {
-        jquery=$;
-        var auth;
-        var token = $.cookie("githubauth");
-        if (token != null) {
-            auth = new gh.Authentication({
-                type: "oauth",
-                token: token
-            });
-        }
-        github = new gh.GitHub({
-            beforeSend: startSpinner,
-            complete: stopSpinner,
-            authentication: auth,
-            debug: false
-        });
-        $(document).ready(function() {
-            console && console.log("Ceylon language module loaded OK");
-            clang.$_process().write = function(x){
-                clprinted=true;
-                printOutput(x.string);
-            };
-            clang.$_process().writeLine = function(x){
-                clprinted=true;
-                printOutputLine(x.string);
-            };
-            console && console.log("ceylon.language.print() patched OK");
-            $('form').submit(false);
-            
-            var editorElem=document.getElementById('edit_ceylon');
-            editor = CodeMirror.fromTextArea(editorElem,{
-                mode:'ceylon',
-                gutters:["CodeMirror-error-gutter", "CodeMirror-gutter"],
-                lineNumbers:true,
-                indentUnit:4,
-                matchBrackets:true,
-                styleActiveLine:true,
-                autoCloseBrackets:true,
-                //highlightSelectionMatches:true,
-                extraKeys:{
-                    "Ctrl-D":function(cm){ fetchDoc(cm); },
-                    "Cmd-D":function(cm){ fetchDoc(cm); },
-                    "Ctrl-B":function(instance){ performRun(); },
-                    "Cmd-B":function(instance){ performRun(); },
-                    "Ctrl-.":function(){complete(editor);},
-                    "Cmd-.":function(){complete(editor);}
-                }
-            });
+var pagepath = window.location.pathname;
+if (!pagepath.endsWith("/")) {
+    var p = pagepath.lastIndexOf("/");
+    pagepath = pagepath.substring(0, p + 1);
+}
 
-            $("#edit_ceylon_div .CodeMirror").resizable({
-                stop: function() { editor.refresh(); },
-                resize: function() {
-                  $("#edit_ceylon_div .CodeMirror-scroll").height($(this).height());
-                  $("#edit_module_div .CodeMirror").width($(this).width());
-                  $(".CodeMirror-scroll").width($(this).width());
-                  $('#output').width($(this).width());
-                  $('#core-page').width($(this).width());
-                  editor.refresh();
-                  modeditor.refresh();
-                }
-              });
-              
-            var modEditorElem=document.getElementById('edit_module');
-            modeditor = CodeMirror.fromTextArea(modEditorElem,{
-                mode:'ceylon',
-                gutters:["CodeMirror-error-gutter", "CodeMirror-gutter"],
-                lineNumbers:true,
-                indentUnit:4,
-                matchBrackets:true,
-                styleActiveLine:true,
-                autoCloseBrackets:true,
-                //highlightSelectionMatches:true,
-                extraKeys:{
-                    "Ctrl-.":function(){complete(editor);},
-                    "Cmd-.":function(){complete(editor);}
-                }
-            });
-
-            $("#edit_module_div .CodeMirror").resizable({
-              stop: function() { editor.refresh(); },
-              resize: function() {
-                $("#edit_module_div .CodeMirror-scroll").height($(this).height());
-                $("#edit_ceylon_div .CodeMirror").width($(this).width());
-                $(".CodeMirror-scroll").width($(this).width());
-                $('#output').width($(this).width());
-                $('#core-page').width($(this).width());
-                editor.refresh();
-                modeditor.refresh();
-              }
-            });
-            
-            $('#output').resizable({
-              stop: function() { editor.refresh(); },
-              resize:function(){
-                $(".CodeMirror-scroll").width($(this).width());
-                editor.refresh();
-                modeditor.refresh();
-              }
-            });
-
-            $('#sidebarblock').perfectScrollbar();
-            
-            showGitHubConnect();
-            $('#share_src').show();
-            $('#save_src').hide();
-            $('#update_src').hide();
-            $('#gistname').hide();
-            $('#shareurl').hide();
-            $('#gistlink').hide();
-            $('#deletegist').hide();
-            if (location.href.indexOf('?src=') > 0) {
-                //Code is directly in URL
-                var key = location.href.slice(location.href.indexOf('?src=')+5);
-                var code = decodeURIComponent(key);
-                setEditorSources(codePrefix + code + codePostfix);
-            } else if (location.href.indexOf('?sample=') > 0) {
-                //Retrieve code from the given sample id
-                var key = location.href.slice(location.href.indexOf('?sample=')+8);
-                editCode(key);
-            } else if (location.href.indexOf('?gist=') > 0) {
-                //Retrieve code from the given sample id
-                var key = location.href.slice(location.href.indexOf('?gist=')+6);
-                editGist(key);
-            } else {
-            	runCode(wrapCode('print("Ceylon ``language.version`` \\"``language.versionName``\\"");'));
-                editCode('hello_world');
-            }
-            listGists();
-            editor.on('change',function(){live_tc.last=Date.now();});
-            editor.on('cursorActivity',function(){
-              if (closePopups)closePopups();
-              closePopups=undefined;
-            });
-            window.setInterval(function(){
-              if (live_tc.status==1 && editor.getValue()!=live_tc.text && Date.now()-live_tc.last>5000) {
-                console.log("typechecking...");
-                live_tc.text=editor.getValue();
-                live_tc.last=Date.now();
-                $.ajax('translate', {
-                    cache:false, type:'POST',
-                    dataType:'json',
-                    timeout:5000,
-                    success:function(json, status, xhr) {
-                        var errs = json['errors'];
-                        if (errs && errs.length>0) {
-                            showErrors(errs, false);
-                        } else {
-                            clearEditMarkers();
-                        }
-                    },
-                    error:function() {},
-                    contentType:'application/x-www-form-urlencoded; charset=UTF-8',
-                    data:{
-                        tc:1,
-                        module:live_tc.modtext,
-                        ceylon:wrapCode(live_tc.text)
-                    }
-                });
-              }
-            },1000);
+$(document).ready(function() {
+    $('form').submit(false);
+    
+    outputwin = $("#output")[0].contentWindow;
+    outputdoc = $(outputwin.document)
+    
+    var auth;
+    var token = $.cookie("githubauth");
+    if (token != null) {
+        auth = new Authentication({
+            type: "oauth",
+            token: token
         });
     }
-);
+    github = new GitHub({
+        beforeSend: startSpinner,
+        complete: stopSpinner,
+        authentication: auth,
+        debug: false
+    });
+
+    var editorElem=document.getElementById('edit_ceylon');
+    editor = CodeMirror.fromTextArea(editorElem,{
+        mode:'ceylon',
+        gutters:["CodeMirror-error-gutter", "CodeMirror-gutter"],
+        lineNumbers:true,
+        indentUnit:4,
+        matchBrackets:true,
+        styleActiveLine:true,
+        autoCloseBrackets:true,
+        //highlightSelectionMatches:true,
+        extraKeys:{
+            "Ctrl-D":function(cm){ fetchDoc(cm); },
+            "Cmd-D":function(cm){ fetchDoc(cm); },
+            "Ctrl-B":function(instance){ performRun(); },
+            "Cmd-B":function(instance){ performRun(); },
+            "Ctrl-.":function(){complete(editor);},
+            "Cmd-.":function(){complete(editor);}
+        }
+    });
+
+    $("#edit_ceylon_div .CodeMirror").resizable({
+        stop: function() { editor.refresh(); },
+        resize: function() {
+            $("#edit_ceylon_div .CodeMirror-scroll").height($(this).height());
+            $("#edit_module_div .CodeMirror").width($(this).width());
+            $(".CodeMirror-scroll").width($(this).width());
+            $('#output').width($(this).width());
+            $('#core-page').width($(this).width());
+            editor.refresh();
+            modeditor.refresh();
+        }
+    });
+      
+    var modEditorElem=document.getElementById('edit_module');
+    modeditor = CodeMirror.fromTextArea(modEditorElem,{
+        mode:'ceylon',
+        gutters:["CodeMirror-error-gutter", "CodeMirror-gutter"],
+        lineNumbers:true,
+        indentUnit:4,
+        matchBrackets:true,
+        styleActiveLine:true,
+        autoCloseBrackets:true,
+        //highlightSelectionMatches:true,
+        extraKeys:{
+            "Ctrl-.":function(){complete(editor);},
+            "Cmd-.":function(){complete(editor);}
+        }
+    });
+
+    $("#edit_module_div .CodeMirror").resizable({
+        stop: function() { editor.refresh(); },
+        resize: function() {
+            $("#edit_module_div .CodeMirror-scroll").height($(this).height());
+            $("#edit_ceylon_div .CodeMirror").width($(this).width());
+            $(".CodeMirror-scroll").width($(this).width());
+            $('#output').width($(this).width());
+            $('#core-page').width($(this).width());
+            editor.refresh();
+            modeditor.refresh();
+        }
+    });
+    
+    $('#outputwrap').resizable({
+        start: function(event, ui) {
+            $("#output").css('pointer-events', 'none');
+        },
+        stop: function(event, ui) {
+            $("#output").css('pointer-events', 'auto');
+            editor.refresh();
+        },
+        resize: function(){
+            $(".CodeMirror-scroll").width($(this).width());
+            editor.refresh();
+            modeditor.refresh();
+        }
+    });
+
+    $('#sidebarblock').perfectScrollbar();
+    
+    showGitHubConnect();
+    $('#share_src').show();
+    $('#save_src').hide();
+    $('#update_src').hide();
+    $('#gistname').hide();
+    $('#shareurl').hide();
+    $('#gistlink').hide();
+    $('#deletegist').hide();
+    
+    if (location.href.indexOf('?src=') > 0) {
+        //Code is directly in URL
+        var key = location.href.slice(location.href.indexOf('?src=')+5);
+        var code = decodeURIComponent(key);
+        setEditorSources(codePrefix + code + codePostfix);
+    } else if (location.href.indexOf('?sample=') > 0) {
+        //Retrieve code from the given sample id
+        var key = location.href.slice(location.href.indexOf('?sample=')+8);
+        editCode(key);
+    } else if (location.href.indexOf('?gist=') > 0) {
+        //Retrieve code from the given sample id
+        var key = location.href.slice(location.href.indexOf('?gist=')+6);
+        editGist(key);
+    } else {
+        editCode('hello_world');
+        window.outputReady = function() {
+        	runCode(wrapCode('print("Ceylon ``language.version`` \\"``language.versionName``\\"");'));
+        };
+    }
+    
+    listGists();
+    editor.on('change',function(){live_tc.last=Date.now();});
+    editor.on('cursorActivity',function(){
+      if (closePopups)closePopups();
+      closePopups=undefined;
+    });
+    setupLiveTypechecker();
+});
+
+function setupLiveTypechecker() {
+    window.setInterval(function(){
+        if (live_tc.status == 1
+                && editor.getValue() != live_tc.text
+                && Date.now()-live_tc.last > 5000) {
+          console.log("typechecking...");
+          live_tc.text = editor.getValue();
+          live_tc.last = Date.now();
+          $.ajax('translate', {
+              cache:false, type:'POST',
+              dataType:'json',
+              timeout:5000,
+              success:function(json, status, xhr) {
+                  var errs = json['errors'];
+                  if (errs && errs.length>0) {
+                      showErrors(errs, false);
+                  } else {
+                      clearEditMarkers();
+                  }
+              },
+              error:function() {},
+              contentType:'application/x-www-form-urlencoded; charset=UTF-8',
+              data:{
+                  tc:1,
+                  module:live_tc.modtext,
+                  ceylon:wrapCode(live_tc.text)
+              }
+          });
+        }
+      },1000);
+}
 
 function hasImports() {
     return $('#imports').prop('checked');
@@ -263,9 +260,10 @@ function complete(editor){
     });
 }
 
+// Show either a GitHub connect or disconnect option
 function showGitHubConnect() {
     if ($.cookie("githubauth") == null) {
-        var redirect = window.location.origin + window.location.pathname + "githubauth";
+        var redirect = window.location.origin + pagepath + "githubauth";
         var url = "https://github.com/login/oauth/authorize?client_id=" + clientid + "&scope=gist&state=xyz&redirect_uri=" + encodeURIComponent(redirect);
         $("#ghconnect").html('<a href="' + url + '" target="githubauth">Connect to GitHub</a>');
     } else {
@@ -273,34 +271,37 @@ function showGitHubConnect() {
     }
 }
 
+// Shows the given Gist in the editor(s) and updates the proper GUI elements
 function showGist(gist) {
     selectedGist = gist;
-    var url = window.location.origin + window.location.pathname + "?gist=" + gist.data.id;
-    jquery('#share_src').hide();
-    jquery('#save_src').hide();
-    jquery('#update_src').show();
-    jquery('#gistname').val(gist.data.description.substr(19));
-    jquery('#gistname').show();
-    jquery('#gistlink').attr('href', gist.data.html_url);
-    jquery('#gistlink').show();
-    jquery('#shareurl').attr('href', url);
-    jquery('#shareurl').show();
+    var url = window.location.origin + pagepath + "?gist=" + gist.data.id;
+    jQuery('#share_src').hide();
+    jQuery('#save_src').hide();
+    jQuery('#update_src').show();
+    jQuery('#gistname').val(gist.data.description.substr(19));
+    jQuery('#gistname').show();
+    jQuery('#gistlink').attr('href', gist.data.html_url);
+    jQuery('#gistlink').show();
+    jQuery('#shareurl').attr('href', url);
+    jQuery('#shareurl').show();
     var token = $.cookie("githubauth");
     if (token) {
-        jquery('#deletegist').show();
+        jQuery('#deletegist').show();
     }
     handleGistNameChange();
 }
 
+// Is called when the "Share" button is pressed
 function shareSource() {
-    jquery('#share_src').hide();
-    jquery('#save_src').show();
-    jquery('#gistname').val("Code snippet");
-    jquery('#gistname').show();
+    jQuery('#share_src').hide();
+    jQuery('#save_src').show();
+    jQuery('#gistname').val("Code snippet");
+    jQuery('#gistname').show();
     handleGistNameChange();
 }
 
-//Stores the code on the server and displays a URL with the key to retrieve it
+// Stores the code by creating a new Gist on the server
+// Is called when the "Save" button is pressed
 function saveSource() {
     function onSuccess(gist) {
         showGist(gist);
@@ -312,7 +313,7 @@ function saveSource() {
         live_tc.clear();
     }
     var files = getGistFiles();
-    var title = jquery('#gistname').val();
+    var title = jQuery('#gistname').val();
     var data = {
         "description": "Ceylon Web Runner: " + title,
         "public": true,
@@ -325,6 +326,8 @@ function saveSource() {
     });
 }
 
+// Creates the proper "files" element necessary for creating and
+// updating Gists using the contents of the current editor(s)
 function getGistFiles() {
     var files;
     if ($("#edit_module_div").is(":visible")) {
@@ -352,7 +355,7 @@ function createComment(gist) {
     var token = $.cookie("githubauth");
     if (token) {
         var data = {
-            "body": "[Click here](" + window.location.origin + window.location.pathname + "?gist=" + gist.data.id + ") to run this code online",
+            "body": "[Click here](" + window.location.origin + pagepath + "?gist=" + gist.data.id + ") to run this code online",
         }
         gist.createComment({
             data: data
@@ -360,6 +363,8 @@ function createComment(gist) {
     }
 }
 
+// Updates the code and or name of an existing Gist on the server
+// Is called when the "Update" button is pressed
 function updateSource() {
     function onSuccess(gist) {
         showGist(gist);
@@ -370,7 +375,7 @@ function updateSource() {
         live_tc.clear();
     }
     var files = getGistFiles();
-    var title = jquery('#gistname').val();
+    var title = jQuery('#gistname').val();
     var data = {
         "description": "Ceylon Web Runner: " + title,
         "files": files
@@ -382,6 +387,8 @@ function updateSource() {
     });
 }
 
+// Deletes a Gist from the server (asks the user for confirmation first)
+// Is called when the "Delete" link is clicked
 function deleteGist() {
     function onRemove(gist) {
         doReset();
@@ -394,10 +401,12 @@ function deleteGist() {
     }
 }
 
+// Updates the user's list of available Gists
 function updateGists() {
     listGists();
 }
 
+// Shows the user's list of available Gists
 function listGists(page) {
     var first = (page == null || page == 1);
     
@@ -452,13 +461,19 @@ function listGists(page) {
     }
 }
 
+// Updates GUI elements whenever the user changes the
+// contents of the "gistname" field
 function handleGistNameChange() {
     var name = $("#gistname").val();
     var disabled = (name == "");
-    jquery('#save_src').prop('disabled', disabled)
-    jquery('#update_src').prop('disabled', disabled)
+    jQuery('#save_src').prop('disabled', disabled)
+    jQuery('#update_src').prop('disabled', disabled)
 }
 
+// Starts the spinner indicating the system is busy.
+// These can be nested, so if you call this function
+// twice you will also need to call `stopSpinner()`
+// twice for it to disappear
 function startSpinner() {
     var button = $('#run_ceylon');
     button.attr('disabled','disabled');
@@ -466,6 +481,7 @@ function startSpinner() {
     spinCount++;
 }
 
+// Stops the spinner indicating the system is busy
 function stopSpinner() {
     spinCount--;
     if (spinCount == 0) {
@@ -478,7 +494,7 @@ function stopSpinner() {
 
 var oldcode, oldmodcode, transok;
 
-//Shows the specified error messages in the code
+// Shows the specified error messages in the code
 function showErrors(errors, print) {
     if (print) {
         printError("Code contains errors:");
@@ -503,14 +519,14 @@ function showErrors(errors, print) {
             marker=editor.markText({line:err.from.line-2,ch:err.from.ch},{line:err.to.line-2,ch:err.to.ch+1},{className:estilo});
             markers.push(marker);
             bindings.push(estilo);
-            jquery("."+estilo).attr("title", errmsg);
+            jQuery("."+estilo).attr("title", errmsg);
         }
     }
 }
 
-//Wraps the contents of the editor in a function and sends it to the server for compilation.
-//On response, executes the script if compilation was OK, otherwise shows errors.
-//In any case it sets the hover docs if available.
+// Wraps the contents of the editor in a function and sends it to the server for compilation.
+// On response, executes the script if compilation was OK, otherwise shows errors.
+// In any case it sets the hover docs if available.
 function translate(onTranslation) {
   var code = getEditCode();
   var modcode = getModuleCode();
@@ -524,9 +540,9 @@ function translate(onTranslation) {
   }
 }
 
-//Wraps the contents of the editor in a function and sends it to the server for compilation.
-//On response, executes the script if compilation was OK, otherwise shows errors.
-//In any case it sets the hover docs if available.
+// Wraps the contents of the editor in a function and sends it to the server for compilation.
+// On response, executes the script if compilation was OK, otherwise shows errors.
+// In any case it sets the hover docs if available.
 function translateCode(code, modcode, doShowCode, onTranslation) {
     clearOutput();
     transok = false;
@@ -552,7 +568,7 @@ function translateCode(code, modcode, doShowCode, onTranslation) {
         }
     };
     document.getElementById('run_ceylon').disabled=true;
-    jquery.ajax('translate', {
+    jQuery.ajax('translate', {
         cache:false, type:'POST',
         dataType:'json',
         timeout:20000,
@@ -571,20 +587,46 @@ function translateCode(code, modcode, doShowCode, onTranslation) {
     });
 }
 
-//Sends the code from the editor to the server for compilation and it successful, runs the resulting js.
+function loadModuleAsString(src, func) {
+    if (outputwin.loadModuleAsString) {
+        startSpinner();
+        outputwin.loadModuleAsString(src, function() {
+                func();
+                stopSpinner();
+            }, function(when, err) {
+                stopSpinner();
+                if (when == "parsing") {
+                    printError("Translated code could not be parsed:");
+                    printError("--- " + err);
+                } else if (when == "running") {
+                    printError("Error running code:");
+                    printError("--- " + err);
+                } else if (when == "require") {
+                    printError("Error loading external modules:");
+                    printError("--- " + err);
+                } else {
+                    printError("Unknown error:");
+                    printError("--- " + err);
+                }
+            }
+        );
+    }
+}
+
+// Sends the code from the editor to the server for compilation and it successful, runs the resulting js.
 function performRun() {
     translate(afterTranslate);
 }
 
-//Sends the given code to the server for compilation and it successful, runs the resulting js.
+// Sends the given code to the server for compilation and it successful, runs the resulting js.
 function runCode(code, modcode) {
   translateCode(code, modcode, false, afterTranslate);
 }
 
-//This function is called if compilation runs OK
+// This function is called if compilation runs OK
 function afterTranslate() {
     if (transok == true) {
-        clprinted=false;
+        clearLangModOutputState();
         //printSystem("// Script start at " + (new Date()));
         try {
             executeCode();
@@ -592,24 +634,18 @@ function afterTranslate() {
             printError("Runtime error:");
             printError("--- " + err);
         }
-        if (!clprinted) {
+        if (!hasLangModOutput()) {
             printSystem("Script ended with no output");
         }
-        var _out = jquery("#output");
-        _out.scrollTop(_out[0].scrollHeight);
+        scrollOutput();
     }
 }
 
-function executeCode(){
-    var methodName = isFullScript(editor.getValue());
-    if (typeof methodName == 'string' || methodName instanceof String) {
-        if (window[methodName]) {
-            window[methodName]();
-        } else {
-            printError("Function '" + methodName + "' does not exist");
-        }
+function executeCode() {
+    if (outputwin.run) {
+        outputwin.run();
     } else {
-        run();
+        printError("Entry point 'run()' not found!")
     }
 }
 
@@ -623,7 +659,7 @@ function setOnStop(func) {
 	}
 }
 
-//A way to stop running scripts (that support it!)
+// A way to stop running scripts (that support it!)
 function stop() {
 	if (stopfunc) {
 		try {
@@ -650,13 +686,13 @@ function setEditorSources(src, modsrc) {
     }
 }
 
-//Retrieves the specified example from the editor, along with its hover docs.
+// Retrieves the specified example from the editor, along with its hover docs.
 function editCode(key) {
-    //Make sure we don't do anything until we have an editor
+    // Make sure we don't do anything until we have an editor
     if (!editor) return false;
-    //Retrieve code
+    // Retrieve code
     live_tc.status=2;
-    jquery.ajax('hoverdoc?key='+key, {
+    jQuery.ajax('hoverdoc?key='+key, {
         cache:true,
         dataType:'json',
         timeout:20000,
@@ -674,7 +710,7 @@ function editCode(key) {
     });
 }
 
-//Retrieves the specified code from GitHub
+// Retrieves the specified code from GitHub
 function editGist(key) {
     function onSuccess(gist) {
         setEditorSourcesFromGist(gist.data);
@@ -685,9 +721,9 @@ function editGist(key) {
         live_tc.clear();
     }
     
-    //Make sure we don't do anything until we have an editor
+    // Make sure we don't do anything until we have an editor
     if (!editor) return false;
-    //Retrieve code
+    // Retrieve code
     live_tc.status=2;
     github.gist(key).fetch({
         success: onSuccess,
@@ -805,7 +841,7 @@ function setModuleCode(src) {
     }
 }
 
-//Puts the specified text in the result element.
+// Puts the specified text in the result element.
 function showCode(code) {
     var result = document.getElementById("result");
     result.innerText = code;
@@ -818,16 +854,16 @@ function doReset() {
     oldmodcode = "";
     clearOutput();
     clearEditMarkers();
-    jquery('#share_src').show();
-    jquery('#save_src').hide();
-    jquery('#update_src').hide();
-    jquery('#gistname').hide();
-    jquery('#gistlink').hide();
-    jquery('#shareurl').hide();
-    jquery('#deletegist').hide();
+    jQuery('#share_src').show();
+    jQuery('#save_src').hide();
+    jQuery('#update_src').hide();
+    jQuery('#gistname').hide();
+    jQuery('#gistlink').hide();
+    jQuery('#shareurl').hide();
+    jQuery('#deletegist').hide();
 }
 
-//Clears all error markers and hover docs.
+// Clears all error markers and hover docs.
 function clearEditMarkers() {
     editor.clearGutter('CodeMirror-error-gutter');
     for (var i=0; i<markers.length;i++) {
@@ -835,109 +871,71 @@ function clearEditMarkers() {
     }
     markers=[];
     for (var i=0; i<bindings.length;i++) {
-        jquery(bindings[i]).unbind('mouseenter mouseleave');
+        jQuery(bindings[i]).unbind('mouseenter mouseleave');
     }
     bindings=[];
 }
 
+function clearLangModOutputState() {
+    var clear = outputwin.clearLangModOutputState;
+    if (clear) {
+        clear();
+    }
+}
+
+function hasLangModOutput() {
+    var hasOutput = outputwin.hasLangModOutput;
+    if (hasOutput) {
+        return hasOutput();
+    }
+}
+
 function clearOutput() {
-    var output = document.getElementById("output");
-    output.innerHTML = "";
+    var clear = outputwin.clearOutput;
+    if (clear) {
+        clear();
+    }
     editor.focus();
 }
 
 function printOutputLine(txt) {
-    var output = document.getElementById("output");
-    output.innerHTML = output.innerHTML + escapeHtml(txt) + "<br>";
+    var print = outputwin.printOutputLine;
+    if (print) {
+        print(txt);
+    }
 }
+
 function printOutput(txt) {
-    var output = document.getElementById("output");
-    output.innerHTML = output.innerHTML + escapeHtml(txt);
+    var print = outputwin.printOutput;
+    if (print) {
+        print(txt);
+    }
 }
 
 function printSystem(txt) {
-    var output = document.getElementById("output");
-    output.innerHTML = output.innerHTML + "<span class='jsc_msg'>" + escapeHtml(txt) + "</span><br>";
+    var print = outputwin.printSystem;
+    if (print) {
+        print(txt);
+    }
 }
 
 function printError(txt) {
-    var output = document.getElementById("output");
-    output.innerHTML = output.innerHTML + "<span class='jsc_error'>" + escapeHtml(txt) + "</span><br>";
+    var print = outputwin.printError;
+    if (print) {
+        print(txt);
+    }
 }
 
-//Basic HTML escaping.
+function scrollOutput() {
+    var scroll = outputwin.scrollOutput;
+    if (scroll) {
+        scroll();
+    }
+}
+
+// Basic HTML escaping.
 function escapeHtml(html) {
     return (''+html).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-// Take a string containing the translated code for a Ceylon module,
-// extracts the meta data and parses it to get at the dependencies
-// and then pre-loads those dependencies using rewritten paths that
-// RequireJS will understand. It will then evaluate the actual
-// soruces and finally execute the "func()" that was passed.
-// Quite a bit of jumping through hoops to get this all to work
-function loadModuleAsString(src, func) {
-    startSpinner();
-    delete window.ex$;
-    delete window._CTM$;
-    delete window.$CCMM$;
-    var lines = src.split("\n");
-    var metadata = lines[1];
-    globalEval(metadata);
-    if (window.$CCMM$) {
-        var deps = window.$CCMM$()["$mod-deps"];
-        if (deps) {
-            var newdeps = rewriteDependencies(deps);
-            if (newdeps.length > 0) {
-                require(newdeps, function() {
-                    globalEval(src);
-                    if (func) {
-                        func();
-                    }
-                    stopSpinner();
-                }, function(err) {
-                    stopSpinner();
-                    printError(err);
-                });
-                return;
-            }
-        }
-    }
-    globalEval(src);
-    if (func) {
-        func();
-    }
-    stopSpinner();
-}
-
-function globalEval(src) {
-    if (window.execScript) {
-        window.execScript(src);
-        return;
-    }
-    var fn = function() {
-        window.eval.call(window,src);
-    };
-    fn();
-}
-
-function rewriteDependencies(deps) {
-    var newdeps = [];
-    for (var i=0; i < deps.length; i++) {
-        var newdep = rewriteDependency(deps[i]);
-        if (!newdep.startsWith("ceylon/language/")) {
-            newdeps.push(newdep);
-        }
-    }
-    return newdeps;
-}
-
-function rewriteDependency(dep) {
-    var p = dep.indexOf("/");
-    var name = dep.substring(0, p);
-    var version = dep.substring(p + 1);
-    var path = name.replace(".", "/");
-    return path + "/" + version + "/" + name + "-" + version;
 }
 
 function fetchDoc(cm) {
@@ -982,7 +980,7 @@ function fetchDoc(cm) {
     document.getElementById('run_ceylon').disabled=true;
     var cursor = editor.getCursor();
     live_tc.status=3;
-    jquery.ajax('hoverdoc', {
+    jQuery.ajax('hoverdoc', {
         cache:false, type:'POST',
         dataType:'json',
         timeout:20000,

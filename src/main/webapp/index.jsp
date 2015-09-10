@@ -26,12 +26,10 @@
         .invis {
             display: none;
         }
-        #output, #edit_ceylon, #edit_module {
-            border: 1px solid black;
+        #outputwrap, #edit_ceylon, #edit_module {
             width:  620px;
             height: 220px;
             padding-left: 4px;
-            overflow: auto;
             background: white;
             white-space: pre-wrap;
             font-family: Inconsolata, Monaco, Courier, monospace;
@@ -40,6 +38,15 @@
             max-width: 900px;
             min-height: 58px;
             max-height:800px;
+        }
+        #edit_ceylon, #edit_module {
+            border: 1px solid black;
+            overflow: auto;
+        }
+        #output {
+            border: 1px solid black;
+            width:  100%;
+            height: 100%;
         }
         #edit_module {
             height: 100px;
@@ -86,7 +93,12 @@
     <!--script type="text/javascript" src="scripts/match-highlighter.js" charset="utf-8"></script-->
     <script type="text/javascript" src="scripts/matchbrackets.js" charset="utf-8"></script>
     <link rel="stylesheet" href="scripts/codemirror.css" />
-    <script type="text/javascript" src="scripts/require.js" data-main="scripts/repl.js"></script>
+    <script type="text/javascript" src="scripts/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" src="scripts/jquery-ui-1.11.2.min.js"></script>
+    <script type="text/javascript" src="scripts/jquery-cookie-1.4.1.js"></script>
+    <script type="text/javascript" src="scripts/perfect-scrollbar.jquery.min.js"></script>
+    <script type="text/javascript" src="scripts/github.js"></script>
+    <script type="text/javascript" src="scripts/repl.js"></script>
     <link rel='stylesheet' type='text/css' href='autocomplete.css'/>
     <link rel='stylesheet' type='text/css' href='scripts/jquery-ui-1.11.2.css'/>
     <link rel='stylesheet' type='text/css' href='scripts/jquery-ui-1.11.2.structure.css'/>
@@ -148,9 +160,8 @@
         </div>
     </form>
     <pre id="result" class="cantseeme">
-    </pre>    
-    <div id="output">
-    </div>
+    </pre>
+    <div id="outputwrap"><iframe id="output" src="runner.jsp"></iframe></div>
     
     <div>The <a href="http://github.com/ceylon/ceylon-web-ide-backend">Ceylon Web Runner</a>
     is powered by <a href="http://github.com/ceylon/ceylon-js">Ceylon JS</a> and 
