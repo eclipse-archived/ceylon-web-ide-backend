@@ -1,0 +1,32 @@
+html {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* line 18, /usr/lib64/ruby/gems/1.8/gems/compass-0.11.7/frameworks/blueprint/stylesheets/blueprint/reset/_utilities.scss */
+.bp-reset-element, body, h1, h2, h3, h4, h5, h6, article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section, summary, blockquote, q, th, td, caption, table,
+div, span, object, iframe, p,
+pre, a, abbr, acronym, address,
+code, del, dfn, em, img,
+dl, dt, dd, ol, ul, li, fieldset,
+form, label, legend,
+caption, tbody, tfoot, thead, tr {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-weight: inherit;
+  font-style: inherit;
+  font-size: 100%;
+  font-family: inherit;
+  vertical-align: baseline;
+}
+
+#output {
+    width:  100%;
+    height: 100%;
+    background: white;
+    white-space: pre-wrap;
+    font-family: Inconsolata, Monaco, Courier, monospace;
+    font-size: 14px;
+}

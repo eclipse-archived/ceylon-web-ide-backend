@@ -6,10 +6,11 @@ shared void run(){
 // through "dynamic" blocks. Compile-time checks are relaxed in
 // these blocks (of course this can result in erros at runtime).
 dynamic {
-    dynamic headerNode = document.getElementById("hdr_title");
+    dynamic doc = window.parent.document;
+    dynamic headerNode = doc.getElementById("hdr_title");
     headerNode.textContent = "Who needs JavaScript?";
-
-    dynamic nodes = document.getElementsByTagName("A");
+    
+    dynamic nodes = doc.getElementsByTagName("A");
     Integer nodesLength = nodes.length;
     for (i in 0..nodesLength-1) {
         dynamic elem = nodes.item(i);
