@@ -23,10 +23,12 @@ caption, tbody, tfoot, thead, tr {
 }
 
 #output {
-    width:  100%;
+    left: 0px;
+    right: 0px;
     height: 100%;
     background: white;
     white-space: pre-wrap;
     font-family: Inconsolata, Monaco, Courier, monospace;
     font-size: 14px;
+    padding: 2px;
 }

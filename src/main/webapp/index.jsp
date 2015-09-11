@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Ceylon Web Runner</title>
+    <title>Ceylon Web IDE</title>
     
     <script>
     var clientid = "<%= System.getenv("GITHUB_CLIENTID") %>";
@@ -26,7 +26,18 @@
         .invis {
             display: none;
         }
-        #outputwrap, #edit_ceylon, #edit_module {
+        #all {
+            position: absolute;
+            width:  100%;
+            top: 0px;
+            bottom: 0px;
+        }
+        #holder {
+            visibility: hidden;
+        }
+        #edit_ceylon, #edit_module {
+            border: 1px solid black;
+            overflow: auto;
             width:  620px;
             height: 220px;
             padding-left: 4px;
@@ -39,12 +50,16 @@
             min-height: 58px;
             max-height:800px;
         }
-        #edit_ceylon, #edit_module {
-            border: 1px solid black;
-            overflow: auto;
-        }
         #output {
-            border: 1px solid black;
+            width:  100%;
+            height: 100%;
+            padding: 0px;
+            background: white;
+            white-space: pre-wrap;
+            font-family: Inconsolata, Monaco, Courier, monospace;
+            font-size: 14px;
+        }
+        #outputframe {
             width:  100%;
             height: 100%;
         }
@@ -104,31 +119,54 @@
     <link rel='stylesheet' type='text/css' href='scripts/jquery-ui-1.11.2.structure.css'/>
     <link rel='stylesheet' type='text/css' href='scripts/w2ui-1.4.3.css'/>
     <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css">
-    <style type="text/css">
-        .ps-container > .ps-scrollbar-y-rail {
-          right: 8px;
-        }
-    </style>
 
 </head>
 
 <body class="bp">
 
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.4";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
 
-<div class="header-bar"><div id="header">
+<div id="all"></div>
+
+<div id="holder">
+
+<div id="header-bar" class="header-bar"><div id="header">
   <a id="header-logo" href="."><h1 id="ceylon">Ceylon</h1></a>
   <div id="header-tagline">
     <p id="say_more_more_clearly">Say more, more clearly</p>
-  </div>
-</div></div>
-
-<div id="primary-content">
+  </div></div>
+  <div class="badges">
+    <div class="badge">
+        <a href="https://twitter.com/ceylonlang" class="twitter-follow-button" data-show-screen-name="false">Follow @ceylonlang</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    </div>
+    <div class="badge">
+        <div class="g-follow" data-annotation="bubble" data-height="20" data-href="https://plus.google.com/102481741611133754149" data-rel="publisher"></div>
+        <script type="text/javascript">
+          (function() {
+            var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+            po.src = 'https://apis.google.com/js/platform.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+          })();
+        </script>
+    </div>
+    <div class="badge">
+        <div class="fb-like" data-href="https://www.facebook.com/ceylonlang" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
+    </div>
+</div>
+</div><!-- header-bar -->
 
 <div id="core-page" style="min-width:290px;max-width:900px;min-height:570px">
 
-    <h1 id="hdr_title">Ceylon Web Runner</h1>
     <div id="ghconnect"></div>
-    <form>
+    <form id="editform">
         <div id="edit_module_div" class="invis">
             <div>
                 <span class="alignLeft">Module editor -- Autocompletion: <code>Ctrl-.</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Documentation: <code>Ctrl-D</code></span>
@@ -161,16 +199,12 @@
     </form>
     <pre id="result" class="cantseeme">
     </pre>
-    <div id="outputwrap"><iframe id="output" src="runner.jsp"></iframe></div>
     
-    <div>The <a href="http://github.com/ceylon/ceylon-web-ide-backend">Ceylon Web Runner</a>
-    is powered by <a href="http://github.com/ceylon/ceylon-js">Ceylon JS</a> and 
-    <a href="http://openshift.redhat.com">OpenShift</a>.</div>
+</div> <!--  core-page -->
 
-</div>
+<div id="output"><iframe id="outputframe" src="runner.jsp"></iframe></div>
 
 <div id="sidebar">
-<div class="point-light-top"/>
 <div id="sidebarblock" class="sidebar-block">
     <div>
         <h3 id="yrcodehdr" class="invis">Your code:</h3>
@@ -201,35 +235,23 @@
         </ol>
     </div>
 </div>
-<div class="point-light-end"/>
-    <div style="text-align:center;padding-top:50px;">
-    <a href="https://twitter.com/ceylonlang" class="twitter-follow-button" data-show-count="false" data-size="large">Follow @ceylonlang</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-    </div>
-    <div>
-    <Google+ Badge -+->
-    <link href="https://plus.google.com/102481741611133754149" rel="publisher" />
-    <script type="text/javascript">
-        window.___gcfg = {lang: 'en'};
-        (function() 
-        {var po = document.createElement("script");
-        po.type = "text/javascript"; po.async = true;po.src = "https://apis.google.com/js/plusone.js";
-        var s = document.getElementsByTagName("script")[0];
-        s.parentNode.insertBefore(po, s);
-        })();
-    </script>
-    <g:plus href="https://plus.google.com/102481741611133754149" width="300" height="131" theme="light"></g:plus>
-    </div>
 
-</div>
+</div> <!-- sidebar -->
 
-</div>
-
-</div>
-
-<div class='footer-bar'>
+<div id='footer-bar' class='footer-bar'>
     <div id='footer'>
         <div id='footer-core'>
+            <div id="powered">
+                <p>The <a href="http://github.com/ceylon/ceylon-web-ide-backend">Ceylon Web Runner</a>
+                is powered by
+                <a href="http://github.com/ceylon/ceylon-js">Ceylon JS</a>, 
+                <a href="http://openshift.redhat.com">OpenShift</a>,
+                <a href="http://requirejs.org">RequireJS</a>,
+                <a href="http://codemirror.net">CodeMirror</a>,
+                <a href="http://jquery.com">jQuery</a>,
+                <a href="http://w2ui.com">w2ui</a>,
+                <a href="https://github.com">GitHub</a>.</p>
+            </div>
             <div id='copyright'>
                 <p id='copyright_copy_2010_2011_red...'>Copyright &copy; 2010-2011, Red Hat, Inc. or third-party contributors -
                 Ceylon is a trademark of Red Hat, Inc. - <a href='http://www.redhat.com/legal/legal_statement.html'>terms of Use</a> - 
@@ -238,6 +260,8 @@
         </div>
     </div>
 </div>
+
+</div> <!-- holder -->
 
 </body>
 </html>

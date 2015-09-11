@@ -7,8 +7,6 @@ var github;
 var selectedGist;
 var editor;
 var modeditor;
-var outputwin;
-var outputdoc;
 var spinCount = 0;
 var live_tc = {
     status:0,
@@ -31,9 +29,6 @@ if (!pagepath.endsWith("/")) {
 $(document).ready(function() {
     $('form').submit(false);
     
-    outputwin = $("#output")[0].contentWindow;
-    outputdoc = $(outputwin.document)
-    
     var auth;
     var token = $.cookie("githubauth");
     if (token != null) {
@@ -49,6 +44,28 @@ $(document).ready(function() {
         debug: false
     });
 
+    // Create the main layout
+    var pstyle = 'border: 1px solid #dfdfdf; padding: 0px;';
+    var zstyle = 'border: 1px solid #dfdfdf; padding: 0px; overflow: hidden;';
+    $('#all').w2layout({
+        name: 'all',
+        padding: 4,
+        panels: [
+            { type: 'top', size: 102, style: zstyle, content: 'top' },
+            { type: 'main', minSize: 100, style: pstyle, content: 'main' },
+            { type: 'preview', size: 200, minSize: 100, resizable: true, style: zstyle, title: 'Program output', content: 'preview' },
+            { type: 'right', size: 260, minSize: 200, resizable: true, style: pstyle, content: 'right' },
+            { type: 'bottom', size: 67, style: zstyle, content: 'bottom' }
+        ]
+    });
+    
+    // Now fill the layout with the elements hidden on the page
+    w2ui["all"].content("top", jqContent($("#header-bar")));
+    w2ui["all"].content("main", jqContent($("#core-page")));
+    w2ui["all"].content("preview", jqContent($("#output")));
+    w2ui["all"].content("right", jqContent($("#sidebar")));
+    w2ui["all"].content("bottom", jqContent($("#footer-bar")));
+    
     var editorElem=document.getElementById('edit_ceylon');
     editor = CodeMirror.fromTextArea(editorElem,{
         mode:'ceylon',
@@ -75,7 +92,7 @@ $(document).ready(function() {
             $("#edit_ceylon_div .CodeMirror-scroll").height($(this).height());
             $("#edit_module_div .CodeMirror").width($(this).width());
             $(".CodeMirror-scroll").width($(this).width());
-            $('#output').width($(this).width());
+            $("#outputframe").width($(this).width());
             $('#core-page').width($(this).width());
             editor.refresh();
             modeditor.refresh();
@@ -104,19 +121,19 @@ $(document).ready(function() {
             $("#edit_module_div .CodeMirror-scroll").height($(this).height());
             $("#edit_ceylon_div .CodeMirror").width($(this).width());
             $(".CodeMirror-scroll").width($(this).width());
-            $('#output').width($(this).width());
+            $("#outputframe").width($(this).width());
             $('#core-page').width($(this).width());
             editor.refresh();
             modeditor.refresh();
         }
     });
     
-    $('#outputwrap').resizable({
+    $("#output").resizable({
         start: function(event, ui) {
-            $("#output").css('pointer-events', 'none');
+            $("#outputframe").css('pointer-events', 'none');
         },
         stop: function(event, ui) {
-            $("#output").css('pointer-events', 'auto');
+            $("#outputframe").css('pointer-events', 'auto');
             editor.refresh();
         },
         resize: function(){
@@ -126,8 +143,6 @@ $(document).ready(function() {
         }
     });
 
-    $('#sidebarblock').perfectScrollbar();
-    
     showGitHubConnect();
     $('#share_src').show();
     $('#save_src').hide();
@@ -165,6 +180,15 @@ $(document).ready(function() {
     });
     setupLiveTypechecker();
 });
+
+function jqContent(jqElem) {
+    return {
+        render: function() {
+            $(this.box).empty();
+            $(this.box).append(jqElem);
+        }
+    }
+}
 
 function setupLiveTypechecker() {
     window.setInterval(function(){
@@ -588,6 +612,7 @@ function translateCode(code, modcode, doShowCode, onTranslation) {
 }
 
 function loadModuleAsString(src, func) {
+    var outputwin = $("#outputframe")[0].contentWindow;
     if (outputwin.loadModuleAsString) {
         startSpinner();
         outputwin.loadModuleAsString(src, function() {
@@ -642,6 +667,7 @@ function afterTranslate() {
 }
 
 function executeCode() {
+    var outputwin = $("#outputframe")[0].contentWindow;
     if (outputwin.run) {
         outputwin.run();
     } else {
@@ -877,6 +903,7 @@ function clearEditMarkers() {
 }
 
 function clearLangModOutputState() {
+    var outputwin = $("#outputframe")[0].contentWindow;
     var clear = outputwin.clearLangModOutputState;
     if (clear) {
         clear();
@@ -884,6 +911,7 @@ function clearLangModOutputState() {
 }
 
 function hasLangModOutput() {
+    var outputwin = $("#outputframe")[0].contentWindow;
     var hasOutput = outputwin.hasLangModOutput;
     if (hasOutput) {
         return hasOutput();
@@ -891,6 +919,7 @@ function hasLangModOutput() {
 }
 
 function clearOutput() {
+    var outputwin = $("#outputframe")[0].contentWindow;
     var clear = outputwin.clearOutput;
     if (clear) {
         clear();
@@ -899,6 +928,7 @@ function clearOutput() {
 }
 
 function printOutputLine(txt) {
+    var outputwin = $("#outputframe")[0].contentWindow;
     var print = outputwin.printOutputLine;
     if (print) {
         print(txt);
@@ -906,6 +936,7 @@ function printOutputLine(txt) {
 }
 
 function printOutput(txt) {
+    var outputwin = $("#outputframe")[0].contentWindow;
     var print = outputwin.printOutput;
     if (print) {
         print(txt);
@@ -913,6 +944,7 @@ function printOutput(txt) {
 }
 
 function printSystem(txt) {
+    var outputwin = $("#outputframe")[0].contentWindow;
     var print = outputwin.printSystem;
     if (print) {
         print(txt);
@@ -920,6 +952,7 @@ function printSystem(txt) {
 }
 
 function printError(txt) {
+    var outputwin = $("#outputframe")[0].contentWindow;
     var print = outputwin.printError;
     if (print) {
         print(txt);
@@ -927,6 +960,7 @@ function printError(txt) {
 }
 
 function scrollOutput() {
+    var outputwin = $("#outputframe")[0].contentWindow;
     var scroll = outputwin.scrollOutput;
     if (scroll) {
         scroll();
@@ -941,6 +975,14 @@ function escapeHtml(html) {
 function fetchDoc(cm) {
     var code = getEditCode();
     var modcode = getModuleCode();
+    var done = false;
+    function close() {
+        if (done) return;
+        done = true;
+        jQuery("body").unbind('keydown', close);
+        jQuery("body").unbind('click', close);
+        help.parentNode.removeChild(help);
+    }
     var docHandler = function(json, status, xhr) {
         live_tc.status=1;
         if (json && json['name']) {
@@ -953,14 +995,6 @@ function fetchDoc(cm) {
                 help.style.left = pos.left + "px";
                 help.style.top = pos.bottom + "px";
                 document.body.appendChild(help);
-                var done = false;
-                function close() {
-                    if (done) return;
-                    done = true;
-                    jQuery("body").unbind('keydown', close);
-                    jQuery("body").unbind('click', close);
-                    help.parentNode.removeChild(help);
-                }
                 jQuery("body").keydown(close);
                 jQuery("body").click(close);
                 closePopups=close;
