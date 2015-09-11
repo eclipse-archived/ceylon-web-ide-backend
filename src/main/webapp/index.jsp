@@ -96,13 +96,13 @@
     <script type="text/javascript" src="scripts/jquery-1.11.1.min.js"></script>
     <script type="text/javascript" src="scripts/jquery-ui-1.11.2.min.js"></script>
     <script type="text/javascript" src="scripts/jquery-cookie-1.4.1.js"></script>
-    <script type="text/javascript" src="scripts/perfect-scrollbar.jquery.min.js"></script>
+    <script type="text/javascript" src="scripts/w2ui-1.4.3.min.js"></script>
     <script type="text/javascript" src="scripts/github.js"></script>
     <script type="text/javascript" src="scripts/repl.js"></script>
     <link rel='stylesheet' type='text/css' href='autocomplete.css'/>
     <link rel='stylesheet' type='text/css' href='scripts/jquery-ui-1.11.2.css'/>
     <link rel='stylesheet' type='text/css' href='scripts/jquery-ui-1.11.2.structure.css'/>
-    <link rel='stylesheet' type='text/css' href='scripts/perfect-scrollbar.css'/>
+    <link rel='stylesheet' type='text/css' href='scripts/w2ui-1.4.3.css'/>
     <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css">
     <style type="text/css">
         .ps-container > .ps-scrollbar-y-rail {
