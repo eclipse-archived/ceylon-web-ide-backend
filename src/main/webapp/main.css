@@ -21,7 +21,6 @@ caption, tbody, tfoot, thead, tr {
   font-style: inherit;
   font-size: 100%;
   font-family: inherit;
-  vertical-align: baseline;
 }
 
 a img {
@@ -411,32 +410,34 @@ body.bp p code, body.bp ul code, body.bp ol code {
 }
 
 /* line 147, /usr/lib64/ruby/gems/1.8/gems/compass-0.11.7/frameworks/blueprint/stylesheets/blueprint/_grid.scss */
-#sidebar {
+div.trompon {
   background: url("http://ceylon-lang.org/images/sidebar_bkg_elephant.png") no-repeat 0px 0px #d4e5e5;
+}
+div.ceylonblock {
   overflow-x: hidden;
   height: 100%;
+  font-size: 14px;
+  text-shadow: white 1px 1px 0px;
 }
 /* line 601 */
-#sidebar .sidebar-block {
+div.ceylonblock .sidebar-block {
   width: 100%;
   position: relative;
   overflow: hidden;
-  font-size: 14px;
-  text-shadow: white 1px 1px 0px;
   padding-left: 1.25em;
   margin: 0em 0em;
 }
 /* line 612 */
-#sidebar .sidebar-block h3 {
+div.ceylonblock h3 {
   font-size: 16px;
   color: #456B6E;
 }
 /* line 617 */
-#sidebar .sidebar-block li {
+div.ceylonblock li {
   font-size: 12px;
 }
 /* line 621 */
-#sidebar .sidebar-block ul {
+div.ceylonblock ul {
   margin-bottom: 1em;
 }
 
@@ -564,4 +565,92 @@ p.screenshot img {
     position: absolute;
     top: 12px;
     right: 25px;
+}
+
+#help-message-content {
+    padding: 10px;
+    line-height: 150%;
+}
+
+#tb_all_main_toolbar_item_run .w2ui-tb-image > span {
+    color: #23a528;
+}
+#tb_all_main_toolbar_item_stop .w2ui-tb-image > span {
+    color: #ff3a3a;
+}
+#tb_all_main_toolbar_item_reset .w2ui-tb-image > span {
+    color: #c63535;
+}
+#tb_all_main_toolbar_item_help .w2ui-tb-image > span {
+    color: #c63535;
+}
+#tb_all_main_toolbar_item_connected .w2ui-tb-image > span {
+    color: #23a528;
+}
+
+.invis {
+    display: none;
+}
+
+#all {
+    position: absolute;
+    width:  100%;
+    top: 0px;
+    bottom: 0px;
+}
+
+#holder {
+    visibility: hidden;
+}
+
+#core-page {
+    overflow: hidden;
+    width:  100%;
+    height: 100%;
+}
+
+.codeeditor {
+    overflow: hidden;
+    width:  100%;
+    height: 100%;
+    background: white;
+    white-space: pre-wrap;
+    font-family: Inconsolata, Monaco, Courier, monospace;
+    font-size: 14px;
+}
+
+#output {
+    width:  100%;
+    height: 100%;
+    padding: 0px;
+    background: white;
+    white-space: pre-wrap;
+    font-family: Inconsolata, Monaco, Courier, monospace;
+    font-size: 14px;
+}
+
+#outputframe {
+    width:  100%;
+    height: 100%;
+}
+
+.alignLeft {
+    float: left;
+}
+
+.alignRight {
+    float: right;
+}
+
+.jsc_msg {
+    color: gray;
+    font-size: small;
+}
+
+.jsc_error {
+    color: red;
+}
+
+input.bubble-button {
+    border-style:none;
 }

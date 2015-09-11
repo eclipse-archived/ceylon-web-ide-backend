@@ -17,89 +17,6 @@
     <!--[if lt IE 8]>
         <link href='http://ceylon-lang.org/stylesheets/ie.css' media='screen, projection' rel='stylesheet' type='text/css' />
     <![endif]-->
-    <style type="text/css">
-        .cantseeme {
-            <% if (request.getParameter("showcode") == null) { %>
-            display: none;
-            <% } %>
-        }
-        .invis {
-            display: none;
-        }
-        #all {
-            position: absolute;
-            width:  100%;
-            top: 0px;
-            bottom: 0px;
-        }
-        #holder {
-            visibility: hidden;
-        }
-        #edit_ceylon, #edit_module {
-            border: 1px solid black;
-            overflow: auto;
-            width:  620px;
-            height: 220px;
-            padding-left: 4px;
-            background: white;
-            white-space: pre-wrap;
-            font-family: Inconsolata, Monaco, Courier, monospace;
-            font-size: 14px;
-            min-width: 290px;
-            max-width: 900px;
-            min-height: 58px;
-            max-height:800px;
-        }
-        #output {
-            width:  100%;
-            height: 100%;
-            padding: 0px;
-            background: white;
-            white-space: pre-wrap;
-            font-family: Inconsolata, Monaco, Courier, monospace;
-            font-size: 14px;
-        }
-        #outputframe {
-            width:  100%;
-            height: 100%;
-        }
-        #edit_module {
-            height: 100px;
-        }
-        .alignLeft {
-            float: left;
-        }
-        .alignRight {
-            float: right;
-        }
-        .jsc_msg {
-            color: gray;
-            font-size: small;
-        }
-        .jsc_error {
-            color: red;
-        }
-        input.bubble-button {
-            border-style:none;
-        }
-		.spinner {
-		  display: inline-block;
-		  opacity: 0;
-		  width: 0;
-		
-		  -webkit-transition: opacity 0.25s, width 0.25s;
-		  -moz-transition: opacity 0.25s, width 0.25s;
-		  -o-transition: opacity 0.25s, width 0.25s;
-		  transition: opacity 0.25s, width 0.25s;
-		}
-		.has-spinner.active {
-		  cursor:progress;
-		}
-		.has-spinner.active .spinner {
-		  opacity: 1;
-		  width: auto; /* This doesn't work, just fix for unkown width elements */
-		}
-    </style>
     <script type="text/javascript" src="scripts/codemirror.js" charset="utf-8"></script>
     <script type="text/javascript" src="scripts/autocomplete.js" charset="utf-8"></script>
     <script type="text/javascript" src="scripts/mode/ceylon/ceylon.js" charset="utf-8"></script>
@@ -118,7 +35,7 @@
     <link rel='stylesheet' type='text/css' href='scripts/jquery-ui-1.11.2.css'/>
     <link rel='stylesheet' type='text/css' href='scripts/jquery-ui-1.11.2.structure.css'/>
     <link rel='stylesheet' type='text/css' href='scripts/w2ui-1.4.3.css'/>
-    <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
 
 </head>
 
@@ -163,48 +80,45 @@
 </div>
 </div><!-- header-bar -->
 
-<div id="core-page" style="min-width:290px;max-width:900px;min-height:570px">
+<div id="core-page">
 
-    <div id="ghconnect"></div>
-    <form id="editform">
-        <div id="edit_module_div" class="invis">
-            <div>
-                <span class="alignLeft">Module editor -- Autocompletion: <code>Ctrl-.</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Documentation: <code>Ctrl-D</code></span>
-                <span class="alignRight invis"><input type="checkbox" id="fullmodule" onclick="toggleFullModule()" disabled/>full module</span>
-                <div style="clear: both"></div>
-            </div>
-            <textarea id="edit_module"></textarea>
+    <div id="edit_module_div" class="invis codeeditor">
+        <textarea id="edit_module"></textarea>
+    </div>
+    <div id="edit_ceylon_div" class="codeeditor">
+        <textarea id="edit_ceylon"></textarea>
+    </div>
+    
+        <div class="invis">
+            <span class="alignRight"><input type="checkbox" id="fullscript" onclick="toggleFullScript()" disabled/>full script&nbsp;&nbsp;
+            <input type="checkbox" id="imports" onclick="toggleImports()" disabled/>imports</span>
+            <div style="clear: both"></div>
         </div>
-        <div id="edit_ceylon_div">
-            <div>
-                <span class="alignLeft">Code editor -- Autocompletion: <code>Ctrl-.</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Documentation: <code>Ctrl-D</code></span>
-                <span class="alignRight"><input type="checkbox" id="fullscript" onclick="toggleFullScript()" disabled/>full script&nbsp;&nbsp;
-                <input type="checkbox" id="imports" onclick="toggleImports()" disabled/>imports</span>
-                <div style="clear: both"></div>
-            </div>
-            <textarea id="edit_ceylon"></textarea>
+        <div class="invis">
+            <span class="alignRight invis"><input type="checkbox" id="fullmodule" onclick="toggleFullModule()" disabled/>full module</span>
+            <div style="clear: both"></div>
         </div>
-        <div style="text-align:center; padding-top:5px; padding-bottom:5px;">
-        <button class="bubble-button has-spinner" id="run_ceylon" name="run_ceylon" onClick="performRun()"><span class="spinner"><i class="icon-spin icon-refresh"> </i></span>Run</button>
-        <button class="bubble-button invis" id="stop_ceylon" name="stop_ceylon" onClick="stop()">Stop</button>
-        <button class="bubble-button" onClick="doReset()">Reset</button>
-        <button class="bubble-button" id="share_src" name="share_src" onClick="shareSource()">Share</button>
-        <button class="bubble-button invis" id="save_src" name="save_src" onClick="saveSource()">Save Code</button>
-        <button class="bubble-button invis" id="update_src" name="update_src" onClick="updateSource()">Update Code</button>
-        <input class="invis" type="text" id="gistname" name="gistname" value="" size="20" oninput="handleGistNameChange(this)">
-        <a class="invis" href="#" id="shareurl" title="Direct link to this page pre-filled with the current code">Link</a>
-        <a class="invis" href="#" target="gistlink" id="gistlink" title="Link to the shared code on GitHub">Gist</a>
-        <a class="invis" href="#" id="deletegist" onClick="deleteGist(); return false;" title="Remove the shared code from GitHub">Delete</a>
-        </div>
-    </form>
-    <pre id="result" class="cantseeme">
-    </pre>
+        
+    <!--
+    <div style="text-align:center; padding-top:5px; padding-bottom:5px;">
+    <button class="bubble-button has-spinner" id="run_ceylon" name="run_ceylon" onClick="performRun()"><span class="spinner"><i class="icon-spin icon-refresh"> </i></span>Run</button>
+    <button class="bubble-button invis" id="stop_ceylon" name="stop_ceylon" onClick="stop()">Stop</button>
+    <button class="bubble-button" onClick="doReset()">Reset</button>
+    <button class="bubble-button" id="share_src" name="share_src" onClick="shareSource()">Share</button>
+    <button class="bubble-button invis" id="save_src" name="save_src" onClick="saveSource()">Save Code</button>
+    <button class="bubble-button invis" id="update_src" name="update_src" onClick="updateSource()">Update Code</button>
+    <input class="invis" type="text" id="gistname" name="gistname" value="" size="20" oninput="handleGistNameChange(this)">
+    <a class="invis" href="#" id="shareurl" title="Direct link to this page pre-filled with the current code">Link</a>
+    <a class="invis" href="#" target="gistlink" id="gistlink" title="Link to the shared code on GitHub">Gist</a>
+    <a class="invis" href="#" id="deletegist" onClick="deleteGist(); return false;" title="Remove the shared code from GitHub">Delete</a>
+    </div>
+    -->
     
 </div> <!--  core-page -->
 
 <div id="output"><iframe id="outputframe" src="runner.jsp"></iframe></div>
 
-<div id="sidebar">
+<div id="sidebar" class="trompon ceylonblock">
 <div id="sidebarblock" class="sidebar-block">
     <div>
         <h3 id="yrcodehdr" class="invis">Your code:</h3>
@@ -261,6 +175,17 @@
     </div>
 </div>
 
+<div id="help-message"><div id="help-message-content" class="ceylonblock">
+<h3>Editor keyboard shortcuts</h3>
+<ul>
+    <li>Autocompletion: <code>Ctrl-.</code>
+    <li>Documentation: <code>Ctrl-D</code>
+</ul>
+</div></div>
+
+<pre id="result" class="invis">
+</pre>
+    
 </div> <!-- holder -->
 
 </body>

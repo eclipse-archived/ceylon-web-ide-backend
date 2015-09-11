@@ -1,5 +1,8 @@
 "use strict";
 
+// TODO
+//     var url = window.location.origin + pagepath + "?gist=" + gist.data.id;
+
 var markers = [];
 var bindings = [];
 
@@ -52,7 +55,55 @@ $(document).ready(function() {
         padding: 4,
         panels: [
             { type: 'top', size: 102, style: zstyle, content: 'top' },
-            { type: 'main', minSize: 100, style: pstyle, content: 'main' },
+            { type: 'main', minSize: 100, style: zstyle, content: 'main',
+                toolbar: {
+                    items: [
+                        { type: 'menu',  id: 'menu', hint: 'Manage your code', icon: 'fa fa-bars',
+                            items: getMenuItems()
+                        },
+                        { type: 'break',  id: 'break0' },
+                        { type: 'button',  id: 'run',  caption: 'Run', hint: 'Compile & execute', icon: 'fa fa-play' },
+                        { type: 'button',  id: 'stop',  caption: 'Stop', hint: 'Stop program', icon: 'fa fa-stop', disabled: true },
+                        { type: 'button',  id: 'reset',  caption: 'Reset', hint: 'Clear output & errors', icon: 'fa fa-exclamation' },
+                        { type: 'button',  id: 'share',  caption: 'Share', hint: 'Share the code on GitHub', icon: 'fa fa-share' },
+                        { type: 'break',  id: 'break1' },
+                        { type: 'check',  id: 'advanced',  caption: 'Advanced', hint: 'Enable more complex code constructs', icon: 'fa fa-square-o' },
+                        { type: 'spacer' },
+                        { type: 'button',  id: 'help',  caption: 'Help', hint: 'Help on how this Web IDE works', icon: 'fa fa-question' },
+                        { type: 'button',  id: 'connect',  caption: 'Connect', hint: 'Connect to GitHub', icon: 'fa fa-github', hidden: isGitHubConnected() },
+                        { type: 'menu',   id: 'connected', caption: 'Connected', hint: 'Connected to GitHub', icon: 'fa fa-github', hidden: !isGitHubConnected(),
+                            items: [
+                                { text: 'Disconnect from GitHub', id: 'disconnect', icon: 'fa fa-scissors' }
+                            ]
+                        },
+                    ],
+                    onClick: function (event) {
+                        if (event.target == "run") {
+                            performRun();
+                        } else if (event.target == "stop") {
+                            stop();
+                        } else if (event.target == "reset") {
+                            doReset();
+                        } else if (event.target == "share") {
+                            shareSource();
+                        } else if (event.target == "help") {
+                            handleHelpClick();
+                        } else if (event.target == "connect") {
+                            handleGitHubConnect();
+                        } else if (event.target == "connected:disconnect") {
+                            handleGitHubDisconnect();
+                        } else if (event.target == "menu:rename") {
+                            handleRenameGist();
+                        } else if (event.target == "menu:saveall") {
+                            updateSource();
+                        } else if (event.target == "menu:saveas") {
+                            handleSaveAs();
+                        } else if (event.target == "menu:delete") {
+                            handleDeleteGist();
+                        }
+                    }
+                }
+            },
             { type: 'preview', size: 200, minSize: 100, resizable: true, style: zstyle, title: 'Program output', content: 'preview' },
             { type: 'right', size: 260, minSize: 200, resizable: true, style: pstyle, content: 'right' },
             { type: 'bottom', size: 67, style: zstyle, content: 'bottom' }
@@ -86,19 +137,6 @@ $(document).ready(function() {
         }
     });
 
-    $("#edit_ceylon_div .CodeMirror").resizable({
-        stop: function() { editor.refresh(); },
-        resize: function() {
-            $("#edit_ceylon_div .CodeMirror-scroll").height($(this).height());
-            $("#edit_module_div .CodeMirror").width($(this).width());
-            $(".CodeMirror-scroll").width($(this).width());
-            $("#outputframe").width($(this).width());
-            $('#core-page').width($(this).width());
-            editor.refresh();
-            modeditor.refresh();
-        }
-    });
-      
     var modEditorElem=document.getElementById('edit_module');
     modeditor = CodeMirror.fromTextArea(modEditorElem,{
         mode:'ceylon',
@@ -115,19 +153,6 @@ $(document).ready(function() {
         }
     });
 
-    $("#edit_module_div .CodeMirror").resizable({
-        stop: function() { editor.refresh(); },
-        resize: function() {
-            $("#edit_module_div .CodeMirror-scroll").height($(this).height());
-            $("#edit_ceylon_div .CodeMirror").width($(this).width());
-            $(".CodeMirror-scroll").width($(this).width());
-            $("#outputframe").width($(this).width());
-            $('#core-page').width($(this).width());
-            editor.refresh();
-            modeditor.refresh();
-        }
-    });
-    
     $("#output").resizable({
         start: function(event, ui) {
             $("#outputframe").css('pointer-events', 'none');
@@ -143,7 +168,6 @@ $(document).ready(function() {
         }
     });
 
-    showGitHubConnect();
     $('#share_src').show();
     $('#save_src').hide();
     $('#update_src').hide();
@@ -187,6 +211,52 @@ function jqContent(jqElem) {
             $(this.box).empty();
             $(this.box).append(jqElem);
         }
+    }
+}
+
+function getMenuItems() {
+    var hasGist = (selectedGist != null);
+    return [
+        { text: 'Rename...', id: 'rename', icon: 'fa fa-pencil', disabled: !hasGist },
+        { text: 'Save All', id: 'saveall', icon: 'fa fa-floppy-o', disabled: !hasGist },
+        { text: 'Save As...', id: 'saveas', icon: 'fa fa-files-o' },
+        { text: 'Delete', id: 'delete', icon: 'fa fa-trash-o', disabled: !hasGist || !isGitHubConnected() },
+    ];
+}
+
+function updateMenuState() {
+    w2ui["all"].get("main").toolbar.set("menu", { items: getMenuItems() });
+}
+
+function handleHelpClick() {
+    $('#tb_all_main_toolbar_item_help').w2overlay({ html: $('#help-message').html() });
+}
+
+function isGitHubConnected() {
+    return ($.cookie("githubauth") != null);
+}
+
+// Return "Connect" or "Disconnect" depending on current state
+function getGitHubButtonLabel() {
+    if (!isGitHubConnected()) {
+        return "Connect";
+    } else {
+        return "Connected";
+    }
+}
+
+function handleGitHubConnect() {
+    if (!isGitHubConnected()) {
+        var redirect = window.location.origin + pagepath + "githubauth";
+        var url = "https://github.com/login/oauth/authorize?client_id=" + clientid + "&scope=gist&state=xyz&redirect_uri=" + encodeURIComponent(redirect);
+        window.open(url, "githubauth");
+    }
+}
+
+function handleGitHubDisconnect() {
+    if (isGitHubConnected()) {
+        $.removeCookie('githubauth', { path: '/' });
+        window.location.reload();
     }
 }
 
@@ -284,51 +354,31 @@ function complete(editor){
     });
 }
 
-// Show either a GitHub connect or disconnect option
-function showGitHubConnect() {
-    if ($.cookie("githubauth") == null) {
-        var redirect = window.location.origin + pagepath + "githubauth";
-        var url = "https://github.com/login/oauth/authorize?client_id=" + clientid + "&scope=gist&state=xyz&redirect_uri=" + encodeURIComponent(redirect);
-        $("#ghconnect").html('<a href="' + url + '" target="githubauth">Connect to GitHub</a>');
-    } else {
-        $("#ghconnect").html('<a href="#" onclick="$.removeCookie(\'githubauth\', { path: \'/\' }); window.location.reload()">Disconnect from GitHub</a>');
-    }
-}
-
-// Shows the given Gist in the editor(s) and updates the proper GUI elements
-function showGist(gist) {
+// Mark the given Gist as selected and updates the proper GUI elements
+function selectGist(gist) {
     selectedGist = gist;
-    var url = window.location.origin + pagepath + "?gist=" + gist.data.id;
-    jQuery('#share_src').hide();
-    jQuery('#save_src').hide();
-    jQuery('#update_src').show();
-    jQuery('#gistname').val(gist.data.description.substr(19));
-    jQuery('#gistname').show();
-    jQuery('#gistlink').attr('href', gist.data.html_url);
-    jQuery('#gistlink').show();
-    jQuery('#shareurl').attr('href', url);
-    jQuery('#shareurl').show();
-    var token = $.cookie("githubauth");
-    if (token) {
-        jQuery('#deletegist').show();
-    }
-    handleGistNameChange();
+    updateMenuState();
 }
 
-// Is called when the "Share" button is pressed
-function shareSource() {
-    jQuery('#share_src').hide();
-    jQuery('#save_src').show();
-    jQuery('#gistname').val("Code snippet");
-    jQuery('#gistname').show();
-    handleGistNameChange();
+// Clear selected Gist
+function clearGist(gist) {
+    selectedGist = null;
+    updateMenuState();
+}
+
+// Asks the user for a name and stores the code on the server
+// Is called when the "Save As" menu item is selected
+function handleSaveAs() {
+    var name = prompt("Gist name");
+    if (name != null && name != "") {
+        saveSource(name);
+    }
 }
 
 // Stores the code by creating a new Gist on the server
-// Is called when the "Save" button is pressed
-function saveSource() {
+function saveSource(title) {
     function onSuccess(gist) {
-        showGist(gist);
+        selectGist(gist);
         createComment(gist);
         updateGists();
     }
@@ -337,7 +387,6 @@ function saveSource() {
         live_tc.clear();
     }
     var files = getGistFiles();
-    var title = jQuery('#gistname').val();
     var data = {
         "description": "Ceylon Web Runner: " + title,
         "public": true,
@@ -387,11 +436,42 @@ function createComment(gist) {
     }
 }
 
+// Asks the user for a new name and updates the existing Gist on the server
+// Is called when the "Rename" menu item is selected
+function handleRenameGist() {
+    var oldname = getGistName(selectedGist);
+    var name = prompt("Gist name", oldname);
+    if (name != null && name != "" && name != oldname) {
+        renameGist(name);
+    }
+}
+
 // Updates the code and or name of an existing Gist on the server
-// Is called when the "Update" button is pressed
+// Is called when the "Rename" button is pressed
+function renameGist(title) {
+    function onSuccess(gist) {
+        selectGist(gist);
+        updateGists();
+    }
+    function onError(xhr, status, err) {
+        printError("Error storing Gist: " + (err?err:status));
+        live_tc.clear();
+    }
+    var data = {
+        "description": "Ceylon Web Runner: " + title,
+    };
+    selectedGist.edit({
+        data: data,
+        success: onSuccess,
+        error: onError
+    });
+}
+
+// Updates the code of an existing Gist on the server
+// Is called when the "Save All" button is pressed
 function updateSource() {
     function onSuccess(gist) {
-        showGist(gist);
+        selectGist(gist);
         updateGists();
     }
     function onError(xhr, status, err) {
@@ -399,10 +479,8 @@ function updateSource() {
         live_tc.clear();
     }
     var files = getGistFiles();
-    var title = jQuery('#gistname').val();
     var data = {
-        "description": "Ceylon Web Runner: " + title,
-        "files": files
+            "files": files
     };
     selectedGist.edit({
         data: data,
@@ -412,22 +490,32 @@ function updateSource() {
 }
 
 // Deletes a Gist from the server (asks the user for confirmation first)
-// Is called when the "Delete" link is clicked
+// Is called when the "Delete" menu item is selected
+function handleDeleteGist() {
+    if (selectedGist != null && confirm("Do you really want to delete this Gist?")) {
+        deleteGist();
+    }
+}
+
+// Deletes a Gist from the server
 function deleteGist() {
     function onRemove(gist) {
         doReset();
         updateGists();
     }
-    if (selectedGist != null && confirm("Do you really want to delete this Gist?")) {
-        selectedGist.remove({
-            success: onRemove
-        });
-    }
+    selectedGist.remove({
+        success: onRemove
+    });
 }
 
 // Updates the user's list of available Gists
 function updateGists() {
     listGists();
+}
+
+// Returns the name of the given Gist
+function getGistName(gist) {
+    return gist.data.description.substring(19);
 }
 
 // Shows the user's list of available Gists
@@ -439,7 +527,7 @@ function listGists(page) {
             $('#yrcode').empty();
             first = false;
         }
-        var desc = gist.data.description.substring(19);
+        var desc = getGistName(gist);
         $('#yrcode').append('<li class="news_entry"><a href="#" onClick="return editGist(\'' + gist.data.id + '\')">' + desc + '</a></li>');
         $('#yrcodehdr').show();
         $('#yrcode').show();
@@ -485,13 +573,24 @@ function listGists(page) {
     }
 }
 
-// Updates GUI elements whenever the user changes the
-// contents of the "gistname" field
-function handleGistNameChange() {
-    var name = $("#gistname").val();
-    var disabled = (name == "");
-    jQuery('#save_src').prop('disabled', disabled)
-    jQuery('#update_src').prop('disabled', disabled)
+function buttonEnable(name, enable) {
+    if (enable) {
+        w2ui["all"].get("main").toolbar.enable(name);
+    } else {
+        w2ui["all"].get("main").toolbar.disable(name);
+    }
+}
+
+function buttonShow(name, show) {
+    if (show) {
+        w2ui["all"].get("main").toolbar.show(name);
+    } else {
+        w2ui["all"].get("main").toolbar.hide(name);
+    }
+}
+
+function buttonSetIcon(name, icon) {
+    w2ui["all"].get("main").toolbar.set(name, { icon: icon });
 }
 
 // Starts the spinner indicating the system is busy.
@@ -499,9 +598,8 @@ function handleGistNameChange() {
 // twice you will also need to call `stopSpinner()`
 // twice for it to disappear
 function startSpinner() {
-    var button = $('#run_ceylon');
-    button.attr('disabled','disabled');
-    button.addClass('active');
+    buttonEnable("run", false);
+    buttonSetIcon("run", "fa fa-cog fa-spin");
     spinCount++;
 }
 
@@ -509,9 +607,8 @@ function startSpinner() {
 function stopSpinner() {
     spinCount--;
     if (spinCount == 0) {
-        var button = $('#run_ceylon');
-        button.removeAttr('disabled');
-        button.removeClass('active');
+        buttonEnable("run", true);
+        buttonSetIcon("run", "fa fa-play");
         editor.focus();
     }
 }
@@ -546,6 +643,11 @@ function showErrors(errors, print) {
             jQuery("."+estilo).attr("title", errmsg);
         }
     }
+}
+
+//Sends the code from the editor to the server for compilation and it successful, runs the resulting js.
+function performRun() {
+    translate(afterTranslate);
 }
 
 // Wraps the contents of the editor in a function and sends it to the server for compilation.
@@ -591,7 +693,6 @@ function translateCode(code, modcode, doShowCode, onTranslation) {
             }
         }
     };
-    document.getElementById('run_ceylon').disabled=true;
     jQuery.ajax('translate', {
         cache:false, type:'POST',
         dataType:'json',
@@ -638,11 +739,6 @@ function loadModuleAsString(src, func) {
     }
 }
 
-// Sends the code from the editor to the server for compilation and it successful, runs the resulting js.
-function performRun() {
-    translate(afterTranslate);
-}
-
 // Sends the given code to the server for compilation and it successful, runs the resulting js.
 function runCode(code, modcode) {
   translateCode(code, modcode, false, afterTranslate);
@@ -680,8 +776,8 @@ var stopfunc;
 function setOnStop(func) {
 	if (!stopfunc) {
 		stopfunc = func;
-		$('#run_ceylon').addClass('invis');
-		$('#stop_ceylon').removeClass('invis');
+		enableButton("run", false);
+        enableButton("stop", true);
 	}
 }
 
@@ -692,8 +788,8 @@ function stop() {
 			stopfunc();
 		} catch(e) {}
 		stopfunc = undefined;
-		$('#run_ceylon').removeClass('invis');
-		$('#stop_ceylon').addClass('invis');
+        enableButton("run", true);
+        enableButton("stop", false);
 	}
 }
 
@@ -740,7 +836,7 @@ function editCode(key) {
 function editGist(key) {
     function onSuccess(gist) {
         setEditorSourcesFromGist(gist.data);
-        showGist(gist);
+        selectGist(gist);
     }
     function onError(xhr, status, err) {
         printError("Error retrieving Gist '" + key + "': " + (err?err:status));
@@ -875,18 +971,11 @@ function showCode(code) {
 }
 
 function doReset() {
-    selectedGist = null;
+    clearGist();
     oldcode = "";
     oldmodcode = "";
     clearOutput();
     clearEditMarkers();
-    jQuery('#share_src').show();
-    jQuery('#save_src').hide();
-    jQuery('#update_src').hide();
-    jQuery('#gistname').hide();
-    jQuery('#gistlink').hide();
-    jQuery('#shareurl').hide();
-    jQuery('#deletegist').hide();
 }
 
 // Clears all error markers and hover docs.
@@ -1011,7 +1100,6 @@ function fetchDoc(cm) {
             }
         }
     };
-    document.getElementById('run_ceylon').disabled=true;
     var cursor = editor.getCursor();
     live_tc.status=3;
     jQuery.ajax('hoverdoc', {
