@@ -27,7 +27,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/mongo-2.7.3.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/antlr-3.4.jar"/>
-	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/json-smart-1.1.1.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/json-smart-1.1.1.jar" sourcepath="debug/json-smart-1.1.1-sources.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/txtmark-0.11.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/com.redhat.ceylon.common-1.1.1.jar"/>
