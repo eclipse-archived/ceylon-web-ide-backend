@@ -1,13 +1,11 @@
 "use strict";
 
-// TODO
-//     var url = window.location.origin + pagepath + "?gist=" + gist.data.id;
-
 var markers = [];
 var bindings = [];
 
 var github;
 var selectedGist;
+var selectedExample;
 var fileDeleted;
 var spinCount = 0;
 var live_tc = {
@@ -161,13 +159,13 @@ $(document).ready(function() {
     } else if (location.href.indexOf('?sample=') > 0) {
         //Retrieve code from the given sample id
         var key = location.href.slice(location.href.indexOf('?sample=')+8);
-        editCode(key);
+        editExample(key);
     } else if (location.href.indexOf('?gist=') > 0) {
         //Retrieve code from the given sample id
         var key = location.href.slice(location.href.indexOf('?gist=')+6);
         editGist(key);
     } else {
-        editCode('hello_world');
+        editExample('hello_world');
         window.outputReady = function() {
         	runCode('print("Ceylon ``language.version`` \\"``language.versionName``\\"");');
             stopSpinner();
@@ -306,6 +304,7 @@ function complete(editor){
 // Mark the given Gist as selected and updates the proper GUI elements
 function selectGist(gist) {
     selectedGist = gist;
+    selectedExample = null;
     updateMenuState();
 }
 
@@ -458,6 +457,28 @@ function updateSource() {
     });
 }
 
+function shareSource() {
+    var weburl;
+    if (selectedGist != null) {
+        weburl = window.location.origin + pagepath + "?gist=" + selectedGist.data.id;
+    } else {
+        weburl = window.location.origin + pagepath + "?sample=" + selectedExample;
+    }
+    var html = '<div style="padding: 10px" class="ceylon_share_links">' +
+        'Direct link to this page showing the current code:<br>' +
+        '<div><input type="text" value="' + weburl + '" readonly onclick="this.select();">' +
+        '<a href="' + weburl + '" target="share_webide"><i class="fa fa-external-link"></i></a></div>';
+    if (selectedGist != null) {
+        var githuburl = selectedGist.data.html_url;
+        html += '<br><br>' +
+            'Link to GitHub Gist where the current code is stored:<br>' +
+            '<div><input type="text" value="' + githuburl + '" readonly onclick="this.select();">' +
+            '<a href="' + githuburl + '" target="share_github"><i class="fa fa-external-link"></i></a></div>';
+    }
+    html += '</div>';
+    $("#tb_all_main_toolbar_item_share").w2overlay(html);
+}
+
 // Deletes a Gist from the server (asks the user for confirmation first)
 // Is called when the "Delete" menu item is selected
 function handleNewFile() {
@@ -566,6 +587,9 @@ function handleNewProject() {
 }
 
 function newProject() {
+    selectedGist = null;
+    selectedExample = null;
+    fileDeleted = false;
     clearOutput();
     deleteEditors();
     newFile("main.ceylon");
@@ -893,14 +917,14 @@ function stop() {
 	}
 }
 
-function handleEditCode(key) {
+function handleEditExample(key) {
     checkForChangesAndRun(function() {
-        editCode(key);
+        editExample(key);
     });
 }
 
 // Retrieves the specified example from the editor, along with its hover docs.
-function editCode(key) {
+function editExample(key) {
     // Retrieve code
     live_tc.status=2;
     jQuery.ajax('hoverdoc?key='+key, {
@@ -912,6 +936,8 @@ function editCode(key) {
         contentType:'application/x-www-form-urlencoded; charset=UTF-8',
         success:function(json, status, xhr) {
             doReset();
+            selectedExample = key;
+            selectedGist = null;
             setEditorSourcesFromGist(json.files);
         },
         error:function(xhr, status, err) {
@@ -948,6 +974,7 @@ function editGist(key) {
 
 // Sets the code for the editor(s) from the given object
 function setEditorSourcesFromGist(files) {
+    fileDeleted = false;
     clearOutput();
     deleteEditors();
     var cnt = 0;
@@ -1040,6 +1067,13 @@ function createEditor(name) {
     });
     editor.ceylonId = newid;
     editor.ceylonName = name;
+    editor.on('focus', function() {
+        // Hack to mak sure that clicking in the editor correctly
+        // closes all popups and deselects their associated buttons
+        $().w2overlay();
+        w2ui.all_main_toolbar.uncheck("menu");
+        w2ui.all_main_toolbar.uncheck("connected");
+    });
     editor.on('change', function() {
         updateEditorDirtyState(editor.ceylonId);
         live_tc.last = Date.now();

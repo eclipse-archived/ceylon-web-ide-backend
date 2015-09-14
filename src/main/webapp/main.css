@@ -641,6 +641,20 @@ p.screenshot img {
     height: 100%;
 }
 
+#w2ui-overlay div.ceylon_share_links div {
+    width: 100%;
+    margin-top: 2px;
+    white-space: nowrap;
+}
+
+#w2ui-overlay div.ceylon_share_links input {
+    width: 90%;
+}
+
+#w2ui-overlay div.ceylon_share_links a {
+    margin-left: 6px;
+}
+
 .alignLeft {
     float: left;
 }

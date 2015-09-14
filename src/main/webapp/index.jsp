@@ -129,25 +129,25 @@
         <a id="yrcodemore" class="invis" href="#" onCLick="">more...</a>
         <h3 id="news">Try out a sample:</h3>
         <ol>
-        <li class="news_entry"><a href="#" onClick="return handleEditCode('hello_world')">Hello World</a></li>
-        <li class="news_entry"><a href="#" onClick="return handleEditCode('basics')">Basics</a></li>
-        <li class="news_entry"><a href="#" onClick="return handleEditCode('null_and_union')">Null values and union types</a></li>
-        <li class="news_entry"><a href="#" onClick="return handleEditCode('conditions')">Conditions and assertions</a></li>
-        <li class="news_entry"><a href="#" onClick="return handleEditCode('classes_and_functions')">Classes and functions 1</a></li>
-        <li class="news_entry"><a href="#" onClick="return handleEditCode('interfaces')">Interfaces and mixin inheritance</a></li>
-        <li class="news_entry"><a href="#" onClick="return handleEditCode('classes_and_functions2')">Classes and functions 2</a></li>
-        <li class="news_entry"><a href="#" onClick="return handleEditCode('collections')">Collections and sequence comprehensions</a></li>
-        <li class="news_entry"><a href="#" onClick="return handleEditCode('named_arguments')">Named argument syntax</a></li>
-        <li class="news_entry"><a href="#" onClick="return handleEditCode('generics')">Type parameters</a></li>
-        <li class="news_entry"><a href="#" onClick="return handleEditCode('switch1')">Enumerations and the switch statement</a></li>
-        <li class="news_entry"><a href="#" onClick="return handleEditCode('interop')">Interoperability</a></li>
-        <li class="news_entry"><a href="#" onClick="return handleEditCode('request')">Interoperability 2</a></li>
-        <li class="news_entry"><a href="#" onClick="return handleEditCode('dynints')">Dynamic interfaces</a></li>
-        <li class="news_entry"><a href="#" onClick="return handleEditCode('operators')">Operator polymorphism</a></li>
-        <li class="news_entry"><a href="#" onClick="return handleEditCode('metamodel')">Type-safe Metamodel</a></li>
-        <li class="news_entry"><a href="#" onClick="return handleEditCode('game_of_life')">Game of Life</a></li>
-        <li class="news_entry"><a href="#" onClick="return handleEditCode('importtest1')">Simple Import Test</a></li>
-        <li class="news_entry"><a href="#" onClick="return handleEditCode('importtest2')">Advanced Import Test</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditExample('hello_world')">Hello World</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditExample('basics')">Basics</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditExample('null_and_union')">Null values and union types</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditExample('conditions')">Conditions and assertions</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditExample('classes_and_functions')">Classes and functions 1</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditExample('interfaces')">Interfaces and mixin inheritance</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditExample('classes_and_functions2')">Classes and functions 2</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditExample('collections')">Collections and sequence comprehensions</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditExample('named_arguments')">Named argument syntax</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditExample('generics')">Type parameters</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditExample('switch1')">Enumerations and the switch statement</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditExample('interop')">Interoperability</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditExample('request')">Interoperability 2</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditExample('dynints')">Dynamic interfaces</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditExample('operators')">Operator polymorphism</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditExample('metamodel')">Type-safe Metamodel</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditExample('game_of_life')">Game of Life</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditExample('importtest1')">Simple Import Test</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditExample('importtest2')">Advanced Import Test</a></li>
         </ol>
     </div>
 </div>
