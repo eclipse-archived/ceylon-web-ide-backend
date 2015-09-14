@@ -609,6 +609,13 @@ p.screenshot img {
     height: 100%;
 }
 
+#editorspane {
+    position: absolute;
+    top: 30px;
+    bottom: 0px;
+    width: 100%;
+}
+
 .codeeditor {
     overflow: hidden;
     width:  100%;
@@ -653,4 +660,9 @@ p.screenshot img {
 
 input.bubble-button {
     border-style:none;
+}
+
+/* work around display bug with icons in menus missing bits from the bottom */ 
+.w2ui-overlay table.w2ui-drop-menu span.w2ui-icon {
+    padding-top: 2px;
 }

@@ -32,3 +32,12 @@ caption, tbody, tfoot, thead, tr {
     font-size: 14px;
     padding: 2px;
 }
+
+.jsc_msg {
+    color: gray;
+    font-size: small;
+}
+
+.jsc_error {
+    color: red;
+}

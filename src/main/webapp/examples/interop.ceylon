@@ -7,9 +7,6 @@ shared void run(){
 // these blocks (of course this can result in erros at runtime).
 dynamic {
     dynamic doc = window.parent.document;
-    dynamic headerNode = doc.getElementById("hdr_title");
-    headerNode.textContent = "Who needs JavaScript?";
-    
     dynamic nodes = doc.getElementsByTagName("A");
     Integer nodesLength = nodes.length;
     for (i in 0..nodesLength-1) {
@@ -22,5 +19,6 @@ dynamic {
             elem.textContent = "*``oldText``*";
         }
     }
+    print("-- Run again to toggle --");
 }
 }

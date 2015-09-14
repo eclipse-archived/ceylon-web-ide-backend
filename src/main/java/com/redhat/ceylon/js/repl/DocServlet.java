@@ -1,6 +1,7 @@
 package com.redhat.ceylon.js.repl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -16,6 +17,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.minidev.json.JSONValue;
+
 import com.redhat.ceylon.model.typechecker.model.Declaration;
 import com.redhat.ceylon.js.util.CompilerUtils;
 import com.redhat.ceylon.js.util.DocUtils;
@@ -30,13 +33,15 @@ public class DocServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        try {
-            String modName = request.getParameter("modname");
-            String modScript = request.getParameter("module");
-            final String[] scripts = request.getParameterValues("ceylon");
-            final int row = Integer.parseInt(request.getParameter("r"));
-            final int col = Integer.parseInt(request.getParameter("c"));
-            final ScriptFile src = CompilerUtils.createScriptSource(modName, modScript, scripts);
+        try (InputStream is = request.getInputStream()) {
+            // Reading GitHub's response
+            String json = ServletUtils.readAll(is);
+            // Extracting the access token
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>)JSONValue.parseKeepingOrder(json);
+            final ScriptFile src = CompilerUtils.createScriptSource(result);
+            final int row = Integer.parseInt((String)result.get("r"));
+            final int col = Integer.parseInt((String)result.get("c"));
             Declaration decl = DocUtils.findDeclaration(
                     CompilerUtils.getTypeChecker(request.getServletContext(), src), row, col);
             final Map<String,Object> docs = decl == null ? new HashMap<String, Object>() : DocUtils.getDocs(decl);

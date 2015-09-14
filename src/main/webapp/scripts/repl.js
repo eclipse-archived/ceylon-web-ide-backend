@@ -8,17 +8,26 @@ var bindings = [];
 
 var github;
 var selectedGist;
-var editor;
-var modeditor;
+var fileDeleted;
 var spinCount = 0;
 var live_tc = {
-    status:0,
-    last:Date.now(),
-    clear:function clear() {
+    status: 0,
+    last: Date.now(),
+    shouldTypecheck: function(files) {
+        return status == 1
+            && files != live_tc.files
+            && Date.now()-live_tc.last > 5000;
+    },
+    update: function(files) {
+        if (files) {
+            live_tc.files = files;
+        }
+        live_tc.last = Date.now();
+    },
+    clear: function() {
         live_tc.status = 1;
         live_tc.last = Date.now();
-        live_tc.text = editor.getValue();
-        live_tc.modtext = modeditor.getValue();
+        live_tc.files = getCompilerFiles();
     }
 };
 var closePopups = undefined;
@@ -50,6 +59,15 @@ $(document).ready(function() {
     // Create the main layout
     var pstyle = 'border: 1px solid #dfdfdf; padding: 0px;';
     var zstyle = 'border: 1px solid #dfdfdf; padding: 0px; overflow: hidden;';
+    
+    $('#editortabs').w2tabs({
+        name: 'editortabs',
+        tabs: [],
+        onClick: function(event) {
+            selectEditor(event.target);
+        }
+    });
+    
     $('#all').w2layout({
         name: 'all',
         padding: 4,
@@ -92,6 +110,14 @@ $(document).ready(function() {
                             handleGitHubConnect();
                         } else if (event.target == "connected:disconnect") {
                             handleGitHubDisconnect();
+                        } else if (event.target == "menu:newfile") {
+                            handleNewFile();
+                        } else if (event.target == "menu:renamefile") {
+                            handleRenameFile();
+                        } else if (event.target == "menu:deletefile") {
+                            handleDeleteFile();
+                        } else if (event.target == "menu:new") {
+                            handleNewProject();
                         } else if (event.target == "menu:rename") {
                             handleRenameGist();
                         } else if (event.target == "menu:saveall") {
@@ -117,57 +143,6 @@ $(document).ready(function() {
     w2ui["all"].content("right", jqContent($("#sidebar")));
     w2ui["all"].content("bottom", jqContent($("#footer-bar")));
     
-    var editorElem=document.getElementById('edit_ceylon');
-    editor = CodeMirror.fromTextArea(editorElem,{
-        mode:'ceylon',
-        gutters:["CodeMirror-error-gutter", "CodeMirror-gutter"],
-        lineNumbers:true,
-        indentUnit:4,
-        matchBrackets:true,
-        styleActiveLine:true,
-        autoCloseBrackets:true,
-        //highlightSelectionMatches:true,
-        extraKeys:{
-            "Ctrl-D":function(cm){ fetchDoc(cm); },
-            "Cmd-D":function(cm){ fetchDoc(cm); },
-            "Ctrl-B":function(instance){ performRun(); },
-            "Cmd-B":function(instance){ performRun(); },
-            "Ctrl-.":function(){complete(editor);},
-            "Cmd-.":function(){complete(editor);}
-        }
-    });
-
-    var modEditorElem=document.getElementById('edit_module');
-    modeditor = CodeMirror.fromTextArea(modEditorElem,{
-        mode:'ceylon',
-        gutters:["CodeMirror-error-gutter", "CodeMirror-gutter"],
-        lineNumbers:true,
-        indentUnit:4,
-        matchBrackets:true,
-        styleActiveLine:true,
-        autoCloseBrackets:true,
-        //highlightSelectionMatches:true,
-        extraKeys:{
-            "Ctrl-.":function(){complete(editor);},
-            "Cmd-.":function(){complete(editor);}
-        }
-    });
-
-    $("#output").resizable({
-        start: function(event, ui) {
-            $("#outputframe").css('pointer-events', 'none');
-        },
-        stop: function(event, ui) {
-            $("#outputframe").css('pointer-events', 'auto');
-            editor.refresh();
-        },
-        resize: function(){
-            $(".CodeMirror-scroll").width($(this).width());
-            editor.refresh();
-            modeditor.refresh();
-        }
-    });
-
     $('#share_src').show();
     $('#save_src').hide();
     $('#update_src').hide();
@@ -175,6 +150,8 @@ $(document).ready(function() {
     $('#shareurl').hide();
     $('#gistlink').hide();
     $('#deletegist').hide();
+
+    startSpinner();
     
     if (location.href.indexOf('?src=') > 0) {
         //Code is directly in URL
@@ -192,16 +169,12 @@ $(document).ready(function() {
     } else {
         editCode('hello_world');
         window.outputReady = function() {
-        	runCode(wrapCode('print("Ceylon ``language.version`` \\"``language.versionName``\\"");'));
+        	runCode('print("Ceylon ``language.version`` \\"``language.versionName``\\"");');
+            stopSpinner();
         };
     }
     
     listGists();
-    editor.on('change',function(){live_tc.last=Date.now();});
-    editor.on('cursorActivity',function(){
-      if (closePopups)closePopups();
-      closePopups=undefined;
-    });
     setupLiveTypechecker();
 });
 
@@ -215,12 +188,17 @@ function jqContent(jqElem) {
 }
 
 function getMenuItems() {
+    var cnt = getEditors().length;
     var hasGist = (selectedGist != null);
     return [
-        { text: 'Rename...', id: 'rename', icon: 'fa fa-pencil', disabled: !hasGist },
-        { text: 'Save All', id: 'saveall', icon: 'fa fa-floppy-o', disabled: !hasGist },
-        { text: 'Save As...', id: 'saveas', icon: 'fa fa-files-o' },
-        { text: 'Delete', id: 'delete', icon: 'fa fa-trash-o', disabled: !hasGist || !isGitHubConnected() },
+        { text: 'New File...', id: 'newfile', icon: 'fa fa-file-o' },
+        { text: 'Rename File...', id: 'renamefile', icon: 'fa fa-pencil', disabled: (cnt == 0) },
+        { text: 'Delete File', id: 'deletefile', icon: 'fa fa-file-excel-o', disabled: (cnt == 0) },
+        { text: 'New Project...', id: 'new', icon: 'fa fa-files-o' },
+        { text: 'Rename Project...', id: 'rename', icon: 'fa fa-pencil', disabled: !hasGist, hidden: !isGitHubConnected() },
+        { text: 'Save All', id: 'saveall', icon: 'fa fa-floppy-o', disabled: !hasGist || (cnt == 0), hidden: !isGitHubConnected() },
+        { text: 'Save As...', id: 'saveas', icon: 'fa fa-files-o', disabled: (cnt == 0) },
+        { text: 'Delete Project', id: 'delete', icon: 'fa fa-trash-o', disabled: !hasGist, hidden: !isGitHubConnected() },
     ];
 }
 
@@ -262,17 +240,17 @@ function handleGitHubDisconnect() {
 
 function setupLiveTypechecker() {
     window.setInterval(function(){
-        if (live_tc.status == 1
-                && editor.getValue() != live_tc.text
-                && Date.now()-live_tc.last > 5000) {
+        var files = getCompilerFiles();
+        if (live_tc.shouldTypecheck(files)) {
           console.log("typechecking...");
-          live_tc.text = editor.getValue();
+          live_tc.files = files;
           live_tc.last = Date.now();
           $.ajax('translate', {
-              cache:false, type:'POST',
-              dataType:'json',
-              timeout:5000,
-              success:function(json, status, xhr) {
+              cache: false,
+              type: 'POST',
+              dataType: 'json',
+              timeout: 5000,
+              success: function(json, status, xhr) {
                   var errs = json['errors'];
                   if (errs && errs.length>0) {
                       showErrors(errs, false);
@@ -280,44 +258,15 @@ function setupLiveTypechecker() {
                       clearEditMarkers();
                   }
               },
-              error:function() {},
-              contentType:'application/x-www-form-urlencoded; charset=UTF-8',
-              data:{
-                  tc:1,
-                  module:live_tc.modtext,
-                  ceylon:wrapCode(live_tc.text)
+              error: function() {},
+              contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+              data: {
+                  tc: 1,
+                  files: files
               }
           });
         }
       },1000);
-}
-
-function hasImports() {
-    return $('#imports').prop('checked');
-}
-
-function toggleImports() {
-    if ($('#imports').prop('checked')) {
-        showModuleEditor();
-    } else {
-        hideModuleEditor();
-    }
-}
-
-function showModuleEditor() {
-    $("#edit_module_div").show();
-    modeditor.refresh();
-    $('#imports').prop('checked', true);
-    prevFullScriptState = isFullScript();
-    $('#fullscript').prop('checked', true);
-    $('#fullscript').prop('disabled', true);
-}
-
-function hideModuleEditor() {
-    $("#edit_module_div").hide();
-    $('#imports').prop('checked', false);
-    $('#fullscript').prop('checked', prevFullScriptState);
-    $('#fullscript').prop('disabled', false);
 }
 
 // autocompletion support
@@ -342,8 +291,8 @@ function complete(editor){
         },
         error:function(xhr, status, err) {
         	stopSpinner();
-            alert("An error occurred while compiling your code: " + err?err:status);
             live_tc.status=1;
+            w2alert("An error occurred while compiling your code: " + err?err:status, "Error");
         },
         contentType:'application/x-www-form-urlencoded; charset=UTF-8',
         data: { 
@@ -369,15 +318,17 @@ function clearGist(gist) {
 // Asks the user for a name and stores the code on the server
 // Is called when the "Save As" menu item is selected
 function handleSaveAs() {
-    var name = prompt("Gist name");
-    if (name != null && name != "") {
-        saveSource(name);
-    }
+    w2prompt("Enter a name for the new Gist", "Name", "", "Save As", function(name) {
+        if (name != null && name != "") {
+            saveSource(name);
+        }
+    });
 }
 
 // Stores the code by creating a new Gist on the server
 function saveSource(title) {
     function onSuccess(gist) {
+        clearEditorDirtyStates();
         selectGist(gist);
         createComment(gist);
         updateGists();
@@ -402,23 +353,39 @@ function saveSource(title) {
 // Creates the proper "files" element necessary for creating and
 // updating Gists using the contents of the current editor(s)
 function getGistFiles() {
-    var files;
-    if ($("#edit_module_div").is(":visible")) {
-        files = {
-            "script.ceylon": {
-                "content": getEditCode()
-            },
-            "module.ceylon": {
-                "content": getModuleCode()
+    var files = {};
+    var editors = getEditors();
+    $.each(editors, function(index, editor) {
+        var content = { content: getEditorCode(editor.ceylonId) };
+        if (isEditorRenamed(editor.ceylonId)) {
+            content.filename = editor.ceylonName;
+            files[editor.ceylonSavedName] = content;
+        } else {
+            files[editor.ceylonName] = content;
+        }
+    });
+    // See if we need to delete any files
+    if (selectedGist != null) {
+        $.each(selectedGist.data.files, function(index, item) {
+            if (getEditor(editorId(index)) == null) {
+                files[index] = null;
             }
-        };
-    } else {
-        files = {
-            "script.ceylon": {
-                "content": getEditCode()
-            }
-        };
+        });
     }
+    return files;
+}
+
+// Creates the proper "files" element necessary for compilation,
+// autocomplete and documentation handling
+function getCompilerFiles() {
+    var files = {};
+    var editors = getEditors();
+    $.each(editors, function(index, editor) {
+        if (compilerAccepts(editor.ceylonName)) {
+            var content = { content: getEditorCode(editor.ceylonId) };
+            files[editor.ceylonName] = content;
+        }
+    });
     return files;
 }
 
@@ -440,10 +407,11 @@ function createComment(gist) {
 // Is called when the "Rename" menu item is selected
 function handleRenameGist() {
     var oldname = getGistName(selectedGist);
-    var name = prompt("Gist name", oldname);
-    if (name != null && name != "" && name != oldname) {
-        renameGist(name);
-    }
+    w2prompt("Enter a new name for the current Gist", "Name", oldname, "Rename", function(name) {
+        if (name != null && name != "" && name != oldname) {
+            renameGist(name);
+        }
+    });
 }
 
 // Updates the code and or name of an existing Gist on the server
@@ -471,6 +439,7 @@ function renameGist(title) {
 // Is called when the "Save All" button is pressed
 function updateSource() {
     function onSuccess(gist) {
+        clearEditorDirtyStates();
         selectGist(gist);
         updateGists();
     }
@@ -491,9 +460,125 @@ function updateSource() {
 
 // Deletes a Gist from the server (asks the user for confirmation first)
 // Is called when the "Delete" menu item is selected
+function handleNewFile() {
+    var suggestion = suggestFileName();
+    askFileName("New File", suggestion, true, function(newname) {
+        newFile(newname);
+    });
+}
+
+function newFile(name) {
+    var editor = createEditor(name);
+    selectEditor(editor.ceylonId);
+    updateEditorDirtyState(editor.ceylonId);
+    updateMenuState();
+}
+
+function handleRenameFile() {
+    var id = selectedEditorId();
+    var editor = getEditor(id);
+    askFileName("Rename File", editor.ceylonName, false, function(newname) {
+        renameFile(id, newname);
+    });
+}
+
+function renameFile(id, newname) {
+    var editor = getEditor(id);
+    var oldname = editor.ceylonName;
+    if (oldname != newname) {
+        editor.ceylonName = newname;
+        updateEditorDirtyState(id);
+    }
+}
+
+function askFileName(title, suggestion, nodup, func) {
+    var name = w2prompt('Enter the name for the file INCLUDING the extension (eg. "main.ceylon")',
+        "Name",
+        suggestion,
+        title,
+        function(name) {
+            if (name != null && name != "") {
+                func(name);
+            }
+        },
+        function(form) {
+            var ok = false;
+            var name = form.get("value").el.value;
+            if (!editorAccepts(name)) {
+                form.error('The file name has to end in ".ceylon", ".js", ".md" or ".txt"');
+            } else if (!/^[-_.a-zA-Z0-9]+$/.test(name)) {
+                form.error('The file name can only contain letters, digits, "_", "-" and "."');
+            } else if (nodup && getEditor(editorId(name)) != null) {
+                form.error('A file with that name already exists');
+            } else {
+                ok = true;
+            }
+            return ok;
+        }
+    );
+}
+
+function suggestFileName() {
+    var suggestion;
+    var cnt = 1;
+    do {
+        suggestion = "new" + (cnt++) + ".ceylon";
+    } while (getEditor(editorId(suggestion)) != null);
+    return suggestion;
+}
+
+// Deletes a Gist from the server (asks the user for confirmation first)
+// Is called when the "Delete" menu item is selected
+function handleDeleteFile() {
+    var editor = getEditor(selectedEditorId());
+    w2confirm("Do you really want to delete this file '" + editor.ceylonName + "'?")
+        .yes(function() {
+            deleteFile();
+        });
+}
+
+// Deletes a file
+function deleteFile() {
+    fileDeleted = true;
+    var id = selectedEditorId();
+    // Remove the editor
+    var div = getEditorDiv(id);
+    $(div).remove();
+    // Remove the tab
+    var index = w2ui["editortabs"].get(id, true);
+    w2ui["editortabs"].remove(id);
+    // Select a new tab
+    var editors = getEditors();
+    var cnt = editors.length;
+    if (cnt > 0) {
+        var newindex = (index < cnt) ? index : cnt - 1;
+        var newid = editors[newindex].ceylonId;
+        selectEditor(newid);
+    } else {
+        updateMenuState();
+    }
+}
+
+function handleNewProject() {
+    checkForChangesAndRun(function() {
+        newProject();
+    });
+}
+
+function newProject() {
+    clearOutput();
+    deleteEditors();
+    newFile("main.ceylon");
+}
+
+// Deletes a Gist from the server (asks the user for confirmation first)
+// Is called when the "Delete" menu item is selected
 function handleDeleteGist() {
-    if (selectedGist != null && confirm("Do you really want to delete this Gist?")) {
-        deleteGist();
+    if (selectedGist != null) {
+        w2confirm("Do you really want to delete this Gist?")
+            .yes(function() {
+                deleteGist();
+            });
     }
 }
 
@@ -528,7 +613,7 @@ function listGists(page) {
             first = false;
         }
         var desc = getGistName(gist);
-        $('#yrcode').append('<li class="news_entry"><a href="#" onClick="return editGist(\'' + gist.data.id + '\')">' + desc + '</a></li>');
+        $('#yrcode').append('<li class="news_entry"><a href="#" onClick="return handleEditGist(\'' + gist.data.id + '\')">' + desc + '</a></li>');
         $('#yrcodehdr').show();
         $('#yrcode').show();
     }
@@ -593,6 +678,14 @@ function buttonSetIcon(name, icon) {
     w2ui["all"].get("main").toolbar.set(name, { icon: icon });
 }
 
+function buttonCheck(name, check) {
+    if (check) {
+        w2ui["all"].get("main").toolbar.check(name);
+    } else {
+        w2ui["all"].get("main").toolbar.uncheck(name);
+    }
+}
+
 // Starts the spinner indicating the system is busy.
 // These can be nested, so if you call this function
 // twice you will also need to call `stopSpinner()`
@@ -609,11 +702,11 @@ function stopSpinner() {
     if (spinCount == 0) {
         buttonEnable("run", true);
         buttonSetIcon("run", "fa fa-play");
-        editor.focus();
+        focusSelectedEditor();
     }
 }
 
-var oldcode, oldmodcode, transok;
+var transok;
 
 // Shows the specified error messages in the code
 function showErrors(errors, print) {
@@ -650,34 +743,44 @@ function performRun() {
     translate(afterTranslate);
 }
 
-// Wraps the contents of the editor in a function and sends it to the server for compilation.
+//Sends the given code to the server for compilation and it successful, runs the resulting js.
+function runCode(code) {
+    var files = {
+            "main.ceylon": {
+                content: codePrefix + code + codePostfix
+            }
+    };
+    translateCode(files, afterTranslate);
+}
+
+// Wraps the contents of the editors in an object and sends it to the server for compilation.
 // On response, executes the script if compilation was OK, otherwise shows errors.
 // In any case it sets the hover docs if available.
 function translate(onTranslation) {
-  var code = getEditCode();
-  var modcode = getModuleCode();
-  if (code != oldcode || modcode != oldmodcode) {
-      clearEditMarkers();
-      translateCode(code, modcode, true, onTranslation);
-  } else {
-      if (onTranslation) {
-          onTranslation();
-      }
-  }
+    var files = getCompilerFiles();
+    if (!$.isEmptyObject(files)) {
+        if (shouldCompile(files)) {
+            clearEditMarkers();
+            translateCode(files, onTranslation);
+        } else {
+            if (onTranslation) {
+                onTranslation();
+            }
+        }
+    }
 }
 
-// Wraps the contents of the editor in a function and sends it to the server for compilation.
+// Wraps the contents of the editor in an object and sends it to the server for compilation.
 // On response, executes the script if compilation was OK, otherwise shows errors.
 // In any case it sets the hover docs if available.
-function translateCode(code, modcode, doShowCode, onTranslation) {
+function translateCode(files, onTranslation) {
     clearOutput();
     transok = false;
-    var compileHandler = function(json, status, xhr) {
-        oldcode = code;
-        oldmodcode = modcode;
-        var translatedcode=json['code'];
+    
+    function onSuccess(json, status, xhr) {
+        var translatedcode = json['code'];
         if (translatedcode) {
-            showCode(translatedcode);
+            markCompiled(files);
             try {
                 transok = true;
                 loadModuleAsString(translatedcode, onTranslation);
@@ -692,23 +795,25 @@ function translateCode(code, modcode, doShowCode, onTranslation) {
                 showErrors(errs, true);
             }
         }
-    };
+    }
+    function onError(xhr, status, err) {
+        transok = false;
+        printError("An error occurred while compiling your code:");
+        printError("--- " + (err?err:status));
+    }
+    
     jQuery.ajax('translate', {
-        cache:false, type:'POST',
-        dataType:'json',
-        timeout:20000,
-        beforeSend:startSpinner,
-        complete:stopSpinner,
-        success:compileHandler,
-        error:function(xhr, status, err) {
-            transok = false;
-            alert("An error occurred while compiling your code: " + err?err:status);
-        },
-        contentType:'application/x-www-form-urlencoded; charset=UTF-8',
-        data:{
-            module:modcode,
-            ceylon:code
-        }
+        cache: false, type:'POST',
+        dataType: 'json',
+        timeout: 20000,
+        beforeSend: startSpinner,
+        complete: stopSpinner,
+        success: onSuccess,
+        error: onError,
+        contentType: 'application/json; charset=utf-8',
+        data: JSON.stringify({
+            files: files
+        })
     });
 }
 
@@ -737,11 +842,6 @@ function loadModuleAsString(src, func) {
             }
         );
     }
-}
-
-// Sends the given code to the server for compilation and it successful, runs the resulting js.
-function runCode(code, modcode) {
-  translateCode(code, modcode, false, afterTranslate);
 }
 
 // This function is called if compilation runs OK
@@ -793,25 +893,14 @@ function stop() {
 	}
 }
 
-// Sets the code for the editor(s)
-function setEditorSources(src, modsrc) {
-    $("#fullscript").prop('disabled', false);
-    $("#imports").prop('disabled', false);
-    if (modsrc && modsrc != "") {
-        showModuleEditor();
-        setModuleCode(unwrapModule(modsrc));
-        setEditCode(unwrapCode(src));
-    } else {
-        hideModuleEditor();
-        setModuleCode("// Add module imports here");
-        setEditCode(unwrapCode(src));
-    }
+function handleEditCode(key) {
+    checkForChangesAndRun(function() {
+        editCode(key);
+    });
 }
 
 // Retrieves the specified example from the editor, along with its hover docs.
 function editCode(key) {
-    // Make sure we don't do anything until we have an editor
-    if (!editor) return false;
     // Retrieve code
     live_tc.status=2;
     jQuery.ajax('hoverdoc?key='+key, {
@@ -823,7 +912,7 @@ function editCode(key) {
         contentType:'application/x-www-form-urlencoded; charset=UTF-8',
         success:function(json, status, xhr) {
             doReset();
-            setEditorSourcesFromGist(json);
+            setEditorSourcesFromGist(json.files);
         },
         error:function(xhr, status, err) {
             printError("Error retrieving example '" + key + "': " + (err?err:status));
@@ -832,10 +921,16 @@ function editCode(key) {
     });
 }
 
+function handleEditGist(key) {
+    checkForChangesAndRun(function() {
+        editGist(key);
+    });
+}
+
 // Retrieves the specified code from GitHub
 function editGist(key) {
     function onSuccess(gist) {
-        setEditorSourcesFromGist(gist.data);
+        setEditorSourcesFromGist(gist.data.files);
         selectGist(gist);
     }
     function onError(xhr, status, err) {
@@ -843,8 +938,6 @@ function editGist(key) {
         live_tc.clear();
     }
     
-    // Make sure we don't do anything until we have an editor
-    if (!editor) return false;
     // Retrieve code
     live_tc.status=2;
     github.gist(key).fetch({
@@ -853,26 +946,247 @@ function editGist(key) {
     });
 }
 
-function setEditorSourcesFromGist(json) {
-    var src, modsrc;
-    for (var key in json.files) {
-        if (json.files.hasOwnProperty(key)) {
-            if (key == "module.ceylon") {
-                modsrc = json.files[key].content;
-            } else if (key.endsWith(".ceylon")) {
-                src = json.files[key].content;
-            }
+// Sets the code for the editor(s) from the given object
+function setEditorSourcesFromGist(files) {
+    clearOutput();
+    deleteEditors();
+    var cnt = 0;
+    var firstFile, firstCeylonFile, firstEditModeFile;
+    $.each(files, function(index, item) {
+        if (firstFile == null && editorAccepts(index) != null) {
+            firstFile = index;
         }
+        if (firstEditModeFile == null && editorMode(index) != null) {
+            firstEditModeFile = index;
+        }
+        if (firstCeylonFile == null && index.endsWith(".ceylon")) {
+            firstCeylonFile = index;
+        }
+        if (compilerAccepts(index)) {
+            cnt++;
+        }
+        if (editorAccepts(index)) {
+            addSourceEditor(index, item.content);
+        }
+    });
+    var selectFile = firstCeylonFile || firstEditModeFile || firstFile;
+    if (selectFile != null) {
+        selectEditor(editorId(selectFile));
     }
-    setEditorSources(src, modsrc);
+    buttonCheck("advanced", (cnt > 1));
+    clearEditorDirtyStates();
+    updateMenuState();
 }
 
-function getEditCode() {
-    return wrapCode(editor.getValue());
+// Creates a new editor with the given name and source
+function addSourceEditor(name, src) {
+    var editor = createEditor(name);
+    setEditorCode(editor.ceylonId, src);
 }
 
-function getModuleCode() {
-    return wrapModule(modeditor.getValue());
+function editorId(name) {
+    return "editor_" + name.replace(".", "_");
+}
+
+function editorAccepts(name) {
+    return editorMode(name) != null
+            || name.endsWith(".txt");
+}
+
+function compilerAccepts(name) {
+    return name.endsWith(".ceylon")
+            || name.endsWith(".js");
+}
+
+function editorMode(name) {
+    if (name.endsWith(".ceylon")) {
+        return "ceylon";
+    } else if (name.endsWith(".js")) {
+        return "javascript";
+    } else if (name.endsWith(".md")) {
+        return "markdown";
+    } else {
+        return undefined;
+    }
+}
+
+function createTab(newid, name, template) {
+    w2ui["editortabs"].add({ id: newid, caption: name });
+    var tabTemplate = $("#" + template);
+    var newTabContent = tabTemplate.clone();
+    newTabContent[0].id = newid;
+    $("#editorspane").append(newTabContent);
+}
+
+function createEditor(name) {
+    var newid = editorId(name);
+    createTab(newid, name, 'editor-template');
+    var textarea = $("#" + newid + " textarea")[0];
+    var editor = CodeMirror.fromTextArea(textarea, {
+        mode: editorMode(name),
+        gutters: ["CodeMirror-error-gutter", "CodeMirror-gutter"],
+        lineNumbers: true,
+        indentUnit: 4,
+        matchBrackets: true,
+        styleActiveLine: true,
+        autoCloseBrackets: true,
+        //highlightSelectionMatches: true,
+        extraKeys: {
+            "Ctrl-D": function(cm) { fetchDoc(cm); },
+            "Cmd-D": function(cm) { fetchDoc(cm); },
+            "Ctrl-.": function() { complete(editor); },
+            "Cmd-.": function() { complete(editor); }
+        }
+    });
+    editor.ceylonId = newid;
+    editor.ceylonName = name;
+    editor.on('change', function() {
+        updateEditorDirtyState(editor.ceylonId);
+        live_tc.last = Date.now();
+    });
+    editor.on('cursorActivity', function() {
+        if (closePopups) closePopups();
+        closePopups = undefined;
+    });
+    return editor;
+}
+
+function getEditorDiv(id) {
+    return $("#" + id);
+}
+
+function getEditor(id) {
+    var codemirrordiv = $("#" + id + " > div");
+    if (codemirrordiv.length == 1) {
+        return codemirrordiv[0].CodeMirror;
+    } else {
+        return null;
+    }
+}
+
+function getEditors() {
+    var editors = [];
+    var codemirrordivs = $("#editorspane > div > div");
+    codemirrordivs.each(function(index, item) {
+        editors.push(item.CodeMirror);
+    });
+    return editors;
+}
+
+function selectEditor(id) {
+    w2ui["editortabs"].select(id);
+    $("#editorspane > div").addClass("invis");
+    getEditorDiv(id).removeClass("invis");
+    var editor = getEditor(id);
+    editor.refresh();
+    editor.focus();
+}
+
+function isEditorDirty(id) {
+    var editor = getEditor(id);
+    var src = editor.getValue();
+    var oldsrc = editor.ceylonSavedSource;
+    return (src != oldsrc);
+}
+
+function isEditorRenamed(id) {
+    var editor = getEditor(id);
+    return editor.ceylonSavedName != editor.ceylonName;
+}
+
+function updateEditorDirtyState(id) {
+    var caption = getEditor(id).ceylonName;
+    if (selectedGist != null && isEditorRenamed(id)) {
+        caption = "[" + caption + "]";
+    }
+    if (isEditorDirty(id)) {
+        caption = "*" + caption;
+    }
+    w2ui["editortabs"].set(id, { caption: caption });
+}
+
+function clearEditorDirtyStates() {
+    var editors = getEditors();
+    $.each(editors, function(index, editor) {
+        editor.ceylonSavedName = editor.ceylonName;
+        editor.ceylonSavedSource = editor.getValue();
+        updateEditorDirtyState(editor.ceylonId);
+    });
+    fileDeleted = false;
+}
+
+// Returns true is any of the editors is dirty or if
+// a file has been deleted since the last save
+function isAnyEditorDirty() {
+    var dirty = fileDeleted;
+    var editors = getEditors();
+    $.each(editors, function(index, editor) {
+        dirty = dirty || isEditorDirty(editor.ceylonId);
+    });
+    return dirty;
+}
+
+var oldfiles;
+
+function markCompiled(files) {
+    oldfiles = JSON.stringify(files);
+}
+
+function shouldCompile(files) {
+    return JSON.stringify(files) != oldfiles;
+}
+
+function selectedEditorId() {
+    // First test is because w2ui keeps returning the previous
+    // active state when all tabs have been deleted
+    return (w2ui["editortabs"].tabs.length > 0) ? w2ui["editortabs"].active : null;
+}
+
+function focusSelectedEditor() {
+    var id = selectedEditorId();
+    if (id != null) {
+        getEditor(id).focus();
+    }
+}
+
+function getEditorCode(id) {
+    var editor = getEditor(id);
+    var src = editor.getValue();
+    if (editor.ceylonName.endsWith(".ceylon")) {
+        return (id == editorId("module.ceylon")) ? wrapModule(src) : wrapCode(src);
+    } else {
+        return src;
+    }
+}
+
+function setEditorCode(id, src) {
+    if (src != getEditorCode(id)) {
+        var editor = getEditor(id);
+        if (editor.ceylonName.endsWith(".ceylon")) {
+            src = (id == editorId("module.ceylon")) ? unwrapModule(src) : unwrapCode(src);
+        }
+        editor.setValue(src);
+        editor.ceylonSavedSource = src;
+    }
+}
+
+function deleteEditors() {
+    live_tc.clear();
+    $("#editorspane").empty();
+    var tabs = w2ui["editortabs"].tabs;
+    // WARNING: do NOT change this to $.each(tabs, ...) !
+    $(tabs).each(function(index, item) {
+        w2ui["editortabs"].remove(item.id);
+    });
+}
+
+function checkForChangesAndRun(func) {
+    if (isAnyEditorDirty()) {
+        w2confirm("This will discard any changes! Are you sure you want to continue?")
+            .yes(func);
+    } else {
+        func();
+    }
 }
 
 var wrappedTag = "//$webrun_wrapped\n";
@@ -943,52 +1257,26 @@ function isWrapped(code) {
     return code.toString().trimLeft().startsWith(wrappedTag);
 }
 
-function setEditCode(src) {
-	if (src != getEditCode()) {
-		clearOutput();
-	    clearEditMarkers();
-	    editor.setValue(src);
-	    editor.focus();
-        live_tc.clear();
-	}
-}
-
-function setModuleCode(src) {
-    if (src != getModuleCode()) {
-        clearOutput();
-        clearEditMarkers();
-        modeditor.setValue(src);
-        modeditor.focus();
-        live_tc.clear();
-    }
-}
-
-// Puts the specified text in the result element.
-function showCode(code) {
-    var result = document.getElementById("result");
-    result.innerText = code;
-    return false;
-}
-
 function doReset() {
     clearGist();
-    oldcode = "";
-    oldmodcode = "";
     clearOutput();
     clearEditMarkers();
 }
 
 // Clears all error markers and hover docs.
 function clearEditMarkers() {
-    editor.clearGutter('CodeMirror-error-gutter');
-    for (var i=0; i<markers.length;i++) {
-        markers[i].clear();
-    }
-    markers=[];
-    for (var i=0; i<bindings.length;i++) {
-        jQuery(bindings[i]).unbind('mouseenter mouseleave');
-    }
-    bindings=[];
+    var editors = getEditors();
+    $.each(editors, function(index, editor) {
+        editor.clearGutter('CodeMirror-error-gutter');
+        for (var i=0; i<markers.length;i++) {
+            markers[i].clear();
+        }
+        markers=[];
+        for (var i=0; i<bindings.length;i++) {
+            jQuery(bindings[i]).unbind('mouseenter mouseleave');
+        }
+        bindings=[];
+    });
 }
 
 function clearLangModOutputState() {
@@ -1013,7 +1301,7 @@ function clearOutput() {
     if (clear) {
         clear();
     }
-    editor.focus();
+    focusSelectedEditor();
 }
 
 function printOutputLine(txt) {
@@ -1111,8 +1399,8 @@ function fetchDoc(cm) {
         success:docHandler,
         error:function(xhr,status,err){
             transok=false;
-            alert("An error occurred while retrieving documentation for your code: " + err?err:status);
             live_tc.status=1;
+            w2alert("An error occurred while retrieving documentation for your code: " + err?err:status, "Error");
         },
         contentType:'application/x-www-form-urlencoded; charset=UTF-8',
         data:{
@@ -1120,6 +1408,56 @@ function fetchDoc(cm) {
             ceylon:code,
             r: cursor.line+2,
             c: cursor.ch-1
+        }
+    });
+}
+
+function w2prompt(msg, label, value, title, onClose, onValidate) {
+    onValidate = onValidate || function() { return true; }
+    if (w2ui.promptform) {
+        w2ui.promptform.destroy();
+    }
+    $().w2form({
+        name: 'promptform',
+        style: 'border: 0px; background-color: transparent;',
+        formHTML: 
+            '<div class="w2ui-page page-0">'+
+            '    <div class="w2ui-field w2ui-centered">'+
+            '        <p id="w2prompt_msg" style="font-size: 120%">' + msg + '</p><br><br>' +
+            '        <label id="w2prompt_label">' + label + ':</label>'+
+            '        <div>'+
+            '           <input name="value" type="text" maxlength="100" style="width: 250px"/>'+
+            '        </div>'+
+            '    </div>'+
+            '</div>'+
+            '<div class="w2ui-buttons">'+
+            '    <button class="btn" name="ok">Ok</button>'+
+            '    <button class="btn" name="cancel">Cancel</button>'+
+            '</div>',
+        fields: [
+            { field: 'value', type: 'text', required: true },
+        ],
+        record: { 
+            value: value,
+        },
+        actions: {
+            "ok": function () {
+                if (this.validate().length == 0 && onValidate(w2ui.promptform)) {
+                    w2popup.close();
+                    onClose(w2ui.promptform.get("value").el.value);
+                }
+            },
+            "cancel": function () { w2popup.close(); onClose(null); },
+        }
+    });
+    w2popup.open({
+        title: title,
+        body: '<div id="form" style="width: 100%; height: 100%;"></div>',
+        modal: true,
+        onOpen: function (event) {
+            event.onComplete = function () {
+                $('#w2ui-popup #form').w2render('promptform');
+            }
         }
     });
 }

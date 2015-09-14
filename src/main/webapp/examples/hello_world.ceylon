@@ -7,8 +7,8 @@ print("Hello world!");
 String str = "world";
 print("Hello ``str``!");
 
-// Click "Run" below to run the program.
+// Click "Run" above to run the program.
 // It is converted to JavaScript and runs directly in your browser!
 
-// Select a sample on the right to load it into this editor.
+// Also try the other examples in the list on the right
 }

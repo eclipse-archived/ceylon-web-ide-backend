@@ -20,6 +20,8 @@
     <script type="text/javascript" src="scripts/codemirror.js" charset="utf-8"></script>
     <script type="text/javascript" src="scripts/autocomplete.js" charset="utf-8"></script>
     <script type="text/javascript" src="scripts/mode/ceylon/ceylon.js" charset="utf-8"></script>
+    <script type="text/javascript" src="scripts/mode/javascript/javascript.js" charset="utf-8"></script>
+    <script type="text/javascript" src="scripts/mode/markdown/markdown.js" charset="utf-8"></script>
     <script type="text/javascript" src="scripts/active-line.js" charset="utf-8"></script>
     <script type="text/javascript" src="scripts/closebrackets.js" charset="utf-8"></script>
     <!--script type="text/javascript" src="scripts/match-highlighter.js" charset="utf-8"></script-->
@@ -82,13 +84,9 @@
 
 <div id="core-page">
 
-    <div id="edit_module_div" class="invis codeeditor">
-        <textarea id="edit_module"></textarea>
-    </div>
-    <div id="edit_ceylon_div" class="codeeditor">
-        <textarea id="edit_ceylon"></textarea>
-    </div>
-    
+    <div id="editortabs"></div>
+    <div id="editorspane"></div>
+
         <div class="invis">
             <span class="alignRight"><input type="checkbox" id="fullscript" onclick="toggleFullScript()" disabled/>full script&nbsp;&nbsp;
             <input type="checkbox" id="imports" onclick="toggleImports()" disabled/>imports</span>
@@ -116,6 +114,10 @@
     
 </div> <!--  core-page -->
 
+<!-- template for creating new editors -->
+<div id="editor-template" class="codeeditor invis"><textarea></textarea></div>
+
+<!-- output window -->    
 <div id="output"><iframe id="outputframe" src="runner.jsp"></iframe></div>
 
 <div id="sidebar" class="trompon ceylonblock">
@@ -127,25 +129,25 @@
         <a id="yrcodemore" class="invis" href="#" onCLick="">more...</a>
         <h3 id="news">Try out a sample:</h3>
         <ol>
-        <li class="news_entry"><a href="#" onClick="return editCode('hello_world')">Hello World</a></li>
-        <li class="news_entry"><a href="#" onClick="return editCode('basics')">Basics</a></li>
-        <li class="news_entry"><a href="#" onClick="return editCode('null_and_union')">Null values and union types</a></li>
-        <li class="news_entry"><a href="#" onClick="return editCode('conditions')">Conditions and assertions</a></li>
-        <li class="news_entry"><a href="#" onClick="return editCode('classes_and_functions')">Classes and functions 1</a></li>
-        <li class="news_entry"><a href="#" onClick="return editCode('interfaces')">Interfaces and mixin inheritance</a></li>
-        <li class="news_entry"><a href="#" onClick="return editCode('classes_and_functions2')">Classes and functions 2</a></li>
-        <li class="news_entry"><a href="#" onClick="return editCode('collections')">Collections and sequence comprehensions</a></li>
-        <li class="news_entry"><a href="#" onClick="return editCode('named_arguments')">Named argument syntax</a></li>
-        <li class="news_entry"><a href="#" onClick="return editCode('generics')">Type parameters</a></li>
-        <li class="news_entry"><a href="#" onClick="return editCode('switch1')">Enumerations and the switch statement</a></li>
-        <li class="news_entry"><a href="#" onClick="return editCode('interop')">Interoperability</a></li>
-        <li class="news_entry"><a href="#" onClick="return editCode('request')">Interoperability 2</a></li>
-        <li class="news_entry"><a href="#" onClick="return editCode('dynints')">Dynamic interfaces</a></li>
-        <li class="news_entry"><a href="#" onClick="return editCode('operators')">Operator polymorphism</a></li>
-        <li class="news_entry"><a href="#" onClick="return editCode('metamodel')">Type-safe Metamodel</a></li>
-        <li class="news_entry"><a href="#" onClick="return editCode('game_of_life')">Game of Life</a></li>
-        <li class="news_entry"><a href="#" onClick="return editCode('importtest1')">Simple Import Test</a></li>
-        <li class="news_entry"><a href="#" onClick="return editCode('importtest2')">Advanced Import Test</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditCode('hello_world')">Hello World</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditCode('basics')">Basics</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditCode('null_and_union')">Null values and union types</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditCode('conditions')">Conditions and assertions</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditCode('classes_and_functions')">Classes and functions 1</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditCode('interfaces')">Interfaces and mixin inheritance</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditCode('classes_and_functions2')">Classes and functions 2</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditCode('collections')">Collections and sequence comprehensions</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditCode('named_arguments')">Named argument syntax</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditCode('generics')">Type parameters</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditCode('switch1')">Enumerations and the switch statement</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditCode('interop')">Interoperability</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditCode('request')">Interoperability 2</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditCode('dynints')">Dynamic interfaces</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditCode('operators')">Operator polymorphism</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditCode('metamodel')">Type-safe Metamodel</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditCode('game_of_life')">Game of Life</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditCode('importtest1')">Simple Import Test</a></li>
+        <li class="news_entry"><a href="#" onClick="return handleEditCode('importtest2')">Advanced Import Test</a></li>
         </ol>
     </div>
 </div>

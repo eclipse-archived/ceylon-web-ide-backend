@@ -1,7 +1,10 @@
 package com.redhat.ceylon.js.util;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 
@@ -52,37 +55,25 @@ public class CompilerUtils {
      * If a single script gets passed we create our own empty `module.ceylon` script
      * with the given module name.
      * If the given module name is `null` the default name "web_ide_script" will be used.
-     * When several scripts get passed the first one will be assumed to be the
-     * module descriptor.
      */
-    public static ScriptFile createScriptSource(String modName, String script, String... scripts) {
-        // If we have a "script" we just add it as the first element of the "scripts" array
-        // (this is all just to make the usage if this method a bit easier, it's better to
-        // have a bit more complexity here instead of at all the call sites)
-        if (script != null) {
-            if (scripts != null && scripts.length > 0) {
-                String[] tmp = new String[scripts.length + 1];
-                tmp[0] = script;
-                System.arraycopy(scripts, 0, tmp, 1, scripts.length);
-                scripts = tmp;
-            } else {
-                scripts = new String[] {script};
-            }
+    @SuppressWarnings("unchecked")
+    public static ScriptFile createScriptSource(Map<String, Object> data) {
+        String modName = (String)data.get("modName");
+        Map<String, Object> jsonFiles = (Map<String, Object>)data.get("files");
+        int size = jsonFiles.size();
+        boolean hasModuleDescriptor = jsonFiles.containsKey("module.ceylon");
+        ScriptFile[] files = new ScriptFile[hasModuleDescriptor ? size : size + 1];
+        int cnt = 0;
+        for (String fileName : jsonFiles.keySet()) {
+            Map<String, Object> jsonFile = (Map<String, Object>)jsonFiles.get(fileName);
+            String script = (String)jsonFile.get("content");
+            files[cnt] = new ScriptFile(fileName, script);
+            cnt++;
         }
-        // First we create an array holding the scripts themselves
-        ScriptFile[] files;
-        if (scripts.length > 1) {
-            files = new ScriptFile[scripts.length];
-            files[0] = new ScriptFile("module.ceylon", scripts[0]);
-            for (int i=1; i < scripts.length; i++) {
-                files[i] = new ScriptFile("SCRIPT" + i + ".ceylon", scripts[i]);
-            }
-        } else {
-            files = new ScriptFile[] {
-                    CompilerUtils.MODULE_FILE,
-                    new ScriptFile("SCRIPT.ceylon", scripts[0])
-            };
+        if (!hasModuleDescriptor) {
+            files[size] = CompilerUtils.MODULE_FILE;
         }
+        
         // Make sure we have a module name
         if (modName == null) {
             modName = "web_ide_script";
@@ -96,4 +87,20 @@ public class CompilerUtils {
         return new ScriptFile("ROOT", files);
     }
 
+    /**
+     * JavaScript files just get copied directly to the output
+     * @throws IOException
+     */
+    @SuppressWarnings("unchecked")
+    public static void writeJSSources(Writer out, Map<String, Object> data) throws IOException {
+        Map<String, Object> jsonFiles = (Map<String, Object>)data.get("files");
+        for (String fileName : jsonFiles.keySet()) {
+            if (fileName.endsWith(".js")) {
+                Map<String, Object> jsonFile = (Map<String, Object>)jsonFiles.get(fileName);
+                String script = (String)jsonFile.get("content");
+                out.write(script);
+                out.write('\n');
+            }
+        }
+    }
 }

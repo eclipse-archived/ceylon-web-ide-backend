@@ -2,7 +2,11 @@ package com.redhat.ceylon.js.repl;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
+
+import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -46,8 +50,14 @@ public class TestDoc {
 
     @Test
     public void testDocumentation() {
-        TypeChecker tc = new TypeCheckerBuilder().verbose(false).addSrcDirectory(
-                CompilerUtils.createScriptSource(null, code)).getTypeChecker();
+        HashMap<String, Object> file = new HashMap<String, Object>();
+        file.put("content", code);
+        HashMap<String, Object> files = new HashMap<String, Object>();
+        files.put("test.ceylon", file);
+        HashMap<String, Object> obj = new HashMap<String, Object>();
+        obj.put("files", files);
+        JSONObject json = (JSONObject)JSONValue.parse(JSONObject.toJSONString(obj));
+        TypeChecker tc = new TypeCheckerBuilder().verbose(false).addSrcDirectory(CompilerUtils.createScriptSource(json)).getTypeChecker();
         tc.process();
         final Declaration d = DocUtils.findDeclaration(tc, row, col);
         Assert.assertNotNull("Can't find declaration", d);

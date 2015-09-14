@@ -1,6 +1,9 @@
 package com.redhat.ceylon.js.util;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +32,19 @@ public final class ServletUtils {
 
     public static void sendResponse(final List<String> arr, HttpServletResponse response) throws IOException {
         sendStringResponse(JSONArray.toJSONString(arr), "application/json", response);
+    }
+
+    public static String readAll(InputStream is) throws IOException {
+        StringBuilder buf = new StringBuilder();
+        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        String s;
+        while ((s = br.readLine()) != null) {
+            if (buf.length() > 0) {
+                buf.append('\n');
+            }
+           buf.append(s);
+        }
+        return buf.toString();
     }
 
 }

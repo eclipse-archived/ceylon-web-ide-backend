@@ -1,6 +1,7 @@
 package com.redhat.ceylon.js.repl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +11,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import net.minidev.json.JSONValue;
 
 import com.redhat.ceylon.compiler.js.DocVisitor;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
@@ -37,13 +40,16 @@ public class AutocompleteServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        try {
-            String modName = req.getParameter("modname");
-            String modScript = req.getParameter("module");
-            String[] scripts = req.getParameterValues("ceylon");
-            final int locRow = Integer.parseInt(req.getParameter("r"));
-            final int locCol = Integer.parseInt(req.getParameter("c"));
-            final ScriptFile src = CompilerUtils.createScriptSource(modName, modScript, scripts);
+        try (InputStream is = req.getInputStream()) {
+            // Reading GitHub's response
+            String json = ServletUtils.readAll(is);
+            // Extracting the access token
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>)JSONValue.parseKeepingOrder(json);
+            final ScriptFile src = CompilerUtils.createScriptSource(result);
+            
+            final int locRow = Integer.parseInt((String)result.get("r"));
+            final int locCol = Integer.parseInt((String)result.get("c"));
             //Run the typechecker
             TypeChecker typeChecker = CompilerUtils.getTypeChecker(req.getServletContext(), src);
             typeChecker.process();

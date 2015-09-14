@@ -1,9 +1,7 @@
 package com.redhat.ceylon.js.repl;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -18,6 +16,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
+
+import com.redhat.ceylon.js.util.ServletUtils;
 
 @WebServlet("/githubauth")
 public class GitHubAuthServlet extends HttpServlet {
@@ -65,7 +65,7 @@ public class GitHubAuthServlet extends HttpServlet {
                 con.setAllowUserInteraction(false);
                 try (InputStream is = con.getInputStream()) {
                     // Reading GitHub's response
-                    String json = readAll(is);
+                    String json = ServletUtils.readAll(is);
                     log.info("GitHubAuth: response: " + json);
                     // Extracting the access token
                     JSONObject result = (JSONObject)JSONValue.parse(json);
@@ -88,19 +88,6 @@ public class GitHubAuthServlet extends HttpServlet {
         out.print("window.close();");
         out.print("</script></body></html>");
         out.flush();
-    }
-    
-    private String readAll(InputStream is) throws IOException {
-        StringBuilder buf = new StringBuilder();
-        BufferedReader br = new BufferedReader(new InputStreamReader(is));
-        String s;
-        while ((s = br.readLine()) != null) {
-            if (buf.length() > 0) {
-                buf.append('\n');
-            }
-           buf.append(s);
-        }
-        return buf.toString();
     }
 
 }
