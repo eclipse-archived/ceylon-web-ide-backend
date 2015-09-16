@@ -10,8 +10,13 @@ var fileDeleted;
 var spinCount = 0;
 var closePopups = undefined;
 
+var defaultImportSrc = "" + 
+		"module web_ide_script \"1.0.0\" {\n" + 
+		"    // Add module imports here\n" + 
+		"}";
+
 var live_tc = {
-    _timeout: 5000,
+    _timeout: 3000,
     _status: "disabled",
     _last: Date.now(),
     _files: null,
@@ -44,7 +49,7 @@ var live_tc = {
     },
     done: function() {
         live_tc.update();
-        live_tc.postpone();
+        live_tc.pause();
     },
     now: function() {
         live_tc._files = {};
@@ -133,6 +138,8 @@ $(document).ready(function() {
                             doReset();
                         } else if (event.target == "share") {
                             shareSource();
+                        } else if (event.target == "advanced") {
+                            handleAdvanced(event);
                         } else if (event.target == "help") {
                             handleHelpClick();
                         } else if (event.target == "connect") {
@@ -186,7 +193,7 @@ $(document).ready(function() {
         //Code is directly in URL
         var key = location.href.slice(location.href.indexOf('?src=')+5);
         var code = decodeURIComponent(key);
-        setEditorSources(codePrefix + code + codePostfix);
+        editSource(code);
     } else if (location.href.indexOf('?sample=') > 0) {
         //Retrieve code from the given sample id
         var key = location.href.slice(location.href.indexOf('?sample=')+8);
@@ -270,33 +277,33 @@ function handleGitHubDisconnect() {
 function setupLiveTypechecker() {
     window.setInterval(function(){
         if (live_tc.shouldTypecheck()) {
-          console.log("typechecking...");
-          live_tc.pause();
-          $.ajax('translate', {
-              cache: false,
-              type: 'POST',
-              dataType: 'json',
-              timeout: 5000,
-              success: function(json, status, xhr) {
-                  live_tc.done();
-                  var errs = json['errors'];
-                  if (errs && !$.isEmptyObject(errs)) {
-                      showErrors(errs, false);
-                  } else {
-                      clearEditMarkers();
-                  }
-              },
-              error: function() {
-                  live_tc.done();
-              },
-              contentType: 'application/json; charset=UTF-8',
-              data: JSON.stringify({
-                  tc: 1,
-                  files: getCompilerFiles()
-              })
-          });
+            console.log("typechecking...");
+            live_tc.pause();
+            $.ajax('translate', {
+                cache: false,
+                type: 'POST',
+                dataType: 'json',
+                timeout: 5000,
+                success: function(json, status, xhr) {
+                    live_tc.done();
+                    var errs = json['errors'];
+                    if (errs && !$.isEmptyObject(errs)) {
+                        showErrors(errs, false);
+                    } else {
+                        clearEditMarkers();
+                    }
+                },
+                error: function() {
+                    live_tc.done();
+                },
+                contentType: 'application/json; charset=UTF-8',
+                data: JSON.stringify({
+                    tc: 1,
+                    files: getCompilerFiles()
+                })
+            });
         }
-      },1000);
+    },1000);
 }
 
 // autocompletion support
@@ -339,12 +346,14 @@ function selectGist(gist) {
     selectedGist = gist;
     selectedExample = null;
     updateMenuState();
+    updateAdvancedState();
 }
 
 // Clear selected Gist
 function clearGist(gist) {
     selectedGist = null;
     updateMenuState();
+    updateAdvancedState();
 }
 
 // Asks the user for a name and stores the code on the server
@@ -530,10 +539,33 @@ function handleNewFile() {
 }
 
 function newFile(name) {
-    var editor = createEditor(name);
+    var editor;
+    if (name.endsWith(".ceylon") && countCeylonFiles() >= 1) {
+        // We switch to advanced mode
+        applyAdvanced();
+        if (name == "module.ceylon") {
+            // The switch to advanced mode will have created
+            // this editor already, we just select it
+            editor = getEditor(editorId("module.ceylon"));
+        } else {
+            // We still need to create the new file
+            editor = createEditor(name);
+        }
+    } else {
+        editor = createEditor(name);
+    }
     selectEditor(editor.ceylonId);
     updateEditorDirtyState(editor.ceylonId);
     updateMenuState();
+    updateAdvancedState();
+    return editor;
+}
+
+function newModuleFile() {
+    var neweditor = addSourceEditor("module.ceylon", defaultImportSrc);
+    markWrapperReadOnly(neweditor.ceylonId);
+    updateEditorDirtyState(neweditor.ceylonId);
+    return neweditor;
 }
 
 function handleRenameFile() {
@@ -550,6 +582,8 @@ function renameFile(id, newname) {
     if (oldname != newname) {
         editor.ceylonName = newname;
         updateEditorDirtyState(id);
+        updateMenuState();
+        updateAdvancedState();
     }
 }
 
@@ -595,29 +629,31 @@ function handleDeleteFile() {
     var editor = getEditor(selectedEditorId());
     w2confirm("Do you really want to delete this file '" + editor.ceylonName + "'?")
         .yes(function() {
-            deleteFile();
+            deleteFile(selectedEditorId());
         });
 }
 
 // Deletes a file
-function deleteFile() {
+function deleteFile(id) {
     fileDeleted = true;
-    var id = selectedEditorId();
     // Remove the editor
     var div = getEditorDiv(id);
-    $(div).remove();
-    // Remove the tab
-    var index = w2ui["editortabs"].get(id, true);
-    w2ui["editortabs"].remove(id);
-    // Select a new tab
-    var editors = getEditors();
-    var cnt = editors.length;
-    if (cnt > 0) {
-        var newindex = (index < cnt) ? index : cnt - 1;
-        var newid = editors[newindex].ceylonId;
-        selectEditor(newid);
-    } else {
-        updateMenuState();
+    if (div.length > 0) {
+        div.remove();
+        // Remove the tab
+        var index = w2ui["editortabs"].get(id, true);
+        w2ui["editortabs"].remove(id);
+        // Select a new tab
+        var editors = getEditors();
+        var cnt = editors.length;
+        if (cnt > 0) {
+            var newindex = (index < cnt) ? index : cnt - 1;
+            var newid = editors[newindex].ceylonId;
+            selectEditor(newid);
+        } else {
+            updateMenuState();
+        }
+        updateAdvancedState();
     }
 }
 
@@ -753,6 +789,91 @@ function buttonCheck(name, check) {
 
 function buttonIsChecked(name, check) {
     return w2ui["all"].get("main").toolbar.get(name).checked;
+}
+
+// Returns the number of Ceylon files that are available
+// (this incldues module descriptors)
+function countCeylonFiles() {
+    var cnt = 0;
+    var editors = getEditors();
+    $.each(editors, function(index, editor) {
+        if (editor.ceylonName.endsWith(".ceylon")) {
+            cnt++;
+        }
+    });
+    return cnt;
+}
+
+function handleAdvanced(event) {
+    if (isAdvancedModeActive()) {
+        undoAdvanced();
+    } else {
+        checkForChangesAndRun(function() {
+            applyAdvanced();
+        }, function() {
+            buttonCheck("advanced", false);
+        });
+    }
+}
+
+function applyAdvanced() {
+    var editors = getEditors();
+    $.each(editors, function (index, editor) {
+        editor.execCommand("selectAll");
+        editor.execCommand("indentMore");
+        var src = wrapCode(getEditorCode(editor.ceylonId, true), true);
+        setEditorCode(editor.ceylonId, src, true);
+        clearEditorDirtyState(editor.ceylonId);
+    });
+    newModuleFile();
+    live_tc.ready();
+    updateMenuState();
+    // Need to put this in a timeout or the update
+    // of the button conflicts with the w2 framework
+    window.setTimeout(function () {
+        updateAdvancedState();
+    }, 1);
+}
+
+function undoAdvanced() {
+    var tmp = fileDeleted;
+    deleteFile(editorId("module.ceylon"));
+    fileDeleted = tmp;
+    var editors = getEditors();
+    $.each(editors, function (index, editor) {
+        var src = unwrapCode(getEditorCode(editor.ceylonId, true), true);
+        setEditorCode(editor.ceylonId, src, true);
+        editor.execCommand("selectAll");
+        editor.execCommand("indentLess");
+        editor.setCursor(0);
+        clearEditorDirtyState(editor.ceylonId);
+    });
+    updateMenuState();
+    // Need to put this in a timeout or the update
+    // of the button conflicts with the w2 framework
+    window.setTimeout(function () {
+        updateAdvancedState();
+    }, 1);
+}
+
+function isCodeUnwrappable() {
+    var canUnwrap = true;
+    var cnt = countCeylonFiles();
+    var editors = getEditors();
+    $.each(editors, function(index, editor) {
+        if (editor.ceylonName.endsWith(".ceylon")
+                && editor.ceylonName != "module.ceylon") {
+            canUnwrap = canUnwrap && isWrapped(editor.getValue(), true);
+        }
+    });
+    return canUnwrap && cnt <= 2;
+}
+
+function updateAdvancedState() {
+    var cnt = countCeylonFiles();
+    var advanced = (cnt > 1) || (cnt == 1) && isCodeUnwrappable();
+    buttonCheck("advanced", advanced);
+    buttonEnable("advanced", !advanced || ((cnt == 1) || (cnt == 2)) && isCodeUnwrappable());
 }
 
 function isAdvancedModeActive() {
@@ -1009,7 +1130,7 @@ function editExample(key) {
         },
         error:function(xhr, status, err) {
             printError("Error retrieving example '" + key + "': " + (err?err:status));
-            live_tc.done();
+            live_tc.ready();
         }
     });
 }
@@ -1029,7 +1150,7 @@ function editGist(key) {
     }
     function onError(xhr, status, err) {
         printError("Error retrieving Gist '" + key + "': " + (err?err:status));
-        live_tc.done();
+        live_tc.ready();
     }
     
     // Retrieve code
@@ -1046,37 +1167,52 @@ function setEditorSourcesFromGist(files) {
     clearOutput();
     deleteEditors();
     var cnt = 0;
+    var hasModule = false;
+    var hasWrapped = false;
     var firstFile, firstCeylonFile, firstEditModeFile;
     $.each(files, function(index, item) {
-        if (firstFile == null && editorAccepts(index) != null) {
-            firstFile = index;
-        }
-        if (firstEditModeFile == null && editorMode(index) != null) {
-            firstEditModeFile = index;
-        }
-        if (firstCeylonFile == null && index.endsWith(".ceylon")) {
-            firstCeylonFile = index;
-        }
-        if (index.endsWith(".ceylon")) {
-            cnt++;
-        }
         if (editorAccepts(index)) {
+            if (firstFile == null) {
+                firstFile = index;
+            }
+            if (firstEditModeFile == null && editorMode(index) != null) {
+                firstEditModeFile = index;
+            }
+            if (firstCeylonFile == null && index.endsWith(".ceylon")) {
+                firstCeylonFile = index;
+            }
+            if (index.endsWith(".ceylon")) {
+                cnt++;
+            }
+            if (index == "module.ceylon") {
+                hasModule = true;
+            }
+            if (index.endsWith(".ceylon")
+                    && (index != "module.ceylon")
+                    && isWrapped(item.content)) {
+                hasWrapped = true;
+            }
             addSourceEditor(index, item.content);
         }
     });
+    if (!hasModule && (cnt > 1 || cnt == 1 && !hasWrapped)) {
+        newModuleFile();
+    }
     var selectFile = firstCeylonFile || firstEditModeFile || firstFile;
     if (selectFile != null) {
         selectEditor(editorId(selectFile));
     }
-    buttonCheck("advanced", (cnt > 1));
     clearEditorDirtyStates();
     updateMenuState();
+    updateAdvancedState();
+    live_tc.ready();
 }
 
 // Creates a new editor with the given name and source
 function addSourceEditor(name, src) {
     var editor = createEditor(name);
     setEditorCode(editor.ceylonId, src);
+    return editor;
 }
 
 function editorId(name) {
@@ -1145,6 +1281,8 @@ function createEditor(name) {
     });
     editor.on('change', function() {
         updateEditorDirtyState(editor.ceylonId);
+        updateMenuState();
+        updateAdvancedState();
         live_tc.postpone();
     });
     editor.on('cursorActivity', function() {
@@ -1206,7 +1344,13 @@ function updateEditorDirtyState(id) {
         caption = "*" + caption;
     }
     w2ui["editortabs"].set(id, { caption: caption });
-    updateMenuState();
+}
+
+function clearEditorDirtyState(id) {
+    var editor = getEditor(id);
+    editor.ceylonSavedName = editor.ceylonName;
+    editor.ceylonSavedSource = editor.getValue();
+    updateEditorDirtyState(editor.ceylonId);
 }
 
 function clearEditorDirtyStates() {
@@ -1216,6 +1360,8 @@ function clearEditorDirtyStates() {
         editor.ceylonSavedSource = editor.getValue();
         updateEditorDirtyState(editor.ceylonId);
     });
+    updateMenuState();
+    updateAdvancedState();
     fileDeleted = false;
 }
 
@@ -1237,7 +1383,7 @@ function markCompiled(files) {
 }
 
 function shouldCompile(files) {
-    return JSON.stringify(files) != oldfiles;
+    return JSON.stringify(files) != oldfiles || !transok;
 }
 
 function selectedEditorId() {
@@ -1253,25 +1399,42 @@ function focusSelectedEditor() {
     }
 }
 
-function getEditorCode(id) {
+function getEditorCode(id, noWrap) {
     var editor = getEditor(id);
     var src = editor.getValue();
-    if (editor.ceylonName.endsWith(".ceylon")) {
-        return (id == editorId("module.ceylon")) ? wrapModule(src) : wrapCode(src);
+    var name = editor.ceylonName;
+    if (name.endsWith(".ceylon") && (name != "module.ceylon") && !noWrap) {
+        return wrapCode(src);
     } else {
         return src;
     }
 }
 
-function setEditorCode(id, src) {
+function setEditorCode(id, src, noUnwrap) {
     if (src != getEditorCode(id)) {
         var editor = getEditor(id);
-        if (editor.ceylonName.endsWith(".ceylon")) {
-            src = (id == editorId("module.ceylon")) ? unwrapModule(src) : unwrapCode(src);
+        var name = editor.ceylonName;
+        if (name.endsWith(".ceylon") && (name != "module.ceylon") && !noUnwrap) {
+            if (isWrapped(src)) {
+                src = unwrapCode(src);
+            }
         }
         editor.setValue(src);
         editor.ceylonSavedSource = src;
     }
+}
+
+// This will mark the first and final lines of the editor read-only
+function markWrapperReadOnly(id) {
+    var editor = getEditor(id);
+    // First line
+    var opts1 = { readOnly:true, inclusiveLeft:true, inclusiveRight:false, atomic: true };
+    editor.markText({line:0,ch:0}, {line:1,ch:0}, opts1);
+    editor.addLineClass(0, "background", "cm-locked");
+    // Last line
+    var opts2 = { readOnly:true, inclusiveLeft:false, inclusiveRight:true, atomic: true };
+    editor.markText({line:editor.lineCount() - 1,ch:0}, {line:editor.lineCount(),ch:0}, opts2);
+    editor.addLineClass(editor.lineCount() - 1, "background", "cm-locked");
 }
 
 function deleteEditors() {
@@ -1284,56 +1447,42 @@ function deleteEditors() {
     live_tc.done();
 }
 
-function checkForChangesAndRun(func) {
+function checkForChangesAndRun(func, negative) {
     if (isAnyEditorDirty()) {
-        w2confirm("This will discard any changes! Are you sure you want to continue?")
-            .yes(func);
+        var conf = w2confirm("This will discard any changes! Are you sure you want to continue?");
+        conf.yes(func);
+        if (negative != null) {
+            conf.no(negative);
+        }
     } else {
         func();
     }
 }
 
 var wrappedTag = "//$webrun_wrapped\n";
-var codePrefix = wrappedTag + "shared void run(){\n";
+var codePrefix = "shared void run(){\n";
 var codePostfix = "\n}";
 
-function wrapCode(code) {
+function wrapCode(code, noTag) {
 	if (isFullScript(code) == false) {
-        return codePrefix + code + codePostfix;
+	    if (noTag) {
+	        return codePrefix + code + codePostfix;
+	    } else {
+	        return wrappedTag + codePrefix + code + codePostfix;
+	    }
 	} else {
 		return code;
 	}
 }
 
-function unwrapCode(code) {
-    if (isWrapped(code)) {
-        $('#fullscript').prop('checked', false);
+function unwrapCode(code, allowMissingTag) {
+    if (isWrapped(code, allowMissingTag)) {
         code = code.trim();
-        return code.substring(codePrefix.length, code.length - codePostfix.length);
+        var len = 0;
+        len += (code.startsWith(wrappedTag)) ? wrappedTag.length : 0;
+        len += (code.startsWith(codePrefix, len)) ? codePrefix.length : 0;
+        return code.substring(len, code.length - codePostfix.length);
     } else {
-        $('#fullscript').prop('checked', true);
-        return code;
-    }
-}
-
-var modulePrefix = wrappedTag + "module web_ide_script \"1.0.0\" {\n";
-var modulePostfix = "\n}";
-
-function wrapModule(code) {
-    if (isFullModule(code) == false) {
-        return modulePrefix + code + modulePostfix;
-    } else {
-        return code;
-    }
-}
-
-function unwrapModule(code) {
-    if (isWrapped(code)) {
-        $('#fullmodule').prop('checked', false);
-        code = code.trim();
-        return code.substring(modulePrefix.length, code.length - modulePostfix.length);
-    } else {
-        $('#fullmodule').prop('checked', true);
         return code;
     }
 }
@@ -1342,12 +1491,10 @@ function isFullScript() {
     return buttonIsChecked("advanced");
 }
 
-function isFullModule() {
-    return false;
-}
-
-function isWrapped(code) {
-    return code.toString().trimLeft().startsWith(wrappedTag);
+function isWrapped(code, allowMissingTag) {
+    var src = code.toString().trimLeft();
+    return src.startsWith(wrappedTag + codePrefix)
+        || allowMissingTag && src.startsWith(codePrefix);
 }
 
 function doReset() {
@@ -1490,7 +1637,7 @@ function fetchDoc(cm) {
         success:docHandler,
         error:function(xhr,status,err){
             transok = false;
-            live_tc.done();
+            live_tc.ready();
             w2alert("An error occurred while retrieving documentation for your code: " + err?err:status, "Error");
         },
         contentType:'application/x-www-form-urlencoded; charset=UTF-8',

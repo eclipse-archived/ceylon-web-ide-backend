@@ -687,3 +687,7 @@ input.bubble-button {
     padding: 1px;
     padding-left: 2px;
 }
+
+.cm-locked {
+    background-color: rgb(255, 243, 243);
+}
