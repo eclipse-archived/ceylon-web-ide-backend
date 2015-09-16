@@ -77,6 +77,14 @@ $(document).ready(function() {
         debug: false
     });
 
+    // Prevent default CTRL+D and CTRL+S used by the editor
+    $(document).bind('keydown', function(e) {
+        if(e.ctrlKey && (e.which == 68 || e.which == 83)) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
     // Create the main layout
     var pstyle = 'border: 1px solid #dfdfdf; padding: 0px;';
     var zstyle = 'border: 1px solid #dfdfdf; padding: 0px; overflow: hidden;';
@@ -217,7 +225,7 @@ function getMenuItems() {
         { text: 'Delete File', id: 'deletefile', icon: 'fa fa-file-excel-o', disabled: (cnt == 0) },
         { text: 'New Project...', id: 'new', icon: 'fa fa-files-o' },
         { text: 'Rename Project...', id: 'rename', icon: 'fa fa-pencil', disabled: !hasGist, hidden: !isGitHubConnected() },
-        { text: 'Save All', id: 'saveall', icon: 'fa fa-floppy-o', disabled: !hasGist || (cnt == 0), hidden: !isGitHubConnected() },
+        { text: 'Save All', id: 'saveall', icon: 'fa fa-floppy-o', disabled: !hasGist || (cnt == 0) || !isAnyEditorDirty(), hidden: !isGitHubConnected() },
         { text: 'Save As...', id: 'saveas', icon: 'fa fa-files-o', disabled: (cnt == 0) },
         { text: 'Delete Project', id: 'delete', icon: 'fa fa-trash-o', disabled: !hasGist, hidden: !isGitHubConnected() },
     ];
@@ -455,6 +463,17 @@ function renameGist(title) {
         success: onSuccess,
         error: onError
     });
+}
+
+// This is a safe way to call `updateSource()` if you
+// don't know if that action is allowed at this moment
+function handleSaveAll() {
+    if (selectedGist != null
+            && (getEditors().length > 0)
+            && isAnyEditorDirty()
+            && isGitHubConnected()) {
+        updateSource();
+    }
 }
 
 // Updates the code of an existing Gist on the server
@@ -1106,6 +1125,7 @@ function createEditor(name) {
         autoCloseBrackets: true,
         //highlightSelectionMatches: true,
         extraKeys: {
+            "Ctrl-S": function(cm) { handleSaveAll(); },
             "Ctrl-D": function(cm) { fetchDoc(cm); },
             "Cmd-D": function(cm) { fetchDoc(cm); },
             "Ctrl-.": function() { complete(editor); },
@@ -1184,6 +1204,7 @@ function updateEditorDirtyState(id) {
         caption = "*" + caption;
     }
     w2ui["editortabs"].set(id, { caption: caption });
+    updateMenuState();
 }
 
 function clearEditorDirtyStates() {
