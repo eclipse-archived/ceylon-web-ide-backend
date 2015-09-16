@@ -4,11 +4,8 @@ import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -19,19 +16,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.minidev.json.JSONValue;
 
-import com.redhat.ceylon.compiler.js.util.Options;
 import com.redhat.ceylon.compiler.js.JsCompiler;
 import com.redhat.ceylon.compiler.js.util.JsOutput;
+import com.redhat.ceylon.compiler.js.util.Options;
 import com.redhat.ceylon.compiler.loader.ModelEncoder;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
-import com.redhat.ceylon.compiler.typechecker.analyzer.UsageWarning;
-import com.redhat.ceylon.model.typechecker.model.Module;
-import com.redhat.ceylon.compiler.typechecker.parser.RecognitionError;
-import com.redhat.ceylon.compiler.typechecker.tree.AnalysisMessage;
-import com.redhat.ceylon.compiler.typechecker.tree.Message;
 import com.redhat.ceylon.js.util.CompilerUtils;
-import com.redhat.ceylon.js.util.DocUtils;
 import com.redhat.ceylon.js.util.ServletUtils;
+import com.redhat.ceylon.model.typechecker.model.Module;
 
 /**
  * Servlet implementation class CeylonToJSTranslationServlet
@@ -80,7 +72,6 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             }
             out.write("var ex$={};");
             //Run the compiler, if typechecker returns no errors.
-            Collection<Message> messages = null;
             if (typeChecker.getErrors() == 0 && !typecheckOnly) {
                 JsCompiler compiler = new JsCompiler(typeChecker, opts) {
                     @Override
@@ -97,27 +88,16 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
                 //Don't rely on result flag, check errors instead
                 compiler.generate();
                 //Put errors in this list
-                messages = compiler.listErrors();
-            } else {
-                messages = new CollectErrorVisitor(typeChecker).listErrors();
             }
             
-            // Collect any errors
-            List<Map<String,Object>> errs = new ArrayList<Map<String,Object>>(messages.size());
-            for (Message err : messages) {
-                if (!(err instanceof UsageWarning)) {
-                    Map<String, Object> encoded = encodeError(err);
-                    if (!errs.contains(encoded)) {
-                        errs.add(encodeError(err));
-                    }
-                }
-            }
-            
+            CollectErrorVisitor cev = new CollectErrorVisitor(typeChecker);
             final Map<String,Object> resp = new HashMap<String, Object>(1);
-            if (errs.isEmpty() && !typecheckOnly) {
+            if (cev.errors() == 0 && !typecheckOnly) {
                 resp.put("code", out.toString());
-            } else {
+            }
+            if (cev.errors() > 0 || cev.warnings() > 0) {
                 //Print out errors
+                Map<String, Object> errs = cev.json();
                 resp.put("errors", errs);
             }
             ServletUtils.sendResponse(resp, response);
@@ -132,20 +112,4 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
                     String.format("Service error: %s", msg)), response);
 	    }
 	}
-	
-    private Map<String,Object> encodeError(Message err) {
-        final Map<String,Object> errmsg = new HashMap<String, Object>(4);
-        errmsg.put("msg", err.getMessage());
-        errmsg.put("code", err.getCode());
-        if (err instanceof AnalysisMessage) {
-            AnalysisMessage msg = (AnalysisMessage)err;
-            errmsg.putAll(DocUtils.locationToMap(msg.getTreeNode().getLocation(), true));
-        } else if (err instanceof RecognitionError) {
-            RecognitionError rec = (RecognitionError)err;
-            String pos = String.format("%d:%d", rec.getLine(), rec.getCharacterInLine());
-            errmsg.putAll(DocUtils.locationToMap(pos, true));
-        }
-        return errmsg;
-    }
-
 }

@@ -680,3 +680,5 @@ input.bubble-button {
 .w2ui-overlay table.w2ui-drop-menu span.w2ui-icon {
     padding-top: 2px;
 }
+
+.cm-s-default .cm-warning {background-image:url(../images/underline.gif); background-position:bottom; background-repeat:repeat-x;}

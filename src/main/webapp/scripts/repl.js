@@ -8,27 +8,50 @@ var selectedGist;
 var selectedExample;
 var fileDeleted;
 var spinCount = 0;
+var closePopups = undefined;
+
 var live_tc = {
-    status: 0,
-    last: Date.now(),
+    _timeout: 5000,
+    _status: "disabled",
+    _last: Date.now(),
+    _files: null,
     shouldTypecheck: function(files) {
-        return status == 1
-            && files != live_tc.files
-            && Date.now()-live_tc.last > 5000;
-    },
-    update: function(files) {
-        if (files) {
-            live_tc.files = files;
+        if (live_tc._status == "ready" && Date.now()-live_tc._last > live_tc._timeout) {
+            var files = getCompilerFiles();
+            if (!$.isEmptyObject(files)) {
+                return JSON.stringify(files) != live_tc._files;
+            }
         }
-        live_tc.last = Date.now();
+        return false;
     },
-    clear: function() {
-        live_tc.status = 1;
-        live_tc.last = Date.now();
-        live_tc.files = getCompilerFiles();
+    ready: function() {
+        live_tc._status = "ready";
+    },
+    pause: function() {
+        live_tc._status = "paused";
+    },
+    disable: function() {
+        live_tc._status = "disabled";
+    },
+    update: function() {
+        live_tc._files = JSON.stringify(getCompilerFiles());
+    },
+    postpone: function(files) {
+        live_tc._last = Date.now();
+        if (live_tc._status != "disabled") {
+            live_tc.ready();
+        }
+    },
+    done: function() {
+        live_tc.update();
+        live_tc.postpone();
+    },
+    now: function() {
+        live_tc._files = {};
+        live_tc._last = Date.now() - live_tc._timeout - 1;
+        live_tc.ready();
     }
 };
-var closePopups = undefined;
 
 var pagepath = window.location.pathname;
 if (!pagepath.endsWith("/")) {
@@ -238,30 +261,31 @@ function handleGitHubDisconnect() {
 
 function setupLiveTypechecker() {
     window.setInterval(function(){
-        var files = getCompilerFiles();
-        if (live_tc.shouldTypecheck(files)) {
+        if (live_tc.shouldTypecheck()) {
           console.log("typechecking...");
-          live_tc.files = files;
-          live_tc.last = Date.now();
+          live_tc.pause();
           $.ajax('translate', {
               cache: false,
               type: 'POST',
               dataType: 'json',
               timeout: 5000,
               success: function(json, status, xhr) {
+                  live_tc.done();
                   var errs = json['errors'];
-                  if (errs && errs.length>0) {
+                  if (errs && !$.isEmptyObject(errs)) {
                       showErrors(errs, false);
                   } else {
                       clearEditMarkers();
                   }
               },
-              error: function() {},
-              contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
-              data: {
+              error: function() {
+                  live_tc.done();
+              },
+              contentType: 'application/json; charset=UTF-8',
+              data: JSON.stringify({
                   tc: 1,
-                  files: files
-              }
+                  files: getCompilerFiles()
+              })
           });
         }
       },1000);
@@ -271,7 +295,7 @@ function setupLiveTypechecker() {
 function complete(editor){
 	var cursor = editor.getCursor();
     var code = getEditCode();
-    live_tc.status=4;
+    live_tc.pause();
     jQuery.ajax('assist', {
         cache:false, type:'POST',
         dataType:'json',
@@ -279,6 +303,7 @@ function complete(editor){
         beforeSend: startSpinner,
         success: function(json, status, xhr){
         	stopSpinner();
+            live_tc.ready();
         	CodeMirror.autocomplete(editor, function(){
         		return {
         			list: json.opts,
@@ -289,7 +314,7 @@ function complete(editor){
         },
         error:function(xhr, status, err) {
         	stopSpinner();
-            live_tc.status=1;
+            live_tc.ready();
             w2alert("An error occurred while compiling your code: " + err?err:status, "Error");
         },
         contentType:'application/x-www-form-urlencoded; charset=UTF-8',
@@ -334,7 +359,6 @@ function saveSource(title) {
     }
     function onError(xhr, status, err) {
         printError("Error storing Gist: " + (err?err:status));
-        live_tc.clear();
     }
     var files = getGistFiles();
     var data = {
@@ -422,7 +446,6 @@ function renameGist(title) {
     }
     function onError(xhr, status, err) {
         printError("Error storing Gist: " + (err?err:status));
-        live_tc.clear();
     }
     var data = {
         "description": "Ceylon Web Runner: " + title,
@@ -444,7 +467,6 @@ function updateSource() {
     }
     function onError(xhr, status, err) {
         printError("Error storing Gist: " + (err?err:status));
-        live_tc.clear();
     }
     var files = getGistFiles();
     var data = {
@@ -710,6 +732,14 @@ function buttonCheck(name, check) {
     }
 }
 
+function buttonIsChecked(name, check) {
+    return w2ui["all"].get("main").toolbar.get(name).checked;
+}
+
+function isAdvancedModeActive() {
+    return buttonIsChecked("advanced");
+}
+
 // Starts the spinner indicating the system is busy.
 // These can be nested, so if you call this function
 // twice you will also need to call `stopSpinner()`
@@ -727,38 +757,6 @@ function stopSpinner() {
         buttonEnable("run", true);
         buttonSetIcon("run", "fa fa-play");
         focusSelectedEditor();
-    }
-}
-
-var transok;
-
-// Shows the specified error messages in the code
-function showErrors(errors, print) {
-    if (print) {
-        printError("Code contains errors:");
-    }
-    for (var i=0; i < errors.length;i++) {
-        var err = errors[i];
-        var errmsg = escapeHtml(err.msg);
-        if (print) {
-            printError((err.from.line-1) + ":" + err.from.ch + " - " + err.msg);
-        }
-        if (err.from.line > 1) {
-            //This is to add a marker in the gutter
-            var img = document.createElement('img');
-            img.title=errmsg;
-            img.src="images/error.gif";
-            editor.setGutterMarker(err.from.line-2, 'CodeMirror-error-gutter', img);
-            //This is to modify the style (underline or whatever)
-            var marker=editor.markText({line:err.from.line-2,ch:err.from.ch},{line:err.to.line-2,ch:err.to.ch+1},{className:"cm-error"});
-            markers.push(marker);
-            //And this is for the hover
-            var estilo="ceylonerr_r"+err.from.line+"_c"+err.from.ch;
-            marker=editor.markText({line:err.from.line-2,ch:err.from.ch},{line:err.to.line-2,ch:err.to.ch+1},{className:estilo});
-            markers.push(marker);
-            bindings.push(estilo);
-            jQuery("."+estilo).attr("title", errmsg);
-        }
     }
 }
 
@@ -794,6 +792,8 @@ function translate(onTranslation) {
     }
 }
 
+var transok;
+
 // Wraps the contents of the editor in an object and sends it to the server for compilation.
 // On response, executes the script if compilation was OK, otherwise shows errors.
 // In any case it sets the hover docs if available.
@@ -802,8 +802,9 @@ function translateCode(files, onTranslation) {
     transok = false;
     
     function onSuccess(json, status, xhr) {
+        live_tc.done();
         var translatedcode = json['code'];
-        if (translatedcode) {
+        if (translatedcode != null) {
             markCompiled(files);
             try {
                 transok = true;
@@ -812,15 +813,15 @@ function translateCode(files, onTranslation) {
                 printError("Translated code could not be parsed:");
                 printError("--- " + err);
             }
-        } else {
-            //errors?
-            var errs = json['errors'];
-            if (errs) {
-                showErrors(errs, true);
-            }
+        }
+        //errors?
+        var errs = json['errors'];
+        if (errs && !$.isEmptyObject(errs)) {
+            showErrors(errs, translatedcode == null);
         }
     }
     function onError(xhr, status, err) {
+        live_tc.done();
         transok = false;
         printError("An error occurred while compiling your code:");
         printError("--- " + (err?err:status));
@@ -838,6 +839,50 @@ function translateCode(files, onTranslation) {
         data: JSON.stringify({
             files: files
         })
+    });
+}
+
+//Shows the specified error messages in the code
+function showErrors(errors, print) {
+    if (print) {
+        printError("Code contains errors:");
+    }
+    $.each(errors, function(fileName, fileErrors) {
+        $.each(fileErrors, function(index, err) {
+            var errmsg = escapeHtml(err.msg);
+            var linedelta = isAdvancedModeActive() ? 0 : 2;
+            if (print) {
+                var msg = ((err.tp == "w") ? "warning: " : "error: ") + err.msg +
+                        (err.from.line-linedelta) + ":" + err.from.ch + " of " + fileName;
+                printError(msg);
+            }
+            if (err.from.line > 1) {
+                var editor = getEditor(editorId(fileName));
+                if (editor != null) {
+                    //This is to add a marker in the gutter
+                    var underlineStyle;
+                    var img = document.createElement('img');
+                    img.title = errmsg;
+                    if (err.tp == "w") {
+                        img.src = "images/warning.png";
+                        underlineStyle = "cm-warning";
+                    } else {
+                        img.src = "images/error.gif";
+                        underlineStyle = "cm-error";
+                    }
+                    editor.setGutterMarker(err.from.line-linedelta-1, 'CodeMirror-error-gutter', img);
+                    //This is to modify the style (underline or whatever)
+                    var marker = editor.markText({line:err.from.line-linedelta-1,ch:err.from.ch},{line:err.to.line-linedelta-1,ch:err.to.ch+1},{className:underlineStyle});
+                    markers.push(marker);
+                    //And this is for the hover
+                    var estilo = "ceylonerr_r"+err.from.line+"_c"+err.from.ch;
+                    marker = editor.markText({line:err.from.line-linedelta-1,ch:err.from.ch},{line:err.to.line-linedelta-1,ch:err.to.ch+1},{className:estilo});
+                    markers.push(marker);
+                    bindings.push(estilo);
+                    jQuery("."+estilo).attr("title", errmsg);
+                }
+            }
+        });
     });
 }
 
@@ -926,7 +971,7 @@ function handleEditExample(key) {
 // Retrieves the specified example from the editor, along with its hover docs.
 function editExample(key) {
     // Retrieve code
-    live_tc.status=2;
+    live_tc.pause();
     jQuery.ajax('hoverdoc?key='+key, {
         cache:true,
         dataType:'json',
@@ -939,10 +984,11 @@ function editExample(key) {
             selectedExample = key;
             selectedGist = null;
             setEditorSourcesFromGist(json.files);
+            live_tc.now();
         },
         error:function(xhr, status, err) {
             printError("Error retrieving example '" + key + "': " + (err?err:status));
-            live_tc.clear();
+            live_tc.done();
         }
     });
 }
@@ -958,14 +1004,15 @@ function editGist(key) {
     function onSuccess(gist) {
         setEditorSourcesFromGist(gist.data.files);
         selectGist(gist);
+        live_tc.now();
     }
     function onError(xhr, status, err) {
         printError("Error retrieving Gist '" + key + "': " + (err?err:status));
-        live_tc.clear();
+        live_tc.done();
     }
     
     // Retrieve code
-    live_tc.status=2;
+    live_tc.pause();
     github.gist(key).fetch({
         success: onSuccess,
         error: onError
@@ -989,7 +1036,7 @@ function setEditorSourcesFromGist(files) {
         if (firstCeylonFile == null && index.endsWith(".ceylon")) {
             firstCeylonFile = index;
         }
-        if (compilerAccepts(index)) {
+        if (index.endsWith(".ceylon")) {
             cnt++;
         }
         if (editorAccepts(index)) {
@@ -1071,12 +1118,12 @@ function createEditor(name) {
         // Hack to mak sure that clicking in the editor correctly
         // closes all popups and deselects their associated buttons
         $().w2overlay();
-        w2ui.all_main_toolbar.uncheck("menu");
-        w2ui.all_main_toolbar.uncheck("connected");
+        buttonCheck("menu", false);
+        buttonCheck("connected", false);
     });
     editor.on('change', function() {
         updateEditorDirtyState(editor.ceylonId);
-        live_tc.last = Date.now();
+        live_tc.postpone();
     });
     editor.on('cursorActivity', function() {
         if (closePopups) closePopups();
@@ -1205,13 +1252,13 @@ function setEditorCode(id, src) {
 }
 
 function deleteEditors() {
-    live_tc.clear();
     $("#editorspane").empty();
     var tabs = w2ui["editortabs"].tabs;
     // WARNING: do NOT change this to $.each(tabs, ...) !
     $(tabs).each(function(index, item) {
         w2ui["editortabs"].remove(item.id);
     });
+    live_tc.done();
 }
 
 function checkForChangesAndRun(func) {
@@ -1269,22 +1316,11 @@ function unwrapModule(code) {
 }
 
 function isFullScript() {
-    return $('#fullscript').prop('checked');
-}
-
-var prevFullScriptState = false;
-function toggleFullScript() {
-    // TODO try to wrap/unwrap code in editor
-    prevFullScriptState = isFullScript();
+    return buttonIsChecked("advanced");
 }
 
 function isFullModule() {
-    return $('#fullmodule').prop('checked');
-}
-
-function toggleFullModule() {
-    // TODO try to wrap/unwrap code in editor
-    prevFullScriptState = isFullScript();
+    return buttonIsChecked("advanced");
 }
 
 function isWrapped(code) {
@@ -1395,10 +1431,9 @@ function fetchDoc(cm) {
         help.parentNode.removeChild(help);
     }
     var docHandler = function(json, status, xhr) {
-        live_tc.status=1;
+        live_tc.ready();
         if (json && json['name']) {
             if (json['doc']) {
-
                 var pos = editor.cursorCoords(true);
                 var help = document.createElement("div");
                 help.className = "help infront";
@@ -1410,7 +1445,6 @@ function fetchDoc(cm) {
                 jQuery("body").click(close);
                 closePopups=close;
                 help.focus();
-
             } else if (json['name'].startsWith("ceylon.language::")) {
                 var tok = json['name'].substring(17);
                 if (json['type'] === 'interface' || json['type'] === 'class') {
@@ -1423,7 +1457,7 @@ function fetchDoc(cm) {
         }
     };
     var cursor = editor.getCursor();
-    live_tc.status=3;
+    live_tc.pause();
     jQuery.ajax('hoverdoc', {
         cache:false, type:'POST',
         dataType:'json',
@@ -1432,8 +1466,8 @@ function fetchDoc(cm) {
         complete:stopSpinner,
         success:docHandler,
         error:function(xhr,status,err){
-            transok=false;
-            live_tc.status=1;
+            transok = false;
+            live_tc.done();
             w2alert("An error occurred while retrieving documentation for your code: " + err?err:status, "Error");
         },
         contentType:'application/x-www-form-urlencoded; charset=UTF-8',
