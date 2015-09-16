@@ -681,4 +681,9 @@ input.bubble-button {
     padding-top: 2px;
 }
 
-.cm-s-default .cm-warning {background-image:url(../images/underline.gif); background-position:bottom; background-repeat:repeat-x;}
+.cm-s-default .cm-warning {background-image:url(images/underlinew.gif); background-position:bottom; background-repeat:repeat-x;}
+
+.CodeMirror-gutter-elt img.iconerror {
+    padding: 1px;
+    padding-left: 2px;
+}

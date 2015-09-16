@@ -884,9 +884,11 @@ function showErrors(errors, print) {
                     img.title = errmsg;
                     if (err.tp == "w") {
                         img.src = "images/warning.png";
+                        img.className = "iconwarning"
                         underlineStyle = "cm-warning";
                     } else {
                         img.src = "images/error.gif";
+                        img.className = "iconerror"
                         underlineStyle = "cm-error";
                     }
                     editor.setGutterMarker(err.from.line-linedelta-1, 'CodeMirror-error-gutter', img);
