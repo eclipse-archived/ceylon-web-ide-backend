@@ -1341,7 +1341,7 @@ function isFullScript() {
 }
 
 function isFullModule() {
-    return buttonIsChecked("advanced");
+    return false;
 }
 
 function isWrapped(code) {
