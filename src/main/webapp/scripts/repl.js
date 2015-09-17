@@ -220,6 +220,7 @@ $(document).ready(function() {
     } else {
         editExample('hello_world');
         window.outputReady = function() {
+            window.outputReady = null;
             startSpinner();
         	runCode('print("Ceylon ``language.version`` \\"``language.versionName``\\"");');
             stopSpinner();
@@ -985,13 +986,18 @@ function translate(onTranslation) {
     }
 }
 
+function translateCode(files, onTranslation) {
+    resetOutput(function() {
+        doTranslateCode(files, onTranslation);
+    });
+}
+
 var transok;
 
 // Wraps the contents of the editor in an object and sends it to the server for compilation.
 // On response, executes the script if compilation was OK, otherwise shows errors.
 // In any case it sets the hover docs if available.
-function translateCode(files, onTranslation) {
-    clearOutput();
+function doTranslateCode(files, onTranslation) {
     transok = false;
     
     function onSuccess(json, status, xhr) {
@@ -1134,6 +1140,11 @@ function executeCode() {
         outputwin.run();
     } else {
         printError("Entry point 'run()' not found!")
+        printError("When advanced mode is active your code should contain a method like:");
+        printError("");
+        printError("shared void run() {");
+        printError("    // Your program starts here");
+        printError("}");
     }
 }
 
@@ -1615,6 +1626,14 @@ function clearEditMarkers() {
         $(bindings[i]).unbind('mouseenter mouseleave');
     }
     bindings=[];
+}
+
+function resetOutput(onReady) {
+    window.outputReady = function() {
+        window.outputReady = null;
+        onReady();
+    }
+    $("#outputframe")[0].contentWindow.location.reload();
 }
 
 function clearLangModOutputState() {
