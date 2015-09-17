@@ -77,7 +77,7 @@ $(document).ready(function() {
     
     var auth;
     var token = $.cookie("githubauth");
-    if (token != null) {
+    if (token != null && !("noauth" in uriparams)) {
         auth = new Authentication({
             type: "oauth",
             token: token
@@ -727,6 +727,10 @@ function getGistName(gist) {
 
 // Shows the user's list of available Gists
 function listGists(page) {
+    if (github.config.authentication == null) {
+        return;
+    }
+    
     var first = (page == null || page == 1);
     
     function showGist(gist) {
