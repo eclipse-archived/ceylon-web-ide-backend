@@ -691,3 +691,13 @@ input.bubble-button {
 .cm-locked {
     background-color: rgb(255, 243, 243);
 }
+
+td.haswarnings div.w2ui-tab:after {
+    content: url('images/warning.png');
+    padding-left: 4px;
+}
+
+td.haserrors div.w2ui-tab:after {
+    content: url('images/error.gif');
+    padding-left: 4px;
+}

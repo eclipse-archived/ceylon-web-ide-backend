@@ -10,10 +10,15 @@ var fileDeleted;
 var spinCount = 0;
 var closePopups = undefined;
 
-var defaultImportSrc = "" + 
-		"module web_ide_script \"1.0.0\" {\n" + 
-		"    // Add module imports here\n" + 
-		"}";
+var wrappedTag = "//$webrun_wrapped\n";
+var codePrefix = "shared void run(){\n";
+var codePostfix = "\n}";
+
+var modulePrefix = "module web_ide_script \"1.0.0\" {\n";
+var modulePostfix = "\n}";
+var defaultImportSrc = modulePrefix +
+		"    // Add module imports here" + 
+		modulePostfix;
 
 var live_tc = {
     _timeout: 3000,
@@ -286,11 +291,10 @@ function setupLiveTypechecker() {
                 timeout: 5000,
                 success: function(json, status, xhr) {
                     live_tc.done();
+                    clearEditMarkers();
                     var errs = json['errors'];
                     if (errs && !$.isEmptyObject(errs)) {
                         showErrors(errs, false);
-                    } else {
-                        clearEditMarkers();
                     }
                 },
                 error: function() {
@@ -1007,10 +1011,12 @@ function showErrors(errors, print) {
                         img.src = "images/warning.png";
                         img.className = "iconwarning"
                         underlineStyle = "cm-warning";
+                        getEditorTab(editor.ceylonId).addClass("haswarnings");
                     } else {
                         img.src = "images/error.gif";
                         img.className = "iconerror"
                         underlineStyle = "cm-error";
+                        getEditorTab(editor.ceylonId).addClass("haserrors");
                     }
                     editor.setGutterMarker(err.from.line-linedelta-1, 'CodeMirror-error-gutter', img);
                     //This is to modify the style (underline or whatever)
@@ -1021,7 +1027,7 @@ function showErrors(errors, print) {
                     marker = editor.markText({line:err.from.line-linedelta-1,ch:err.from.ch},{line:err.to.line-linedelta-1,ch:err.to.ch+1},{className:estilo});
                     markers.push(marker);
                     bindings.push(estilo);
-                    jQuery("."+estilo).attr("title", errmsg);
+                    $("."+estilo).attr("title", errmsg);
                 }
             }
         });
@@ -1184,15 +1190,16 @@ function setEditorSourcesFromGist(files) {
             if (index.endsWith(".ceylon")) {
                 cnt++;
             }
-            if (index == "module.ceylon") {
-                hasModule = true;
-            }
             if (index.endsWith(".ceylon")
                     && (index != "module.ceylon")
                     && isWrapped(item.content)) {
                 hasWrapped = true;
             }
-            addSourceEditor(index, item.content);
+            var neweditor = addSourceEditor(index, item.content);
+            if (index == "module.ceylon" && isWrappedModule(item.content)) {
+                markWrapperReadOnly(neweditor.ceylonId);
+                hasModule = true;
+            }
         }
     });
     if (!hasModule && (cnt > 1 || cnt == 1 && !hasWrapped)) {
@@ -1296,6 +1303,10 @@ function getEditorDiv(id) {
     return $("#" + id);
 }
 
+function getEditorTab(id) {
+    return $("#tabs_editortabs_tab_" + id);    
+}
+
 function getEditor(id) {
     var codemirrordiv = $("#" + id + " > div");
     if (codemirrordiv.length == 1) {
@@ -1336,6 +1347,12 @@ function isEditorRenamed(id) {
 }
 
 function updateEditorDirtyState(id) {
+    // Setting the tab state resets any classes we might
+    // have added, so we store their states
+    var tab = getEditorTab(id);
+    var hasErr = tab.hasClass("haserrors");
+    var hasWrn = tab.hasClass("haswarnings");
+    
     var caption = getEditor(id).ceylonName;
     if (selectedGist != null && isEditorRenamed(id)) {
         caption = "[" + caption + "]";
@@ -1344,6 +1361,10 @@ function updateEditorDirtyState(id) {
         caption = "*" + caption;
     }
     w2ui["editortabs"].set(id, { caption: caption });
+
+    // We now restore any classes that we found earlier
+    if (hasErr) tab.addClass("haserrors");
+    if (hasWrn) tab.addClass("haswarnings");
 }
 
 function clearEditorDirtyState(id) {
@@ -1459,10 +1480,6 @@ function checkForChangesAndRun(func, negative) {
     }
 }
 
-var wrappedTag = "//$webrun_wrapped\n";
-var codePrefix = "shared void run(){\n";
-var codePostfix = "\n}";
-
 function wrapCode(code, noTag) {
 	if (isFullScript(code) == false) {
 	    if (noTag) {
@@ -1477,7 +1494,6 @@ function wrapCode(code, noTag) {
 
 function unwrapCode(code, allowMissingTag) {
     if (isWrapped(code, allowMissingTag)) {
-        code = code.trim();
         var len = 0;
         len += (code.startsWith(wrappedTag)) ? wrappedTag.length : 0;
         len += (code.startsWith(codePrefix, len)) ? codePrefix.length : 0;
@@ -1492,9 +1508,12 @@ function isFullScript() {
 }
 
 function isWrapped(code, allowMissingTag) {
-    var src = code.toString().trimLeft();
-    return src.startsWith(wrappedTag + codePrefix)
-        || allowMissingTag && src.startsWith(codePrefix);
+    return code.startsWith(wrappedTag + codePrefix)
+        || allowMissingTag && code.startsWith(codePrefix);
+}
+
+function isWrappedModule(code) {
+    return code.startsWith(modulePrefix) && code.endsWith(modulePostfix);
 }
 
 function doReset() {
@@ -1508,15 +1527,18 @@ function clearEditMarkers() {
     var editors = getEditors();
     $.each(editors, function(index, editor) {
         editor.clearGutter('CodeMirror-error-gutter');
-        for (var i=0; i<markers.length;i++) {
-            markers[i].clear();
-        }
-        markers=[];
-        for (var i=0; i<bindings.length;i++) {
-            jQuery(bindings[i]).unbind('mouseenter mouseleave');
-        }
-        bindings=[];
+        var tab = getEditorTab(editor.ceylonId);
+        tab.removeClass("haswarnings");
+        tab.removeClass("haserrors");
     });
+    for (var i=0; i<markers.length;i++) {
+        markers[i].clear();
+    }
+    markers=[];
+    for (var i=0; i<bindings.length;i++) {
+        $(bindings[i]).unbind('mouseenter mouseleave');
+    }
+    bindings=[];
 }
 
 function clearLangModOutputState() {
