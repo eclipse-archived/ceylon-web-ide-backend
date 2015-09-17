@@ -11,7 +11,7 @@ var spinCount = 0;
 var closePopups = undefined;
 
 var wrappedTag = "//$webrun_wrapped\n";
-var codePrefix = "shared void run(){\n";
+var codePrefix = "shared void run() {\n";
 var codePostfix = "\n}";
 
 var modulePrefix = "module web_ide_script \"1.0.0\" {\n";
@@ -124,7 +124,7 @@ $(document).ready(function() {
                         { type: 'button',  id: 'reset',  caption: 'Reset', hint: 'Clear output & errors', icon: 'fa fa-exclamation' },
                         { type: 'button',  id: 'share',  caption: 'Share', hint: 'Share the code on GitHub', icon: 'fa fa-share' },
                         { type: 'break',  id: 'break1' },
-                        { type: 'check',  id: 'advanced',  caption: 'Advanced', hint: 'Enable more complex code constructs', icon: 'fa fa-square-o' },
+                        { type: 'check',  id: 'advanced',  caption: 'Advanced', hint: 'Enable more complex code constructs', icon: 'fa fa-square-o', checkicon: 'fa fa-check-square-o', uncheckicon: 'fa fa-square-o' },
                         { type: 'spacer' },
                         { type: 'button',  id: 'help',  caption: 'Help', hint: 'Help on how this Web IDE works', icon: 'fa fa-question' },
                         { type: 'button',  id: 'connect',  caption: 'Connect', hint: 'Connect to GitHub', icon: 'fa fa-github', hidden: isGitHubConnected() },
@@ -784,10 +784,18 @@ function buttonSetIcon(name, icon) {
 }
 
 function buttonCheck(name, check) {
+    var toolbar = w2ui["all"].get("main").toolbar;
+    var item = toolbar.get(name);
     if (check) {
-        w2ui["all"].get("main").toolbar.check(name);
+        toolbar.check(name);
+        if (item.checkicon) {
+            toolbar.set(name, { icon: item.checkicon });
+        }
     } else {
-        w2ui["all"].get("main").toolbar.uncheck(name);
+        toolbar.uncheck(name);
+        if (item.uncheckicon) {
+            toolbar.set(name, { icon: item.uncheckicon });
+        }
     }
 }
 
@@ -810,13 +818,15 @@ function countCeylonFiles() {
 
 function handleAdvanced(event) {
     if (isAdvancedModeActive()) {
-        undoAdvanced();
-    } else {
         checkForChangesAndRun(function() {
-            applyAdvanced();
+            buttonSetIcon("advanced", "fa fa-square-o");
+            undoAdvanced();
         }, function() {
-            buttonCheck("advanced", false);
-        });
+            buttonCheck("advanced", true);
+        }, ["module.ceylon"]);
+    } else {
+        buttonSetIcon("advanced", "fa fa-check-square-o");
+        applyAdvanced();
     }
 }
 
@@ -827,7 +837,6 @@ function applyAdvanced() {
         editor.execCommand("indentMore");
         var src = wrapCode(getEditorCode(editor.ceylonId, true), true);
         setEditorCode(editor.ceylonId, src, true);
-        clearEditorDirtyState(editor.ceylonId);
     });
     newModuleFile();
     live_tc.ready();
@@ -850,7 +859,6 @@ function undoAdvanced() {
         editor.execCommand("selectAll");
         editor.execCommand("indentLess");
         editor.setCursor(0);
-        clearEditorDirtyState(editor.ceylonId);
     });
     updateMenuState();
     // Need to put this in a timeout or the update
@@ -1387,12 +1395,16 @@ function clearEditorDirtyStates() {
 }
 
 // Returns true is any of the editors is dirty or if
-// a file has been deleted since the last save
-function isAnyEditorDirty() {
+// a file has been deleted since the last save.
+// Can have an optional list of editor ids to check
+// for (by default all editors are checked)
+function isAnyEditorDirty(edids) {
     var dirty = fileDeleted;
     var editors = getEditors();
     $.each(editors, function(index, editor) {
-        dirty = dirty || isEditorDirty(editor.ceylonId);
+        if (edids == null || $.inArray(editor.ceylonName, edids) >= 0) {
+            dirty = dirty || isEditorDirty(editor.ceylonId);
+        }
     });
     return dirty;
 }
@@ -1441,7 +1453,9 @@ function setEditorCode(id, src, noUnwrap) {
             }
         }
         editor.setValue(src);
-        editor.ceylonSavedSource = src;
+        if (!noUnwrap) {
+            editor.ceylonSavedSource = src;
+        }
     }
 }
 
@@ -1458,6 +1472,7 @@ function markWrapperReadOnly(id) {
     editor.addLineClass(editor.lineCount() - 1, "background", "cm-locked");
 }
 
+// Deletes all editors
 function deleteEditors() {
     $("#editorspane").empty();
     var tabs = w2ui["editortabs"].tabs;
@@ -1468,8 +1483,14 @@ function deleteEditors() {
     live_tc.done();
 }
 
-function checkForChangesAndRun(func, negative) {
-    if (isAnyEditorDirty()) {
+// This function checks for dirty editors and will run `func()`
+// immediately if non of them are. Otherwise it will show a
+// question to the user asking if they want to discard the 
+// changes. When affirmative `func()` will be run or 'negative()'
+// otherwise. Can have an optional list of editor ids to check
+// for dirty state (by default all editors are checked)
+function checkForChangesAndRun(func, negative, edids) {
+    if (isAnyEditorDirty(edids)) {
         var conf = w2confirm("This will discard any changes! Are you sure you want to continue?");
         conf.yes(func);
         if (negative != null) {
