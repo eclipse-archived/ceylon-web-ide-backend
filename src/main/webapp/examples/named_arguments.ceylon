@@ -1,5 +1,5 @@
 //$webrun_wrapped
-shared void run(){
+shared void run() {
 void order(String product, Integer count=1, Float discount=0.0,
           {String*} comments={}) {
     String commentStr = ", ".join { for (c in comments) "'``c``'" };

@@ -1,5 +1,5 @@
 //$webrun_wrapped
-shared void run(){
+shared void run() {
 // The following is an error because null is not a String.
 //String s = null;  //ERROR!
 

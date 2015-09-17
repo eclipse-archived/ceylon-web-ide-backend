@@ -1,5 +1,5 @@
 //$webrun_wrapped
-shared void run(){
+shared void run() {
 // The classic "hello world" in Ceylon
 print("Hello world!");
 

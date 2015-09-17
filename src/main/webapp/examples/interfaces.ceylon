@@ -1,5 +1,5 @@
 //$webrun_wrapped
-shared void run(){
+shared void run() {
 "This interface represents a customer of the shop."
 interface Customer {
  

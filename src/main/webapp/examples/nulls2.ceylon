@@ -1,5 +1,5 @@
 //$webrun_wrapped
-shared void run(){
+shared void run() {
 void greet(String? name) {
     print("Hello, ``name else "World"``!");
 }

@@ -1,5 +1,5 @@
 //$webrun_wrapped
-shared void run(){
+shared void run() {
 // Game of Life 2.4
 
 value pwidth = 620;   // Width of drawing area in pixels

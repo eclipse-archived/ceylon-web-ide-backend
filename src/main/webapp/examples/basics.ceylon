@@ -1,5 +1,5 @@
 //$webrun_wrapped
-shared void run(){
+shared void run() {
 // Any object can be converted to a string using ".string".
 // There are no special primitive types, even numbers are objects.
 Integer i = 3;

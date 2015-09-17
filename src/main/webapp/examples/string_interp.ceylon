@@ -1,5 +1,5 @@
 //$webrun_wrapped
-shared void run(){
+shared void run() {
 String interp = " interpolation ";
 String s2 = "to START and END with";
 String s3 = "siht ekil ,";

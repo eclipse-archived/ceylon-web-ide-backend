@@ -1,5 +1,5 @@
 //$webrun_wrapped
-shared void run(){
+shared void run() {
 "You can define a dynamic interface, so you can use
  conformant instances outside of dynamic blocks"
 dynamic DataHolder {

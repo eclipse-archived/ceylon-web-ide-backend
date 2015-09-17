@@ -1,5 +1,5 @@
 //$webrun_wrapped
-shared void run(){
+shared void run() {
 //You can use normal conditions as in any other language
 value nums = 1..10;
 if (nums.size == 10) {

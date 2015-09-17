@@ -1,5 +1,5 @@
 //$webrun_wrapped
-shared void run(){
+shared void run() {
 // Using JavaScript's XMLHttpRequest to connect
 // to a simple web service that returns the time
 // on the server and displays it in the console

@@ -1,5 +1,5 @@
 //$webrun_wrapped
-shared void run(){
+shared void run() {
 // Operators are associated to specific interfaces. A type that
 // satisfies such an interface can be used with the respective
 // operators.

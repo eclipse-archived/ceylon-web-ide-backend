@@ -1,5 +1,5 @@
 //$webrun_wrapped
-shared void run(){
+shared void run() {
 // A constant, read-only sequence of values:
 String[] animals = [ "elephant", "parrot", "giraffe" ];
 String[] none = []; // empty sequence

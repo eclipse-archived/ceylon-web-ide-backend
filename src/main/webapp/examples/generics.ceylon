@@ -1,5 +1,5 @@
 //$webrun_wrapped
-shared void run(){
+shared void run() {
 // Ceylon allows generic types and functions, i.e. they may have
 // type parameters:
 class Generic<Item>(item) {

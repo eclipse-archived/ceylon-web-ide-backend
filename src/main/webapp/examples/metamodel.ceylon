@@ -1,5 +1,5 @@
 //$webrun_wrapped
-shared void run(){
+shared void run() {
 "You can get the metamodel of a class like this"
 value stringType = `String`;
 

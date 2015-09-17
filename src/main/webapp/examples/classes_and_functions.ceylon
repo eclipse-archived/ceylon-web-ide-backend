@@ -1,5 +1,5 @@
 //$webrun_wrapped
-shared void run(){
+shared void run() {
 // Functions use the familiar C/Java syntax:
 Float mean(Float x, Float y) {
     return ((x*x + y*y) / 2) ^ 0.5;

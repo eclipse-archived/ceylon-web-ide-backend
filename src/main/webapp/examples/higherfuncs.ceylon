@@ -1,5 +1,5 @@
 //$webrun_wrapped
-shared void run(){
+shared void run() {
 class SimpleClass() {
     shared String upper(Integer x) {
         return "INT ``x``";

@@ -1,5 +1,5 @@
 //$webrun_wrapped
-shared void run(){
+shared void run() {
 void printIf1(String? s) {
     if (exists s) {
         print(s);
