@@ -3012,7 +3012,7 @@ if (navigator.languages||navigator.userLanguage||navigator.browserLanguage||navi
 properties["user.locale"]=$_String((navigator.languages || [navigator.userLanguage||navigator.browserLanguage||navigator.language])[0]);
 }
 if (navigator.appVersion !== undefined) {
-properties["browser.version"] = $_String(navigator.platform);
+properties["browser.version"] = $_String(navigator.appVersion);
 }
 }
 if (typeof process !== "undefined") {
