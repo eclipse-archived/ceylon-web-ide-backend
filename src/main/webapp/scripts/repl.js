@@ -1032,7 +1032,7 @@ function showErrors(errors, print) {
             var errmsg = escapeHtml(err.msg);
             var linedelta = isAdvancedModeActive() ? 0 : 2;
             if (print) {
-                var msg = ((err.tp == "w") ? "warning: " : "error: ") + err.msg +
+                var msg = ((err.tp == "w") ? "warning: " : "error: ") + err.msg + " " +
                         (err.from.line-linedelta) + ":" + err.from.ch + " of " + fileName;
                 printError(msg);
             }
