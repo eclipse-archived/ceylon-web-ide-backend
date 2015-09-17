@@ -20,6 +20,9 @@ var defaultImportSrc = modulePrefix +
 		"    // Add module imports here" + 
 		modulePostfix;
 
+var uri = new URI();
+var uriparams = uri.search(true);
+
 var live_tc = {
     _timeout: 3000,
     _status: "disabled",
@@ -192,19 +195,16 @@ $(document).ready(function() {
     $('#gistlink').hide();
     $('#deletegist').hide();
 
-    if (location.href.indexOf('?src=') > 0) {
-        //Code is directly in URL
-        var key = location.href.slice(location.href.indexOf('?src=')+5);
-        var code = decodeURIComponent(key);
+    if (uriparams.src != null) {
+        // Code is directly in URL
+        var code = decodeURIComponent(uriparams.src);
         editSource(code);
-    } else if (location.href.indexOf('?sample=') > 0) {
-        //Retrieve code from the given sample id
-        var key = location.href.slice(location.href.indexOf('?sample=')+8);
-        editExample(key);
-    } else if (location.href.indexOf('?gist=') > 0) {
-        //Retrieve code from the given sample id
-        var key = location.href.slice(location.href.indexOf('?gist=')+6);
-        editGist(key);
+    } else if (uriparams.sample != null) {
+        // Retrieve code from the given sample id
+        editExample(uriparams.sample);
+    } else if (uriparams.gist != null) {
+        // Retrieve code from the given sample id
+        editGist(uriparams.gist);
     } else {
         editExample('hello_world');
         window.outputReady = function() {

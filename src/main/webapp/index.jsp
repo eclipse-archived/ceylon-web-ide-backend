@@ -31,6 +31,7 @@
     <script type="text/javascript" src="scripts/jquery-ui-1.11.2.min.js"></script>
     <script type="text/javascript" src="scripts/jquery-cookie-1.4.1.js"></script>
     <script type="text/javascript" src="scripts/w2ui-1.4.3.min.js"></script>
+    <script type="text/javascript" src="scripts/URI.min.js"></script>
     <script type="text/javascript" src="scripts/github.js"></script>
     <script type="text/javascript" src="scripts/repl.js"></script>
     <link rel='stylesheet' type='text/css' href='autocomplete.css'/>
@@ -96,21 +97,6 @@
             <span class="alignRight invis"><input type="checkbox" id="fullmodule" onclick="toggleFullModule()" disabled/>full module</span>
             <div style="clear: both"></div>
         </div>
-        
-    <!--
-    <div style="text-align:center; padding-top:5px; padding-bottom:5px;">
-    <button class="bubble-button has-spinner" id="run_ceylon" name="run_ceylon" onClick="performRun()"><span class="spinner"><i class="icon-spin icon-refresh"> </i></span>Run</button>
-    <button class="bubble-button invis" id="stop_ceylon" name="stop_ceylon" onClick="stop()">Stop</button>
-    <button class="bubble-button" onClick="doReset()">Reset</button>
-    <button class="bubble-button" id="share_src" name="share_src" onClick="shareSource()">Share</button>
-    <button class="bubble-button invis" id="save_src" name="save_src" onClick="saveSource()">Save Code</button>
-    <button class="bubble-button invis" id="update_src" name="update_src" onClick="updateSource()">Update Code</button>
-    <input class="invis" type="text" id="gistname" name="gistname" value="" size="20" oninput="handleGistNameChange(this)">
-    <a class="invis" href="#" id="shareurl" title="Direct link to this page pre-filled with the current code">Link</a>
-    <a class="invis" href="#" target="gistlink" id="gistlink" title="Link to the shared code on GitHub">Gist</a>
-    <a class="invis" href="#" id="deletegist" onClick="deleteGist(); return false;" title="Remove the shared code from GitHub">Delete</a>
-    </div>
-    -->
     
 </div> <!--  core-page -->
 
