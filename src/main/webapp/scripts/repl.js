@@ -1240,9 +1240,11 @@ function setEditorSourcesFromGist(files) {
                 hasWrapped = true;
             }
             var neweditor = addSourceEditor(index, item.content);
-            if (index == "module.ceylon" && isWrappedModule(item.content)) {
-                markWrapperReadOnly(neweditor.ceylonId);
+            if (index == "module.ceylon") {
                 hasModule = true;
+                if (isWrappedModule(item.content)) {
+                    markWrapperReadOnly(neweditor.ceylonId);
+                }
             }
         }
     });
