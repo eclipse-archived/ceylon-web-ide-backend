@@ -701,3 +701,7 @@ td.haserrors div.w2ui-tab:after {
     content: url('images/error.gif');
     padding-left: 4px;
 }
+
+.news_entry.selected {
+    font-weight: bold;
+}

@@ -348,6 +348,7 @@ function complete(editor){
 function selectGist(gist) {
     selectedGist = gist;
     selectedExample = null;
+    markGistSelected(gist);
     updateMenuState();
     updateAdvancedState();
 }
@@ -355,8 +356,24 @@ function selectGist(gist) {
 // Clear selected Gist
 function clearGist(gist) {
     selectedGist = null;
+    clearListSelectState();
     updateMenuState();
     updateAdvancedState();
+}
+
+function clearListSelectState() {
+    $("#sidebar #yrcode li").removeClass("selected");
+    $("#sidebar #examples li").removeClass("selected");
+}
+
+function markGistSelected(gist) {
+    clearListSelectState();
+    $("#sidebar #yrcode li#gist_" + gist.data.id).addClass("selected");
+}
+
+function markExampleSelected(name) {
+    clearListSelectState();
+    $("#sidebar #examples li#example_" + name).addClass("selected");
 }
 
 // Asks the user for a name and stores the code on the server
@@ -672,6 +689,7 @@ function newProject() {
     fileDeleted = false;
     clearOutput();
     deleteEditors();
+    clearListSelectState();
     newFile("main.ceylon");
 }
 
@@ -717,7 +735,7 @@ function listGists(page) {
             first = false;
         }
         var desc = getGistName(gist);
-        $('#yrcode').append('<li class="news_entry"><a href="#" onClick="return handleEditGist(\'' + gist.data.id + '\')">' + desc + '</a></li>');
+        $('#yrcode').append('<li id="gist_' + gist.data.id + '" class="news_entry"><a href="#" onClick="return handleEditGist(\'' + gist.data.id + '\')">' + desc + '</a></li>');
         $('#yrcodehdr').show();
         $('#yrcode').show();
     }
@@ -747,6 +765,9 @@ function listGists(page) {
             $('#yrcodemore').show();
         } else {
             $('#yrcodemore').hide();
+        }
+        if (selectedGist != null) {
+            markGistSelected(selectedGist);
         }
     }
     
@@ -1121,13 +1142,14 @@ function stop() {
 	}
 }
 
-//Retrieves the specified example from the editor, along with its hover docs.
+// Retrieves the specified example from the editor, along with its hover docs.
 function editSource(src) {
      doReset();
      selectedExample = null;
      selectedGist = null;
      var files = createFilesFromCode(src);
      setEditorSourcesFromGist(files);
+     clearListSelectState();
      live_tc.now();
 }
 
@@ -1152,6 +1174,7 @@ function editExample(key) {
             doReset();
             selectedExample = key;
             selectedGist = null;
+            markExampleSelected(key);
             setEditorSourcesFromGist(json.files);
             live_tc.now();
         },
@@ -1171,8 +1194,8 @@ function handleEditGist(key) {
 // Retrieves the specified code from GitHub
 function editGist(key) {
     function onSuccess(gist) {
-        setEditorSourcesFromGist(gist.data.files);
         selectGist(gist);
+        setEditorSourcesFromGist(gist.data.files);
         live_tc.now();
     }
     function onError(xhr, status, err) {
