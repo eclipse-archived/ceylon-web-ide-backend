@@ -195,6 +195,18 @@ $(document).ready(function() {
     $('#gistlink').hide();
     $('#deletegist').hide();
 
+    if ("usrlow" in uriparams) {
+        // With "usrlow" set the user's gists will be shown
+        // at the bottom of the sidebar instead of the top
+        addExamplesContainer();
+        addUserGistsContainer();
+    } else {
+        addUserGistsContainer();
+        addExamplesContainer();
+    }
+    
+    addExamples();
+    
     if (uriparams.src != null) {
         // Code is directly in URL
         var code = decodeURIComponent(uriparams.src);
@@ -215,6 +227,7 @@ $(document).ready(function() {
     }
     
     listGists();
+    
     setupLiveTypechecker();
 });
 
@@ -1783,4 +1796,42 @@ function w2prompt(msg, label, value, title, onClose, onValidate) {
             }
         }
     });
+}
+
+function addUserGistsContainer() {
+    $("#sidebarblock > div").append('<h3 id="yrcodehdr" class="invis">Your code:</h3>');
+    $("#sidebarblock > div").append('<ol id="yrcode" class="invis"></ol>');
+    $("#sidebarblock > div").append('<a id="yrcodemore" class="invis" href="#" onCLick="">more...</a>');
+}
+
+function addExamplesContainer() {
+    $("#sidebarblock > div").append('<h3 id="exampleshdr">Try out a sample:</h3>');
+    $("#sidebarblock > div").append('<ol id="examples"></ol>');
+}
+
+function addExample(key, title) {
+    $("#examples").append('<li id="example_' + key + '" class="news_entry"><a href="#" onClick="return handleEditExample(\'' + key + '\')">' + title + '</a></li>');
+}
+
+function addExamples() {
+    $("#examples").empty();
+    addExample("hello_world", "Hello World");
+    addExample("basics", "Basics");
+    addExample("null_and_union", "Null values and union types");
+    addExample("conditions", "Conditions and assertions");
+    addExample("classes_and_functions", "Classes and functions 1");
+    addExample("interfaces", "Interfaces and mixin inheritance");
+    addExample("classes_and_functions2", "Classes and functions 2");
+    addExample("collections", "Collections and sequence comprehensions");
+    addExample("named_arguments", "Named argument syntax");
+    addExample("generics", "Type parameters");
+    addExample("switch1", "Enumerations and the switch statement");
+    addExample("interop", "Interoperability");
+    addExample("request", "Interoperability 2");
+    addExample("dynints", "Dynamic interfaces");
+    addExample("operators", "Operator polymorphism");
+    addExample("metamodel", "Type-safe Metamodel");
+    addExample("game_of_life", "Game of Life");
+    addExample("importtest1", "Local Import");
+    addExample("importtest2", "Module Import");
 }

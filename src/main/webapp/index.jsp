@@ -109,32 +109,6 @@
 <div id="sidebar" class="trompon ceylonblock">
 <div id="sidebarblock" class="sidebar-block">
     <div>
-        <h3 id="yrcodehdr" class="invis">Your code:</h3>
-        <ol id="yrcode" class="invis">
-        </ol>
-        <a id="yrcodemore" class="invis" href="#" onCLick="">more...</a>
-        <h3 id="news">Try out a sample:</h3>
-        <ol id="examples">
-        <li id="example_hello_world" class="news_entry"><a href="#" onClick="return handleEditExample('hello_world')">Hello World</a></li>
-        <li id="example_basics" class="news_entry"><a href="#" onClick="return handleEditExample('basics')">Basics</a></li>
-        <li id="example_null_and_union" class="news_entry"><a href="#" onClick="return handleEditExample('null_and_union')">Null values and union types</a></li>
-        <li id="example_conditions" class="news_entry"><a href="#" onClick="return handleEditExample('conditions')">Conditions and assertions</a></li>
-        <li id="example_classes_and_functions" class="news_entry"><a href="#" onClick="return handleEditExample('classes_and_functions')">Classes and functions 1</a></li>
-        <li id="example_interfaces" class="news_entry"><a href="#" onClick="return handleEditExample('interfaces')">Interfaces and mixin inheritance</a></li>
-        <li id="example_classes_and_functions2" class="news_entry"><a href="#" onClick="return handleEditExample('classes_and_functions2')">Classes and functions 2</a></li>
-        <li id="example_collections" class="news_entry"><a href="#" onClick="return handleEditExample('collections')">Collections and sequence comprehensions</a></li>
-        <li id="example_named_arguments" class="news_entry"><a href="#" onClick="return handleEditExample('named_arguments')">Named argument syntax</a></li>
-        <li id="example_generics" class="news_entry"><a href="#" onClick="return handleEditExample('generics')">Type parameters</a></li>
-        <li id="example_switch1" class="news_entry"><a href="#" onClick="return handleEditExample('switch1')">Enumerations and the switch statement</a></li>
-        <li id="example_interop" class="news_entry"><a href="#" onClick="return handleEditExample('interop')">Interoperability</a></li>
-        <li id="example_request" class="news_entry"><a href="#" onClick="return handleEditExample('request')">Interoperability 2</a></li>
-        <li id="example_dynints" class="news_entry"><a href="#" onClick="return handleEditExample('dynints')">Dynamic interfaces</a></li>
-        <li id="example_operators" class="news_entry"><a href="#" onClick="return handleEditExample('operators')">Operator polymorphism</a></li>
-        <li id="example_metamodel" class="news_entry"><a href="#" onClick="return handleEditExample('metamodel')">Type-safe Metamodel</a></li>
-        <li id="example_game_of_life" class="news_entry"><a href="#" onClick="return handleEditExample('game_of_life')">Game of Life</a></li>
-        <li id="example_importtest1" class="news_entry"><a href="#" onClick="return handleEditExample('importtest1')">Simple Import Test</a></li>
-        <li id="example_importtest2" class="news_entry"><a href="#" onClick="return handleEditExample('importtest2')">Advanced Import Test</a></li>
-        </ol>
     </div>
 </div>
 
