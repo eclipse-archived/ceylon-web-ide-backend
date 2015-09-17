@@ -1,6 +1,8 @@
 <project name="Ceylon Web IDE" default="update" basedir=".">
     <property file="build.properties" />
 
+    <property name="overwrite" value="false" />
+
     <property name="ceylon.dist.dir" value="${basedir}/../ceylon-dist/dist" />
     <property name="ceylon.lib.dir" value="${ceylon.dist.dir}/lib" />
     <property name="ceylon.repo.dir" value="${ceylon.dist.dir}/repo" />
@@ -11,14 +13,14 @@
     <property name="web.lib.dir" value="${web.inf.dir}/lib" />
     <property name="web.repo.dir" value="${web.inf.dir}/ceylon-repo/system" />
 
-    <target name="update" description="Update the JARs and CARs needed for the Web IDE">
-        <copy todir="${web.modules.dir}" overwrite="true">
+    <target name="update" depends="update-js" description="Update the JARs and CARs needed for the Web IDE">
+        <copy todir="${web.modules.dir}" overwrite="${overwrite}">
             <fileset dir="${ceylon.repo.dir}">
                 <include name="ceylon/language/**/*.js" />
                 <include name="ceylon/language/**/*.js.sha1" />
             </fileset>
         </copy>
-        <copy todir="${web.repo.dir}" overwrite="true">
+        <copy todir="${web.repo.dir}" overwrite="${overwrite}">
             <fileset dir="${ceylon.repo.dir}">
                 <include name="ceylon/language/**/*.js" />
                 <include name="ceylon/language/**/*.js.sha1" />
@@ -32,7 +34,7 @@
                 <include name="com/redhat/ceylon/module-resolver/**/*.jar.sha1" />
             </fileset>
         </copy>
-        <copy todir="${web.lib.dir}" overwrite="true">
+        <copy todir="${web.lib.dir}" overwrite="${overwrite}">
             <fileset dir="${ceylon.repo.dir}/com/redhat/ceylon/common/${ceylon.version}">
                 <include name="*.jar" />
             </fileset>
@@ -47,6 +49,21 @@
             </fileset>
             <fileset dir="${ceylon.repo.dir}/com/redhat/ceylon/compiler/js/${ceylon.version}">
                 <include name="*.jar" />
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="update-js" description="Update the JS files needed for the Web IDE">
+        <copy todir="${web.modules.dir}" overwrite="${overwrite}">
+            <fileset dir="${ceylon.repo.dir}">
+                <include name="ceylon/language/**/*.js" />
+                <include name="ceylon/language/**/*.js.sha1" />
+            </fileset>
+        </copy>
+        <copy todir="${web.repo.dir}" overwrite="${overwrite}">
+            <fileset dir="${ceylon.repo.dir}">
+                <include name="ceylon/language/**/*.js" />
+                <include name="ceylon/language/**/*.js.sha1" />
             </fileset>
         </copy>
     </target>
