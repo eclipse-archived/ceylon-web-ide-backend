@@ -192,8 +192,6 @@ $(document).ready(function() {
     $('#gistlink').hide();
     $('#deletegist').hide();
 
-    startSpinner();
-    
     if (location.href.indexOf('?src=') > 0) {
         //Code is directly in URL
         var key = location.href.slice(location.href.indexOf('?src=')+5);
@@ -210,6 +208,7 @@ $(document).ready(function() {
     } else {
         editExample('hello_world');
         window.outputReady = function() {
+            startSpinner();
         	runCode('print("Ceylon ``language.version`` \\"``language.versionName``\\"");');
             stopSpinner();
         };
@@ -917,13 +916,17 @@ function performRun() {
     translate(afterTranslate);
 }
 
+function createFilesFromCode(code) {
+    return {
+        "main.ceylon": {
+            content: wrappedTag + codePrefix + code + codePostfix
+        }
+    };
+}
+
 //Sends the given code to the server for compilation and it successful, runs the resulting js.
 function runCode(code) {
-    var files = {
-            "main.ceylon": {
-                content: codePrefix + code + codePostfix
-            }
-    };
+    var files = createFilesFromCode(code);
     translateCode(files, afterTranslate);
 }
 
@@ -1116,6 +1119,16 @@ function stop() {
         enableButton("run", true);
         enableButton("stop", false);
 	}
+}
+
+//Retrieves the specified example from the editor, along with its hover docs.
+function editSource(src) {
+     doReset();
+     selectedExample = null;
+     selectedGist = null;
+     var files = createFilesFromCode(src);
+     setEditorSourcesFromGist(files);
+     live_tc.now();
 }
 
 function handleEditExample(key) {
