@@ -129,7 +129,7 @@
                 <a href="https://github.com">GitHub</a>.</p>
             </div>
             <div id='copyright'>
-                <p id='copyright_copy_2010_2011_red...'>Copyright &copy; 2010-2011, Red Hat, Inc. or third-party contributors -
+                <p id='copyright_copy_2010_2015_red...'>Copyright &copy; 2010-2015, Red Hat, Inc. or third-party contributors -
                 Ceylon is a trademark of Red Hat, Inc. - <a href='http://www.redhat.com/legal/legal_statement.html'>terms of Use</a> - 
                 <a href='http://www.redhat.com/legal/privacy_statement.html'>Privacy policy</a></p>
             </div>
