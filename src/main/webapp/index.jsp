@@ -140,7 +140,7 @@
 <div id="help-message"><div id="help-message-content" class="ceylonblock">
 <h3>Editor keyboard shortcuts</h3>
 <ul>
-    <li>Autocompletion: <code>Ctrl-.</code>
+    <li>Autocompletion: <code>Ctrl-Space</code>
     <li>Documentation: <code>Ctrl-D</code>
 </ul>
 </div></div>

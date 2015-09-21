@@ -342,41 +342,6 @@ function setupLiveTypechecker() {
     },1000);
 }
 
-// autocompletion support
-function complete(editor){
-	var cursor = editor.getCursor();
-    var code = getEditCode();
-    live_tc.pause();
-    jQuery.ajax('assist', {
-        cache:false, type:'POST',
-        dataType:'json',
-        timeout:20000,
-        beforeSend: startSpinner,
-        success: function(json, status, xhr){
-        	stopSpinner();
-            live_tc.ready();
-        	CodeMirror.autocomplete(editor, function(){
-        		return {
-        			list: json.opts,
-        			from: cursor,
-        			to: cursor
-        		};
-        	});
-        },
-        error:function(xhr, status, err) {
-        	stopSpinner();
-            live_tc.ready();
-            w2alert("An error occurred while compiling your code: " + err?err:status, "Error");
-        },
-        contentType:'application/x-www-form-urlencoded; charset=UTF-8',
-        data: { 
-        	ceylon:code,
-        	r: cursor.line+2,
-        	c: cursor.ch-1
-        }
-    });
-}
-
 // Mark the given Gist as selected and updates the proper GUI elements
 function selectGist(gist) {
     selectedGist = gist;
@@ -1060,6 +1025,106 @@ function doTranslateCode(files, onTranslation) {
     });
 }
 
+// Autocompletion support
+function complete(editor){
+    var cursor = editor.getCursor();
+    var files = getCompilerFiles();
+    live_tc.pause();
+    jQuery.ajax('assist', {
+        cache:false, type:'POST',
+        dataType:'json',
+        timeout:20000,
+        beforeSend: startSpinner,
+        success: function(json, status, xhr){
+            stopSpinner();
+            live_tc.ready();
+            CodeMirror.autocomplete(editor, function(){
+                return {
+                    list: json.opts,
+                    from: cursor,
+                    to: cursor
+                };
+            });
+        },
+        error:function(xhr, status, err) {
+            live_tc.ready();
+            printError("An error occurred while retrieving completions for your code:");
+            printError("--- " + (err?err:status));
+        },
+        contentType: 'application/json; charset=UTF-8',
+        data: JSON.stringify({ 
+            files: files,
+            f: editor.ceylonName,
+            r: cursor.line + (isAdvancedModeActive() ? 1 : 3),
+            c: cursor.ch-1
+        })
+    });
+}
+
+var help;
+
+function fetchDoc(cm) {
+    var files = getCompilerFiles();
+    var done = false;
+    function close() {
+        if (done) return;
+        done = true;
+        $("body").unbind('keydown', close);
+        $("body").unbind('click', close);
+        help.parentNode.removeChild(help);
+    }
+    var docHandler = function(json, status, xhr) {
+        live_tc.ready();
+        if (json && json['name']) {
+            if (json['doc']) {
+                var pos = editor.cursorCoords(true);
+                help = document.createElement("div");
+                help.className = "help infront";
+                help.innerHTML = json['doc'];
+                help.style.left = pos.left + "px";
+                help.style.top = pos.bottom + "px";
+                document.body.appendChild(help);
+                $("body").keydown(close);
+                $("body").click(close);
+                closePopups = close;
+                help.focus();
+            } else if (json['name'].startsWith("ceylon.language::")) {
+                var tok = json['name'].substring(17);
+                if (json['type'] === 'interface' || json['type'] === 'class') {
+                    console.log("URL http://modules.ceylon-lang.org/test/ceylon/language/0.5/module-doc/"
+                            + json['type'] + "_" + tok + ".html");
+                } else {
+                    console.log("URL http://modules.ceylon-lang.org/test/ceylon/language/0.5/module-doc/index.html#" + tok);
+                }
+            }
+        }
+    };
+    var editor = getEditor(selectedEditorId());
+    var cursor = editor.getCursor();
+    live_tc.pause();
+    jQuery.ajax('hoverdoc', {
+        cache: false,
+        type: 'POST',
+        dataType: 'json',
+        timeout: 20000,
+        beforeSend: startSpinner,
+        complete: stopSpinner,
+        success: docHandler,
+        error: function(xhr,status,err){
+            live_tc.ready();
+            printError("An error occurred while retrieving documentation for your code:");
+            printError("--- " + (err?err:status));
+        },
+        contentType: 'application/json; charset=UTF-8',
+        data: JSON.stringify({ 
+            files: files,
+            f: editor.ceylonName,
+            r: cursor.line + (isAdvancedModeActive() ? 1 : 3),
+            c: cursor.ch-1
+        })
+    });
+}
+
 //Shows the specified error messages in the code
 function showErrors(errors, print) {
     if (print) {
@@ -1366,8 +1431,8 @@ function createEditor(name) {
             "Ctrl-S": function(cm) { handleSaveAll(); },
             "Ctrl-D": function(cm) { fetchDoc(cm); },
             "Cmd-D": function(cm) { fetchDoc(cm); },
-            "Ctrl-.": function() { complete(editor); },
-            "Cmd-.": function() { complete(editor); }
+            "Ctrl-Space": function() { complete(editor); },
+            "Cmd-Space": function() { complete(editor); }
         }
     });
     editor.ceylonId = newid;
@@ -1378,6 +1443,10 @@ function createEditor(name) {
         $().w2overlay();
         buttonCheck("menu", false);
         buttonCheck("connected", false);
+        if (closePopups) {
+            closePopups();
+        }
+        closePopups = undefined;
     });
     editor.on('change', function() {
         updateEditorDirtyState(editor.ceylonId);
@@ -1386,7 +1455,9 @@ function createEditor(name) {
         live_tc.postpone();
     });
     editor.on('cursorActivity', function() {
-        if (closePopups) closePopups();
+        if (closePopups) {
+            closePopups();
+        }
         closePopups = undefined;
     });
     return editor;
@@ -1723,67 +1794,6 @@ function scrollOutput() {
 // Basic HTML escaping.
 function escapeHtml(html) {
     return (''+html).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-function fetchDoc(cm) {
-    var code = getEditCode();
-    var modcode = getModuleCode();
-    var done = false;
-    function close() {
-        if (done) return;
-        done = true;
-        jQuery("body").unbind('keydown', close);
-        jQuery("body").unbind('click', close);
-        help.parentNode.removeChild(help);
-    }
-    var docHandler = function(json, status, xhr) {
-        live_tc.ready();
-        if (json && json['name']) {
-            if (json['doc']) {
-                var pos = editor.cursorCoords(true);
-                var help = document.createElement("div");
-                help.className = "help infront";
-                help.innerHTML = json['doc'];
-                help.style.left = pos.left + "px";
-                help.style.top = pos.bottom + "px";
-                document.body.appendChild(help);
-                jQuery("body").keydown(close);
-                jQuery("body").click(close);
-                closePopups=close;
-                help.focus();
-            } else if (json['name'].startsWith("ceylon.language::")) {
-                var tok = json['name'].substring(17);
-                if (json['type'] === 'interface' || json['type'] === 'class') {
-                    console.log("URL http://modules.ceylon-lang.org/test/ceylon/language/0.5/module-doc/"
-                        + json['type'] + "_" + tok + ".html");
-                } else {
-                    console.log("URL http://modules.ceylon-lang.org/test/ceylon/language/0.5/module-doc/index.html#" + tok);
-                }
-            }
-        }
-    };
-    var cursor = editor.getCursor();
-    live_tc.pause();
-    jQuery.ajax('hoverdoc', {
-        cache:false, type:'POST',
-        dataType:'json',
-        timeout:20000,
-        beforeSend:startSpinner,
-        complete:stopSpinner,
-        success:docHandler,
-        error:function(xhr,status,err){
-            transok = false;
-            live_tc.ready();
-            w2alert("An error occurred while retrieving documentation for your code: " + err?err:status, "Error");
-        },
-        contentType:'application/x-www-form-urlencoded; charset=UTF-8',
-        data:{
-            module:modcode,
-            ceylon:code,
-            r: cursor.line+2,
-            c: cursor.ch-1
-        }
-    });
 }
 
 function w2prompt(msg, label, value, title, onClose, onValidate) {

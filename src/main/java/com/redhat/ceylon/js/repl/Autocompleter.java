@@ -33,14 +33,21 @@ import com.redhat.ceylon.js.util.DocUtils;
  * @author Enrique Zamudio
  */
 public class Autocompleter extends AutocompleteVisitor {
-
+    private String file;
+    
     /** Create a new instance that will look for suggestions for the node at the specified location. */
-    public Autocompleter(int row, int col, TypeChecker tc) {
+    public Autocompleter(String file, int row, int col, TypeChecker tc) {
         super(row, col, tc);
+        this.file = file;
     }
 
     public Node findNode() {
-        return findNode(SCRIPT_VAL);
+        return findNode(new AutocompleteUnitValidator() {
+            @Override
+            public boolean processUnit(PhasedUnit pu) {
+                return file.equals(pu.getUnitFile().getName());
+            }
+        });
     }
 
     /** Looks for declarations matching the node's text and returns them as strings. */
@@ -183,12 +190,5 @@ public class Autocompleter extends AutocompleteVisitor {
         }
         return "";
     }
-
-    public static final AutocompleteUnitValidator SCRIPT_VAL = new AutocompleteUnitValidator() {
-        @Override
-        public boolean processUnit(PhasedUnit pu) {
-            return !"module.ceylon".equals(pu.getUnitFile().getName());
-        }
-    };
 
 }

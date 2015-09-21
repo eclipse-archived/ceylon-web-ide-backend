@@ -40,10 +40,11 @@ public class DocServlet extends HttpServlet {
             @SuppressWarnings("unchecked")
             Map<String, Object> result = (Map<String, Object>)JSONValue.parseKeepingOrder(json);
             final ScriptFile src = CompilerUtils.createScriptSource(result);
-            final int row = Integer.parseInt((String)result.get("r"));
-            final int col = Integer.parseInt((String)result.get("c"));
+            final String file = (String)result.get("f");
+            final int row = ((Integer)result.get("r")).intValue();
+            final int col = ((Integer)result.get("c")).intValue();
             Declaration decl = DocUtils.findDeclaration(
-                    CompilerUtils.getTypeChecker(request.getServletContext(), src), row, col);
+                    CompilerUtils.getTypeChecker(request.getServletContext(), src), file, row, col);
             final Map<String,Object> docs = decl == null ? new HashMap<String, Object>() : DocUtils.getDocs(decl);
             ServletUtils.sendResponse(docs, response);
         } catch (RuntimeException ex) {

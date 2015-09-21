@@ -62,12 +62,12 @@ public class DocUtils {
         return m;
     }
 
-    public static Declaration findDeclaration(final TypeChecker typeChecker, final int row, final int col) {
+    public static Declaration findDeclaration(final TypeChecker typeChecker, final String file, final int row, final int col) {
         //Run the typechecker
         typeChecker.process();
         //Find the node at the specified position
-        final Autocompleter visitor = new Autocompleter(row, col, typeChecker);
-        final Node node = visitor.findNode(Autocompleter.SCRIPT_VAL);
+        final Autocompleter visitor = new Autocompleter(file, row, col, typeChecker);
+        final Node node = visitor.findNode();
         if (node != null) {
             //Return its declaration
             try {
