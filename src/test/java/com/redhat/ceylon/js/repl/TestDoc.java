@@ -59,7 +59,7 @@ public class TestDoc {
         JSONObject json = (JSONObject)JSONValue.parse(JSONObject.toJSONString(obj));
         TypeChecker tc = new TypeCheckerBuilder().verbose(false).addSrcDirectory(CompilerUtils.createScriptSource(json)).getTypeChecker();
         tc.process();
-        final Declaration d = DocUtils.findDeclaration(tc, row, col);
+        final Declaration d = DocUtils.findDeclaration(tc, "test.ceylon", row, col);
         Assert.assertNotNull("Can't find declaration", d);
         Assert.assertEquals("Declaration found but not what I expected", dname, d.getQualifiedNameString());
         final Map<String,Object> docs = DocUtils.getDocs(d);

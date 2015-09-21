@@ -50,7 +50,7 @@ public class TestAutocomplete {
         tc.process();
         nodeText = text;
         checkCompletion = found;
-        assist = new Autocompleter(1, text.length()-1, tc);
+        assist = new Autocompleter("test.ceylon", 1, text.length()-1, tc);
     }
 
     @Test
