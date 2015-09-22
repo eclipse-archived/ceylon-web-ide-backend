@@ -2,6 +2,9 @@
 shared void run() {
 // Game of Life 2.4
 
+value seed = system.milliseconds;
+value density = 0.8;
+
 value pwidth = 620;   // Width of drawing area in pixels
 value pheight = 300;  // Height of drawing area in pixels
 value gwidth = 124;   // Number of cells horizontally and vertically
@@ -20,21 +23,21 @@ class Cell(x, y) {
     shared Integer y;
     "The current state of the Cell"
     shared variable State state = dead;
-
+    
     // All the neighbouring cells
     late shared [Cell,Cell,Cell,Cell,Cell,Cell,Cell,Cell] neighbors;
-
+    
     variable Integer nroNeighbours = 0;
-
+    
     shared void setup() =>
-        update(resurrected, 0);
-
+            update(resurrected, 0);
+    
     shared void resurrect() =>
-        update(alive, 1);
-
+            update(alive, 1);
+    
     shared void kill() =>
-        update(dead, -1);
-
+            update(dead, -1);
+    
     void update(State newState, Integer dN) {
         if (state == newState) {
             return;
@@ -59,7 +62,7 @@ class Cell(x, y) {
             return dead;
         }
     }
-
+    
     shared Boolean canResurrect() {
         if (state == dead && nroNeighbours == 3) {
             state = resurrected;
@@ -68,14 +71,14 @@ class Cell(x, y) {
             return false;
         }
     }
-
+    
     shared Cell[] resurrections() {
         value result = [ for (c in neighbors) if (c.canResurrect()) c ];
         return state == resurrected then result.withLeading(this) else result;
     }
     
     shared actual String string =>
-        "Cell[``x``,``y``]: ``state`` (``nroNeighbours``)";
+            "Cell[``x``,``y``]: ``state`` (``nroNeighbours``)";
 }
 
 class Grid(width, height) {
@@ -103,10 +106,10 @@ class Grid(width, height) {
         for (x in 0:width) {
             value c = cell(x, y);
             c.neighbors = [ cell(x - 1, y - 1), cell(x, y - 1), cell(x + 1, y - 1), cell(x - 1, y),
-                cell(x + 1, y), cell(x - 1, y + 1), cell(x, y + 1), cell(x + 1, y + 1) ];
+            cell(x + 1, y), cell(x - 1, y + 1), cell(x, y + 1), cell(x + 1, y + 1) ];
         }
     }
- 
+    
     shared void add(Integer x, Integer y) {
         value c = cell(x, y);
         c.setup();
@@ -120,9 +123,9 @@ class Grid(width, height) {
         // we construct a third list with dead cells that
         // will be resurrected
         value alives = [ for (c in _living)
-          if (c.state == alive && c.nextState == alive) c ];
+        if (c.state == alive && c.nextState == alive) c ];
         value moribunds = [ for (c in _living)
-          if (c.state == alive && c.nextState == moribund) c ];
+        if (c.state == alive && c.nextState == moribund) c ];
         value resurrections = [ for (c in _living) for (r in c.resurrections()) r ];
         
         // And resurrect the dead ones
@@ -140,14 +143,11 @@ class Grid(width, height) {
     }
 }
 
-// George Marsaglia's Random Number Generator
-variable Integer m_w = system.milliseconds / 13;
-variable Integer m_z = system.milliseconds / 648;
+variable Integer _seed = seed;
+
 Float random() {
-    m_z = 36969 * m_z.and(2^15-1) + m_z.rightLogicalShift(16);
-    m_w = 18000 * m_w.and(2^15-1) + m_w.rightLogicalShift(16);
-    Integer r = m_z.leftLogicalShift(15).and(2^30-1) + m_w;  /* 32-bit result */
-    return r.float / (2^30-1).float;
+    _seed = (_seed * 9301 + 49297) % 233280;
+    return _seed / 233280.0;
 }
 
 Grid randomNoiseGrid(Integer width, Integer height, Float probability) {
@@ -162,7 +162,7 @@ Grid randomNoiseGrid(Integer width, Integer height, Float probability) {
     return grid;
 }
 
-value life = randomNoiseGrid(gwidth, gheight, 0.8);
+value life = randomNoiseGrid(gwidth, gheight, density);
 
 value cwidth = pwidth / gwidth;
 value cheight = pheight / gheight;
@@ -172,6 +172,8 @@ variable value start = system.milliseconds;
 variable value prevNew = -1;
 variable value prevDead = -1;
 variable value prevCount = 0;
+
+variable dynamic ctx2d = null;
 
 void drawCells({Cell*} cells, void drawCell(Cell c)) {
     for (c in cells) {
@@ -203,11 +205,7 @@ void draw() {
         prevDead = deadCells.size;
     }
     dynamic {
-        dynamic doc = window.parent.document;
-        dynamic canvas = doc.getElementById("lifegrid");
-        if (exists canvas) {
-            dynamic ctx = canvas.getContext("2d");
-            
+        if (exists ctx=ctx2d) {
             void drawCell(Cell c) {
                 if (c.state == alive) {
                     ctx.fillStyle = "#FF0000";
@@ -219,42 +217,38 @@ void draw() {
             
             drawCells(newCells, drawCell);
             drawCells(deadCells, drawCell);
-      
+            
             if (!newCells.empty || !deadCells.empty) {
                 setTimeout(draw, 1);
             } else {
                 print("Stable state, stopped");
                 print("Drawn ``count`` frames in ``runtime/1000`` seconds (fps=``fps``)");
             }
+        } else {
+            print("Stopped by user");
         }
     }
 }
 
 dynamic {
-    dynamic doc = window.parent.document;
-    if (!doc.getElementById("lifegrid") exists) {
-        dynamic canvas = doc.createElement("canvas");
-        canvas.setAttribute("id", "lifegrid");
-        canvas.setAttribute("width", pwidth);
-        canvas.setAttribute("height", pheight);
-        dynamic corePage = doc.getElementById("core-page");
-        corePage.insertBefore(canvas, corePage.childNodes[3]);
-        dynamic ctx = canvas.getContext("2d");
-        ctx.fillStyle = "#FFFFFF";
-        ctx.fillRect(0, 0, pwidth, pheight);
-    }
-
+    dynamic win = openCanvasWindow();
+    dynamic canvas = win.ceylonCanvas;
+    canvas.setAttribute("id", "lifegrid");
+    canvas.setAttribute("width", pwidth);
+    canvas.setAttribute("height", pheight);
+    ctx2d = canvas.getContext("2d");
+    ctx2d.fillStyle = "#FFFFFF";
+    ctx2d.fillRect(0, 0, pwidth, pheight);
+    
     setOnStop(void() {
-        dynamic doc = window.parent.document;
-        dynamic canvas = doc.getElementById("lifegrid");
-        if (exists canvas) {
-            canvas.parentNode.removeChild(canvas);
+        if (exists ctx=ctx2d) {
+            ctx2d = null;
         }
     });
-  
+    
     setTimeout(draw, 1);
 }
 
 print("Game of Life");
-print("Seed used: ``m_w``, ``m_z``");
+print("Seed used: ``seed``");
 }
