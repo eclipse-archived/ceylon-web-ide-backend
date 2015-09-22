@@ -5,8 +5,6 @@ shared void run() {
 value seed = system.milliseconds;
 value density = 0.8;
 
-value pwidth = 620;   // Width of drawing area in pixels
-value pheight = 300;  // Height of drawing area in pixels
 value gwidth = 124;   // Number of cells horizontally and vertically
 value gheight = 60;   // Number of cells horizontally and vertically
 
@@ -164,8 +162,11 @@ Grid randomNoiseGrid(Integer width, Integer height, Float probability) {
 
 value life = randomNoiseGrid(gwidth, gheight, density);
 
-value cwidth = pwidth / gwidth;
-value cheight = pheight / gheight;
+variable value pwidth = 620;   // Width of drawing area in pixels
+variable value pheight = 300;  // Height of drawing area in pixels
+
+variable value cwidth = pwidth / gwidth;
+variable value cheight = pheight / gheight;
 
 variable value count = 0;
 variable value start = system.milliseconds;
@@ -233,9 +234,13 @@ void draw() {
 dynamic {
     dynamic win = openCanvasWindow();
     dynamic canvas = win.ceylonCanvas;
-    canvas.setAttribute("id", "lifegrid");
-    canvas.setAttribute("width", pwidth);
-    canvas.setAttribute("height", pheight);
+    canvas.id = "lifegrid";
+    pwidth = canvas.scrollWidth;
+    pheight = canvas.scrollHeight;
+    cwidth = pwidth / gwidth;
+    cheight = pheight / gheight;
+    canvas.width = cwidth * gwidth;
+    canvas.height = cheight * gheight;
     ctx2d = canvas.getContext("2d");
     ctx2d.fillStyle = "#FFFFFF";
     ctx2d.fillRect(0, 0, pwidth, pheight);
