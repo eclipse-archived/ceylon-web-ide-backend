@@ -141,20 +141,22 @@ $(document).ready(function() {
                             items: getMenuItems()
                         },
                         { type: 'break',  id: 'break0' },
-                        { type: 'button',  id: 'run',  caption: 'Run', hint: 'Compile & execute', icon: 'fa fa-play' },
-                        { type: 'button',  id: 'stop',  caption: 'Stop', hint: 'Stop program', icon: 'fa fa-stop', disabled: true },
-                        { type: 'button',  id: 'reset',  caption: 'Reset', hint: 'Clear output & errors', icon: 'fa fa-exclamation' },
-                        { type: 'button',  id: 'share',  caption: 'Share', hint: 'Share the code on GitHub', icon: 'fa fa-share' },
+                        { type: 'button',  id: 'run', caption: 'Run', hint: 'Compile & execute', icon: 'fa fa-play' },
+                        { type: 'button',  id: 'stop', caption: 'Stop', hint: 'Stop program', icon: 'fa fa-stop', disabled: true },
+                        { type: 'button',  id: 'reset', caption: 'Reset', hint: 'Clear output & errors', icon: 'fa fa-exclamation' },
+                        { type: 'button',  id: 'share', caption: 'Share', hint: 'Share the code on GitHub', icon: 'fa fa-share' },
                         { type: 'break',  id: 'break1' },
-                        { type: 'check',  id: 'advanced',  caption: 'Advanced', hint: 'Enable more complex code constructs', icon: 'fa fa-square-o', checkicon: 'fa fa-check-square-o', uncheckicon: 'fa fa-square-o' },
+                        { type: 'check',  id: 'advanced', caption: 'Advanced', hint: 'Enable more complex code constructs', icon: 'fa fa-square-o', checkicon: 'fa fa-check-square-o', uncheckicon: 'fa fa-square-o' },
                         { type: 'spacer' },
-                        { type: 'button',  id: 'help',  caption: 'Help', hint: 'Help on how this Web IDE works', icon: 'fa fa-question' },
-                        { type: 'button',  id: 'connect',  caption: 'Connect', hint: 'Connect to GitHub', icon: 'fa fa-github', hidden: isGitHubConnected() },
+                        { type: 'button',  id: 'help', caption: 'Help', hint: 'Help on how this Web IDE works', icon: 'fa fa-question' },
+                        { type: 'button',  id: 'connect', caption: 'Connect', hint: 'Connect to GitHub', icon: 'fa fa-github', hidden: isGitHubConnected() },
                         { type: 'menu',   id: 'connected', caption: 'Connected', hint: 'Connected to GitHub', icon: 'fa fa-github', hidden: !isGitHubConnected(),
                             items: [
                                 { text: 'Disconnect from GitHub', id: 'disconnect', icon: 'fa fa-scissors' }
                             ]
                         },
+                        { type: 'button',  id: 'resize', hint: 'Hide side bar', icon: 'fa fa-arrows-alt' },
+                        { type: 'button',  id: 'resized', hint: 'Show side bar', icon: 'fa fa-columns', hidden: true },
                     ],
                     onClick: function (event) {
                         if (event.target == "run") {
@@ -173,6 +175,10 @@ $(document).ready(function() {
                             handleGitHubConnect();
                         } else if (event.target == "connected:disconnect") {
                             handleGitHubDisconnect();
+                        } else if (event.target == "resize") {
+                            handleResize();
+                        } else if (event.target == "resized") {
+                            handleResized();
                         } else if (event.target == "menu:newfile") {
                             handleNewFile();
                         } else if (event.target == "menu:renamefile") {
@@ -193,7 +199,7 @@ $(document).ready(function() {
                     }
                 }
             },
-            { type: 'preview', size: 200, minSize: 100, resizable: true, style: zstyle, title: 'Program output', content: 'preview' },
+            { type: 'preview', size: "30%", minSize: 100, resizable: true, style: zstyle, title: 'Program output', content: 'preview' },
             { type: 'right', size: 260, minSize: 200, resizable: true, style: pstyle, content: 'right' },
             { type: 'bottom', size: 67, style: zstyle, content: 'bottom' }
         ]
@@ -282,6 +288,22 @@ function updateMenuState() {
 
 function handleHelpClick() {
     $('#tb_all_main_toolbar_item_help').w2overlay({ html: $('#help-message').html() });
+}
+
+function handleResize() {
+    buttonShow("resize", false);
+    buttonShow("resized", true);
+    w2ui.all.hide("top");
+    w2ui.all.hide("bottom");
+    w2ui.all.hide("right");
+}
+
+function handleResized() {
+    buttonShow("resize", true);
+    buttonShow("resized", false);
+    w2ui.all.show("top");
+    w2ui.all.show("bottom");
+    w2ui.all.show("right");
 }
 
 function isGitHubConnected() {
