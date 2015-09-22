@@ -103,6 +103,9 @@
 <!-- template for creating new editors -->
 <div id="editor-template" class="codeeditor invis"><textarea></textarea></div>
 
+<!-- template for creating the canvas tab -->
+<div id="canvas-template" class="invis"><canvas></canvas></div>
+
 <!-- output window -->    
 <div id="output"><iframe id="outputframe" src="runner.jsp"></iframe></div>
 

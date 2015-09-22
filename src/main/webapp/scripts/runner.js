@@ -187,6 +187,10 @@ function rewriteDependency(dep) {
     return path + "/" + version + "/" + name + "-" + version;
 }
 
+function openCanvasWindow() {
+    return window.parent.openCanvasWindow();
+}
+
 function setOnStop(func) {
     window.parent.setOnStop(func);
 }

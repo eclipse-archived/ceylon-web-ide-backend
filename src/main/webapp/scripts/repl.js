@@ -125,7 +125,7 @@ $(document).ready(function() {
         name: 'editortabs',
         tabs: [],
         onClick: function(event) {
-            selectEditor(event.target);
+            selectTab(event.target);
         }
     });
     
@@ -262,11 +262,12 @@ function jqContent(jqElem) {
 
 function getMenuItems() {
     var cnt = getEditors().length;
+    var editorSelected = getEditors().length > 0 && getEditor(selectedTabId()) != null;
     var hasGist = (selectedGist != null);
     return [
         { text: 'New File...', id: 'newfile', icon: 'fa fa-file-o' },
-        { text: 'Rename File...', id: 'renamefile', icon: 'fa fa-pencil', disabled: (cnt == 0) },
-        { text: 'Delete File', id: 'deletefile', icon: 'fa fa-file-excel-o', disabled: (cnt == 0) },
+        { text: 'Rename File...', id: 'renamefile', icon: 'fa fa-pencil', disabled: !editorSelected },
+        { text: 'Delete File', id: 'deletefile', icon: 'fa fa-file-excel-o', disabled: !editorSelected },
         { text: 'New Project...', id: 'new', icon: 'fa fa-files-o' },
         { text: 'Rename Project...', id: 'rename', icon: 'fa fa-pencil', disabled: !hasGist, hidden: !isGitHubConnected() },
         { text: 'Save All', id: 'saveall', icon: 'fa fa-floppy-o', disabled: !hasGist || (cnt == 0) || !isAnyEditorDirty(), hidden: !isGitHubConnected() },
@@ -572,7 +573,7 @@ function newFile(name) {
     } else {
         editor = createEditor(name);
     }
-    selectEditor(editor.ceylonId);
+    selectTab(editor.ceylonId);
     updateEditorDirtyState(editor.ceylonId);
     updateMenuState();
     updateAdvancedState();
@@ -587,7 +588,7 @@ function newModuleFile() {
 }
 
 function handleRenameFile() {
-    var id = selectedEditorId();
+    var id = selectedTabId();
     var editor = getEditor(id);
     askFileName("Rename File", editor.ceylonName, false, function(newname) {
         renameFile(id, newname);
@@ -644,10 +645,10 @@ function suggestFileName() {
 // Deletes a Gist from the server (asks the user for confirmation first)
 // Is called when the "Delete" menu item is selected
 function handleDeleteFile() {
-    var editor = getEditor(selectedEditorId());
+    var editor = getEditor(selectedTabId());
     w2confirm("Do you really want to delete this file '" + editor.ceylonName + "'?")
         .yes(function() {
-            deleteFile(selectedEditorId());
+            deleteFile(selectedTabId());
         });
 }
 
@@ -658,20 +659,7 @@ function deleteFile(id) {
     var div = getEditorDiv(id);
     if (div.length > 0) {
         div.remove();
-        // Remove the tab
-        var index = w2ui["editortabs"].get(id, true);
-        w2ui["editortabs"].remove(id);
-        // Select a new tab
-        var editors = getEditors();
-        var cnt = editors.length;
-        if (cnt > 0) {
-            var newindex = (index < cnt) ? index : cnt - 1;
-            var newid = editors[newindex].ceylonId;
-            selectEditor(newid);
-        } else {
-            updateMenuState();
-        }
-        updateAdvancedState();
+        deleteTab(id);
     }
 }
 
@@ -823,6 +811,10 @@ function buttonCheck(name, check) {
 
 function buttonIsChecked(name, check) {
     return w2ui["all"].get("main").toolbar.get(name).checked;
+}
+
+function tabCloseable(id, onClose) {
+    w2ui["editortabs"].set(id, { closable: onClose != null, onClose: onClose });
 }
 
 // Returns the number of Ceylon files that are available
@@ -1099,7 +1091,7 @@ function fetchDoc(cm) {
             }
         }
     };
-    var editor = getEditor(selectedEditorId());
+    var editor = getEditor(selectedTabId());
     var cursor = editor.getCursor();
     live_tc.pause();
     jQuery.ajax('hoverdoc', {
@@ -1232,25 +1224,30 @@ function executeCode() {
     }
 }
 
-var stopfunc;
+var stopfunc = null;
 
 function setOnStop(func) {
 	if (!stopfunc) {
 		stopfunc = func;
-		enableButton("run", false);
-        enableButton("stop", true);
+		buttonEnable("run", false);
+		buttonEnable("stop", true);
 	}
+}
+
+function isRunning() {
+    return stopfunc != null;
 }
 
 // A way to stop running scripts (that support it!)
 function stop() {
-	if (stopfunc) {
+	if (isRunning()) {
 		try {
 			stopfunc();
 		} catch(e) {}
-		stopfunc = undefined;
-        enableButton("run", true);
-        enableButton("stop", false);
+		stopfunc = null;
+		buttonEnable("run", true);
+		buttonEnable("stop", false);
+		scrollOutput();
 	}
 }
 
@@ -1365,7 +1362,7 @@ function setEditorSourcesFromGist(files) {
     }
     var selectFile = firstCeylonFile || firstEditModeFile || firstFile;
     if (selectFile != null) {
-        selectEditor(editorId(selectFile));
+        selectTab(editorId(selectFile));
     }
     clearEditorDirtyStates();
     updateMenuState();
@@ -1412,6 +1409,54 @@ function createTab(newid, name, template) {
     var newTabContent = tabTemplate.clone();
     newTabContent[0].id = newid;
     $("#editorspane").append(newTabContent);
+    return newTabContent;
+}
+
+//Delete a tab (not the content pane! Remove that first)
+function deleteTab(id) {
+    // Remove the tab
+    var index = w2ui["editortabs"].get(id, true);
+    w2ui["editortabs"].remove(id);
+    // Select a new tab
+    var editors = getEditors();
+    var cnt = editors.length;
+    if (cnt > 0) {
+        var newindex = (index < cnt) ? index : cnt - 1;
+        var newid = editors[newindex].ceylonId;
+        selectTab(newid);
+    } else {
+        updateMenuState();
+    }
+    updateAdvancedState();
+}
+
+function canvasId() {
+    return "webide_canvas";
+}
+
+function createCanvas() {
+    var id = canvasId();
+    var elem = createTab(id, "Canvas", 'canvas-template');
+    elem[0].ceylonCanvas = elem.find("canvas")[0];
+    tabCloseable(id, function() {
+        stop();
+        deleteCanvas();
+    });
+    selectTab(id);
+}
+
+function deleteCanvas() {
+    var id = canvasId();
+    $("#" + id).remove();
+    deleteTab(id);
+}
+
+function openCanvasWindow() {
+    var id = canvasId();
+    if (w2ui["editortabs"].get(id) == null) {
+        createCanvas();
+    }
+    return $("#" + id)[0];
 }
 
 function createEditor(name) {
@@ -1489,13 +1534,17 @@ function getEditors() {
     return editors;
 }
 
-function selectEditor(id) {
+function selectTab(id) {
     w2ui["editortabs"].select(id);
     $("#editorspane > div").addClass("invis");
     getEditorDiv(id).removeClass("invis");
+    updateMenuState();
+    // If it's an editor set the focus to it
     var editor = getEditor(id);
-    editor.refresh();
-    editor.focus();
+    if (editor != null) {
+        editor.refresh();
+        editor.focus();
+    }
 }
 
 function isEditorDirty(id) {
@@ -1575,16 +1624,19 @@ function shouldCompile(files) {
     return JSON.stringify(files) != oldfiles || !transok;
 }
 
-function selectedEditorId() {
+function selectedTabId() {
     // First test is because w2ui keeps returning the previous
     // active state when all tabs have been deleted
     return (w2ui["editortabs"].tabs.length > 0) ? w2ui["editortabs"].active : null;
 }
 
 function focusSelectedEditor() {
-    var id = selectedEditorId();
+    var id = selectedTabId();
     if (id != null) {
-        getEditor(id).focus();
+        var editor = getEditor(id);
+        if (editor != null) {
+            editor.focus();
+        }
     }
 }
 
@@ -1646,7 +1698,9 @@ function deleteEditors() {
 // otherwise. Can have an optional list of editor ids to check
 // for dirty state (by default all editors are checked)
 function checkForChangesAndRun(func, negative, edids) {
-    if (isAnyEditorDirty(edids)) {
+    if (isRunning()) {
+        w2alert("Program is running, stop it first before doing anything else", "Program Running", negative);
+    } else if (isAnyEditorDirty(edids)) {
         var conf = w2confirm("This will discard any changes! Are you sure you want to continue?");
         conf.yes(func);
         if (negative != null) {
