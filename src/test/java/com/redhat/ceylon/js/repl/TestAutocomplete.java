@@ -30,7 +30,7 @@ public class TestAutocomplete {
     @Parameters
     public static Collection<Object[]> sources() {
         return Arrays.asList(new Object[][]{
-            {"void f(){pri", "print" },
+            {"void print(Anything val) {} void f(){pri", "print" },
             {"void f(){\"x\".ini", "initial" },
             {"String[] strings; st",  "strings" },
             {"void f(String? maybe){if (exists m",   "maybe" },

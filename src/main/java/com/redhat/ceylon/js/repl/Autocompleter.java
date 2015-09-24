@@ -2,7 +2,6 @@ package com.redhat.ceylon.js.repl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -10,7 +9,9 @@ import com.github.rjeschke.txtmark.Processor;
 import com.redhat.ceylon.compiler.js.AutocompleteVisitor;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
-import com.redhat.ceylon.compiler.typechecker.context.PhasedUnits;
+import com.redhat.ceylon.compiler.typechecker.tree.Node;
+import com.redhat.ceylon.compiler.typechecker.tree.Tree;
+import com.redhat.ceylon.js.util.DocUtils;
 import com.redhat.ceylon.model.typechecker.model.Annotation;
 import com.redhat.ceylon.model.typechecker.model.Class;
 import com.redhat.ceylon.model.typechecker.model.ClassOrInterface;
@@ -19,14 +20,11 @@ import com.redhat.ceylon.model.typechecker.model.DeclarationWithProximity;
 import com.redhat.ceylon.model.typechecker.model.Function;
 import com.redhat.ceylon.model.typechecker.model.Parameter;
 import com.redhat.ceylon.model.typechecker.model.ParameterList;
-import com.redhat.ceylon.model.typechecker.model.Type;
 import com.redhat.ceylon.model.typechecker.model.Setter;
+import com.redhat.ceylon.model.typechecker.model.Type;
 import com.redhat.ceylon.model.typechecker.model.TypeParameter;
 import com.redhat.ceylon.model.typechecker.model.TypedDeclaration;
 import com.redhat.ceylon.model.typechecker.model.Value;
-import com.redhat.ceylon.compiler.typechecker.tree.Node;
-import com.redhat.ceylon.compiler.typechecker.tree.Tree.QualifiedMemberExpression;
-import com.redhat.ceylon.js.util.DocUtils;
 
 /** A visitor that can return a list of suggestions given a location on the AST.
  * 
@@ -53,22 +51,49 @@ public class Autocompleter extends AutocompleteVisitor {
     /** Looks for declarations matching the node's text and returns them as strings. */
     public List<Map<String,Object>> getCompletionsAsMap() {
         Map<String, DeclarationWithProximity> comps = new HashMap<String, DeclarationWithProximity>();
-        if (getNodeAtLocation() != null) {
-            HashSet<PhasedUnit> units = new HashSet<PhasedUnit>();
-            HashSet<com.redhat.ceylon.model.typechecker.model.Package> packs = new HashSet<>();
-            if (getNodeAtLocation() instanceof QualifiedMemberExpression) {
-                QualifiedMemberExpression exp = (QualifiedMemberExpression)getNodeAtLocation();
+        Node node = getNodeAtLocation();
+        if (node != null) {
+//            HashSet<PhasedUnit> units = new HashSet<PhasedUnit>();
+//            HashSet<com.redhat.ceylon.model.typechecker.model.Package> packs = new HashSet<>();
+            if (node instanceof Tree.QualifiedMemberOrTypeExpression) {
+                Tree.QualifiedMemberOrTypeExpression exp = (Tree.QualifiedMemberOrTypeExpression)node;
                 Type type = exp.getPrimary().getTypeModel();
                 Map<String, DeclarationWithProximity> c2 = type.getDeclaration().getMatchingMemberDeclarations(
-                        getNodeAtLocation().getUnit(), null, getTextAtLocation(), 0);
+                        node.getUnit(), exp.getScope(), getTextAtLocation(), 0);
                 comps.putAll(c2);
-            } else {
+            }
+            else if (node instanceof Tree.BaseMemberOrTypeExpression) {
+                final Tree.BaseMemberOrTypeExpression exp = (Tree.BaseMemberOrTypeExpression)node;
+                Map<String, DeclarationWithProximity> c2 = exp.getScope().getMatchingDeclarations(
+                        node.getUnit(), getTextAtLocation(), 0);
+                comps.putAll(c2);
+            }
+            else if (node instanceof Tree.BaseType) {
+                final Tree.BaseType exp = (Tree.BaseType)node;
+                Map<String, DeclarationWithProximity> c2 = exp.getScope().getMatchingDeclarations(
+                        node.getUnit(), getTextAtLocation(), 0);
+                comps.putAll(c2);
+            }
+            else if (node instanceof Tree.QualifiedType) {
+                final Tree.QualifiedType exp = (Tree.QualifiedType)node;
+                Type type = exp.getOuterType().getTypeModel();
+                Map<String, DeclarationWithProximity> c2 = type.getDeclaration().getMatchingMemberDeclarations(
+                        node.getUnit(), exp.getScope(), getTextAtLocation(), 0);
+                comps.putAll(c2);
+            }
+            else if (node instanceof Tree.Variable) {
+                final Tree.Variable exp = (Tree.Variable)node;
+                Map<String, DeclarationWithProximity> c2 = exp.getScope().getMatchingDeclarations(
+                        node.getUnit(), getTextAtLocation(), 0);
+                comps.putAll(c2);
+            }
+            /*else {
                 for (PhasedUnits pus : checker.getPhasedUnitsOfDependencies()) {
                     for (PhasedUnit pu : pus.getPhasedUnits()) {
                         addCompletions(comps, units, packs, pu);
                     }
                 }
-            }
+            }*/
         }
         return translateCompletions(comps);
     }
