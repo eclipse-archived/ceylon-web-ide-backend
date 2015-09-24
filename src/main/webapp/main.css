@@ -370,14 +370,24 @@ body.bp p code, body.bp ul code, body.bp ol code {
 /* line 152 */
 .header-bar {
   background: url("http://ceylon-lang.org/images/bkg_header.png") repeat-x;
+  height: 100%;
 }
 
 /* line 156 */
 #header {
-  height: 100px;
-  width: 950px;
+  height: 100%;
+  width: 100%;
   margin: auto;
 }
+
+#header-bar-small #header {
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  padding-top: 5px;
+  padding-left: 15px;
+}
+
 /* line 162 */
 #header #header-logo {
   background: url("http://ceylon-lang.org/images/ceylon-logo.png") no-repeat 0px 0px;
@@ -462,7 +472,7 @@ div.ceylonblock ul {
 
 /* line 726 */
 #footer {
-  width: 950px;
+  width: 100%;
   margin: 0 auto;
   overflow: hidden;
   *zoom: 1;
@@ -481,7 +491,7 @@ div.ceylonblock ul {
   display: inline;
   float: left;
   margin-right: 0;
-  width: 950px;
+  width: 100%;
   max-height: 65px;
 }
 /* line 147, /usr/lib64/ruby/gems/1.8/gems/compass-0.11.7/frameworks/blueprint/stylesheets/blueprint/_grid.scss */

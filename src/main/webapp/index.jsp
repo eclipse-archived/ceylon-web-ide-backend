@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta content="width=device-width,maximum-scale=1.0,initial-scale=1.0,minimum-scale=0.9,user-scalable=no" name="viewport">
     <meta charset="utf-8">
     <title>Ceylon Web IDE</title>
     
@@ -55,8 +56,15 @@
 
 <div id="all"></div>
 
-<div id="holder">
+<div id="holder" class ="invis">
 
+<!--  Header bar for mobile devices -->
+<div id="header-bar-small" class="header-bar"><div id="header">
+Ceylon Web IDE
+</div>
+</div><!-- header-bar-small -->
+
+<!--  Header bar for large screens -->
 <div id="header-bar" class="header-bar"><div id="header">
   <a id="header-logo" href="."><h1 id="ceylon">Ceylon</h1></a>
   <div id="header-tagline">

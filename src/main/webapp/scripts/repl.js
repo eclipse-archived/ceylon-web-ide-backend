@@ -23,6 +23,10 @@ var defaultImportSrc = modulePrefix +
 var uri = new URI();
 var uriparams = uri.search(true);
 
+var isLimitedWidth = window.matchMedia("only screen and (max-width: 760px)").matches;
+var isLimitedHeight = window.matchMedia("only screen and (max-height: 760px)").matches;
+var isMobile = isLimitedWidth || isLimitedHeight;
+
 var live_tc = {
     _timeout: 3000,
     _status: "disabled",
@@ -133,8 +137,8 @@ $(document).ready(function() {
         name: 'all',
         padding: 4,
         panels: [
-            { type: 'top', size: 102, style: zstyle, content: 'top' },
-            { type: 'main', minSize: 100, style: zstyle, content: 'main',
+            { type: 'top', size: isLimitedHeight ? 40 : 102, style: zstyle, content: 'top' },
+            { type: 'main', minSize: 180, style: zstyle, content: 'main',
                 toolbar: {
                     items: [
                         { type: 'menu',  id: 'menu', hint: 'Manage your code', icon: 'fa fa-bars',
@@ -863,6 +867,10 @@ function buttonShow(name, show) {
 
 function buttonSetIcon(name, icon) {
     w2ui["all"].get("main").toolbar.set(name, { icon: icon });
+}
+
+function buttonSetCaption(name, caption) {
+    w2ui["all"].get("main").toolbar.set(name, { caption: caption });
 }
 
 function buttonCheck(name, check) {
