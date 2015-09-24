@@ -440,6 +440,12 @@ div.ceylonblock li {
 div.ceylonblock ul {
   margin-bottom: 1em;
 }
+#sidebarhandle {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    z-index: 10000;
+}
 
 /* line 684 */
 .expandable {

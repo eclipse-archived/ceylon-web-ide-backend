@@ -110,11 +110,11 @@
 <div id="output"><iframe id="outputframe" src="runner.jsp"></iframe></div>
 
 <div id="sidebar" class="trompon ceylonblock">
+<div id="sidebarhandle" class="w2ui-toolbar"><table cellpadding="0" cellspacing="0" title="Hide side bar" class="w2ui-button" onclick="var el=w2ui['all_main_toolbar']; if (el) el.click('resize', event);" onmouseover="$(this).addClass('over');" onmouseout="$(this).removeClass('over').removeClass('down');" onmousedown="$(this).addClass('down');" onmouseup="$(this).removeClass('down');"><tbody><tr><td><table cellpadding="1" cellspacing="0"><tbody><tr><td><div class="w2ui-tb-image"><span class="fa fa-angle-double-right"></span></div></td></tr></tbody></table></td></tr></tbody></table></div>
 <div id="sidebarblock" class="sidebar-block">
     <div>
     </div>
 </div>
-
 </div> <!-- sidebar -->
 
 <div id='footer-bar' class='footer-bar'>

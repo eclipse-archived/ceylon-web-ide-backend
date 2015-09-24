@@ -155,8 +155,8 @@ $(document).ready(function() {
                                 { text: 'Disconnect from GitHub', id: 'disconnect', icon: 'fa fa-scissors' }
                             ]
                         },
-                        { type: 'button',  id: 'resize', hint: 'Hide side bar', icon: 'fa fa-arrows-alt' },
-                        { type: 'button',  id: 'resized', hint: 'Show side bar', icon: 'fa fa-columns', hidden: true },
+                        { type: 'button',  id: 'resize', hint: 'Hide side bar', icon: 'fa fa-arrows-alt', hidden: true },
+                        { type: 'button',  id: 'resized', hint: 'Show side bar', icon: 'fa fa-angle-double-left', hidden: !isLimitedWidth },
                     ],
                     onClick: function (event) {
                         if (event.target == "run") {
@@ -176,9 +176,9 @@ $(document).ready(function() {
                         } else if (event.target == "connected:disconnect") {
                             handleGitHubDisconnect();
                         } else if (event.target == "resize") {
-                            handleResize();
+                            doMaximize();
                         } else if (event.target == "resized") {
-                            handleResized();
+                            doUnmaximize();
                         } else if (event.target == "menu:newfile") {
                             handleNewFile();
                         } else if (event.target == "menu:renamefile") {
@@ -200,17 +200,25 @@ $(document).ready(function() {
                 }
             },
             { type: 'preview', size: "30%", minSize: 100, resizable: true, style: zstyle, title: 'Program output', content: 'preview' },
-            { type: 'right', size: 260, minSize: 200, resizable: true, style: pstyle, content: 'right' },
-            { type: 'bottom', size: 67, style: zstyle, content: 'bottom' }
+            { type: 'right', size: 260, minSize: 200, resizable: true, style: pstyle, content: 'right', hidden: isLimitedWidth },
+            { type: 'bottom', size: 67, style: zstyle, content: 'bottom', hidden: isLimitedHeight }
         ]
     });
     
     // Now fill the layout with the elements hidden on the page
-    w2ui["all"].content("top", jqContent($("#header-bar")));
-    w2ui["all"].content("main", jqContent($("#core-page")));
-    w2ui["all"].content("preview", jqContent($("#output")));
-    w2ui["all"].content("right", jqContent($("#sidebar")));
-    w2ui["all"].content("bottom", jqContent($("#footer-bar")));
+    w2ui.all.content("top", isLimitedHeight ? jqContent($("#header-bar-small")) : jqContent($("#header-bar")));
+    w2ui.all.content("main", jqContent($("#core-page")));
+    w2ui.all.content("preview", jqContent($("#output")));
+    w2ui.all.content("right", jqContent($("#sidebar")));
+    w2ui.all.content("bottom", jqContent($("#footer-bar")));
+    
+    w2ui.all.on({
+        type: "resize",
+        execute: "after"
+    }, function(event, data) {
+        handleResizeMain(event, data);
+        handleResizeSidebar(event, data);
+    });
     
     $('#share_src').show();
     $('#save_src').hide();
@@ -243,8 +251,8 @@ $(document).ready(function() {
         // Retrieve code from the given sample id
         editGist(uriparams.gist);
     } else {
-        editExample('hello_world');
         window.outputReady = function() {
+            editExample('hello_world');
             window.outputReady = null;
             startSpinner();
         	runCode('print("Ceylon ``language.version`` \\"``language.versionName``\\"");');
@@ -263,6 +271,52 @@ function jqContent(jqElem) {
             $(this.box).empty();
             $(this.box).append(jqElem);
         }
+    }
+}
+
+function handleResizeMain(event, data) {
+    var toolbarContractSize = 570;
+    var toolbarMinimalSize = 333;
+    var main = w2ui.all.get("main");
+    var newwidth = main.width;
+    if (newwidth < toolbarContractSize) {
+        buttonSetCaption("run", "");
+        buttonSetCaption("stop", "");
+        buttonSetCaption("reset", "");
+        buttonSetCaption("share", "");
+        buttonSetCaption("advanced", "Adv");
+        buttonSetCaption("help", "");
+        buttonSetCaption("connect", "");
+        buttonSetCaption("connected", "");
+    } else if (newwidth >= toolbarContractSize) {
+        buttonSetCaption("run", "Run");
+        buttonSetCaption("stop", "Stop");
+        buttonSetCaption("reset", "Reset");
+        buttonSetCaption("share", "Share");
+        buttonSetCaption("advanced", "Advanced");
+        buttonSetCaption("help", "Help");
+        buttonSetCaption("connect", "Connect");
+        buttonSetCaption("connected", "Connected");
+    }
+    if (newwidth < toolbarMinimalSize) {
+        buttonShow("share", false);
+        buttonShow("advanced", false);
+        buttonShow("help", false);
+        buttonShow("connect", false);
+        buttonShow("connected", false);
+    } else if (newwidth >= toolbarMinimalSize) {
+        buttonShow("share", true);
+        buttonShow("advanced", true);
+        buttonShow("help", true);
+        buttonShow("connect", !isGitHubConnected());
+        buttonShow("connected", isGitHubConnected());
+    }
+}
+
+function handleResizeSidebar(event, data) {
+    var dx = $("#sidebar").innerWidth() - $("#sidebarblock").outerWidth();
+    if (dx >= 0) {
+        $("#sidebarhandle").css("right", dx + "px");
     }
 }
 
@@ -290,19 +344,14 @@ function handleHelpClick() {
     $('#tb_all_main_toolbar_item_help').w2overlay({ html: $('#help-message').html() });
 }
 
-function handleResize() {
+function doMaximize() {
     buttonShow("resize", false);
     buttonShow("resized", true);
-    w2ui.all.hide("top");
-    w2ui.all.hide("bottom");
     w2ui.all.hide("right");
 }
 
-function handleResized() {
-    buttonShow("resize", true);
+function doUnmaximize() {
     buttonShow("resized", false);
-    w2ui.all.show("top");
-    w2ui.all.show("bottom");
     w2ui.all.show("right");
 }
 
@@ -781,6 +830,7 @@ function listGists(page) {
         if (selectedGist != null) {
             markGistSelected(selectedGist);
         }
+        handleResizeSidebar();
     }
     
     // Check that we have a valid GitHub token
