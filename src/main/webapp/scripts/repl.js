@@ -929,10 +929,12 @@ function handleAdvanced(event) {
 function applyAdvanced() {
     var editors = getEditors();
     $.each(editors, function (index, editor) {
-        editor.execCommand("selectAll");
-        editor.execCommand("indentMore");
-        var src = wrapCode(getEditorCode(editor.ceylonId, true), true);
-        setEditorCode(editor.ceylonId, src, true);
+        if (editor.ceylonName.endsWith(".ceylon")) {
+            editor.execCommand("selectAll");
+            editor.execCommand("indentMore");
+            var src = wrapCode(getEditorCode(editor.ceylonId, true), true);
+            setEditorCode(editor.ceylonId, src, true);
+        }
     });
     newModuleFile();
     live_tc.ready();
@@ -950,11 +952,13 @@ function undoAdvanced() {
     fileDeleted = tmp;
     var editors = getEditors();
     $.each(editors, function (index, editor) {
-        var src = unwrapCode(getEditorCode(editor.ceylonId, true), true);
-        setEditorCode(editor.ceylonId, src, true);
-        editor.execCommand("selectAll");
-        editor.execCommand("indentLess");
-        editor.setCursor(0);
+        if (editor.ceylonName.endsWith(".ceylon")) {
+            var src = unwrapCode(getEditorCode(editor.ceylonId, true), true);
+            setEditorCode(editor.ceylonId, src, true);
+            editor.execCommand("selectAll");
+            editor.execCommand("indentLess");
+            editor.setCursor(0);
+        }
     });
     updateMenuState();
     // Need to put this in a timeout or the update
