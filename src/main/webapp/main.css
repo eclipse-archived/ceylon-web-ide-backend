@@ -429,6 +429,9 @@ div.ceylonblock {
   font-size: 14px;
   text-shadow: white 1px 1px 0px;
 }
+div.ceylonpopup {
+    max-width: 300px;
+}
 /* line 601 */
 div.ceylonblock .sidebar-block {
   width: 100%;
