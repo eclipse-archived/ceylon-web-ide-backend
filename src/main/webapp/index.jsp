@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta content="width=device-width,maximum-scale=1.0,initial-scale=1.0,minimum-scale=0.9,user-scalable=yes" name="viewport">
+    <meta content="width=device-width,maximum-scale=2.0,initial-scale=1.0,minimum-scale=0.5,user-scalable=yes" name="viewport">
     <meta charset="utf-8">
     <title>Ceylon Web IDE</title>
     
