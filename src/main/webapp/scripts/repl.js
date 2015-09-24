@@ -636,7 +636,7 @@ function handleNewFile() {
 
 function newFile(name) {
     var editor;
-    if (name.endsWith(".ceylon") && countCeylonFiles() >= 1) {
+    if (!isAdvancedModeActive() && name.endsWith(".ceylon") && countCeylonFiles() >= 1) {
         // We switch to advanced mode
         applyAdvanced();
         if (name == "module.ceylon") {
