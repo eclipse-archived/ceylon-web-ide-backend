@@ -159,6 +159,7 @@ $(document).ready(function() {
                                 { text: 'Disconnect from GitHub', id: 'disconnect', icon: 'fa fa-scissors' }
                             ]
                         },
+                        { type: 'break',  id: 'break2', hidden: true },
                         { type: 'button',  id: 'resize', hint: 'Hide side bar', icon: 'fa fa-arrows-alt', hidden: true },
                         { type: 'button',  id: 'resized', hint: 'Show side bar', icon: 'fa fa-angle-double-left', hidden: !isLimitedWidth },
                     ],
@@ -349,12 +350,13 @@ function handleHelpClick() {
 }
 
 function doMaximize() {
-    buttonShow("resize", false);
+    buttonShow("break2", true);
     buttonShow("resized", true);
     w2ui.all.hide("right");
 }
 
 function doUnmaximize() {
+    buttonShow("break2", false);
     buttonShow("resized", false);
     w2ui.all.show("right");
 }
