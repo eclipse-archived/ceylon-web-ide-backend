@@ -476,7 +476,7 @@ function saveSource(title) {
     var files = getGistFiles();
     var data = {
         "description": "Ceylon Web Runner: " + title,
-        "public": true,
+        "public": false,
         "files": files
     };
     github.createGist({
