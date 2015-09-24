@@ -122,7 +122,7 @@ $(document).ready(function() {
     });
 
     // Create the main layout
-    var pstyle = 'border: 1px solid #dfdfdf; padding: 0px;';
+    var pstyle = 'border: 0px; padding: 0px; overflow: hidden;';
     var zstyle = 'border: 1px solid #dfdfdf; padding: 0px; overflow: hidden;';
     
     $('#editortabs').w2tabs({
@@ -137,7 +137,7 @@ $(document).ready(function() {
         name: 'all',
         padding: 4,
         panels: [
-            { type: 'top', size: isLimitedHeight ? 40 : 102, style: zstyle, content: 'top' },
+            { type: 'top', size: isLimitedHeight ? 40 : 102, style: pstyle, content: 'top' },
             { type: 'main', minSize: 180, style: zstyle, content: 'main',
                 toolbar: {
                     items: [
@@ -205,7 +205,7 @@ $(document).ready(function() {
                 }
             },
             { type: 'preview', size: "30%", minSize: 100, resizable: true, style: zstyle, title: 'Program output', content: 'preview' },
-            { type: 'right', size: 260, minSize: 200, resizable: true, style: pstyle, content: 'right', hidden: isLimitedWidth },
+            { type: 'right', size: 260, minSize: 200, resizable: true, style: zstyle, content: 'right', hidden: isLimitedWidth },
             { type: 'bottom', size: 67, style: zstyle, content: 'bottom', hidden: isLimitedHeight }
         ]
     });
