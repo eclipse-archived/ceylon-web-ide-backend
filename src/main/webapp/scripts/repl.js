@@ -1623,7 +1623,9 @@ function selectTab(id) {
     var editor = getEditor(id);
     if (editor != null) {
         editor.refresh();
-        editor.focus();
+        if (!isMobile) {
+            editor.focus();
+        }
     }
 }
 
@@ -1714,7 +1716,7 @@ function focusSelectedEditor() {
     var id = selectedTabId();
     if (id != null) {
         var editor = getEditor(id);
-        if (editor != null) {
+        if (editor != null && !isMobile) {
             editor.focus();
         }
     }
