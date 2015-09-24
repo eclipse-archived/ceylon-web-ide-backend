@@ -151,8 +151,15 @@ Ceylon Web IDE
 <div id="help-message"><div id="help-message-content" class="ceylonblock ceylonpopup">
 <h3>Editor keyboard shortcuts</h3>
 <ul>
+<% if (System.getProperty("os.name").toLowerCase().indexOf("mac") >= 0) { %>
+    <li>Autocompletion: <code>Cmd-.</code>
+    <li>Documentation: <code>Ctrl-D</code>
+    <li>Save All: <code>Ctrl-S</code>
+<% } else { %>
     <li>Autocompletion: <code>Ctrl-Space</code>
     <li>Documentation: <code>Ctrl-D</code>
+    <li>Save All: <code>Ctrl-S</code>
+<% } %>
 </ul>
 <h3>GitHub connect</h3>
 Use the <i class="fa fa-github"></i> button to connect to your GitHub account

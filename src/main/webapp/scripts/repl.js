@@ -1556,10 +1556,11 @@ function createEditor(name) {
         //highlightSelectionMatches: true,
         extraKeys: {
             "Ctrl-S": function(cm) { handleSaveAll(); },
+            "Cmd-S": function(cm) { handleSaveAll(); },
             "Ctrl-D": function(cm) { fetchDoc(cm); },
             "Cmd-D": function(cm) { fetchDoc(cm); },
             "Ctrl-Space": function() { complete(editor); },
-            "Cmd-Space": function() { complete(editor); }
+            "Cmd-.": function() { complete(editor); }
         }
     });
     editor.ceylonId = newid;
