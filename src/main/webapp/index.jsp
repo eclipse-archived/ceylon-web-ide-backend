@@ -152,9 +152,9 @@ Ceylon Web IDE
 <h3>Editor keyboard shortcuts</h3>
 <ul>
 <% if (System.getProperty("os.name").toLowerCase().indexOf("mac") >= 0) { %>
-    <li>Autocompletion: <code>Cmd-.</code>
-    <li>Documentation: <code>Ctrl-D</code>
-    <li>Save All: <code>Ctrl-S</code>
+    <li>Autocompletion: <code>Ctrl-Space</code>
+    <li>Documentation: <code>Cmd-D</code>
+    <li>Save All: <code>Cmd-S</code>
 <% } else { %>
     <li>Autocompletion: <code>Ctrl-Space</code>
     <li>Documentation: <code>Ctrl-D</code>
