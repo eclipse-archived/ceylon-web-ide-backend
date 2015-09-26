@@ -1496,6 +1496,8 @@ function editorMode(name) {
         return "ceylon";
     } else if (name.endsWith(".js")) {
         return "javascript";
+    } else if (name.endsWith(".json")) {
+        return {name: "javascript", json: true};
     } else if (name.endsWith(".md")) {
         return "markdown";
     } else {
