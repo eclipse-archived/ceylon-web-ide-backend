@@ -470,9 +470,6 @@ function saveSource(title) {
         createComment(gist);
         updateGists();
     }
-    function onError(xhr, status, err) {
-        printError("Error storing Gist: " + (err?err:status));
-    }
     var files = getGistFiles();
     var data = {
         "description": "Ceylon Web Runner: " + title,
@@ -482,8 +479,20 @@ function saveSource(title) {
     github.createGist({
         data: data,
         success: onSuccess,
-        error: onError
+        error: onStoreGistError
     });
+}
+
+function onStoreGistError(xhr, status, err) {
+    printError("Error storing Gist: " + (err?err:status));
+    if (xhr.status == 404) {
+        printError(
+            "This can happen when you are trying to save a Gist\n" +
+            "that has been deleted in the mean time or you might\n" +
+            "be trying to change a Gist that is not owned by you.\n" +
+            "In that case use 'Save As' to create your own\n" +
+            "personal copy.");
+    }
 }
 
 // Creates the proper "files" element necessary for creating and
@@ -557,16 +566,13 @@ function renameGist(title) {
         selectGist(gist);
         updateGists();
     }
-    function onError(xhr, status, err) {
-        printError("Error storing Gist: " + (err?err:status));
-    }
     var data = {
         "description": "Ceylon Web Runner: " + title,
     };
     selectedGist.edit({
         data: data,
         success: onSuccess,
-        error: onError
+        error: onStoreGistError
     });
 }
 
@@ -589,9 +595,6 @@ function updateSource() {
         selectGist(gist);
         updateGists();
     }
-    function onError(xhr, status, err) {
-        printError("Error storing Gist: " + (err?err:status));
-    }
     var files = getGistFiles();
     var data = {
             "files": files
@@ -599,7 +602,7 @@ function updateSource() {
     selectedGist.edit({
         data: data,
         success: onSuccess,
-        error: onError
+        error: onStoreGistError
     });
 }
 
@@ -774,8 +777,19 @@ function deleteGist() {
         updateGists();
     }
     selectedGist.remove({
-        success: onRemove
+        success: onRemove,
+        error: onDeleteGistError
     });
+}
+
+function onDeleteGistError(xhr, status, err) {
+    printError("Error deleting Gist: " + (err?err:status));
+    if (xhr.status == 404) {
+        printError(
+            "This can happen when you are trying to delete a Gist\n" +
+            "that was already deleted in the mean time or you might\n" +
+            "be trying to delete a Gist that is not owned by you.\n");
+    }
 }
 
 // Updates the user's list of available Gists
