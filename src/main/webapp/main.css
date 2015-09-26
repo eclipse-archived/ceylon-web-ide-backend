@@ -737,3 +737,13 @@ td.haserrors div.w2ui-tab:after {
     width: 100%;
     height: 100%;
 }
+
+.mdpreview {
+    background-color: white;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    padding-top: 15px;
+    padding-left: 15px;
+    padding-right: 15px;
+}

@@ -33,6 +33,7 @@
     <script type="text/javascript" src="scripts/jquery-cookie-1.4.1.js"></script>
     <script type="text/javascript" src="scripts/w2ui-1.4.3.min.js"></script>
     <script type="text/javascript" src="scripts/URI.min.js"></script>
+    <script type="text/javascript" src="scripts/marked.min.js"></script>
     <script type="text/javascript" src="scripts/github.js"></script>
     <script type="text/javascript" src="scripts/repl.js"></script>
     <link rel='stylesheet' type='text/css' href='autocomplete.css'/>
@@ -113,6 +114,9 @@ Ceylon Web IDE
 
 <!-- template for creating the canvas tab -->
 <div id="canvas-template" class="invis"><canvas></canvas></div>
+
+<!-- template for creating a preview tab -->
+<div id="preview-template" class="mdpreview invis"><div class="mdpreview-content"></div></div>
 
 <!-- output window -->    
 <div id="output"><iframe id="outputframe" src="runner.jsp"></iframe></div>

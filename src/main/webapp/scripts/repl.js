@@ -649,26 +649,29 @@ function handleNewFile() {
 }
 
 function newFile(name) {
-    var editor;
+    var neweditor;
     if (!isAdvancedModeActive() && name.endsWith(".ceylon") && countCeylonFiles() >= 1) {
         // We switch to advanced mode
         applyAdvanced();
         if (name == "module.ceylon") {
             // The switch to advanced mode will have created
             // this editor already, we just select it
-            editor = getEditor(editorId("module.ceylon"));
+            neweditor = getEditor(editorId("module.ceylon"));
         } else {
             // We still need to create the new file
-            editor = createEditor(name);
+            neweditor = createEditor(name);
         }
     } else {
-        editor = createEditor(name);
+        neweditor = createEditor(name);
     }
-    selectTab(editor.ceylonId);
-    updateEditorDirtyState(editor.ceylonId);
+    if (name.endsWith(".md")) {
+        createMarkdownView(neweditor.ceylonId);
+    }
+    selectTab(neweditor.ceylonId);
+    updateEditorDirtyState(neweditor.ceylonId);
     updateMenuState();
     updateAdvancedState();
-    return editor;
+    return neweditor;
 }
 
 function newModuleFile() {
@@ -751,6 +754,11 @@ function deleteFile(id) {
     if (div.length > 0) {
         div.remove();
         deleteTab(id);
+        var previewDiv = getPreviewDiv(id);
+        if (previewDiv != null && previewDiv.length > 0) {
+            previewDiv.remove();
+            deleteTab("preview_" + id);
+        }
     }
 }
 
@@ -834,13 +842,14 @@ function listUserGists(page) {
     
     function acceptGist(gist) {
         if (gist.data.description.startsWith("Ceylon Web Runner: ")) {
-            var show = false;
-            $.each(gist.data.files, function(idx, itm) {
-                if (idx.endsWith(".ceylon")) {
-                    show = true;
-                }
-            });
-            return show;
+//            var show = false;
+//            $.each(gist.data.files, function(idx, itm) {
+//                if (idx.endsWith(".ceylon")) {
+//                    show = true;
+//                }
+//            });
+//            return show;
+            return true;
         }
         return false;
     }
@@ -1494,7 +1503,7 @@ function setEditorSourcesFromGist(files) {
     var cnt = 0;
     var hasModule = false;
     var hasWrapped = false;
-    var firstFile, firstCeylonFile, firstEditModeFile;
+    var firstFile, firstCeylonFile, firstEditModeFile, readme;
     $.each(files, function(index, item) {
         if (editorAccepts(index)) {
             if (firstFile == null) {
@@ -1514,21 +1523,30 @@ function setEditorSourcesFromGist(files) {
                     && isWrapped(item.content)) {
                 hasWrapped = true;
             }
+            if (index == "README.md") {
+                readme = index;
+            }
             var neweditor = addSourceEditor(index, item.content);
             if (index == "module.ceylon") {
                 hasModule = true;
                 if (isWrappedModule(item.content)) {
                     markWrapperReadOnly(neweditor.ceylonId);
                 }
+            } else if (index.endsWith(".md")) {
+                createMarkdownView(neweditor.ceylonId);
             }
         }
     });
     if (!hasModule && (cnt > 1 || cnt == 1 && !hasWrapped)) {
         newModuleFile();
     }
-    var selectFile = firstCeylonFile || firstEditModeFile || firstFile;
+    var selectFile = readme || firstCeylonFile || firstEditModeFile || firstFile;
     if (selectFile != null) {
-        selectTab(editorId(selectFile));
+        var tabid = editorId(selectFile);
+        if (selectFile.endsWith(".md")) {
+            tabid = "preview_" + tabid;
+        }
+        selectTab(tabid);
     }
     clearEditorDirtyStates();
     updateMenuState();
@@ -1627,6 +1645,21 @@ function openCanvasWindow() {
     return $("#" + id)[0];
 }
 
+function createMarkdownView(editorId) {
+    var editor = getEditor(editorId);
+    var name = editor.ceylonName.substring(0, editor.ceylonName.length - 3);
+    createTab("preview_" + editorId, name + " <i class='fa fa-eye'></i>", 'preview-template');
+    updateMarkdownView(editorId);
+}
+
+function updateMarkdownView(editorId) {
+    var editor = getEditor(editorId);
+    var src = getEditorCode(editorId, true);
+    var mdHtml = marked(src);
+    $("#preview_" + editorId + " > div").html(mdHtml);
+    editor.ceylonPreviewUpdate = false;
+}
+
 function createEditor(name) {
     var newid = editorId(name);
     createTab(newid, name, 'editor-template');
@@ -1667,6 +1700,7 @@ function createEditor(name) {
         updateMenuState();
         updateAdvancedState();
         live_tc.postpone();
+        editor.ceylonPreviewUpdate = true;
     });
     editor.on('cursorActivity', function() {
         if (closePopups) {
@@ -1675,6 +1709,10 @@ function createEditor(name) {
         closePopups = undefined;
     });
     return editor;
+}
+
+function getPreviewDiv(id) {
+    return $("#preview_" + id);
 }
 
 function getEditorDiv(id) {
@@ -1696,7 +1734,7 @@ function getEditor(id) {
 
 function getEditors() {
     var editors = [];
-    var codemirrordivs = $("#editorspane > div > div");
+    var codemirrordivs = $("#editorspane > div > div.CodeMirror");
     codemirrordivs.each(function(index, item) {
         editors.push(item.CodeMirror);
     });
@@ -1714,6 +1752,14 @@ function selectTab(id) {
         editor.refresh();
         if (!isMobile) {
             editor.focus();
+        }
+    }
+    // If it's a preview check if it needs to be refreshed
+    if (id.startsWith("preview_")) {
+        var editorId = id.substring(8);
+        var editor = getEditor(editorId);
+        if (editor != null && editor.ceylonPreviewUpdate) {
+            updateMarkdownView(editorId);
         }
     }
 }
