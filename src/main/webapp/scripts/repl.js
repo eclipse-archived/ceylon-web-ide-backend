@@ -247,7 +247,7 @@ $(document).ready(function() {
     if (uriparams.set != null) {
         handleSelectSet(uriparams.set);
     } else {
-        addExamples();
+        handleSelectSet("6e03a3db46854ff825e9");
     }
     
     if (uriparams.src != null) {
