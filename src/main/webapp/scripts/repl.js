@@ -355,7 +355,7 @@ function updateMenuState() {
 }
 
 function handleHelpClick() {
-    $('#tb_all_main_toolbar_item_help').w2overlay({ html: $('#help-message').html() });
+    openHelpView();
 }
 
 function doMaximize() {
@@ -1676,6 +1676,34 @@ function updateMarkdownView(editorId) {
     var mdHtml = marked(src);
     $("#preview_" + editorId + " > div").html(mdHtml);
     editor.ceylonPreviewUpdate = false;
+}
+
+function helpViewId() {
+    return "webide_help";
+}
+
+function createHelpView() {
+    var id = helpViewId();
+    var elem = createTab(id, "Help", 'help-template');
+    tabCloseable(id, function() {
+        deleteHelpView();
+    });
+    selectTab(id);
+}
+
+function deleteHelpView() {
+    var id = helpViewId();
+    $("#" + id).remove();
+    deleteTab(id);
+}
+
+function openHelpView() {
+    var id = helpViewId();
+    if (w2ui["editortabs"].get(id) == null) {
+        createHelpView();
+    }
+    selectTab(id);
+    return $("#" + id)[0];
 }
 
 function createEditor(name) {

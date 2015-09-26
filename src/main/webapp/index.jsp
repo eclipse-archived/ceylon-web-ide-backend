@@ -118,6 +118,37 @@ Ceylon Web IDE
 <!-- template for creating a preview tab -->
 <div id="preview-template" class="mdpreview invis"><div class="mdpreview-content"></div></div>
 
+<!-- template for creating a help tab -->
+<div id="help-template" class="helptab invis"><div class="helptab-content ceylonblock">
+<h3>Editor keyboard shortcuts</h3>
+<ul>
+<% if (System.getProperty("os.name").toLowerCase().indexOf("mac") >= 0) { %>
+    <li>Autocompletion: <code>Ctrl-Space</code>
+    <li>Documentation: <code>Cmd-D</code>
+    <li>Save All: <code>Cmd-S</code>
+<% } else { %>
+    <li>Autocompletion: <code>Ctrl-Space</code>
+    <li>Documentation: <code>Ctrl-D</code>
+    <li>Save All: <code>Ctrl-S</code>
+<% } %>
+</ul>
+<h3>GitHub connect</h3>
+Use the <i class="fa fa-github"></i> button to connect to your GitHub account
+so you can store and retrieve your code.
+<h3>Sharing your code with others</h3>
+Click the <i class="fa fa-share"></i> button and a window will appear with
+links that either lead to this page pre-filled with the code you're currently
+editing (the code needs to be saved on GitHub first or to GitHub itself where
+you can manage the code directly.
+<h3>Advanced mode</h3>
+By default you're editing in "Simplified" mode, this means that you get just
+a single source file where you can immediately start typing Ceylon code without
+having to care or even know about the requirements for a full-fledged program.
+But it's comes with a couple of limitations like not being able to import other
+modules. For this you need to switch to "Advanced" mode. NB: once you switch
+to advanced mode and start making changes you most likely cannot switch back!
+</div></div>
+
 <!-- output window -->    
 <div id="output"><iframe id="outputframe" src="runner.jsp"></iframe></div>
 
@@ -151,36 +182,6 @@ Ceylon Web IDE
         </div>
     </div>
 </div>
-
-<div id="help-message"><div id="help-message-content" class="ceylonblock ceylonpopup">
-<h3>Editor keyboard shortcuts</h3>
-<ul>
-<% if (System.getProperty("os.name").toLowerCase().indexOf("mac") >= 0) { %>
-    <li>Autocompletion: <code>Ctrl-Space</code>
-    <li>Documentation: <code>Cmd-D</code>
-    <li>Save All: <code>Cmd-S</code>
-<% } else { %>
-    <li>Autocompletion: <code>Ctrl-Space</code>
-    <li>Documentation: <code>Ctrl-D</code>
-    <li>Save All: <code>Ctrl-S</code>
-<% } %>
-</ul>
-<h3>GitHub connect</h3>
-Use the <i class="fa fa-github"></i> button to connect to your GitHub account
-so you can store and retrieve your code.
-<h3>Sharing your code with others</h3>
-Click the <i class="fa fa-share"></i> button and a window will appear with
-links that either lead to this page pre-filled with the code you're currently
-editing (the code needs to be saved on GitHub first or to GitHub itself where
-you can manage the code directly.
-<h3>Advanced mode</h3>
-By default you're editing in "Simplified" mode, this means that you get just
-a single source file where you can immediately start typing Ceylon code without
-having to care or even know about the requirements for a full-fledged program.
-But it's comes with a couple of limitations like not being able to import other
-modules. For this you need to switch to "Advanced" mode. NB: once you switch
-to advanced mode and start making changes you most likely cannot switch back!
-</div></div>
 
 <pre id="result" class="invis">
 </pre>
