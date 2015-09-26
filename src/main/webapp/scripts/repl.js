@@ -247,6 +247,8 @@ $(document).ready(function() {
     if (uriparams.set != null) {
         handleSelectSet(uriparams.set);
     } else {
+        // This is the default set of examples stored in our
+        // special "ceylonwebide" GitHub account
         handleSelectSet("6e03a3db46854ff825e9");
     }
     
