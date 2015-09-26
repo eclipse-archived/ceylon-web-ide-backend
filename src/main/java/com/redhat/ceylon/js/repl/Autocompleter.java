@@ -48,7 +48,13 @@ public class Autocompleter extends AutocompleteVisitor {
         });
     }
 
-    /** Looks for declarations matching the node's text and returns them as strings. */
+    /** Looks for declarations matching the node's text and returns them as strings. 
+     * 
+     *  Note that this method is just a very poor-quality reimplementation of the
+     *  method IdeCompletionManager.getProposals(). (We should find some way to share
+     *  that code.)
+     *  
+     * */
     public List<Map<String,Object>> getCompletionsAsMap() {
         Map<String, DeclarationWithProximity> comps = new HashMap<String, DeclarationWithProximity>();
         Node node = getNodeAtLocation();
