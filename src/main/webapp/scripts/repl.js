@@ -340,7 +340,7 @@ function getMenuItems() {
         { text: 'New File...', id: 'newfile', icon: 'fa fa-file-o' },
         { text: 'Rename File...', id: 'renamefile', icon: 'fa fa-pencil', disabled: !editorSelected },
         { text: 'Delete File', id: 'deletefile', icon: 'fa fa-file-excel-o', disabled: !editorSelected },
-        { text: 'New Project...', id: 'new', icon: 'fa fa-files-o' },
+        { text: 'New Project (Gist)...', id: 'new', icon: 'fa fa-files-o' },
         { text: 'Rename Project...', id: 'rename', icon: 'fa fa-pencil', disabled: !hasGist, hidden: !isGitHubConnected() },
         { text: 'Save All', id: 'saveall', icon: 'fa fa-floppy-o', disabled: !hasGist || (cnt == 0) || !isAnyEditorDirty(), hidden: !isGitHubConnected() },
         { text: 'Save As...', id: 'saveas', icon: 'fa fa-files-o', disabled: (cnt == 0) },
