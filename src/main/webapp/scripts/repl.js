@@ -644,7 +644,23 @@ function shareSource() {
 function handleNewFile() {
     var suggestion = suggestFileName();
     askFileName("New File", suggestion, true, function(newname) {
-        newFile(newname);
+        if (!isAdvancedModeActive()
+                && countCeylonFiles() == 1
+                && newname.endsWith(".ceylon")) {
+            // Creating a second .ceylon file when in "simplified"
+            // mode means we'll have to switch to "advanced" mode.
+            // Let's explain this to the user and give them the
+            // opportunity to abort
+            w2confirm('Adding a second ".ceylon" file means that we ' +
+                    'have to switch to "advanced" mode where you cannot ' +
+                    'simply type statements anymore but you will have ' +
+                    'to write proper Ceylon code. Are you sure you ' +
+                    'want to continue?').yes(function() {
+                        newFile(newname);
+                    });
+        } else {
+            newFile(newname);
+        }
     });
 }
 
