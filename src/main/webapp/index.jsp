@@ -28,6 +28,7 @@
     <!--script type="text/javascript" src="scripts/match-highlighter.js" charset="utf-8"></script-->
     <script type="text/javascript" src="scripts/matchbrackets.js" charset="utf-8"></script>
     <link rel="stylesheet" href="scripts/codemirror.css" />
+    <link rel="stylesheet" href="scripts/cm-ceylon.css" />
     <script type="text/javascript" src="scripts/jquery-1.11.1.min.js"></script>
     <script type="text/javascript" src="scripts/jquery-ui-1.11.2.min.js"></script>
     <script type="text/javascript" src="scripts/jquery-cookie-1.4.1.js"></script>
@@ -44,7 +45,7 @@
 
 </head>
 
-<body class="bp">
+<body>
 
 <div id="fb-root"></div>
 <script>(function(d, s, id) {
@@ -60,13 +61,13 @@
 <div id="holder" class ="invis">
 
 <!--  Header bar for mobile devices -->
-<div id="header-bar-small" class="header-bar"><div id="header">
+<div id="header-bar-small" class="bp header-bar"><div id="header">
 Ceylon Web IDE
 </div>
 </div><!-- header-bar-small -->
 
 <!--  Header bar for large screens -->
-<div id="header-bar" class="header-bar"><div id="header">
+<div id="header-bar" class="bp header-bar"><div id="header">
   <a id="header-logo" href="."><h1 id="ceylon">Ceylon</h1></a>
   <div id="header-tagline">
     <p id="say_more_more_clearly">Say more, more clearly</p>
@@ -116,10 +117,10 @@ Ceylon Web IDE
 <div id="canvas-template" class="invis"><canvas></canvas></div>
 
 <!-- template for creating a preview tab -->
-<div id="preview-template" class="mdpreview invis"><div class="mdpreview-content"></div></div>
+<div id="preview-template" class="bp mdpreview invis"><div class="mdpreview-content"></div></div>
 
 <!-- template for creating a help tab -->
-<div id="help-template" class="helptab invis"><div class="helptab-content ceylonblock">
+<div id="help-template" class="bp helptab invis"><div class="helptab-content ceylonblock">
 <h3>Editor keyboard shortcuts</h3>
 <ul>
 <% if (System.getProperty("os.name").toLowerCase().indexOf("mac") >= 0) { %>
@@ -152,7 +153,7 @@ to advanced mode and start making changes you most likely cannot switch back!
 <!-- output window -->    
 <div id="output"><iframe id="outputframe" src="runner.jsp"></iframe></div>
 
-<div id="sidebar" class="trompon ceylonblock">
+<div id="sidebar" class="bp trompon ceylonblock">
 <div id="sidebarhandle" class="w2ui-toolbar"><table cellpadding="0" cellspacing="0" title="Hide side bar" class="w2ui-button" onclick="var el=w2ui['all_main_toolbar']; if (el) el.click('resize', event);" onmouseover="$(this).addClass('over');" onmouseout="$(this).removeClass('over').removeClass('down');" onmousedown="$(this).addClass('down');" onmouseup="$(this).removeClass('down');"><tbody><tr><td><table cellpadding="1" cellspacing="0"><tbody><tr><td><div class="w2ui-tb-image"><span class="fa fa-angle-double-right"></span></div></td></tr></tbody></table></td></tr></tbody></table></div>
 <div id="sidebarblock" class="sidebar-block">
     <div>
@@ -160,7 +161,7 @@ to advanced mode and start making changes you most likely cannot switch back!
 </div>
 </div> <!-- sidebar -->
 
-<div id='footer-bar' class='footer-bar'>
+<div id='footer-bar' class='footer-bar bp'>
     <div id='footer'>
         <div id='footer-core'>
             <div id="powered">

@@ -1,0 +1,47 @@
+/*
+    Ceylon styles for CodeMirror
+*/
+
+.CodeMirror.cm-s-ceylon {
+    width: 100%;
+    height: 100%;
+}
+
+/* Colors for special Ceylon source elements */
+.cm-s-ceylon .cm-classname {color: rgb(153,0,102);}
+.cm-s-ceylon .cm-annotation {color: rgb(51,153,204);}
+
+/* Colors for the default CodeMirror source elements */
+.cm-s-ceylon .cm-keyword {color: rgb(76,76,76);}
+.cm-s-ceylon .cm-atom {color: #219;}
+.cm-s-ceylon .cm-number {color: blue;}
+.cm-s-ceylon .cm-def {color: #00f;}
+.cm-s-ceylon .cm-punctuation,
+.cm-s-ceylon .cm-property,
+.cm-s-ceylon .cm-operator {color: black;}
+.cm-s-ceylon .cm-variable {color: rgb(0,51,153);}
+.cm-s-ceylon .cm-variable-2 {color: #05a;}
+.cm-s-ceylon .cm-variable-3 {color: #085;}
+.cm-s-ceylon .cm-comment {color: darkcyan;}
+.cm-s-ceylon .cm-string {color: blue;}
+.cm-s-ceylon .cm-string-2 {color: blue;}
+.cm-s-ceylon .cm-meta {color: #555;}
+.cm-s-ceylon .cm-qualifier {color: #555;}
+.cm-s-ceylon .cm-builtin {color: #30a;}
+.cm-s-ceylon .cm-bracket {color: #cc7;}
+.cm-s-ceylon .cm-tag {color: #170;}
+.cm-s-ceylon .cm-attribute {color: #00c;}
+.cm-s-ceylon .cm-hr {color: #999;}
+.cm-s-ceylon .cm-link {color: #00c;}
+
+.cm-s-ceylon .cm-error {background-image:url(../images/underline.gif); background-position:bottom; background-repeat:repeat-x;}
+.cm-s-ceylon .cm-warning {background-image:url(../images/underlinew.gif); background-position:bottom; background-repeat:repeat-x;}
+
+.CodeMirror-gutter-elt img.iconerror {
+    padding: 1px;
+    padding-left: 2px;
+}
+
+.cm-locked {
+    background-color: rgb(255, 243, 243);
+}

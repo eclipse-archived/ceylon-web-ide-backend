@@ -164,45 +164,7 @@ $(document).ready(function() {
                         { type: 'button',  id: 'resize', hint: 'Hide side bar', icon: 'fa fa-arrows-alt', hidden: true },
                         { type: 'button',  id: 'resized', hint: 'Show side bar', icon: 'fa fa-angle-double-left', hidden: !isLimitedWidth },
                     ],
-                    onClick: function (event) {
-                        if (event.target == "run") {
-                            performRun();
-                        } else if (event.target == "stop") {
-                            stop();
-                        } else if (event.target == "reset") {
-                            doReset();
-                        } else if (event.target == "share") {
-                            shareSource();
-                        } else if (event.target == "advanced") {
-                            handleAdvanced(event);
-                        } else if (event.target == "help") {
-                            handleHelpClick();
-                        } else if (event.target == "connect") {
-                            handleGitHubConnect();
-                        } else if (event.target == "connected:disconnect") {
-                            handleGitHubDisconnect();
-                        } else if (event.target == "resize") {
-                            doMaximize();
-                        } else if (event.target == "resized") {
-                            doUnmaximize();
-                        } else if (event.target == "menu:newfile") {
-                            handleNewFile();
-                        } else if (event.target == "menu:renamefile") {
-                            handleRenameFile();
-                        } else if (event.target == "menu:deletefile") {
-                            handleDeleteFile();
-                        } else if (event.target == "menu:new") {
-                            handleNewProject();
-                        } else if (event.target == "menu:rename") {
-                            handleRenameGist();
-                        } else if (event.target == "menu:saveall") {
-                            updateSource();
-                        } else if (event.target == "menu:saveas") {
-                            handleSaveAs();
-                        } else if (event.target == "menu:delete") {
-                            handleDeleteGist();
-                        }
-                    }
+                    onClick: handleToolbarClick
                 }
             },
             { type: 'preview', size: "30%", minSize: 100, resizable: true, style: zstyle, title: 'Program output', content: 'preview' },
@@ -210,6 +172,12 @@ $(document).ready(function() {
             { type: 'bottom', size: 67, style: zstyle, content: 'bottom', hidden: isLimitedHeight }
         ]
     });
+    
+    // Hack to apply our main CSS class to the layout because
+    // it doesn't provide a way to do that declaratively
+    $(".w2ui-panel-title").addClass("bp");
+    $(".w2ui-panel-tabs").addClass("bp");
+    $(".w2ui-panel-toolbar").addClass("bp");
     
     // Now fill the layout with the elements hidden on the page
     w2ui.all.content("top", isLimitedHeight ? jqContent($("#header-bar-small")) : jqContent($("#header-bar")));
@@ -284,6 +252,46 @@ function jqContent(jqElem) {
             $(this.box).empty();
             $(this.box).append(jqElem);
         }
+    }
+}
+
+function handleToolbarClick(event) {
+    if (event.target == "run") {
+        performRun();
+    } else if (event.target == "stop") {
+        stop();
+    } else if (event.target == "reset") {
+        doReset();
+    } else if (event.target == "share") {
+        shareSource();
+    } else if (event.target == "advanced") {
+        handleAdvanced(event);
+    } else if (event.target == "help") {
+        handleHelpClick();
+    } else if (event.target == "connect") {
+        handleGitHubConnect();
+    } else if (event.target == "connected:disconnect") {
+        handleGitHubDisconnect();
+    } else if (event.target == "resize") {
+        doMaximize();
+    } else if (event.target == "resized") {
+        doUnmaximize();
+    } else if (event.target == "menu:newfile") {
+        handleNewFile();
+    } else if (event.target == "menu:renamefile") {
+        handleRenameFile();
+    } else if (event.target == "menu:deletefile") {
+        handleDeleteFile();
+    } else if (event.target == "menu:new") {
+        handleNewProject();
+    } else if (event.target == "menu:rename") {
+        handleRenameGist();
+    } else if (event.target == "menu:saveall") {
+        updateSource();
+    } else if (event.target == "menu:saveas") {
+        handleSaveAs();
+    } else if (event.target == "menu:delete") {
+        handleDeleteGist();
     }
 }
 
@@ -1711,6 +1719,7 @@ function createEditor(name) {
     var textarea = $("#" + newid + " textarea")[0];
     var editor = CodeMirror.fromTextArea(textarea, {
         mode: editorMode(name),
+        theme: 'ceylon',
         gutters: ["CodeMirror-error-gutter", "CodeMirror-gutter"],
         lineNumbers: true,
         indentUnit: 4,
