@@ -37,6 +37,10 @@
 .cm-s-ceylon .cm-error {background-image:url(../images/underline.gif); background-position:bottom; background-repeat:repeat-x;}
 .cm-s-ceylon .cm-warning {background-image:url(../images/underlinew.gif); background-position:bottom; background-repeat:repeat-x;}
 
+.CodeMirror-gutters {
+    background-color: floralwhite;
+}
+
 .CodeMirror-gutter-elt img.iconerror {
     padding: 1px;
     padding-left: 2px;
