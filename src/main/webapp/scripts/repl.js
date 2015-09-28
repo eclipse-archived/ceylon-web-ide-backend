@@ -284,6 +284,8 @@ function handleToolbarClick(event) {
         handleDeleteFile();
     } else if (event.target == "menu:new") {
         handleNewProject();
+    } else if (event.target == "menu:import") {
+        handleImportProject();
     } else if (event.target == "menu:rename") {
         handleRenameGist();
     } else if (event.target == "menu:saveall") {
@@ -362,6 +364,7 @@ function getMenuItems() {
         { text: 'Rename File...', id: 'renamefile', icon: 'fa fa-pencil', disabled: !editorSelected },
         { text: 'Delete File', id: 'deletefile', icon: 'fa fa-file-excel-o', disabled: !editorSelected },
         { text: 'New Project (Gist)...', id: 'new', icon: 'fa fa-files-o' },
+        { text: 'Import Gist...', id: 'import', icon: 'fa fa-download' },
         { text: 'Rename Project...', id: 'rename', icon: 'fa fa-pencil', disabled: !hasGist, hidden: !isGitHubConnected() },
         { text: 'Save All', id: 'saveall', icon: 'fa fa-floppy-o', disabled: !hasGist || (cnt == 0) || !isAnyEditorDirty(), hidden: !isGitHubConnected() },
         { text: 'Save As...', id: 'saveas', icon: 'fa fa-files-o', disabled: (cnt == 0) },
@@ -813,6 +816,20 @@ function newProject() {
     deleteEditors();
     clearListSelectState();
     newFile("main.ceylon");
+}
+
+function handleImportProject() {
+    checkForChangesAndRun(function() {
+        importProject();
+    });
+}
+
+function importProject() {
+    popupSelectGist(function(gistId) {
+        if (gistId != null) {
+            editGist(gistId);
+        }
+    });
 }
 
 // Deletes a Gist from the server (asks the user for confirmation first)
@@ -2176,6 +2193,59 @@ function w2prompt(msg, label, value, title, onClose, onValidate) {
     });
     w2popup.open({
         title: title,
+        body: '<div id="form" style="width: 100%; height: 100%;"></div>',
+        modal: true,
+        onOpen: function (event) {
+            event.onComplete = function () {
+                $('#w2ui-popup #form').w2render('promptform');
+            }
+        }
+    });
+}
+
+function popupSelectGist(onClose) {
+    if (w2ui.promptform) {
+        w2ui.promptform.destroy();
+    }
+    var form = '' +
+        '<div class="w2ui-field w2ui-centered">' +
+        '    <p id="w2prompt_msg" style="font-size: 120%">' +
+        '        Enter the ID of the Gist you want to import</p><br><br>' +
+        '    <label id="w2prompt_label">Gist ID:</label>' +
+        '    <div>' +
+        '       <input name="value" type="text" maxlength="100" style="width: 250px"/>' +
+        '    </div>' +
+        '</div>';
+
+    $().w2form({
+        name: 'promptform',
+        style: 'border: 0px; background-color: transparent;',
+        formHTML: 
+            '<div class="w2ui-page page-0">' +
+            form +
+            '</div>' +
+            '<div class="w2ui-buttons">' +
+            '    <button class="btn" name="ok">Ok</button>' +
+            '    <button class="btn" name="cancel">Cancel</button>' +
+            '</div>',
+        fields: [
+            { field: 'value', type: 'text', required: true },
+        ],
+        record: { 
+            value: '',
+        },
+        actions: {
+            "ok": function () {
+                if (this.validate().length == 0) {
+                    w2popup.close();
+                    onClose(w2ui.promptform.get("value").el.value);
+                }
+            },
+            "cancel": function () { w2popup.close(); onClose(null); },
+        }
+    });
+    w2popup.open({
+        title: 'Import Gist',
         body: '<div id="form" style="width: 100%; height: 100%;"></div>',
         modal: true,
         onOpen: function (event) {
