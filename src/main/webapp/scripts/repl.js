@@ -295,6 +295,13 @@ function handleToolbarClick(event) {
     }
 }
 
+// HACK to make sure the CodeMirror editor doesn't show double scrollbars
+function updateEditorSize(editorId) {
+    var cm = $("#" +  editorId + " > .CodeMirror");
+    var cmscroll = cm.find(".CodeMirror-scroll");
+    cmscroll.height(cm.height());
+}
+
 function handleResizeMain(event, data) {
     var toolbarContractSize = 570;
     var toolbarMinimalSize = 333;
@@ -332,6 +339,11 @@ function handleResizeMain(event, data) {
         buttonShow("connect", !isGitHubConnected());
         buttonShow("connected", isGitHubConnected());
     }
+    
+    var editors = getEditors();
+    $.each(editors, function(index, editor) {
+        updateEditorSize(editor.ceylonId);
+    });
 }
 
 function handleResizeSidebar(event, data) {
@@ -1716,8 +1728,8 @@ function openHelpView() {
 function createEditor(name) {
     var newid = editorId(name);
     createTab(newid, name, 'editor-template');
-    var textarea = $("#" + newid + " textarea")[0];
-    var editor = CodeMirror.fromTextArea(textarea, {
+    var div = $("#" + newid)[0];
+    var editor = CodeMirror(div, {
         mode: editorMode(name),
         theme: 'ceylon',
         gutters: ["CodeMirror-error-gutter", "CodeMirror-gutter"],
@@ -1739,7 +1751,7 @@ function createEditor(name) {
     editor.ceylonId = newid;
     editor.ceylonName = name;
     editor.on('focus', function() {
-        // Hack to mak sure that clicking in the editor correctly
+        // Hack to make sure that clicking in the editor correctly
         // closes all popups and deselects their associated buttons
         $().w2overlay();
         buttonCheck("menu", false);
@@ -1761,6 +1773,9 @@ function createEditor(name) {
             closePopups();
         }
         closePopups = undefined;
+    });
+    editor.on('update', function() {
+        updateEditorSize(editor.ceylonId);
     });
     return editor;
 }

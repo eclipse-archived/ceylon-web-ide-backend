@@ -111,7 +111,7 @@ Ceylon Web IDE
 </div> <!--  core-page -->
 
 <!-- template for creating new editors -->
-<div id="editor-template" class="codeeditor invis"><textarea></textarea></div>
+<div id="editor-template" class="codeeditor invis"></div>
 
 <!-- template for creating the canvas tab -->
 <div id="canvas-template" class="invis"><canvas></canvas></div>
