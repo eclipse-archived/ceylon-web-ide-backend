@@ -26,6 +26,8 @@ var uriparams = uri.search(true);
 
 var isLimitedWidth = window.matchMedia("only screen and (max-width: 760px)").matches;
 var isLimitedHeight = window.matchMedia("only screen and (max-height: 760px)").matches;
+var limitWidth = isLimitedWidth || embedded;
+var limitHeight = isLimitedHeight || embedded;
 var isMobile = isLimitedWidth || isLimitedHeight;
 
 var live_tc = {
@@ -123,54 +125,10 @@ $(document).ready(function() {
     });
 
     // Create the main layout
-    var pstyle = 'border: 0px; padding: 0px; overflow: hidden;';
-    var zstyle = 'border: 1px solid #dfdfdf; padding: 0px; overflow: hidden;';
-    
-    $('#editortabs').w2tabs({
-        name: 'editortabs',
-        tabs: [],
-        onClick: function(event) {
-            selectTab(event.target);
-        }
-    });
-    
     $('#all').w2layout({
         name: 'all',
         padding: 4,
-        panels: [
-            { type: 'top', size: isLimitedHeight ? 40 : 102, style: pstyle, content: 'top' },
-            { type: 'main', minSize: 180, style: zstyle, content: 'main',
-                toolbar: {
-                    items: [
-                        { type: 'menu',  id: 'menu', hint: 'Manage your code', icon: 'fa fa-bars',
-                            items: getMenuItems()
-                        },
-                        { type: 'break',  id: 'break0' },
-                        { type: 'button',  id: 'run', caption: 'Run', hint: 'Compile & execute', icon: 'fa fa-play' },
-                        { type: 'button',  id: 'stop', caption: 'Stop', hint: 'Stop program', icon: 'fa fa-stop', disabled: true },
-                        { type: 'button',  id: 'reset', caption: 'Reset', hint: 'Clear output & errors', icon: 'fa fa-exclamation' },
-                        { type: 'button',  id: 'share', caption: 'Share', hint: 'Share the code on GitHub', icon: 'fa fa-share' },
-                        { type: 'break',  id: 'break1' },
-                        { type: 'check',  id: 'advanced', caption: 'Advanced', hint: 'Enable more complex code constructs', icon: 'fa fa-square-o', checkicon: 'fa fa-check-square-o', uncheckicon: 'fa fa-square-o' },
-                        { type: 'spacer' },
-                        { type: 'button',  id: 'help', caption: 'Help', hint: 'Help on how this Web IDE works', icon: 'fa fa-question' },
-                        { type: 'button',  id: 'connect', caption: 'Connect', hint: 'Connect to GitHub', icon: 'fa fa-github', hidden: isGitHubConnected() },
-                        { type: 'menu',   id: 'connected', caption: 'Connected', hint: 'Connected to GitHub', icon: 'fa fa-github', hidden: !isGitHubConnected(),
-                            items: [
-                                { text: 'Disconnect from GitHub', id: 'disconnect', icon: 'fa fa-scissors' }
-                            ]
-                        },
-                        { type: 'break',  id: 'break2', hidden: true },
-                        { type: 'button',  id: 'resize', hint: 'Hide side bar', icon: 'fa fa-arrows-alt', hidden: true },
-                        { type: 'button',  id: 'resized', hint: 'Show side bar', icon: 'fa fa-angle-double-left', hidden: !isLimitedWidth },
-                    ],
-                    onClick: handleToolbarClick
-                }
-            },
-            { type: 'preview', size: "30%", minSize: 100, resizable: true, style: zstyle, title: 'Program output', content: 'preview' },
-            { type: 'right', size: 260, minSize: 200, resizable: true, style: zstyle, content: 'right', hidden: isLimitedWidth },
-            { type: 'bottom', size: 67, style: zstyle, content: 'bottom', hidden: isLimitedHeight }
-        ]
+        panels: getLayoutPanels()
     });
     
     // Hack to apply our main CSS class to the layout because
@@ -180,7 +138,7 @@ $(document).ready(function() {
     $(".w2ui-panel-toolbar").addClass("bp");
     
     // Now fill the layout with the elements hidden on the page
-    w2ui.all.content("top", isLimitedHeight ? jqContent($("#header-bar-small")) : jqContent($("#header-bar")));
+    w2ui.all.content("top", limitHeight ? jqContent($("#header-bar-small")) : jqContent($("#header-bar")));
     w2ui.all.content("main", jqContent($("#core-page")));
     w2ui.all.content("preview", jqContent($("#output")));
     w2ui.all.content("right", jqContent($("#sidebar")));
@@ -192,6 +150,14 @@ $(document).ready(function() {
     }, function(event, data) {
         handleResizeMain(event, data);
         handleResizeSidebar(event, data);
+    });
+    
+    $('#editortabs').w2tabs({
+        name: 'editortabs',
+        tabs: [],
+        onClick: function(event) {
+            selectTab(event.target);
+        }
     });
     
     $('#share_src').show();
@@ -212,24 +178,22 @@ $(document).ready(function() {
         addExamplesContainer();
     }
     
-    if (uriparams.set != null) {
-        handleSelectSet(uriparams.set);
-    } else {
-        // This is the default set of examples stored in our
-        // special "ceylonwebide" GitHub account
-        handleSelectSet("6e03a3db46854ff825e9");
-    }
-    
+    var noDefault = false;
     if (uriparams.src != null) {
         // Code is directly in URL
         var code = decodeURIComponent(uriparams.src);
-        editSource(code);
+        setTimeout(function() {
+            editSource(code);
+        }, 1);
+        noDefault = true;
     } else if (uriparams.sample != null) {
         // Retrieve code from the given sample id
         editExample("ex", uriparams.sample);
+        noDefault = true;
     } else if (uriparams.gist != null) {
         // Retrieve code from the given sample id
         editGist(uriparams.gist);
+        noDefault = true;
     } else {
         if (uriparams.set == null) {
             window.outputReady = function() {
@@ -239,6 +203,14 @@ $(document).ready(function() {
                 stopSpinner();
             };
         }
+    }
+    
+    if (uriparams.set != null) {
+        handleSelectSet(uriparams.set, noDefault);
+    } else {
+        // This is the default set of examples stored in our
+        // special "ceylonwebide" GitHub account
+        handleSelectSet("6e03a3db46854ff825e9", noDefault);
     }
     
     listUserGists();
@@ -335,11 +307,11 @@ function handleResizeMain(event, data) {
         buttonShow("connect", false);
         buttonShow("connected", false);
     } else if (newwidth >= toolbarMinimalSize) {
-        buttonShow("share", true);
-        buttonShow("advanced", true);
-        buttonShow("help", true);
-        buttonShow("connect", !isGitHubConnected());
-        buttonShow("connected", isGitHubConnected());
+        buttonShow("share", !embedded);
+        buttonShow("advanced", !embedded);
+        buttonShow("help", !embedded);
+        buttonShow("connect", !isGitHubConnected() && !embedded);
+        buttonShow("connected", isGitHubConnected() && !embedded);
     }
     
     var editors = getEditors();
@@ -353,6 +325,49 @@ function handleResizeSidebar(event, data) {
     if (dx >= 0) {
         $("#sidebarhandle").css("right", dx + "px");
     }
+}
+
+function getLayoutPanels() {
+    var pstyle = 'border: 0px; padding: 0px; overflow: hidden;';
+    var zstyle = 'border: 1px solid #dfdfdf; padding: 0px; overflow: hidden;';
+    return [
+        { type: 'top', size: limitHeight ? 40 : 102, style: pstyle, hidden: embedded },
+        { type: 'main', minSize: 180, style: zstyle,
+            toolbar: {
+                items: getToolbarItems(),
+                onClick: handleToolbarClick
+            }
+        },
+        { type: 'preview', size: "30%", minSize: 100, resizable: true, style: zstyle, title: 'Program output' },
+        { type: 'right', size: 260, minSize: 200, resizable: true, style: zstyle, hidden: limitWidth },
+        { type: 'bottom', size: 67, style: zstyle, hidden: limitHeight }
+    ];
+}
+
+function getToolbarItems() {
+    return [
+        { type: 'menu',  id: 'menu', hint: 'Manage your code', icon: 'fa fa-bars', hidden: embedded,
+            items: getMenuItems()
+        },
+        { type: 'break',  id: 'break0', hidden: embedded },
+        { type: 'button',  id: 'run', caption: 'Run', hint: 'Compile & execute', icon: 'fa fa-play' },
+        { type: 'button',  id: 'stop', caption: 'Stop', hint: 'Stop program', icon: 'fa fa-stop', disabled: true },
+        { type: 'button',  id: 'reset', caption: 'Reset', hint: 'Clear output & errors', icon: 'fa fa-exclamation' },
+        { type: 'button',  id: 'share', caption: 'Share', hint: 'Share the code on GitHub', icon: 'fa fa-share', hidden: embedded },
+        { type: 'break',  id: 'break1', hidden: embedded },
+        { type: 'check',  id: 'advanced', caption: 'Advanced', hint: 'Enable more complex code constructs', icon: 'fa fa-square-o', checkicon: 'fa fa-check-square-o', uncheckicon: 'fa fa-square-o', hidden: embedded },
+        { type: 'spacer' },
+        { type: 'button',  id: 'help', caption: 'Help', hint: 'Help on how this Web IDE works', icon: 'fa fa-question', hidden: embedded },
+        { type: 'button',  id: 'connect', caption: 'Connect', hint: 'Connect to GitHub', icon: 'fa fa-github', hidden: isGitHubConnected() || embedded },
+        { type: 'menu',   id: 'connected', caption: 'Connected', hint: 'Connected to GitHub', icon: 'fa fa-github', hidden: !isGitHubConnected() || embedded,
+            items: [
+                { text: 'Disconnect from GitHub', id: 'disconnect', icon: 'fa fa-scissors' }
+            ]
+        },
+        { type: 'break',  id: 'break2', hidden: true, hidden: embedded },
+        { type: 'button',  id: 'resize', hint: 'Hide side bar', icon: 'fa fa-arrows-alt', hidden: true },
+        { type: 'button',  id: 'resized', hint: 'Show side bar', icon: 'fa fa-angle-double-left', hidden: !limitWidth || embedded },
+    ];
 }
 
 function getMenuItems() {
@@ -969,15 +984,15 @@ function retrieveAllUserGists(acceptGist, showGist, userOnEnd) {
     retrieveUserGists(1, acceptGist, showGist, onEnd);
 }
 
-function handleSelectSet(setGistId) {
+function handleSelectSet(setGistId, noDefault) {
     selectedSet = setGistId;
-    listSetGists(setGistId);
+    listSetGists(setGistId, noDefault);
 }
 
 // Retrieves the selected Gist, which should contain a .json
 // file with the appropriate content and shows the Gists
 // listed in it in the sidebar 
-function listSetGists(setGistId) {
+function listSetGists(setGistId, noDefault) {
 
     function addGist(setName, id, title) {
         $('#examples_' + setName).append('<li id="gist_' + id + '" class="news_entry"><a href="#" onClick="return handleEditGist(\'' + id + '\')">' + title + '</a></li>');
@@ -1001,7 +1016,7 @@ function listSetGists(setGistId) {
                     }
                 });
             });
-            if (index["default"] != null) {
+            if (!noDefault && index["default"] != null) {
                 editGist(index["default"].gist);
             }
             markGistSelected(selectedSet, selectedGist);
