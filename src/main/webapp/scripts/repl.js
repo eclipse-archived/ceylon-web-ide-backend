@@ -877,22 +877,8 @@ function getGistName(gist) {
 
 // Shows the user's list of available Gists
 function listUserGists(page) {
-    if (github.config.authentication == null) {
-        return;
-    }
     
     var first = (page == null || page == 1);
-    
-    function showGist(gist) {
-        if (first) {
-            $('#yrcode').empty();
-            first = false;
-        }
-        var desc = getGistName(gist);
-        $('#yrcode').append('<li id="gist_' + gist.data.id + '" class="news_entry"><a href="#" onClick="return handleEditGist(\'' + gist.data.id + '\')">' + desc + '</a></li>');
-        $('#yrcodehdr').show();
-        $('#yrcode').show();
-    }
     
     function acceptGist(gist) {
         if (gist.data.description.startsWith("Ceylon Web Runner: ")) {
@@ -908,10 +894,15 @@ function listUserGists(page) {
         return false;
     }
     
-    function handleGist(gist) {
-        if (acceptGist(gist)) {
-            showGist(gist);
+    function showGist(gist) {
+        if (first) {
+            $('#yrcode').empty();
+            first = false;
         }
+        var desc = getGistName(gist);
+        $('#yrcode').append('<li id="gist_' + gist.data.id + '" class="news_entry"><a href="#" onClick="return handleEditGist(\'' + gist.data.id + '\')">' + desc + '</a></li>');
+        $('#yrcodehdr').show();
+        $('#yrcode').show();
     }
     
     function onEnd(list) {
@@ -927,6 +918,27 @@ function listUserGists(page) {
         handleResizeSidebar();
     }
     
+    retrieveUserGists(page, acceptGist, showGist, onEnd);
+}
+
+// Retrieves a single page of user Gists from GitHub
+// using the provided `acceptGist()` and `showGist()`
+// functions for filtering and displaying and the
+// `onEnd()` when the end of the page is reached.
+// The first two functions will get passed a single
+// Gist object while `onEnd()` will get passed a
+// `GitHub.List` object
+function retrieveUserGists(page, acceptGist, showGist, onEnd) {
+    if (github.config.authentication == null) {
+        return;
+    }
+    
+    function handleGist(gist) {
+        if (acceptGist(gist)) {
+            showGist(gist);
+        }
+    }
+    
     // Check that we have a valid GitHub token
     var token = $.cookie("githubauth");
     if (token) {
@@ -937,6 +949,24 @@ function listUserGists(page) {
             page: page
         });
     }
+}
+
+// Retrieves all pages of user Gists from GitHub
+// using the provided `acceptGist()` and `showGist()`
+// functions for filtering and displaying and the
+// `onEnd()` when all the Gists have been read.
+// The first two functions will get passed a single
+// Gist object while `onEnd()` will get passed a
+// `GitHub.List` object
+function retrieveAllUserGists(acceptGist, showGist, userOnEnd) {
+    function onEnd(list) {
+        if (list.hasMoreElements()) {
+            retrieveUserGists(ist.pages.length + 1, acceptGist, showGist, onEnd);
+        } else if (userOnEnd != null) {
+            userOnEnd(list);
+        }
+    }
+    retrieveUserGists(1, acceptGist, showGist, onEnd);
 }
 
 function handleSelectSet(setGistId) {
@@ -2196,51 +2226,78 @@ function popupSelectGist(onClose) {
     if (w2ui.promptform) {
         w2ui.promptform.destroy();
     }
-    var form = '' +
-        '<div class="w2ui-field w2ui-centered">' +
-        '    <p id="w2prompt_msg" style="font-size: 120%">' +
-        '        Enter the ID of the Gist you want to import</p><br><br>' +
-        '    <label id="w2prompt_label">Gist ID:</label>' +
-        '    <div>' +
-        '       <input name="value" type="text" maxlength="100" style="width: 250px"/>' +
-        '    </div>' +
-        '</div>';
+    
+    function acceptGist(gist) {
+        var ok = false;
+        $.each(gist.data.files, function(index, file) {
+            ok = ok || editorAccepts(index);
+        });
+        return ok;
+    }
+    
+    function showGist(gist) {
+        var fld = w2ui.promptform.get("select");
+        var items = fld.options.items;
+        var desc = gist.data.description || Object.getOwnPropertyNames(gist.data.files)[0];
+        items.push({ id: gist.data.id, text: desc });
+        w2ui.promptform.set("select", { options: { items: items } });
+    }
+    
+    function loadGists() {
+        var items = [ { id: '', text: '-- Select Gist --', disabled: true } ];
+        w2ui.promptform.set("select", { options: { items: items } });
+        retrieveAllUserGists(acceptGist, showGist)
+    }
+    
+    var msg, focus;
+    var fields = [
+         { name: 'value', type: 'text', html: { caption: 'Gist ID' }, required: true },
+     ];
+    var record = { 
+        value: '',
+    };
+    if (isGitHubConnected()) {
+        msg = 'Select the Gist you want to import from the list below or enter its ID in the text field';
+        var fld = { name: 'select', type: 'list', html: { caption: 'Gists' }, options: { items: [] } };
+        fields.splice(0, 0, fld);
+        record.select = '';
+    } else {
+        msg = 'Enter the ID of the Gist you want to import in the text field below';
+    }
 
     $().w2form({
         name: 'promptform',
         style: 'border: 0px; background-color: transparent;',
-        formHTML: 
-            '<div class="w2ui-page page-0">' +
-            form +
-            '</div>' +
-            '<div class="w2ui-buttons">' +
-            '    <button class="btn" name="ok">Ok</button>' +
-            '    <button class="btn" name="cancel">Cancel</button>' +
-            '</div>',
-        fields: [
-            { field: 'value', type: 'text', required: true },
-        ],
-        record: { 
-            value: '',
-        },
+        fields: fields,
+        record: record,
+        focus: -1,
         actions: {
             "ok": function () {
                 if (this.validate().length == 0) {
                     w2popup.close();
-                    onClose(w2ui.promptform.get("value").el.value);
+                    onClose(w2ui.promptform.record.value);
                 }
             },
             "cancel": function () { w2popup.close(); onClose(null); },
         }
+    }).on("change", function(event) {
+        if (event.target == "select") {
+            w2ui.promptform.record.select = event.value_new;
+            w2ui.promptform.record.value = event.value_new.id;
+            w2ui.promptform.refresh();
+        }
     });
     w2popup.open({
         title: 'Import Gist',
-        body: '<div id="form" style="width: 100%; height: 100%;"></div>',
+        body: '<div style="text-align: center; padding: 5%; width: 100%; height: 20%;">' +
+            msg +
+            '</div><div id="form" style="width: 100%; height: 80%;"></div>',
         modal: true,
         onOpen: function (event) {
             event.onComplete = function () {
                 $('#w2ui-popup #form').w2render('promptform');
             }
+            loadGists();
         }
     });
 }
