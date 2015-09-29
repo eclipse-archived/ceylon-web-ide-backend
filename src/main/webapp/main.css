@@ -505,64 +505,11 @@ div.ceylonblock ul {
   color: #9ec1ee;
 }
 
-/* line 1047 */
-#dsq-content .dsq-toolbar-label {
-  text-shadow: none;
-}
-
-/* Inline code editor */
-/* line 1053 */
-.syntaxhighlighter.with-editor .lines {
-  margin-right: 40px !important;
-}
-
-/* line 1057 */
-.syntaxhighlighter .bubble-button {
-  display: block;
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 25px;
-  cursor: pointer;
-  text-align: center;
-  padding: 2px 4px !important;
-}
-
-/* line 1068 */
-.ui-dialog {
-  padding: 1em;
-  background: white;
-  border: 1px solid black;
-  text-shadow: none;
-}
-
-/* line 1075 */
 .ui-widget-overlay {
   opacity: 0.8;
   top: 0px;
   position: absolute;
   background-color: gray;
-}
-
-/* line 1082 */
-.ui-dialog-titlebar {
-  height: 2em;
-  text-align: right;
-}
-
-/* line 1087 */
-iframe.code-editor {
-  width: 100% !important;
-}
-
-/* line 1091 */
-p.screenshot {
-  text-align: center;
-}
-/* line 1094 */
-p.screenshot img {
-  box-shadow: 0 0 1em black;
-  margin: 1em;
 }
 
 .badges {
@@ -669,10 +616,6 @@ p.screenshot img {
 
 .jsc_error {
     color: red;
-}
-
-input.bubble-button {
-    border-style:none;
 }
 
 /* work around display bug with icons in menus missing bits from the bottom */ 
