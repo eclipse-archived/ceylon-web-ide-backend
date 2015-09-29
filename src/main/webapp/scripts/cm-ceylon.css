@@ -12,7 +12,7 @@
 .cm-s-ceylon .cm-annotation {color: rgb(51,153,204);}
 
 /* Colors for the default CodeMirror source elements */
-.cm-s-ceylon .cm-keyword {color: rgb(76,76,76);}
+.cm-s-ceylon .cm-keyword {color: rgb(76,76,76); font-weight: bold;}
 .cm-s-ceylon .cm-atom {color: #219;}
 .cm-s-ceylon .cm-number {color: blue;}
 .cm-s-ceylon .cm-def {color: #00f;}
