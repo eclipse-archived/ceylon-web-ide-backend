@@ -1212,6 +1212,7 @@ function doTranslateCode(files, onTranslation) {
             markCompiled(files);
             try {
                 transok = true;
+                $("#result").text(translatedcode);
                 loadModuleAsString(translatedcode, onTranslation);
             } catch(err) {
                 printError("Translated code could not be parsed:");
