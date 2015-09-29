@@ -2162,22 +2162,8 @@ function w2prompt(msg, label, value, title, onClose, onValidate) {
     $().w2form({
         name: 'promptform',
         style: 'border: 0px; background-color: transparent;',
-        formHTML: 
-            '<div class="w2ui-page page-0">'+
-            '    <div class="w2ui-field w2ui-centered">'+
-            '        <p id="w2prompt_msg" style="font-size: 120%">' + msg + '</p><br><br>' +
-            '        <label id="w2prompt_label">' + label + ':</label>'+
-            '        <div>'+
-            '           <input name="value" type="text" maxlength="100" style="width: 250px"/>'+
-            '        </div>'+
-            '    </div>'+
-            '</div>'+
-            '<div class="w2ui-buttons">'+
-            '    <button class="btn" name="ok">Ok</button>'+
-            '    <button class="btn" name="cancel">Cancel</button>'+
-            '</div>',
         fields: [
-            { field: 'value', type: 'text', required: true },
+            { field: 'value', type: 'text', html: { caption: label }, required: true },
         ],
         record: { 
             value: value,
@@ -2186,7 +2172,7 @@ function w2prompt(msg, label, value, title, onClose, onValidate) {
             "ok": function () {
                 if (this.validate().length == 0 && onValidate(w2ui.promptform)) {
                     w2popup.close();
-                    onClose(w2ui.promptform.get("value").el.value);
+                    onClose(w2ui.promptform.record.value);
                 }
             },
             "cancel": function () { w2popup.close(); onClose(null); },
@@ -2194,7 +2180,9 @@ function w2prompt(msg, label, value, title, onClose, onValidate) {
     });
     w2popup.open({
         title: title,
-        body: '<div id="form" style="width: 100%; height: 100%;"></div>',
+        body: '<div style="text-align: center; padding: 5%; width: 100%; height: 20%;">' +
+        msg +
+        '</div><div id="form" style="width: 100%; height: 80%;"></div>',
         modal: true,
         onOpen: function (event) {
             event.onComplete = function () {
