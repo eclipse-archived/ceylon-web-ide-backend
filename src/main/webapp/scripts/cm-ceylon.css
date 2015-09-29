@@ -16,8 +16,8 @@
 .cm-s-ceylon .cm-atom {color: #219;}
 .cm-s-ceylon .cm-number {color: blue;}
 .cm-s-ceylon .cm-def {color: #00f;}
+.cm-s-ceylon .cm-property {color: rgb(153,0,102);}
 .cm-s-ceylon .cm-punctuation,
-.cm-s-ceylon .cm-property,
 .cm-s-ceylon .cm-operator {color: black;}
 .cm-s-ceylon .cm-variable {color: rgb(0,51,153);}
 .cm-s-ceylon .cm-variable-2 {color: #05a;}
