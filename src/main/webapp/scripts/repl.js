@@ -862,6 +862,7 @@ function handleDeleteGist() {
 function deleteGist() {
     function onRemove(gist) {
         doReset();
+        clearGist();
         updateGists();
     }
     selectedGist.remove({
@@ -2097,7 +2098,6 @@ function isWrappedModule(code) {
 }
 
 function doReset() {
-    clearGist();
     clearOutput();
     clearEditMarkers();
 }
