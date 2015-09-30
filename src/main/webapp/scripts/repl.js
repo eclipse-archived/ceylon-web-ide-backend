@@ -1908,7 +1908,7 @@ function isEditorDirty(id) {
 
 function isEditorRenamed(id) {
     var editor = getEditor(id);
-    return editor.ceylonSavedName != editor.ceylonName;
+    return editor.ceylonSavedName != null && editor.ceylonSavedName != editor.ceylonName;
 }
 
 function updateEditorDirtyState(id) {
