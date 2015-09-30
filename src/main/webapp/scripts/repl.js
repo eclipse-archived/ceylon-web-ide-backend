@@ -1407,7 +1407,9 @@ function showErrors(errors, print) {
                         (err.from.line-linedelta) + ":" + err.from.ch + " of " + fileName;
                 printError(msg);
             }
-            if (err.from.line > 1) {
+            var from = err.from.line-linedelta-1;
+            var to = err.to.line-linedelta-1;
+            if (from >= 0) {
                 var editor = getEditor(editorId(fileName));
                 if (editor != null) {
                     //This is to add a marker in the gutter
@@ -1425,13 +1427,13 @@ function showErrors(errors, print) {
                         underlineStyle = "cm-error";
                         getEditorTab(editor.ceylonId).addClass("haserrors");
                     }
-                    editor.setGutterMarker(err.from.line-linedelta-1, 'CodeMirror-error-gutter', img);
+                    editor.setGutterMarker(from, 'CodeMirror-error-gutter', img);
                     //This is to modify the style (underline or whatever)
-                    var marker = editor.markText({line:err.from.line-linedelta-1,ch:err.from.ch},{line:err.to.line-linedelta-1,ch:err.to.ch+1},{className:underlineStyle});
+                    var marker = editor.markText({line:from,ch:err.from.ch},{line:to,ch:err.to.ch+1},{className:underlineStyle});
                     markers.push(marker);
                     //And this is for the hover
-                    var estilo = "ceylonerr_r"+err.from.line+"_c"+err.from.ch;
-                    marker = editor.markText({line:err.from.line-linedelta-1,ch:err.from.ch},{line:err.to.line-linedelta-1,ch:err.to.ch+1},{className:estilo});
+                    var estilo = "ceylonerr_r"+from+"_c"+err.from.ch;
+                    marker = editor.markText({line:from,ch:err.from.ch},{line:to,ch:err.to.ch+1},{className:estilo});
                     markers.push(marker);
                     bindings.push(estilo);
                     $("."+estilo).attr("title", errmsg);
