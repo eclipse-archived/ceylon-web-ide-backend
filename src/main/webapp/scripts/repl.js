@@ -1615,7 +1615,9 @@ function setEditorSourcesFromGist(files) {
             if (firstEditModeFile == null && editorMode(index) != null) {
                 firstEditModeFile = index;
             }
-            if (firstCeylonFile == null && index.endsWith(".ceylon")) {
+            if (firstCeylonFile == null
+                    && index.endsWith(".ceylon")
+                    && (index != "module.ceylon")) {
                 firstCeylonFile = index;
             }
             if (index.endsWith(".ceylon")) {
