@@ -15,19 +15,19 @@
 .cm-s-ceylon .cm-keyword {color: rgb(76,76,76); font-weight: bold;}
 .cm-s-ceylon .cm-atom {color: #219;}
 .cm-s-ceylon .cm-number {color: blue;}
-.cm-s-ceylon .cm-def {color: #00f;}
+.cm-s-ceylon .cm-def {color: rgb(153,0,102);}
 .cm-s-ceylon .cm-property {color: rgb(153,0,102);}
 .cm-s-ceylon .cm-punctuation,
 .cm-s-ceylon .cm-operator {color: black;}
 .cm-s-ceylon .cm-variable {color: rgb(0,51,153);}
 .cm-s-ceylon .cm-variable-2 {color: #05a;}
-.cm-s-ceylon .cm-variable-3 {color: #085;}
+.cm-s-ceylon .cm-variable-3 {color: rgb(153,0,102);}
 .cm-s-ceylon .cm-comment {color: darkcyan;}
 .cm-s-ceylon .cm-string {color: blue;}
 .cm-s-ceylon .cm-string-2 {color: blue;}
 .cm-s-ceylon .cm-meta {color: #555;}
 .cm-s-ceylon .cm-qualifier {color: #555;}
-.cm-s-ceylon .cm-builtin {color: #30a;}
+.cm-s-ceylon .cm-builtin {color: rgb(51,153,204);}
 .cm-s-ceylon .cm-bracket {color: #cc7;}
 .cm-s-ceylon .cm-tag {color: #170;}
 .cm-s-ceylon .cm-attribute {color: #00c;}

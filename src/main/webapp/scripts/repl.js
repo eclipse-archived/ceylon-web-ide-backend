@@ -1682,7 +1682,7 @@ function compilerAccepts(name) {
 
 function editorMode(name) {
     if (name.endsWith(".ceylon")) {
-        return "ceylon";
+        return "text/x-ceylon";
     } else if (name.endsWith(".js")) {
         return "javascript";
     } else if (name.endsWith(".json")) {
