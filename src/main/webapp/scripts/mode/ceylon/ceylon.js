@@ -496,5 +496,4 @@ CodeMirror.defineMode("ceylon", function(config, parserConfig) {
   };
 });
 
-CodeMirror.defineMIME("text/ceylon", "ceylon");
-CodeMirror.defineMIME("application/json", {name: "javascript", json: true});
+CodeMirror.defineMIME("text/x-ceylon", "ceylon");
