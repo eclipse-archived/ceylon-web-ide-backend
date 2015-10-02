@@ -12,14 +12,14 @@
     
     var tempToken = editor.getTokenAt(cursor);
     if(!(/[\S]/gi.test(tempToken.string))) return;
-    if(tempToken.className == "variable"
-    	|| tempToken.className == "property"
-    	|| tempToken.className == "classname"){
+    if(tempToken.type == "variable"
+    	|| tempToken.type == "property"
+    	|| tempToken.type == "classname"){
     	// we start with a filter
     	filter = tempToken.string;
     	// we will replace that token entirely
     	replaceFrom = {line: cursor.line, ch: cursor.ch - filter.length};
-    }else if(tempToken.className == null
+    }else if(tempToken.type == null
     		&& tempToken.string == "."){
     	// no filter: member completion
     }else{
