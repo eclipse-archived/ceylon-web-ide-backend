@@ -2,6 +2,10 @@
     Ceylon styles for CodeMirror
 */
 
+.CodeMirror {
+    font-family: Inconsolata, Monaco, Courier, monospace;
+}
+
 .CodeMirror.cm-s-ceylon {
     width: 100%;
     height: 100%;
