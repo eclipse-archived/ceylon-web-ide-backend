@@ -84,9 +84,10 @@
     var done = false;
 
     function completionMatches(index){
-      if (filter.length==0)return true;
-      return filter.length==0 ||
-          completions[index].insert.toLowerCase().indexOf(filter.toLowerCase()) == 0;
+      return true;
+      //broken:
+      /*return filter.length==0 ||
+          completions[index].insert.toLowerCase().indexOf(filter.toLowerCase()) == 0;*/
     }
     function updateFilter(){
     	var $children = jQuery(sel).children();
