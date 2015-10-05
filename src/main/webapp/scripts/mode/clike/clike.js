@@ -81,7 +81,6 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
       return "builtin";
     }
     if (contains(atoms, cur)) return "atom";
-    if (state.prevToken==".") return "variable-2";
     return "variable";
   }
 
@@ -194,11 +193,11 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
         pushContext(state, stream.column(), type);
       }
 
-      /*if ((style == "variable" || style == "variable-3") &&
+      if (style == "variable" &&
           ((state.prevToken == "def" ||
             (parserConfig.typeFirstDefinitions && typeBefore(stream, state) &&
              isTopScope(state.context) && stream.match(/^\s*\(/, false)))))
-        style = "def";*/
+        style = "def";
 
       if (hooks.token) {
         var result = hooks.token(stream, state, style);
@@ -674,6 +673,7 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
     typeFirstDefinitions: true,
     atoms: words("true false null larger smaller equal empty finished"),
     indentSwitch: false,
+    styleDefs: false,
     hooks: {
       "@": function(stream) {
         stream.eatWhile(/[\w\$_]/);
@@ -692,7 +692,13 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
       "'": function(stream) {
         stream.eatWhile(/[\w\$_\xa1-\uffff]/);
         return "atom";
-      }
+      },
+      token: function(stream, state, style) {
+          if ((style == "variable" || style == "variable-3") &&
+              state.prevToken == ".") {
+            return "variable-2";
+          }
+        }
     },
     modeProps: {
         fold: ["brace", "import"],
