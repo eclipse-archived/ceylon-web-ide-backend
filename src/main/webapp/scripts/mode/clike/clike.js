@@ -28,7 +28,8 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
       namespaceSeparator = parserConfig.namespaceSeparator,
       isPunctuationChar = parserConfig.isPunctuationChar || /[\[\]{}\(\),;\:\.]/,
       isNumberChar = parserConfig.isNumberChar || /\d/,
-      isOperatorChar = parserConfig.isOperatorChar || /[+\-*&%=<>!?|\/]/;
+      isOperatorChar = parserConfig.isOperatorChar || /[+\-*&%=<>!?|\/]/,
+      endStatement = parserConfig.endStatement || /^[;:,]$/;
 
   var curPunc, isDefKeyword;
 
@@ -74,8 +75,7 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
       if (contains(defKeywords, cur)) isDefKeyword = true;
       return "keyword";
     }
-    if (contains(types, cur))
-        return "variable-3";
+    if (contains(types, cur)) return "variable-3";
     if (contains(builtin, cur)) {
       if (contains(blockKeywords, cur)) curPunc = "newstatement";
       return "builtin";
@@ -171,8 +171,7 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
       if (style == "comment" || style == "meta") return style;
       if (ctx.align == null) ctx.align = true;
 
-      if ((curPunc == ";" || curPunc == ":" || curPunc == ","))
-        while (isStatement(state.context.type)) popContext(state);
+      if (endStatement.test(curPunc)) while (isStatement(state.context.type)) popContext(state);
       else if (curPunc == "{") pushContext(state, stream.column(), "}");
       else if (curPunc == "[") pushContext(state, stream.column(), "]");
       else if (curPunc == "(") pushContext(state, stream.column(), ")");
@@ -423,6 +422,7 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
     defKeywords: words("class interface package enum"),
     typeFirstDefinitions: true,
     atoms: words("true false null"),
+    endStatement: /^[;:]$/,
     hooks: {
       "@": function(stream) {
         stream.eatWhile(/[\w\$_]/);
@@ -523,6 +523,34 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
         return "atom";
       }
     },
+    modeProps: {closeBrackets: {triples: '"'}}
+  });
+
+  def("text/x-kotlin", {
+    name: "clike",
+    keywords: words(
+      /*keywords*/
+      "package as typealias class interface this super val " +
+      "var fun for is in This throw return " +
+      "break continue object if else while do try when !in !is as?" +
+
+      /*soft keywords*/
+      "file import where by get set abstract enum open inner override private public internal " +
+      "protected catch finally out final vararg reified dynamic companion constructor init " +
+      "sealed field property receiver param sparam lateinit data inline noinline tailrec " +
+      "external annotation crossinline"
+    ),
+    types: words(
+      /* package java.lang */
+      "Boolean Byte Character CharSequence Class ClassLoader Cloneable Comparable " +
+      "Compiler Double Exception Float Integer Long Math Number Object Package Pair Process " +
+      "Runtime Runnable SecurityManager Short StackTraceElement StrictMath String " +
+      "StringBuffer System Thread ThreadGroup ThreadLocal Throwable Triple Void"
+    ),
+    multiLineStrings: true,
+    blockKeywords: words("catch class do else finally for if where try while enum"),
+    defKeywords: words("class val var object package interface fun"),
+    atoms: words("true false null this"),
     modeProps: {closeBrackets: {triples: '"'}}
   });
 
