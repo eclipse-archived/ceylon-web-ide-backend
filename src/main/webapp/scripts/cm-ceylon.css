@@ -24,7 +24,7 @@
 .cm-s-ceylon .cm-punctuation,
 .cm-s-ceylon .cm-operator {color: black;}
 .cm-s-ceylon .cm-variable {color: rgb(0,51,153);}
-.cm-s-ceylon .cm-variable-2 {color: #05a;}
+.cm-s-ceylon .cm-variable-2 {color: rgb(102,51,153);}
 .cm-s-ceylon .cm-variable-3 {color: rgb(153,0,102);}
 .cm-s-ceylon .cm-comment {color: darkcyan;}
 .cm-s-ceylon .cm-string {color: blue;}
