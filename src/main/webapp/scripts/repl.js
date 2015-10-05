@@ -2218,13 +2218,13 @@ function w2prompt(msg, label, value, title, onClose, onValidate) {
             value: value,
         },
         actions: {
-            "ok": function () {
+            "OK": function () {
                 if (this.validate().length == 0 && onValidate(w2ui.promptform)) {
                     w2popup.close();
                     onClose(w2ui.promptform.record.value);
                 }
             },
-            "cancel": function () { w2popup.close(); onClose(null); },
+            "Cancel": function () { w2popup.close(); onClose(null); },
         }
     });
     w2popup.open({
@@ -2291,13 +2291,13 @@ function popupSelectGist(onClose) {
         record: record,
         focus: -1,
         actions: {
-            "ok": function () {
+            "OK": function () {
                 if (this.validate().length == 0) {
                     w2popup.close();
                     onClose(w2ui.promptform.record.value);
                 }
             },
-            "cancel": function () { w2popup.close(); onClose(null); },
+            "Cancel": function () { w2popup.close(); onClose(null); },
         }
     }).on("change", function(event) {
         if (event.target == "select") {
