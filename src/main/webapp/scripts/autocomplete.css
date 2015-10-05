@@ -8,9 +8,9 @@
     position: absolute;
     top: 0;
     left: 0;
-    font-family: Menlo, Monaco, Courier, monospace;
+    font-family: Inconsolata, Monaco, Courier, monospace;
     padding-left:2px;
-    font-size: 85%;
+    font-size: 14px;
     -moz-box-shadow: 0 0 7px grey;
     -webkit-box-shadow: 0 0 7px grey;
     box-shadow: 0 0 7px grey;
@@ -26,8 +26,8 @@
     overflow: auto;
     color: black;
     position: absolute;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 12px;
+    font-family: 'Source Sans Pro', Arial, 'Helvetica Neue', Helvetica, sans-serif;
+    font-size: 13px;
     padding-left: 2px;
     resize:both;
     -moz-box-shadow: 0 0 7px grey;
@@ -41,9 +41,11 @@
     border:none !important; 
     font-size:100% !important; 
     color:darkblue !important;
+    padding-left:18px;
 }
-.help p code, .help ul code, .help ol code {
+.help p code, .help ul code, .help ol code, .help pre code {
     color: darkblue !important;
+    font-family: Inconsolata, Monaco, Courier, monospace;
 }
 
 .popup > div {

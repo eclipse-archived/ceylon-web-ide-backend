@@ -9,6 +9,7 @@ import java.util.Map;
 
 import com.github.rjeschke.txtmark.Configuration;
 import com.github.rjeschke.txtmark.Processor;
+import com.github.rjeschke.txtmark.SpanEmitter;
 import com.redhat.ceylon.common.Versions;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.model.typechecker.model.Annotation;
@@ -24,7 +25,22 @@ import com.redhat.ceylon.js.repl.Autocompleter;
  */
 public class DocUtils {
 
-    public static final Configuration MD_CONF = Configuration.builder().forceExtentedProfile().setEncoding("UTF-8").build();
+    public static final Configuration MD_CONF = 
+            Configuration.builder()
+                .forceExtentedProfile()
+                .setEncoding("UTF-8")
+                .setSpecialLinkEmitter(new SpanEmitter() {
+                    @Override
+                    public void emitSpan(StringBuilder out, String content) {
+                        int bar = content.indexOf('|');
+                        if (bar>0) {
+                            out.append(content.substring(0, bar));
+                        }
+                        else {
+                            out.append("<code>").append(content).append("</code>");
+                        }
+                    }
+                }).build();
 
     /** Transforms the reference map into a list of locations in a format that CodeMirror can understand. */
     public static List<Map<String,Object>> referenceMapToList(Map<String, Integer> refs) {

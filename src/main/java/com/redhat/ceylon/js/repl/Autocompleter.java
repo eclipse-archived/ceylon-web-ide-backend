@@ -132,9 +132,9 @@ public class Autocompleter extends AutocompleteVisitor {
         }
     }
 
-    private final static String KEYWORD = "<span class='cm-atom'>";
+    private final static String KEYWORD = "<span class='cm-keyword'>";
     private final static String VARIABLE = "<span class='cm-variable'>";
-    private final static String TYPE = "<span class='cm-classname'>";
+    private final static String TYPE = "<span class='cm-variable-3'>";
     private final static String END = "</span>";
     
     private Map<String,Object> translateCompletion(Declaration declaration, boolean withArgs) {
@@ -150,7 +150,10 @@ public class Autocompleter extends AutocompleteVisitor {
             if (withArgs) {
                 addParameterLists(display, insert, m.getParameterLists());
             }
-            display.append(" : ").append(type(m.getType()));
+            /*Type type = m.getType();
+            if (type!=null) {
+                display.append(" \u220a ").append(type.asString());
+            }*/
             /*if(m.getContainer() instanceof ClassOrInterface){
                 display.append(" - ").append(TYPE).append(((ClassOrInterface)m.getContainer()).getName()).append(END);
             }*/
@@ -165,8 +168,15 @@ public class Autocompleter extends AutocompleteVisitor {
             move = c.getName().length() + 1;
         }else if(declaration instanceof Value || declaration instanceof Setter){
             insert.append(declaration.getName());
-            display.append(declaration.getName());
-            display.append(" : ").append(type(((TypedDeclaration)declaration).getType()));
+            display.append(VARIABLE).append(declaration.getName()).append(END);
+            /*Type type = ((TypedDeclaration) declaration).getType();
+            if (type!=null) {
+                display.append(" \u220a ").append(type.asString());
+            }*/
+            move = declaration.getName().length();
+        }else if(declaration instanceof TypeDeclaration){
+            insert.append(declaration.getName());
+            display.append(TYPE).append(declaration.getName()).append(END);
             move = declaration.getName().length();
         }else{
             insert.append(declaration.getName());
@@ -211,17 +221,16 @@ public class Autocompleter extends AutocompleteVisitor {
                     insert.append(", ");
                     display.append(", ");
                 }
-                display.append(TYPE).append(type(param.getType())).append(END);
+                Type type = param.getType();
+                if (type!=null) {
+                    display.append(TYPE).append(type.asString()).append(END);
+                }
                 display.append(" ").append(VARIABLE).append(param.getName()).append(END);
                 insert.append(param.getName());
             }
             insert.append(")");
             display.append(")");
         }
-    }
-
-    private String type(Type type) {
-        return type.asQualifiedString();
     }
 
     private String getDoc(Declaration declaration) {
@@ -233,6 +242,10 @@ public class Autocompleter extends AutocompleteVisitor {
                 }
                 return doc;
             }
+        }
+        Declaration refined = declaration.getRefinedDeclaration();
+        if (refined!=declaration) {
+            return getDoc(refined);
         }
         return "";
     }

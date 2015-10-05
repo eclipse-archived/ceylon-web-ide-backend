@@ -48,7 +48,7 @@
     complete.appendChild(input);
     
     var sel = complete.appendChild(document.createElement("div"));
-    sel.className = "popup cm-s-default";
+    sel.className = "popup cm-s-ceylon";
 
     for (var i = 0; i < completions.length; ++i) {
       var opt = sel.appendChild(document.createElement("div"));
