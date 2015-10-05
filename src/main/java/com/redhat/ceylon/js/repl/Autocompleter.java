@@ -14,14 +14,15 @@ import com.redhat.ceylon.compiler.typechecker.tree.Tree;
 import com.redhat.ceylon.js.util.DocUtils;
 import com.redhat.ceylon.model.typechecker.model.Annotation;
 import com.redhat.ceylon.model.typechecker.model.Class;
-import com.redhat.ceylon.model.typechecker.model.ClassOrInterface;
 import com.redhat.ceylon.model.typechecker.model.Declaration;
 import com.redhat.ceylon.model.typechecker.model.DeclarationWithProximity;
 import com.redhat.ceylon.model.typechecker.model.Function;
+import com.redhat.ceylon.model.typechecker.model.Functional;
 import com.redhat.ceylon.model.typechecker.model.Parameter;
 import com.redhat.ceylon.model.typechecker.model.ParameterList;
 import com.redhat.ceylon.model.typechecker.model.Setter;
 import com.redhat.ceylon.model.typechecker.model.Type;
+import com.redhat.ceylon.model.typechecker.model.TypeDeclaration;
 import com.redhat.ceylon.model.typechecker.model.TypeParameter;
 import com.redhat.ceylon.model.typechecker.model.TypedDeclaration;
 import com.redhat.ceylon.model.typechecker.model.Value;
@@ -108,19 +109,27 @@ public class Autocompleter extends AutocompleteVisitor {
             Map<String, DeclarationWithProximity> comps) {
         List<Map<String,Object>> completions = new ArrayList<Map<String,Object>>(comps.size());
         for(Map.Entry<String, DeclarationWithProximity> entry : comps.entrySet()){
-            final Map<String,Object> completion = translateCompletion(entry.getValue());
-            if (!completions.contains(completion)) {
-                completions.add(completion);
-            }
+            translateCompletion(entry.getValue(), completions);
         }
         return completions;
     }
 
-    private Map<String,Object> translateCompletion(DeclarationWithProximity value) {
-        Map<String,Object> completion = new HashMap<String, Object>(4);
-        translateCompletion(completion, value.getDeclaration());
-        completion.put("help", Processor.process(getDoc(value.getDeclaration()), DocUtils.MD_CONF));
-        return completion;
+    private void translateCompletion(DeclarationWithProximity value,
+            List<Map<String,Object>> completions) {
+        Declaration declaration = value.getDeclaration();
+        if (declaration instanceof TypeDeclaration ||
+                !(declaration instanceof Functional)) {
+            Map<String,Object> completion = translateCompletion(declaration, false);
+            if (!completions.contains(completion)) {
+                completions.add(completion);
+            }
+        }
+        if (declaration instanceof Functional) {
+            Map<String,Object> completion = translateCompletion(declaration, true);
+            if (!completions.contains(completion)) {
+                completions.add(completion);
+            }
+        }
     }
 
     private final static String KEYWORD = "<span class='cm-atom'>";
@@ -128,8 +137,8 @@ public class Autocompleter extends AutocompleteVisitor {
     private final static String TYPE = "<span class='cm-classname'>";
     private final static String END = "</span>";
     
-    private void translateCompletion(Map<String,Object> completion,
-            Declaration declaration) {
+    private Map<String,Object> translateCompletion(Declaration declaration, boolean withArgs) {
+        Map<String,Object> completion = new HashMap<String, Object>(4);
         StringBuilder insert = new StringBuilder();
         StringBuilder display = new StringBuilder();
         int move;
@@ -138,17 +147,21 @@ public class Autocompleter extends AutocompleteVisitor {
             insert.append(m.getName());
             display.append(VARIABLE).append(m.getName()).append(END);
             addTypeParameters(display, insert, m.getTypeParameters());
-            addParameterLists(display, insert, m.getParameterLists());
-            display.append(" : ").append(type(m.getType()));
-            if(m.getContainer() instanceof ClassOrInterface){
-                display.append(" - ").append(TYPE).append(((ClassOrInterface)m.getContainer()).getName()).append(END);
+            if (withArgs) {
+                addParameterLists(display, insert, m.getParameterLists());
             }
+            display.append(" : ").append(type(m.getType()));
+            /*if(m.getContainer() instanceof ClassOrInterface){
+                display.append(" - ").append(TYPE).append(((ClassOrInterface)m.getContainer()).getName()).append(END);
+            }*/
             move = m.getName().length() + 1;
         }else if(declaration instanceof Class){
             Class c = (Class)declaration;
             insert.append(c.getName());
             display.append(TYPE).append(c.getName()).append(END);
-            addParameterLists(display, insert, c.getParameterLists());
+            if (withArgs) {
+                addParameterLists(display, insert, c.getParameterLists());
+            }
             move = c.getName().length() + 1;
         }else if(declaration instanceof Value || declaration instanceof Setter){
             insert.append(declaration.getName());
@@ -163,6 +176,8 @@ public class Autocompleter extends AutocompleteVisitor {
         completion.put("insert", insert.toString());
         completion.put("display", display.toString());
         completion.put("move", move);
+        completion.put("help", Processor.process(getDoc(declaration), DocUtils.MD_CONF));
+        return completion;
     }
 
     private void addTypeParameters(StringBuilder display, StringBuilder insert,
