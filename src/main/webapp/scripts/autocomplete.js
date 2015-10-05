@@ -13,6 +13,7 @@
     var tempToken = editor.getTokenAt(cursor);
     if(!(/[\S]/gi.test(tempToken.string))) return;
     if(tempToken.type == "variable"
+        || tempToken.type == "variable-2"
     	|| tempToken.type == "variable-3"
     	|| tempToken.type == "builtin"){
     	// we start with a filter
