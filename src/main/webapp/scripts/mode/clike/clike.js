@@ -40,11 +40,11 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
       state.tokenize = tokenString(ch);
       return state.tokenize(stream, state);
     }
-    if (/[\[\]{}\(\),;\:\.]/.test(ch)) {
+    if (/[\[\]{}\(\),;\:\.`]/.test(ch)) {
       curPunc = ch;
       return null;
     }
-    if (/\d/.test(ch)) {
+    if (/\d|#|\$/.test(ch)) {
       stream.eatWhile(/[\w\.]/);
       return "number";
     }
