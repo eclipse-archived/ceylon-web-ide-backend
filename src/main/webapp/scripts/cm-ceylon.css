@@ -49,3 +49,6 @@
 .cm-locked {
     background-color: rgb(255, 243, 243);
 }
+
+div.CodeMirror span.CodeMirror-matchingbracket {color: red;}
+div.CodeMirror span.CodeMirror-nonmatchingbracket {color: red;}
