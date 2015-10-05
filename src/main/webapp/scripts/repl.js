@@ -505,7 +505,7 @@ function markExampleSelected(setName, key) {
 // Asks the user for a name and stores the code on the server
 // Is called when the "Save As" menu item is selected
 function handleSaveAs() {
-    w2prompt("Enter a name for the new Gist", "Name", "", "Save As", function(name) {
+    w2prompt("Enter a name for the new Gist:", "Name", "", "Save As", function(name) {
         if (name != null && name != "") {
             saveSource(name);
         }
@@ -756,7 +756,7 @@ function renameFile(id, newname) {
 }
 
 function askFileName(title, suggestion, nodup, func) {
-    var name = w2prompt('Enter the name for the file INCLUDING the extension (eg. "main.ceylon")',
+    var name = w2prompt('Enter the name for the file <em>including</em> the file extension:<p>(Supported extensions: <code>.ceylon</code>, <code>.js</code>, <code>.md</code>)</p>',
         "Name",
         suggestion,
         title,
@@ -2212,7 +2212,7 @@ function w2prompt(msg, label, value, title, onClose, onValidate) {
         name: 'promptform',
         style: 'border: 0px; background-color: transparent;',
         fields: [
-            { field: 'value', type: 'text', html: { caption: label }, required: true },
+            { field: 'value', type: 'text', html: { caption: label, attr: 'size="40"' }, required: true },
         ],
         record: { 
             value: value,
@@ -2229,9 +2229,9 @@ function w2prompt(msg, label, value, title, onClose, onValidate) {
     });
     w2popup.open({
         title: title,
-        body: '<div style="text-align: center; padding: 5%; width: 100%; height: 20%;">' +
+        body: '<div style="text-align: center; padding: 5%; width: 100%; height: 30%;">' +
         msg +
-        '</div><div id="form" style="width: 100%; height: 80%;"></div>',
+        '</div><div id="form" style="width: 100%; height: 70%;"></div>',
         modal: true,
         onOpen: function (event) {
             event.onComplete = function () {
@@ -2270,18 +2270,18 @@ function popupSelectGist(onClose) {
     
     var msg, focus;
     var fields = [
-         { name: 'value', type: 'text', html: { caption: 'Gist ID' }, required: true },
+         { name: 'value', type: 'text', html: { caption: 'Gist ID', attr: 'size="40"' }, required: true },
      ];
     var record = { 
         value: '',
     };
     if (isGitHubConnected()) {
-        msg = 'Select the Gist you want to import from the list below or enter its ID in the text field';
-        var fld = { name: 'select', type: 'list', html: { caption: 'Gists' }, options: { items: [] } };
+        msg = 'Select the Gist you want to import from the list below or enter its ID in the text field:';
+        var fld = { name: 'select', type: 'list', html: { caption: 'Gists', attr: 'size="40"' }, options: { items: [] } };
         fields.splice(0, 0, fld);
         record.select = '';
     } else {
-        msg = 'Enter the ID of the Gist you want to import in the text field below';
+        msg = 'Enter the ID of the Gist you want to import:';
     }
 
     $().w2form({
@@ -2308,9 +2308,9 @@ function popupSelectGist(onClose) {
     });
     w2popup.open({
         title: 'Import Gist',
-        body: '<div style="text-align: center; padding: 5%; width: 100%; height: 20%;">' +
+        body: '<div style="text-align: center; padding: 5%; width: 100%; height: 30%;">' +
             msg +
-            '</div><div id="form" style="width: 100%; height: 80%;"></div>',
+            '</div><div id="form" style="width: 100%; height: 70%;"></div>',
         modal: true,
         onOpen: function (event) {
             event.onComplete = function () {
