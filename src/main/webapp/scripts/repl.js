@@ -756,7 +756,7 @@ function renameFile(id, newname) {
 }
 
 function askFileName(title, suggestion, nodup, func) {
-    var name = w2prompt('Enter the name for the file <em>including</em> the file extension:<p>(Supported extensions: <code>.ceylon</code>, <code>.js</code>, <code>.md</code>)</p>',
+    var name = w2prompt('Enter the name for the file <em>including</em> the file extension:<p>(Supported extensions: <code>.ceylon</code>, <code>.js</code>, <code>.json</code>, <code>.md, <code>.txt</code></code>)</p>',
         "Name",
         suggestion,
         title,
