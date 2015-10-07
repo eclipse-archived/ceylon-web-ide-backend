@@ -17,7 +17,7 @@
     	|| tempToken.type == "variable-3"
     	|| tempToken.type == "builtin"){
     	// we start with a filter
-    	filter = tempToken.string;
+    	filter = tempToken.string.substring(0, cursor.ch - tempToken.start);
     	// we will replace that token entirely
     	replaceFrom = {line: cursor.line, ch: cursor.ch - filter.length};
     }else if(tempToken.type == null
@@ -35,7 +35,7 @@
     	// we replace from the replaceFrom point until whatever we already inserted
     	var replaceTo = {line: cursor.line, ch: replaceFrom.ch + filter.length};
     	editor.replaceRange(completion.insert, replaceFrom, replaceTo);
-    	editor.setCursor({line: cursor.line, ch: replaceFrom.ch+completion.move});
+    	editor.setCursor({line: cursor.line, ch: replaceFrom.ch + completion.move});
     }
     // When there is only one completion, use it directly.
     if (completions.length == 1) {insert(completions[0]); return true;}

@@ -21,6 +21,7 @@ import com.redhat.ceylon.model.typechecker.model.Function;
 import com.redhat.ceylon.model.typechecker.model.Functional;
 import com.redhat.ceylon.model.typechecker.model.Parameter;
 import com.redhat.ceylon.model.typechecker.model.ParameterList;
+import com.redhat.ceylon.model.typechecker.model.Scope;
 import com.redhat.ceylon.model.typechecker.model.Setter;
 import com.redhat.ceylon.model.typechecker.model.Type;
 import com.redhat.ceylon.model.typechecker.model.TypeDeclaration;
@@ -62,6 +63,8 @@ public class Autocompleter extends AutocompleteVisitor {
         if (node != null) {
             Unit unit = node.getUnit();
             Map<String, DeclarationWithProximity> completions;
+            String prefix = getTextAtLocation();
+            Scope scope = node.getScope();
             if (node instanceof Tree.QualifiedMemberOrTypeExpression) {
                 Tree.QualifiedMemberOrTypeExpression exp = 
                         (Tree.QualifiedMemberOrTypeExpression) node;
@@ -74,16 +77,14 @@ public class Autocompleter extends AutocompleteVisitor {
                                 smte.getDeclaration();
                     completions = 
                             td.getMatchingMemberDeclarations(
-                                    unit, exp.getScope(), 
-                                    getTextAtLocation(), 0);
+                                    unit, scope, prefix, 0);
                 }
                 else {
                     completions = 
                             p.getTypeModel()
                             .getDeclaration()
                             .getMatchingMemberDeclarations(
-                                    unit, exp.getScope(), 
-                                    getTextAtLocation(), 0);
+                                    unit, scope, prefix, 0);
                 }
             }
             else if (node instanceof Tree.BaseMemberOrTypeExpression) {
@@ -92,8 +93,7 @@ public class Autocompleter extends AutocompleteVisitor {
                 completions = 
                         exp.getScope()
                         .getMatchingDeclarations(
-                                unit, 
-                                getTextAtLocation(), 0);
+                                unit, prefix, 0);
             }
             else if (node instanceof Tree.BaseType) {
                 Tree.BaseType exp = 
@@ -101,8 +101,7 @@ public class Autocompleter extends AutocompleteVisitor {
                 completions = 
                         exp.getScope()
                         .getMatchingDeclarations(
-                                unit, 
-                                getTextAtLocation(), 0);
+                                unit, prefix, 0);
             }
             else if (node instanceof Tree.QualifiedType) {
                 Tree.QualifiedType exp = 
@@ -112,8 +111,7 @@ public class Autocompleter extends AutocompleteVisitor {
                         .getTypeModel()
                         .getDeclaration()
                         .getMatchingMemberDeclarations(
-                                unit, exp.getScope(), 
-                                getTextAtLocation(), 0);
+                                unit, scope, prefix, 0);
             }
             else if (node instanceof Tree.Variable) {
                 Tree.Variable exp = 
@@ -121,7 +119,7 @@ public class Autocompleter extends AutocompleteVisitor {
                 completions = exp.getScope()
                         .getMatchingDeclarations(
                                 unit, 
-                                getTextAtLocation(), 0);
+                                prefix, 0);
             }
             else {
                 return Collections.emptyList();
