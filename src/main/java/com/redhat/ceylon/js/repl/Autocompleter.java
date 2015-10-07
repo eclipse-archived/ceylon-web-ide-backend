@@ -1,6 +1,7 @@
 package com.redhat.ceylon.js.repl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +25,7 @@ import com.redhat.ceylon.model.typechecker.model.Setter;
 import com.redhat.ceylon.model.typechecker.model.Type;
 import com.redhat.ceylon.model.typechecker.model.TypeDeclaration;
 import com.redhat.ceylon.model.typechecker.model.TypeParameter;
-import com.redhat.ceylon.model.typechecker.model.TypedDeclaration;
+import com.redhat.ceylon.model.typechecker.model.Unit;
 import com.redhat.ceylon.model.typechecker.model.Value;
 
 /** A visitor that can return a list of suggestions given a location on the AST.
@@ -57,57 +58,85 @@ public class Autocompleter extends AutocompleteVisitor {
      *  
      * */
     public List<Map<String,Object>> getCompletionsAsMap() {
-        Map<String, DeclarationWithProximity> comps = new HashMap<String, DeclarationWithProximity>();
         Node node = getNodeAtLocation();
         if (node != null) {
-//            HashSet<PhasedUnit> units = new HashSet<PhasedUnit>();
-//            HashSet<com.redhat.ceylon.model.typechecker.model.Package> packs = new HashSet<>();
+            Unit unit = node.getUnit();
+            Map<String, DeclarationWithProximity> completions;
             if (node instanceof Tree.QualifiedMemberOrTypeExpression) {
-                Tree.QualifiedMemberOrTypeExpression exp = (Tree.QualifiedMemberOrTypeExpression)node;
-                Type type = exp.getPrimary().getTypeModel();
-                Map<String, DeclarationWithProximity> c2 = type.getDeclaration().getMatchingMemberDeclarations(
-                        node.getUnit(), exp.getScope(), getTextAtLocation(), 0);
-                comps.putAll(c2);
+                Tree.QualifiedMemberOrTypeExpression exp = 
+                        (Tree.QualifiedMemberOrTypeExpression) node;
+                Tree.Primary p = exp.getPrimary();
+                if (exp.getStaticMethodReference()) {
+                    Tree.StaticMemberOrTypeExpression smte = 
+                            (Tree.StaticMemberOrTypeExpression) p;
+                    TypeDeclaration td = 
+                            (TypeDeclaration) 
+                                smte.getDeclaration();
+                    completions = 
+                            td.getMatchingMemberDeclarations(
+                                    unit, exp.getScope(), 
+                                    getTextAtLocation(), 0);
+                }
+                else {
+                    completions = 
+                            p.getTypeModel()
+                            .getDeclaration()
+                            .getMatchingMemberDeclarations(
+                                    unit, exp.getScope(), 
+                                    getTextAtLocation(), 0);
+                }
             }
             else if (node instanceof Tree.BaseMemberOrTypeExpression) {
-                final Tree.BaseMemberOrTypeExpression exp = (Tree.BaseMemberOrTypeExpression)node;
-                Map<String, DeclarationWithProximity> c2 = exp.getScope().getMatchingDeclarations(
-                        node.getUnit(), getTextAtLocation(), 0);
-                comps.putAll(c2);
+                Tree.BaseMemberOrTypeExpression exp = 
+                        (Tree.BaseMemberOrTypeExpression) node;
+                completions = 
+                        exp.getScope()
+                        .getMatchingDeclarations(
+                                unit, 
+                                getTextAtLocation(), 0);
             }
             else if (node instanceof Tree.BaseType) {
-                final Tree.BaseType exp = (Tree.BaseType)node;
-                Map<String, DeclarationWithProximity> c2 = exp.getScope().getMatchingDeclarations(
-                        node.getUnit(), getTextAtLocation(), 0);
-                comps.putAll(c2);
+                Tree.BaseType exp = 
+                        (Tree.BaseType) node;
+                completions = 
+                        exp.getScope()
+                        .getMatchingDeclarations(
+                                unit, 
+                                getTextAtLocation(), 0);
             }
             else if (node instanceof Tree.QualifiedType) {
-                final Tree.QualifiedType exp = (Tree.QualifiedType)node;
-                Type type = exp.getOuterType().getTypeModel();
-                Map<String, DeclarationWithProximity> c2 = type.getDeclaration().getMatchingMemberDeclarations(
-                        node.getUnit(), exp.getScope(), getTextAtLocation(), 0);
-                comps.putAll(c2);
+                Tree.QualifiedType exp = 
+                        (Tree.QualifiedType) node;
+                completions = 
+                        exp.getOuterType()
+                        .getTypeModel()
+                        .getDeclaration()
+                        .getMatchingMemberDeclarations(
+                                unit, exp.getScope(), 
+                                getTextAtLocation(), 0);
             }
             else if (node instanceof Tree.Variable) {
-                final Tree.Variable exp = (Tree.Variable)node;
-                Map<String, DeclarationWithProximity> c2 = exp.getScope().getMatchingDeclarations(
-                        node.getUnit(), getTextAtLocation(), 0);
-                comps.putAll(c2);
+                Tree.Variable exp = 
+                        (Tree.Variable) node;
+                completions = exp.getScope()
+                        .getMatchingDeclarations(
+                                unit, 
+                                getTextAtLocation(), 0);
             }
-            /*else {
-                for (PhasedUnits pus : checker.getPhasedUnitsOfDependencies()) {
-                    for (PhasedUnit pu : pus.getPhasedUnits()) {
-                        addCompletions(comps, units, packs, pu);
-                    }
-                }
-            }*/
+            else {
+                return Collections.emptyList();
+            }
+            return translateCompletions(completions);
         }
-        return translateCompletions(comps);
+        else {
+            return Collections.emptyList(); 
+        }
     }
 
     private List<Map<String,Object>> translateCompletions(
             Map<String, DeclarationWithProximity> comps) {
-        List<Map<String,Object>> completions = new ArrayList<Map<String,Object>>(comps.size());
+        List<Map<String,Object>> completions = 
+                new ArrayList<Map<String,Object>>(comps.size());
         for(Map.Entry<String, DeclarationWithProximity> entry : comps.entrySet()){
             translateCompletion(entry.getValue(), completions);
         }
