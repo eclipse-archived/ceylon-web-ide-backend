@@ -200,6 +200,10 @@ public class DocUtils {
             result.append(KEYWORD).append("alias").append(END);
         }
         result.append(' ');
+        /*if (declaration.isClassOrInterfaceMember()) {
+            ClassOrInterface container = (ClassOrInterface) declaration.getContainer();
+            result.append(TYPE).append(container.getName()).append(END).append('.');
+        }*/
         if (declaration instanceof TypeDeclaration) {
             result.append(TYPE).append(declaration.getName()).append(END);
         }
