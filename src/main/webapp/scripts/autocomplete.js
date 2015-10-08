@@ -81,15 +81,22 @@
 
     var selectedIndex = 0;
     var insertionPoint = cursor.ch;
+    var originalInsertionPoint = insertionPoint;
     var done = false;
     
-    var extraFilter = "";
-
+    var hump = /^[a-z0-9]+|[A-Z][a-z0-9]*/g;
+    
     function completionMatches(index){
-      //TODO: do camel-hump matching here!!!
-      return extraFilter.length==0 ||
-          completions[index].insert.substring(filter.length).toLowerCase()
-            .indexOf(extraFilter.toLowerCase()) == 0;
+      if (originalInsertionPoint==insertionPoint) return true;
+      var completion = completions[index].insert;
+      if (completion.toLowerCase().indexOf(filter.toLowerCase())==0) return true;
+      var filterHumps = filter.match(hump);
+      var completionHumps = completion.match(hump);
+      if (completionHumps.length<filterHumps.length) return false;
+      for (i=0; i<filterHumps.length; i++) {
+          if (completionHumps[i].toLowerCase().indexOf(filterHumps[i].toLowerCase())!=0) return false;
+      }
+      return true;
     }
     function updateFilter(){
     	var $children = jQuery(sel).children();
@@ -204,8 +211,8 @@
     			editor.focus();
     		}else{
     			// normally we must have a filter here
-    			if(extraFilter.length > 0){
-    				extraFilter = extraFilter.substring(0, extraFilter.length-1);
+    			if(filter.length > 0){
+    				filter = filter.substring(0, filter.length-1);
     				updateFilter();
     			}
     		}
@@ -260,7 +267,7 @@
     	updating = true;
 		editor.replaceRange(char, {line: cursor.line, ch: insertionPoint++});
 		updating = false;
-		extraFilter += char;
+		filter += char;
 		updateFilter();
     });
     // do we have an initial filter?
