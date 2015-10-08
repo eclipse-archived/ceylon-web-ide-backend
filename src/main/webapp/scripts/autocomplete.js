@@ -82,12 +82,14 @@
     var selectedIndex = 0;
     var insertionPoint = cursor.ch;
     var done = false;
+    
+    var extraFilter = "";
 
     function completionMatches(index){
-      return true;
-      //broken:
-      /*return filter.length==0 ||
-          completions[index].insert.toLowerCase().indexOf(filter.toLowerCase()) == 0;*/
+      //TODO: do camel-hump matching here!!!
+      return extraFilter.length==0 ||
+          completions[index].insert.substring(filter.length).toLowerCase()
+            .indexOf(extraFilter.toLowerCase()) == 0;
     }
     function updateFilter(){
     	var $children = jQuery(sel).children();
@@ -131,6 +133,7 @@
     	help.innerHTML = completions[selectedIndex].help;
     }
     var prettyPleaseStop=false;
+    var updating=false;
     function keydown(event){
         prettyPleaseStop=false;
     	function prevent(){
@@ -201,15 +204,15 @@
     			editor.focus();
     		}else{
     			// normally we must have a filter here
-    			if(filter.length > 0){
-    				filter = filter.substring(0, filter.length-1);
+    			if(extraFilter.length > 0){
+    				extraFilter = extraFilter.substring(0, extraFilter.length-1);
     				updateFilter();
     			}
     		}
     	}
     }
     function close() {
-      if (done) {
+      if (done||updating) {
         return;
       }
       done = true;
@@ -254,13 +257,15 @@
           return;
         }
     	var char = String.fromCharCode(event.which);
+    	updating = true;
 		editor.replaceRange(char, {line: cursor.line, ch: insertionPoint++});
-		filter += char;
+		updating = false;
+		extraFilter += char;
 		updateFilter();
     });
     // do we have an initial filter?
-    if(filter.length > 0)
-    	updateFilter();
+    //if(filter.length > 0)
+    //	updateFilter();
 
     input.focus();
     // Opera sometimes ignores focusing a freshly created node
