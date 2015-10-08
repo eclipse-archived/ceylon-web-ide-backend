@@ -28,8 +28,10 @@ import com.redhat.ceylon.model.typechecker.model.Functional;
 import com.redhat.ceylon.model.typechecker.model.Generic;
 import com.redhat.ceylon.model.typechecker.model.Interface;
 import com.redhat.ceylon.model.typechecker.model.ModelUtil;
+import com.redhat.ceylon.model.typechecker.model.Package;
 import com.redhat.ceylon.model.typechecker.model.Parameter;
 import com.redhat.ceylon.model.typechecker.model.ParameterList;
+import com.redhat.ceylon.model.typechecker.model.Scope;
 import com.redhat.ceylon.model.typechecker.model.Type;
 import com.redhat.ceylon.model.typechecker.model.TypeAlias;
 import com.redhat.ceylon.model.typechecker.model.TypeDeclaration;
@@ -234,6 +236,20 @@ public class DocUtils {
         }
         appendParameters(declaration, result);
         result.append("</code></pre>");
+        Scope container = declaration.getContainer();
+        if (container instanceof Package) {
+            if (container.getQualifiedNameString()!=null) {
+                result.append("<p>Member of package <code>")
+                    .append(container.getQualifiedNameString())
+                    .append("</code>.</p>");
+            }
+        }
+        else if (declaration.isClassOrInterfaceMember()) {
+            Declaration dec = (Declaration) container;
+            result.append("<p>Member of <code>")
+                .append(dec.getName())
+                .append("</code>.</p>");
+        }
         return result.toString();
     }
 
