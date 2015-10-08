@@ -1,6 +1,8 @@
 package com.redhat.ceylon.js.repl;
 
 import static com.redhat.ceylon.js.util.DocUtils.getDoc;
+import static com.redhat.ceylon.js.util.DocUtils.getExtraInfo;
+import static com.redhat.ceylon.js.util.DocUtils.getParameterInfo;
 import static com.redhat.ceylon.js.util.DocUtils.getSignature;
 
 import java.util.ArrayList;
@@ -9,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.github.rjeschke.txtmark.Processor;
 import com.redhat.ceylon.compiler.js.AutocompleteVisitor;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
@@ -224,7 +225,11 @@ public class Autocompleter extends AutocompleteVisitor {
         completion.put("insert", insert.toString());
         completion.put("display", display.toString());
 //        completion.put("move", move);
-        completion.put("help", getSignature(declaration) + Processor.process(getDoc(declaration), DocUtils.MD_CONF));
+        completion.put("help", 
+                getSignature(declaration) + 
+                getExtraInfo(declaration) + 
+                getDoc(declaration) + 
+                getParameterInfo(declaration));
         return completion;
     }
 

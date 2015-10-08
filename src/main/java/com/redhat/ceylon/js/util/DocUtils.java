@@ -24,6 +24,7 @@ import com.redhat.ceylon.model.typechecker.model.Class;
 import com.redhat.ceylon.model.typechecker.model.ClassOrInterface;
 import com.redhat.ceylon.model.typechecker.model.Declaration;
 import com.redhat.ceylon.model.typechecker.model.Function;
+import com.redhat.ceylon.model.typechecker.model.FunctionOrValue;
 import com.redhat.ceylon.model.typechecker.model.Functional;
 import com.redhat.ceylon.model.typechecker.model.Generic;
 import com.redhat.ceylon.model.typechecker.model.Interface;
@@ -155,32 +156,81 @@ public class DocUtils {
             //json.put("url", sb.toString());
         }
         if (!json.containsKey("url")) {
-            json.put("doc", getSignature(d) + 
-                    Processor.process(getDoc(d), MD_CONF));
+            json.put("doc", 
+                    getSignature(d) + 
+                    getExtraInfo(d) + 
+                    getDoc(d) + 
+                    getParameterInfo(d));
         }
         return json;
     }
 
     public static String getDoc(Declaration declaration) {
+        if (declaration==null) {
+            return "";
+        }
+        StringBuilder result = new StringBuilder();
         for (Annotation ann : declaration.getAnnotations()) {
             if ("doc".equals(ann.getName()) && !ann.getPositionalArguments().isEmpty()) {
                 String doc = ann.getPositionalArguments().get(0);
                 if (doc.charAt(0) == '"' && doc.charAt(doc.length()-1) == '"') {
                     doc = doc.substring(1, doc.length()-1);
                 }
-                return doc;
+                result.append(Processor.process(doc, DocUtils.MD_CONF));
+                break;
             }
         }
-        Declaration refined = declaration.getRefinedDeclaration();
-        if (refined!=declaration) {
-            return getDoc(refined);
+        if (result.length()==0) {
+            Declaration refined = declaration.getRefinedDeclaration();
+            if (refined!=declaration) {
+                result.append("<ul><li>Refines <code class='cm-s-ceylon'>")
+                    .append(TYPE)
+                    .append(((Declaration) refined.getContainer()).getName())
+                    .append(END)
+                    .append('.')
+                    .append(VARIABLE)
+                    .append(refined.getName())
+                    .append(END)
+                    .append("</code></ul>")
+                    .append(getDoc(refined));
+            }
         }
-        return "";
+        return result.toString();
+    }
+
+    public static String getParameterInfo(Declaration declaration) {
+        StringBuilder result = new StringBuilder();
+        if (declaration instanceof TypedDeclaration) {
+            result.append("<ul><li>Returns <code class='cm-s-ceylon'>")
+                .append(TYPE)
+                .append(escape(((TypedDeclaration) declaration).getType()))
+                .append(END)
+                .append("</code></ul>");
+        }
+        if (declaration instanceof Functional) {
+            Functional fun = (Functional) declaration;
+            result.append("<ul>");
+            for(ParameterList parameterList : fun.getParameterLists()){
+                for(Parameter param : parameterList.getParameters()){
+                    FunctionOrValue model = param.getModel();
+                    result.append("<li><p>Accepts ")
+                        .append(getSignatureInternal(model))
+                        .append(".</p>")
+                        .append(getDoc(model));
+                }
+            }
+            result.append("</ul>");
+        }
+        return result.toString();
     }
 
     public static String getSignature(Declaration declaration) {
+        return "<pre>" + getSignatureInternal(declaration) + "</pre>";
+    }
+
+    private static String getSignatureInternal(Declaration declaration) {
         StringBuilder result = new StringBuilder();
-        result.append("<pre><code class='cm-s-ceylon'>");
+        result.append("<code class='cm-s-ceylon'>");
         if (ModelUtil.isConstructor(declaration)) {
             result.append(KEYWORD).append("new").append(END);
         }
@@ -235,19 +285,26 @@ public class DocUtils {
             }
         }
         appendParameters(declaration, result);
-        result.append("</code></pre>");
+        result.append("</code>");
+        return result.toString();
+    }
+
+    public static String getExtraInfo(Declaration declaration) {
+        StringBuilder result = new StringBuilder();
         Scope container = declaration.getContainer();
         if (container instanceof Package) {
             if (container.getQualifiedNameString()!=null) {
-                result.append("<p>Member of package <code>")
+                result.append("<p>Member of package <code class='cm-s-ceylon'>")
                     .append(container.getQualifiedNameString())
                     .append("</code>.</p>");
             }
         }
         else if (declaration.isClassOrInterfaceMember()) {
             Declaration dec = (Declaration) container;
-            result.append("<p>Member of <code>")
+            result.append("<p>Member of <code class='cm-s-ceylon'>")
+                .append(TYPE)
                 .append(dec.getName())
+                .append(END)
                 .append("</code>.</p>");
         }
         return result.toString();
@@ -267,18 +324,25 @@ public class DocUtils {
                     }
                     Type type = param.getType();
                     if (param.isDeclaredVoid()) {
-                        result.append(KEYWORD).append("void").append(END);   
+                        result.append(KEYWORD)
+                            .append("void")
+                            .append(END);   
                     }
                     else if (type!=null) {
                         if (param.isSequenced()) {
                             type = declaration.getUnit().getIteratedType(type);
                         }
-                        result.append(TYPE).append(escape(type)).append(END);
+                        result.append(TYPE)
+                            .append(escape(type))
+                            .append(END);
                         if (param.isSequenced()) {
                             result.append(param.isAtLeastOne() ? "+" : "*");
                         }
                     }
-                    result.append(" ").append(VARIABLE).append(param.getName()).append(END);
+                    result.append(" ")
+                        .append(VARIABLE)
+                        .append(param.getName())
+                        .append(END);
                     appendParameters(param.getModel(), result);
                 }
                 result.append(")");
@@ -287,7 +351,10 @@ public class DocUtils {
     }
 
     public static String escape(Type type) {
-        return type.asString().replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+        return type.asString()
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;");
     }
 
 }
