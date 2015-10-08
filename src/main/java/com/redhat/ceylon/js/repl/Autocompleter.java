@@ -173,9 +173,11 @@ public class Autocompleter extends AutocompleteVisitor {
             Function m = (Function)declaration;
             insert.append(m.getName());
             display.append(VARIABLE).append(m.getName()).append(END);
-            addTypeParameters(display, insert, m.getTypeParameters());
             if (withArgs) {
                 addParameterLists(display, insert, m.getParameterLists());
+            }
+            else {
+                addTypeParameters(display, insert, m.getTypeParameters());
             }
             /*Type type = m.getType();
             if (type!=null) {
@@ -192,6 +194,9 @@ public class Autocompleter extends AutocompleteVisitor {
             if (withArgs) {
                 addParameterLists(display, insert, c.getParameterLists());
             }
+            else {
+                addTypeParameters(display, insert, c.getTypeParameters());
+            }
             move = c.getName().length() + 1;
         }else if(declaration instanceof Value || declaration instanceof Setter){
             insert.append(declaration.getName());
@@ -204,6 +209,10 @@ public class Autocompleter extends AutocompleteVisitor {
         }else if(declaration instanceof TypeDeclaration){
             insert.append(declaration.getName());
             display.append(TYPE).append(declaration.getName()).append(END);
+            if (!withArgs) {
+                TypeDeclaration td = (TypeDeclaration) declaration;
+                addTypeParameters(display, insert, td.getTypeParameters());
+            }
             move = declaration.getName().length();
         }else{
             insert.append(declaration.getName());
@@ -220,17 +229,20 @@ public class Autocompleter extends AutocompleteVisitor {
     private void addTypeParameters(StringBuilder display, StringBuilder insert,
             List<TypeParameter> typeParameters) {
         if(!typeParameters.isEmpty()){
+            insert.append("<");
             display.append("<");
             boolean once = true;
             for(TypeParameter param : typeParameters){
                 if(once)
                     once = false;
                 else{
+                    insert.append(", ");
                     display.append(", ");
                 }
+                insert.append(param.getName());
                 display.append(TYPE).append(param.getName()).append(END);
             }
-            
+            insert.append(">");
             display.append(">");
         }
     }
