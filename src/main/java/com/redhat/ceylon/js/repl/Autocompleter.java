@@ -231,7 +231,7 @@ public class Autocompleter extends AutocompleteVisitor {
     private void addTypeParameters(StringBuilder display, StringBuilder insert,
             List<TypeParameter> typeParameters) {
         if(!typeParameters.isEmpty()){
-            insert.append("&lt;");
+            insert.append("<");
             display.append("&lt;");
             boolean once = true;
             for(TypeParameter param : typeParameters){
@@ -244,7 +244,7 @@ public class Autocompleter extends AutocompleteVisitor {
                 insert.append(param.getName());
                 display.append(TYPE).append(param.getName()).append(END);
             }
-            insert.append("&gt;");
+            insert.append(">");
             display.append("&gt;");
         }
     }
