@@ -1,5 +1,8 @@
 package com.redhat.ceylon.js.repl;
 
+import static com.redhat.ceylon.js.util.DocUtils.getDoc;
+import static com.redhat.ceylon.js.util.DocUtils.getSignature;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,7 +16,6 @@ import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
 import com.redhat.ceylon.compiler.typechecker.tree.Node;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree;
 import com.redhat.ceylon.js.util.DocUtils;
-import com.redhat.ceylon.model.typechecker.model.Annotation;
 import com.redhat.ceylon.model.typechecker.model.Class;
 import com.redhat.ceylon.model.typechecker.model.Declaration;
 import com.redhat.ceylon.model.typechecker.model.DeclarationWithProximity;
@@ -159,10 +161,10 @@ public class Autocompleter extends AutocompleteVisitor {
         }
     }
 
-    private final static String KEYWORD = "<span class='cm-keyword'>";
-    private final static String VARIABLE = "<span class='cm-variable'>";
-    private final static String TYPE = "<span class='cm-variable-3'>";
-    private final static String END = "</span>";
+    public final static String KEYWORD = "<span class='cm-keyword'>";
+    public final static String VARIABLE = "<span class='cm-variable'>";
+    public final static String TYPE = "<span class='cm-variable-3'>";
+    public final static String END = "</span>";
     
     private Map<String,Object> translateCompletion(Declaration declaration, boolean withArgs) {
         Map<String,Object> completion = new HashMap<String, Object>(4);
@@ -222,7 +224,7 @@ public class Autocompleter extends AutocompleteVisitor {
         completion.put("insert", insert.toString());
         completion.put("display", display.toString());
 //        completion.put("move", move);
-        completion.put("help", Processor.process(getDoc(declaration), DocUtils.MD_CONF));
+        completion.put("help", getSignature(declaration) + Processor.process(getDoc(declaration), DocUtils.MD_CONF));
         return completion;
     }
 
@@ -270,23 +272,6 @@ public class Autocompleter extends AutocompleteVisitor {
             insert.append(")");
             display.append(")");
         }
-    }
-
-    private String getDoc(Declaration declaration) {
-        for (Annotation ann : declaration.getAnnotations()) {
-            if ("doc".equals(ann.getName()) && !ann.getPositionalArguments().isEmpty()) {
-                String doc = ann.getPositionalArguments().get(0);
-                if (doc.charAt(0) == '"' && doc.charAt(doc.length()-1) == '"') {
-                    doc = doc.substring(1, doc.length()-1);
-                }
-                return doc;
-            }
-        }
-        Declaration refined = declaration.getRefinedDeclaration();
-        if (refined!=declaration) {
-            return getDoc(refined);
-        }
-        return "";
     }
 
 }

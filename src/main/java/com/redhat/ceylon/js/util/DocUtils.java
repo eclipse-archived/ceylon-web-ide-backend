@@ -1,5 +1,10 @@
 package com.redhat.ceylon.js.util;
 
+import static com.redhat.ceylon.js.repl.Autocompleter.END;
+import static com.redhat.ceylon.js.repl.Autocompleter.KEYWORD;
+import static com.redhat.ceylon.js.repl.Autocompleter.TYPE;
+import static com.redhat.ceylon.js.repl.Autocompleter.VARIABLE;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -12,12 +17,24 @@ import com.github.rjeschke.txtmark.Processor;
 import com.github.rjeschke.txtmark.SpanEmitter;
 import com.redhat.ceylon.common.Versions;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
-import com.redhat.ceylon.model.typechecker.model.Annotation;
-import com.redhat.ceylon.model.typechecker.model.ClassOrInterface;
-import com.redhat.ceylon.model.typechecker.model.Declaration;
-import com.redhat.ceylon.model.typechecker.model.Value;
 import com.redhat.ceylon.compiler.typechecker.tree.Node;
 import com.redhat.ceylon.js.repl.Autocompleter;
+import com.redhat.ceylon.model.typechecker.model.Annotation;
+import com.redhat.ceylon.model.typechecker.model.Class;
+import com.redhat.ceylon.model.typechecker.model.ClassOrInterface;
+import com.redhat.ceylon.model.typechecker.model.Declaration;
+import com.redhat.ceylon.model.typechecker.model.Functional;
+import com.redhat.ceylon.model.typechecker.model.Generic;
+import com.redhat.ceylon.model.typechecker.model.Interface;
+import com.redhat.ceylon.model.typechecker.model.ModelUtil;
+import com.redhat.ceylon.model.typechecker.model.Parameter;
+import com.redhat.ceylon.model.typechecker.model.ParameterList;
+import com.redhat.ceylon.model.typechecker.model.Type;
+import com.redhat.ceylon.model.typechecker.model.TypeAlias;
+import com.redhat.ceylon.model.typechecker.model.TypeDeclaration;
+import com.redhat.ceylon.model.typechecker.model.TypeParameter;
+import com.redhat.ceylon.model.typechecker.model.TypedDeclaration;
+import com.redhat.ceylon.model.typechecker.model.Value;
 
 /** Hover docs utilities.
  * 
@@ -135,19 +152,99 @@ public class DocUtils {
             //json.put("url", sb.toString());
         }
         if (!json.containsKey("url")) {
-            String doc = null;
-            //Only return doc for declarations that are not part of the language module
-            for (Annotation ann : d.getAnnotations()) {
-                if ("doc".equals(ann.getName()) && !ann.getPositionalArguments().isEmpty()) {
-                    doc = ann.getPositionalArguments().get(0);
-                    if (doc.charAt(0) == '"' && doc.charAt(doc.length()-1) == '"') {
-                        doc = doc.substring(1, doc.length()-1);
-                    }
-                    json.put("doc", Processor.process(doc, MD_CONF));
-                }
-            }
+            json.put("doc", getSignature(d) + 
+                    Processor.process(getDoc(d), MD_CONF));
         }
         return json;
+    }
+
+    public static String getDoc(Declaration declaration) {
+        for (Annotation ann : declaration.getAnnotations()) {
+            if ("doc".equals(ann.getName()) && !ann.getPositionalArguments().isEmpty()) {
+                String doc = ann.getPositionalArguments().get(0);
+                if (doc.charAt(0) == '"' && doc.charAt(doc.length()-1) == '"') {
+                    doc = doc.substring(1, doc.length()-1);
+                }
+                return doc;
+            }
+        }
+        Declaration refined = declaration.getRefinedDeclaration();
+        if (refined!=declaration) {
+            return getDoc(refined);
+        }
+        return "";
+    }
+
+    public static String getSignature(Declaration declaration) {
+        StringBuilder result = new StringBuilder();
+        result.append("<pre><code class='cm-s-ceylon'>");
+        if (ModelUtil.isConstructor(declaration)) {
+            result.append(KEYWORD).append("new").append(END);
+        }
+        else if (declaration instanceof TypedDeclaration) {
+            Type type = ((TypedDeclaration) declaration).getType();
+            if (type!=null) {
+                result.append(TYPE).append(type.asString()).append(END);
+            }
+        }
+        else if (declaration instanceof Class) {
+            result.append(KEYWORD).append("class").append(END);
+        }
+        else if (declaration instanceof Interface) {
+            result.append(KEYWORD).append("interface").append(END);
+        }
+        else if (declaration instanceof TypeParameter) {
+            result.append(KEYWORD).append("given").append(END);
+        }
+        else if (declaration instanceof TypeAlias) {
+            result.append(KEYWORD).append("alias").append(END);
+        }
+        result.append(' ');
+        if (declaration instanceof TypeDeclaration) {
+            result.append(TYPE).append(declaration.getName()).append(END);
+        }
+        else if (declaration instanceof TypedDeclaration) {
+            result.append(VARIABLE).append(declaration.getName()).append(END);
+        }
+        if (declaration instanceof Generic) {
+            Generic g = (Generic) declaration;
+            List<TypeParameter> typeParameters = g.getTypeParameters();
+            if(!typeParameters.isEmpty()){
+                result.append("<");
+                boolean once = true;
+                for(TypeParameter param : typeParameters){
+                    if(once)
+                        once = false;
+                    else{
+                        result.append(", ");
+                    }
+                    result.append(TYPE).append(param.getName()).append(END);
+                }
+                result.append(">");
+            }
+        }
+        if (declaration instanceof Functional) {
+            Functional fun = (Functional) declaration;
+            for(ParameterList parameterList : fun.getParameterLists()){
+                result.append("(");
+                boolean once = true;
+                for(Parameter param : parameterList.getParameters()){
+                    if(once)
+                        once = false;
+                    else{
+                        result.append(", ");
+                    }
+                    Type type = param.getType();
+                    if (type!=null) {
+                        result.append(TYPE).append(type.asString()).append(END);
+                    }
+                    result.append(" ").append(VARIABLE).append(param.getName()).append(END);
+                }
+                result.append(")");
+            }
+        }
+        result.append("</code></pre>");
+        return result.toString();
     }
 
 }
