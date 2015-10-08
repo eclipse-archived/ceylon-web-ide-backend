@@ -23,6 +23,7 @@ import com.redhat.ceylon.model.typechecker.model.Annotation;
 import com.redhat.ceylon.model.typechecker.model.Class;
 import com.redhat.ceylon.model.typechecker.model.ClassOrInterface;
 import com.redhat.ceylon.model.typechecker.model.Declaration;
+import com.redhat.ceylon.model.typechecker.model.Function;
 import com.redhat.ceylon.model.typechecker.model.Functional;
 import com.redhat.ceylon.model.typechecker.model.Generic;
 import com.redhat.ceylon.model.typechecker.model.Interface;
@@ -181,10 +182,14 @@ public class DocUtils {
         if (ModelUtil.isConstructor(declaration)) {
             result.append(KEYWORD).append("new").append(END);
         }
+        else if (declaration instanceof Function &&
+                ((Function) declaration).isDeclaredVoid()) {
+            result.append(KEYWORD).append("void").append(END);
+        }
         else if (declaration instanceof TypedDeclaration) {
             Type type = ((TypedDeclaration) declaration).getType();
             if (type!=null) {
-                result.append(TYPE).append(type.asString()).append(END);
+                result.append(TYPE).append(escape(type)).append(END);
             }
         }
         else if (declaration instanceof Class) {
@@ -214,7 +219,7 @@ public class DocUtils {
             Generic g = (Generic) declaration;
             List<TypeParameter> typeParameters = g.getTypeParameters();
             if(!typeParameters.isEmpty()){
-                result.append("<");
+                result.append("&lt;");
                 boolean once = true;
                 for(TypeParameter param : typeParameters){
                     if(once)
@@ -224,7 +229,7 @@ public class DocUtils {
                     }
                     result.append(TYPE).append(param.getName()).append(END);
                 }
-                result.append(">");
+                result.append("&gt;");
             }
         }
         appendParameters(declaration, result);
@@ -245,8 +250,17 @@ public class DocUtils {
                         result.append(", ");
                     }
                     Type type = param.getType();
-                    if (type!=null) {
-                        result.append(TYPE).append(type.asString()).append(END);
+                    if (param.isDeclaredVoid()) {
+                        result.append(KEYWORD).append("void").append(END);   
+                    }
+                    else if (type!=null) {
+                        if (param.isSequenced()) {
+                            type = declaration.getUnit().getIteratedType(type);
+                        }
+                        result.append(TYPE).append(escape(type)).append(END);
+                        if (param.isSequenced()) {
+                            result.append(param.isAtLeastOne() ? "+" : "*");
+                        }
                     }
                     result.append(" ").append(VARIABLE).append(param.getName()).append(END);
                     appendParameters(param.getModel(), result);
@@ -254,6 +268,10 @@ public class DocUtils {
                 result.append(")");
             }
         }
+    }
+
+    public static String escape(Type type) {
+        return type.asString().replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
     }
 
 }

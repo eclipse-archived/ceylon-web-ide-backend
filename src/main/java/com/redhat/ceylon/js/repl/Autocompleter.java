@@ -231,8 +231,8 @@ public class Autocompleter extends AutocompleteVisitor {
     private void addTypeParameters(StringBuilder display, StringBuilder insert,
             List<TypeParameter> typeParameters) {
         if(!typeParameters.isEmpty()){
-            insert.append("<");
-            display.append("<");
+            insert.append("&lt;");
+            display.append("&lt;");
             boolean once = true;
             for(TypeParameter param : typeParameters){
                 if(once)
@@ -244,8 +244,8 @@ public class Autocompleter extends AutocompleteVisitor {
                 insert.append(param.getName());
                 display.append(TYPE).append(param.getName()).append(END);
             }
-            insert.append(">");
-            display.append(">");
+            insert.append("&gt;");
+            display.append("&gt;");
         }
     }
 
@@ -263,8 +263,17 @@ public class Autocompleter extends AutocompleteVisitor {
                     display.append(", ");
                 }
                 Type type = param.getType();
-                if (type!=null) {
-                    display.append(TYPE).append(type.asString()).append(END);
+                if (param.isDeclaredVoid()) {
+                    display.append(KEYWORD).append("void").append(END);   
+                }
+                else if (type!=null) {
+                    if (param.isSequenced()) {
+                        type = type.getDeclaration().getUnit().getIteratedType(type);
+                    }
+                    display.append(TYPE).append(DocUtils.escape(type)).append(END);
+                    if (param.isSequenced()) {
+                        display.append(param.isAtLeastOne() ? "+" : "*");
+                    }
                 }
                 display.append(" ").append(VARIABLE).append(param.getName()).append(END);
                 DocUtils.appendParameters(param.getModel(), display);
