@@ -168,7 +168,7 @@ public class Autocompleter extends AutocompleteVisitor {
         Map<String,Object> completion = new HashMap<String, Object>(4);
         StringBuilder insert = new StringBuilder();
         StringBuilder display = new StringBuilder();
-        int move;
+//        int move;
         if(declaration instanceof Function){
             Function m = (Function)declaration;
             insert.append(m.getName());
@@ -186,7 +186,7 @@ public class Autocompleter extends AutocompleteVisitor {
             /*if(m.getContainer() instanceof ClassOrInterface){
                 display.append(" - ").append(TYPE).append(((ClassOrInterface)m.getContainer()).getName()).append(END);
             }*/
-            move = m.getName().length() + 1;
+//            move = m.getName().length() + 1;
         }else if(declaration instanceof Class){
             Class c = (Class)declaration;
             insert.append(c.getName());
@@ -197,7 +197,7 @@ public class Autocompleter extends AutocompleteVisitor {
             else {
                 addTypeParameters(display, insert, c.getTypeParameters());
             }
-            move = c.getName().length() + 1;
+//            move = c.getName().length() + 1;
         }else if(declaration instanceof Value || declaration instanceof Setter){
             insert.append(declaration.getName());
             display.append(VARIABLE).append(declaration.getName()).append(END);
@@ -205,7 +205,7 @@ public class Autocompleter extends AutocompleteVisitor {
             if (type!=null) {
                 display.append(" \u220a ").append(type.asString());
             }*/
-            move = declaration.getName().length();
+//            move = declaration.getName().length();
         }else if(declaration instanceof TypeDeclaration){
             insert.append(declaration.getName());
             display.append(TYPE).append(declaration.getName()).append(END);
@@ -213,15 +213,15 @@ public class Autocompleter extends AutocompleteVisitor {
                 TypeDeclaration td = (TypeDeclaration) declaration;
                 addTypeParameters(display, insert, td.getTypeParameters());
             }
-            move = declaration.getName().length();
+//            move = declaration.getName().length();
         }else{
             insert.append(declaration.getName());
             display.append(declaration.getName());
-            move = declaration.getName().length();
+//            move = declaration.getName().length();
         }
         completion.put("insert", insert.toString());
         completion.put("display", display.toString());
-        completion.put("move", move);
+//        completion.put("move", move);
         completion.put("help", Processor.process(getDoc(declaration), DocUtils.MD_CONF));
         return completion;
     }

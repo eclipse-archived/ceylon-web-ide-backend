@@ -35,7 +35,14 @@
     	// we replace from the replaceFrom point until whatever we already inserted
     	var replaceTo = {line: cursor.line, ch: replaceFrom.ch + filter.length};
     	editor.replaceRange(completion.insert, replaceFrom, replaceTo);
-    	editor.setCursor({line: cursor.line, ch: replaceFrom.ch + completion.move});
+    	var bits = completion.insert.split(/[\(\)<>,]/g);
+    	if (bits.length==1) {
+    	   editor.setCursor({line: cursor.line, ch: replaceFrom.ch + completion.insert.length});
+    	}
+    	else {
+    	   editor.setSelection({line: cursor.line, ch: replaceFrom.ch + bits[0].length+1},
+    	                       {line: cursor.line, ch: replaceFrom.ch + bits[0].length+1 + bits[1].length});
+    	}
     }
     // When there is only one completion, use it directly.
     if (completions.length == 1) {insert(completions[0]); return true;}
