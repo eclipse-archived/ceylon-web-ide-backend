@@ -267,6 +267,7 @@ public class Autocompleter extends AutocompleteVisitor {
                     display.append(TYPE).append(type.asString()).append(END);
                 }
                 display.append(" ").append(VARIABLE).append(param.getName()).append(END);
+                DocUtils.appendParameters(param.getModel(), display);
                 insert.append(param.getName());
             }
             insert.append(")");

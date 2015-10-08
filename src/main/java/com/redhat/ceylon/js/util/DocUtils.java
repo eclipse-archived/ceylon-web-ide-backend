@@ -227,6 +227,12 @@ public class DocUtils {
                 result.append(">");
             }
         }
+        appendParameters(declaration, result);
+        result.append("</code></pre>");
+        return result.toString();
+    }
+
+    public static void appendParameters(Declaration declaration, StringBuilder result) {
         if (declaration instanceof Functional) {
             Functional fun = (Functional) declaration;
             for(ParameterList parameterList : fun.getParameterLists()){
@@ -243,12 +249,11 @@ public class DocUtils {
                         result.append(TYPE).append(type.asString()).append(END);
                     }
                     result.append(" ").append(VARIABLE).append(param.getName()).append(END);
+                    appendParameters(param.getModel(), result);
                 }
                 result.append(")");
             }
         }
-        result.append("</code></pre>");
-        return result.toString();
     }
 
 }
