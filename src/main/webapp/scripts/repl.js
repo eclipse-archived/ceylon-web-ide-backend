@@ -463,7 +463,7 @@ function setupLiveTypechecker() {
                 })
             });
         }
-    },1000);
+    },500);
 }
 
 // Mark the given Gist as selected and updates the proper GUI elements
