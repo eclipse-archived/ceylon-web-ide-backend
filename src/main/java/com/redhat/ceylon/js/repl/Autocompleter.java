@@ -164,6 +164,7 @@ public class Autocompleter extends AutocompleteVisitor {
     public final static String KEYWORD = "<span class='cm-keyword'>";
     public final static String VARIABLE = "<span class='cm-variable'>";
     public final static String TYPE = "<span class='cm-variable-3'>";
+    public final static String ANNOTATION = "<span class='cm-annotation'>";
     public final static String END = "</span>";
     
     private Map<String,Object> translateCompletion(Declaration declaration, boolean withArgs) {
@@ -174,12 +175,20 @@ public class Autocompleter extends AutocompleteVisitor {
         if(declaration instanceof Function){
             Function m = (Function)declaration;
             insert.append(m.getName());
-            display.append(VARIABLE).append(m.getName()).append(END);
-            if (withArgs) {
-                addParameterLists(display, insert, m.getParameterLists());
+            if (m.isAnnotation()) {
+                display.append(ANNOTATION).append(m.getName()).append(END);
+                if (!m.getFirstParameterList().getParameters().isEmpty()) {
+                    addParameterLists(display, insert, m.getParameterLists());
+                }
             }
             else {
-                addTypeParameters(display, insert, m.getTypeParameters());
+                display.append(VARIABLE).append(m.getName()).append(END);
+                if (withArgs) {
+                    addParameterLists(display, insert, m.getParameterLists());
+                }
+                else {
+                    addTypeParameters(display, insert, m.getTypeParameters());
+                }
             }
             /*Type type = m.getType();
             if (type!=null) {

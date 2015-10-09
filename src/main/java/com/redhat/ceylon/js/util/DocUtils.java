@@ -1,5 +1,6 @@
 package com.redhat.ceylon.js.util;
 
+import static com.redhat.ceylon.js.repl.Autocompleter.ANNOTATION;
 import static com.redhat.ceylon.js.repl.Autocompleter.END;
 import static com.redhat.ceylon.js.repl.Autocompleter.KEYWORD;
 import static com.redhat.ceylon.js.repl.Autocompleter.TYPE;
@@ -300,7 +301,12 @@ public class DocUtils {
             result.append(TYPE).append(declaration.getName()).append(END);
         }
         else if (declaration instanceof TypedDeclaration) {
-            result.append(VARIABLE).append(declaration.getName()).append(END);
+            if (declaration.isAnnotation()) {
+                result.append(ANNOTATION).append(declaration.getName()).append(END);
+            }
+            else {
+                result.append(VARIABLE).append(declaration.getName()).append(END);
+            }
         }
         if (declaration instanceof Generic) {
             Generic g = (Generic) declaration;
