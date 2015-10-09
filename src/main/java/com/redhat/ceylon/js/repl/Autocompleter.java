@@ -82,9 +82,17 @@ public class Autocompleter extends AutocompleteVisitor {
                                     unit, scope, prefix, 0);
                 }
                 else {
+                    Type type = p.getTypeModel();
+                    Tree.MemberOperator op = 
+                            exp.getMemberOperator();
+                    if (op instanceof Tree.SafeMemberOp) {
+                        type = unit.getDefiniteType(type);
+                    }
+                    else if (op instanceof Tree.SpreadOp) {
+                        type = unit.getIteratedType(type);
+                    }
                     completions = 
-                            p.getTypeModel()
-                            .getDeclaration()
+                            type.getDeclaration()
                             .getMatchingMemberDeclarations(
                                     unit, scope, prefix, 0);
                 }
