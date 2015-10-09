@@ -1,0 +1,68 @@
+/*
+    Ceylon styles for CodeMirror
+*/
+
+.CodeMirror {
+    font-family: Inconsolata, Monaco, Courier, monospace;
+    color:white;
+}
+
+.CodeMirror.cm-s-ceylon {
+    width: 100%;
+    height: 100%;
+    background-color:black;
+}
+
+.CodeMirror-activeline-background {background-color:#000066;}
+
+.CodeMirror-cursor {
+  border-left: 1px solid white;
+  border-right: none;
+  width: 0;
+}
+
+/* Colors for special Ceylon source elements */
+.cm-s-ceylon .cm-classname {color: #fec418;}
+.cm-s-ceylon .cm-annotation {color: #06b6ef}
+
+/* Colors for the default CodeMirror source elements */
+.cm-s-ceylon .cm-keyword {color: #b8baaf;}
+.cm-s-ceylon .cm-atom {color: #219;}
+.cm-s-ceylon .cm-number {color: #f99b15;}
+.cm-s-ceylon .cm-def {color: rgb(153,0,102);}
+.cm-s-ceylon .cm-property {color: rgb(153,0,102);}
+.cm-s-ceylon .cm-punctuation,
+.cm-s-ceylon .cm-operator {color: white;}
+.cm-s-ceylon .cm-variable {color: #ef6155;}
+.cm-s-ceylon .cm-variable-2 {color: #55e3ef;}
+.cm-s-ceylon .cm-variable-3 {color: #fec418;}
+.cm-s-ceylon .cm-comment {color: #776e71;}
+.cm-s-ceylon .cm-string {color: #48b685;}
+.cm-s-ceylon .cm-string-2 {color: #48b685;}
+.cm-s-ceylon .cm-meta {color: #555;}
+.cm-s-ceylon .cm-qualifier {color: #555;}
+.cm-s-ceylon .cm-builtin {color: rgb(51,153,204);}
+.cm-s-ceylon .cm-bracket {color: #cc7;}
+.cm-s-ceylon .cm-tag {color: #170;}
+.cm-s-ceylon .cm-attribute {color: #00c;}
+.cm-s-ceylon .cm-hr {color: #999;}
+.cm-s-ceylon .cm-link {color: #00c;}
+
+.cm-s-ceylon .cm-warning {background-image:url(../images/underlinew.gif); background-position:bottom; background-repeat:repeat-x;}
+.cm-s-ceylon .cm-error {background-image:url(../images/underline.gif); background-position:bottom; background-repeat:repeat-x;}
+
+.CodeMirror-gutters {
+    background-color: floralwhite;
+}
+
+.CodeMirror-gutter-elt img.iconerror {
+    padding: 1px;
+    padding-left: 2px;
+}
+
+.cm-locked {
+    background-color: rgb(255, 243, 243);
+}
+
+div.CodeMirror span.CodeMirror-matchingbracket {color: red;}
+div.CodeMirror span.CodeMirror-nonmatchingbracket {color: red;}
