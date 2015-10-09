@@ -78,3 +78,20 @@
 
 div.CodeMirror span.CodeMirror-matchingbracket {color: red;}
 div.CodeMirror span.CodeMirror-nonmatchingbracket {color: red;}
+
+.popup {
+    color:white;
+    background:midnightblue;
+}
+
+.help {
+    color:white;
+    background:darkslateblue;
+}
+
+.help p code, .help ul code, .help ol code, .help pre {
+    color:lime !important;
+}
+.help pre code.cm-s-ceylon {
+    color:white !important;
+}
