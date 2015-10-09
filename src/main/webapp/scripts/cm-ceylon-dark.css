@@ -89,7 +89,7 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: red;}
     background:darkslateblue;
 }
 
-.help p code, .help ul code, .help ol code, .help pre {
+.help p code, .help ul code, .help ol code, .help pre code {
     color:lime !important;
 }
 .help pre code.cm-s-ceylon {
