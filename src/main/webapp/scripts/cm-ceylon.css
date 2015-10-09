@@ -17,7 +17,7 @@
 
 /* Colors for the default CodeMirror source elements */
 .cm-s-ceylon .cm-keyword {color: rgb(76,76,76); font-weight: bold;}
-.cm-s-ceylon .cm-atom {color: #219;}
+.cm-s-ceylon .cm-atom {color: rgb(0,51,153);}
 .cm-s-ceylon .cm-number {color: blue;}
 .cm-s-ceylon .cm-def {color: rgb(153,0,102);}
 .cm-s-ceylon .cm-property {color: rgb(153,0,102);}

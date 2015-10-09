@@ -299,7 +299,7 @@ function handleResizeMain(event, data) {
         buttonSetCaption("reset", "Reset");
         buttonSetCaption("share", "Share");
         buttonSetCaption("advanced", "Advanced");
-        buttonSetCaption("dark", "Dark Mode");
+        buttonSetCaption("dark", "Dark");
         buttonSetCaption("help", "Help");
         buttonSetCaption("connect", "Connect");
         buttonSetCaption("connected", "Connected");
@@ -363,7 +363,7 @@ function getToolbarItems() {
         { type: 'break',  id: 'break1', hidden: embedded },
         { type: 'check',  id: 'advanced', caption: 'Advanced', hint: 'Enable more complex code constructs', icon: 'fa fa-square-o', checkicon: 'fa fa-check-square-o', uncheckicon: 'fa fa-square-o', hidden: embedded },
         { type: 'spacer' },
-        { type: 'button',  id: 'dark', caption: 'Dark Mode', hint: 'Switch theme', icon: 'fa fa-square-o', checkicon: 'fa fa-check-square-o', uncheckicon: 'fa fa-square-o', hidden: embedded },
+        { type: 'button',  id: 'dark', caption: 'Dark', hint: 'Switch theme', icon: 'fa fa-square', checkicon: 'fa fa-check-square', uncheckicon: 'fa fa-square', hidden: embedded },
         { type: 'button',  id: 'help', caption: 'Help', hint: 'Help on how this Web IDE works', icon: 'fa fa-question', hidden: embedded },
         { type: 'button',  id: 'connect', caption: 'Connect', hint: 'Connect to GitHub', icon: 'fa fa-github', hidden: isGitHubConnected() || embedded },
         { type: 'menu',   id: 'connected', caption: 'Connected', hint: 'Connected to GitHub', icon: 'fa fa-github', hidden: !isGitHubConnected() || embedded,
@@ -416,6 +416,8 @@ function handleDarkClick() {
         if (sheet.href!=null && 
             sheet.href.indexOf("cm-ceylon")>0) {
             sheet.disabled = !sheet.disabled;
+            buttonSetIcon("dark", sheet.disabled?"fa fa-check-square":"fa fa-square");
+            buttonCheck("dark", sheet.disabled);
         }
     }
 }

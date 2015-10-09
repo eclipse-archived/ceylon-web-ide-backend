@@ -688,3 +688,8 @@ td.haserrors div.w2ui-tab:after {
     padding-right: 15px;
     line-height: 150%;
 }
+
+.w2ui-toolbar table.w2ui-button .w2ui-tb-image > span.fa-square,
+.w2ui-toolbar table.w2ui-button .w2ui-tb-image > span.fa-check-square {
+  color: black;
+}
