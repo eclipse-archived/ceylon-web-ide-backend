@@ -1111,10 +1111,6 @@ function buttonCheck(name, check) {
     }
 }
 
-function buttonIsChecked(name, check) {
-    return w2ui["all"].get("main").toolbar.get(name).checked;
-}
-
 function tabCloseable(id, onClose) {
     w2ui["editortabs"].set(id, { closable: onClose != null, onClose: onClose });
 }
@@ -1132,6 +1128,8 @@ function countCeylonFiles() {
     return cnt;
 }
 
+var advanced = false;
+
 function handleAdvanced(event) {
     if (isAdvancedModeActive()) {
         checkForChangesAndRun(function() {
@@ -1139,6 +1137,7 @@ function handleAdvanced(event) {
             undoAdvanced();
         }, function() {
             buttonCheck("advanced", true);
+            advanced=true;
         }, ["module.ceylon"]);
     } else {
         buttonSetIcon("advanced", "fa fa-check-square-o");
@@ -1147,6 +1146,7 @@ function handleAdvanced(event) {
 }
 
 function applyAdvanced() {
+    advanced = true;
     var editors = getEditors();
     $.each(editors, function (index, editor) {
         if (editor.ceylonName.endsWith(".ceylon")) {
@@ -1167,6 +1167,7 @@ function applyAdvanced() {
 }
 
 function undoAdvanced() {
+    advanced = false;
     var tmp = fileDeleted;
     deleteFile(editorId("module.ceylon"));
     fileDeleted = tmp;
@@ -1200,8 +1201,6 @@ function isCodeUnwrappable() {
     });
     return canUnwrap && cnt <= 2;
 }
-
-var advanced = false;
 
 function updateAdvancedState() {
     var cnt = countCeylonFiles();
@@ -2123,7 +2122,7 @@ function unwrapCode(code, allowMissingTag) {
 }
 
 function isFullScript() {
-    return buttonIsChecked("advanced");
+    return advanced;
 }
 
 function isWrapped(code, allowMissingTag) {
