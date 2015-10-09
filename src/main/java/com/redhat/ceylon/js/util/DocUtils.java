@@ -200,12 +200,47 @@ public class DocUtils {
 
     public static String getParameterInfo(Declaration declaration) {
         StringBuilder result = new StringBuilder();
+        for (Annotation ann : declaration.getAnnotations()) {
+            List<String> positionalArguments = ann.getPositionalArguments();
+            if ("see".equals(ann.getName()) && !positionalArguments.isEmpty()) {
+                result.append("<p>See ");
+                boolean first = true;
+                for (String name: positionalArguments) {
+                    if (first) {
+                        first = false;
+                    }
+                    else {
+                        result.append(", ");
+                    }
+                    result.append("<code>").append(name).append("</code>");
+                }
+                result.append(".</p>");
+            }
+        }
         if (declaration instanceof TypedDeclaration) {
             result.append("<ul><li>Returns <code class='cm-s-ceylon'>")
                 .append(TYPE)
                 .append(escape(((TypedDeclaration) declaration).getType()))
                 .append(END)
                 .append("</code></ul>");
+        }
+        for (Annotation ann : declaration.getAnnotations()) {
+            List<String> positionalArguments = ann.getPositionalArguments();
+            if ("throws".equals(ann.getName()) && !positionalArguments.isEmpty()) {
+                String type = positionalArguments.get(0);
+                result.append("<ul><li>Throws <code class='cm-s-ceylon'>")
+                    .append(TYPE).append(type).append(END).append("</code>");
+                if (positionalArguments.size()>1) {
+                    result.append("<p>");
+                    String doc = positionalArguments.get(1);
+                    if (doc.charAt(0) == '"' && doc.charAt(doc.length()-1) == '"') {
+                        doc = doc.substring(1, doc.length()-1);
+                    }
+                    result.append(Processor.process(doc, DocUtils.MD_CONF));
+                    result.append("</p>");
+                }
+                result.append("</ul>");
+            }
         }
         if (declaration instanceof Functional) {
             Functional fun = (Functional) declaration;
