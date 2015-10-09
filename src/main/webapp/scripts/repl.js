@@ -1324,7 +1324,7 @@ function complete(editor){
             files: files,
             f: editor.ceylonName,
             r: cursor.line + (isAdvancedModeActive() ? 1 : 3),
-            c: cursor.ch-1
+            c: cursor.ch
         })
     });
 }
