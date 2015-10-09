@@ -342,6 +342,34 @@ public class DocUtils {
                 .append(END)
                 .append("</code>.</p>");
         }
+        if (declaration instanceof Class) {
+            TypeDeclaration td = (TypeDeclaration) declaration;
+            if (td.getExtendedType()!=null) {
+                result.append("<ul><li>Extends <code class='cm-s-ceylon'>")
+                    .append(TYPE)
+                    .append(escape(td.getExtendedType()))
+                    .append(END)
+                    .append("</code>.</ul>");
+            }
+        }
+        if (declaration instanceof ClassOrInterface ||
+                declaration instanceof TypeParameter) {
+            TypeDeclaration td = (TypeDeclaration) declaration;
+            if (!td.getSatisfiedTypes().isEmpty()) {
+                result.append("<ul><li>Satisfies <code class='cm-s-ceylon'>");
+                boolean first = true;
+                for (Type type: td.getSatisfiedTypes()) {
+                    if (first) {
+                        first = false;
+                    }
+                    else {
+                        result.append(" & ");
+                    }
+                    result.append(TYPE).append(escape(type)).append(END);
+                }
+                result.append("</code>.</ul>");
+            }
+        }
         return result.toString();
     }
 
