@@ -361,7 +361,7 @@ function getToolbarItems() {
         { type: 'button',  id: 'reset', caption: 'Reset', hint: 'Clear output & errors', icon: 'fa fa-exclamation' },
         { type: 'button',  id: 'share', caption: 'Share', hint: 'Share the code on GitHub', icon: 'fa fa-share', hidden: embedded },
         { type: 'break',  id: 'break1', hidden: embedded },
-        { type: 'check',  id: 'advanced', caption: 'Advanced', hint: 'Enable more complex code constructs', icon: 'fa fa-square-o', checkicon: 'fa fa-check-square-o', uncheckicon: 'fa fa-square-o', hidden: embedded },
+        { type: 'button',  id: 'advanced', caption: 'Advanced', hint: 'Enable more complex code constructs', icon: 'fa fa-square-o', checkicon: 'fa fa-check-square-o', uncheckicon: 'fa fa-square-o', hidden: embedded },
         { type: 'spacer' },
         { type: 'button',  id: 'dark', caption: 'Dark', hint: 'Switch theme', icon: 'fa fa-square', checkicon: 'fa fa-check-square', uncheckicon: 'fa fa-square', hidden: embedded },
         { type: 'button',  id: 'help', caption: 'Help', hint: 'Help on how this Web IDE works', icon: 'fa fa-question', hidden: embedded },
@@ -1099,12 +1099,12 @@ function buttonCheck(name, check) {
     var toolbar = w2ui["all"].get("main").toolbar;
     var item = toolbar.get(name);
     if (check) {
-        toolbar.check(name);
+        //toolbar.check(name);
         if (item.checkicon) {
             toolbar.set(name, { icon: item.checkicon });
         }
     } else {
-        toolbar.uncheck(name);
+        //toolbar.uncheck(name);
         if (item.uncheckicon) {
             toolbar.set(name, { icon: item.uncheckicon });
         }
@@ -1201,15 +1201,17 @@ function isCodeUnwrappable() {
     return canUnwrap && cnt <= 2;
 }
 
+var advanced = false;
+
 function updateAdvancedState() {
     var cnt = countCeylonFiles();
-    var advanced = (cnt > 1) || (cnt == 1) && isCodeUnwrappable();
+    advanced = (cnt > 1) || (cnt == 1) && isCodeUnwrappable();
     buttonCheck("advanced", advanced);
     buttonEnable("advanced", !advanced || ((cnt == 1) || (cnt == 2)) && isCodeUnwrappable());
 }
 
 function isAdvancedModeActive() {
-    return buttonIsChecked("advanced");
+    return advanced;
 }
 
 // Starts the spinner indicating the system is busy.
