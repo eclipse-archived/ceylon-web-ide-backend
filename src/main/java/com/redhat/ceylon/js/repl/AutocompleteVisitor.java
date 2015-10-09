@@ -104,6 +104,19 @@ public class AutocompleteVisitor {
             }
             super.visit(that);
         }
+        @Override
+        public void visit(final Tree.MemberOperator that) {
+            if (that.getToken().getLine() == row) {
+                int col1 = 
+                        that.getToken().getCharPositionInLine()
+                            + that.getText().length();
+                if (col == col1) {
+                    node = that;
+                    text = "";
+                }
+            }
+            super.visit(that);
+        }
     }
 
     protected class FindParentVisitor extends Visitor {
@@ -116,6 +129,16 @@ public class AutocompleteVisitor {
         public void visit(final Tree.StaticMemberOrTypeExpression that) {
             if (found)return;
             if (that.getIdentifier() == node) {
+                node = that;
+                found = true;
+                return;
+            }
+            super.visit(that);
+        }
+        @Override
+        public void visit(final Tree.QualifiedMemberOrTypeExpression that) {
+            if (found)return;
+            if (that.getMemberOperator() == node) {
                 node = that;
                 found = true;
                 return;
