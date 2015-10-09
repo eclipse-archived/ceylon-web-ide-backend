@@ -238,6 +238,8 @@ function handleToolbarClick(event) {
         shareSource();
     } else if (event.target == "advanced") {
         handleAdvanced(event);
+    } else if (event.target == "dark") {
+        handleDarkClick();
     } else if (event.target == "help") {
         handleHelpClick();
     } else if (event.target == "connect") {
@@ -287,6 +289,7 @@ function handleResizeMain(event, data) {
         buttonSetCaption("reset", "");
         buttonSetCaption("share", "");
         buttonSetCaption("advanced", "Adv");
+        buttonSetCaption("dark", "");
         buttonSetCaption("help", "");
         buttonSetCaption("connect", "");
         buttonSetCaption("connected", "");
@@ -296,6 +299,7 @@ function handleResizeMain(event, data) {
         buttonSetCaption("reset", "Reset");
         buttonSetCaption("share", "Share");
         buttonSetCaption("advanced", "Advanced");
+        buttonSetCaption("dark", "Dark Mode");
         buttonSetCaption("help", "Help");
         buttonSetCaption("connect", "Connect");
         buttonSetCaption("connected", "Connected");
@@ -303,12 +307,14 @@ function handleResizeMain(event, data) {
     if (newwidth < toolbarMinimalSize) {
         buttonShow("share", false);
         buttonShow("advanced", false);
+        buttonShow("dark", false);
         buttonShow("help", false);
         buttonShow("connect", false);
         buttonShow("connected", false);
     } else if (newwidth >= toolbarMinimalSize) {
         buttonShow("share", !embedded);
         buttonShow("advanced", !embedded);
+        buttonShow("dark", !embedded);
         buttonShow("help", !embedded);
         buttonShow("connect", !isGitHubConnected() && !embedded);
         buttonShow("connected", isGitHubConnected() && !embedded);
@@ -357,6 +363,7 @@ function getToolbarItems() {
         { type: 'break',  id: 'break1', hidden: embedded },
         { type: 'check',  id: 'advanced', caption: 'Advanced', hint: 'Enable more complex code constructs', icon: 'fa fa-square-o', checkicon: 'fa fa-check-square-o', uncheckicon: 'fa fa-square-o', hidden: embedded },
         { type: 'spacer' },
+        { type: 'button',  id: 'dark', caption: 'Dark Mode', hint: 'Switch theme', icon: 'fa fa-square-o', checkicon: 'fa fa-check-square-o', uncheckicon: 'fa fa-square-o', hidden: embedded },
         { type: 'button',  id: 'help', caption: 'Help', hint: 'Help on how this Web IDE works', icon: 'fa fa-question', hidden: embedded },
         { type: 'button',  id: 'connect', caption: 'Connect', hint: 'Connect to GitHub', icon: 'fa fa-github', hidden: isGitHubConnected() || embedded },
         { type: 'menu',   id: 'connected', caption: 'Connected', hint: 'Connected to GitHub', icon: 'fa fa-github', hidden: !isGitHubConnected() || embedded,
@@ -389,6 +396,28 @@ function getMenuItems() {
 
 function updateMenuState() {
     w2ui["all"].get("main").toolbar.set("menu", { items: getMenuItems() });
+}
+
+    var sheets = document.styleSheets;
+    console.log(sheets);
+    for (i=0; i<sheets.length; i++) {
+        var sheet = sheets[i];
+        if (sheet.href!=null && 
+            sheet.href.indexOf("cm-ceylon-dark")>0) {
+            sheet.disabled = true;
+        }
+    }
+
+function handleDarkClick() {
+    var sheets = document.styleSheets;
+    console.log(sheets);
+    for (i=0; i<sheets.length; i++) {
+        var sheet = sheets[i];
+        if (sheet.href!=null && 
+            sheet.href.indexOf("cm-ceylon")>0) {
+            sheet.disabled = !sheet.disabled;
+        }
+    }
 }
 
 function handleHelpClick() {

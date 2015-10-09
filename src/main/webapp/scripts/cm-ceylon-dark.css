@@ -21,6 +21,18 @@
   width: 0;
 }
 
+.CodeMirror-gutter.CodeMirror-linenumbers {
+  background-color: black;
+}
+
+.CodeMirror-gutters {
+  border:none;
+}
+
+.CodeMirror-linenumber {
+  color: hotpink;
+}
+
 /* Colors for special Ceylon source elements */
 .cm-s-ceylon .cm-classname {color: #fec418;}
 .cm-s-ceylon .cm-annotation {color: #06b6ef}
