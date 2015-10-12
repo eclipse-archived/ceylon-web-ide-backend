@@ -79,10 +79,11 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
                         return new JsMemoryOutput(m);
                     }
                     //Override this to avoid generating artifacts
-                    protected void finish() throws IOException {
+                    protected int finish() throws IOException {
                         CompilerUtils.writeJSSources(out, result);
                         out.flush();
                         out.close();
+                        return 0;
                     }
                 }.stopOnErrors(true);
                 //Don't rely on result flag, check errors instead
