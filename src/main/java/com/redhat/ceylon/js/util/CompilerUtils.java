@@ -1,5 +1,6 @@
 package com.redhat.ceylon.js.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -85,6 +86,29 @@ public class CompilerUtils {
         }
         // And finally the root to hold it all 
         return new ScriptFile("ROOT", files);
+    }
+
+    /**
+     * Returns a list containing the paths of all the scripts that get passed.
+     */
+    @SuppressWarnings("unchecked")
+    public static List<File> createFilesList(Map<String, Object> data) {
+        String modName = (String)data.get("modName");
+        // Make sure we have a module name
+        if (modName == null) {
+            modName = "web_ide_script";
+        }
+        Map<String, Object> jsonFiles = (Map<String, Object>)data.get("files");
+        int size = jsonFiles.size();
+        boolean hasModuleDescriptor = jsonFiles.containsKey("module.ceylon");
+        List<File> files = new ArrayList<File>(hasModuleDescriptor ? size : size + 1);
+        for (String fileName : jsonFiles.keySet()) {
+            files.add(new File("ROOT/" + modName + "/" + fileName));
+        }
+        if (!hasModuleDescriptor) {
+            files.add(new File("module.ceylon"));
+        }
+        return files;
     }
 
     /**

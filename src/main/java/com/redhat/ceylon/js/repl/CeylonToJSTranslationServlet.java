@@ -1,11 +1,13 @@
 package com.redhat.ceylon.js.repl;
 
 import java.io.CharArrayWriter;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -54,6 +56,7 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             @SuppressWarnings("unchecked")
             final Map<String, Object> result = (Map<String, Object>)JSONValue.parseKeepingOrder(json);
     	    final ScriptFile src = CompilerUtils.createScriptSource(result);
+            final List<File> files = CompilerUtils.createFilesList(result);
     	    
             final boolean typecheckOnly = result.get("tc") != null;
 
@@ -63,7 +66,7 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
             final CharArrayWriter out = new CharArrayWriter(json.length()*2);
             //Override the inner output class to use the in-memory writer
             class JsMemoryOutput extends JsOutput {
-                JsMemoryOutput(Module m) throws IOException { super(m, "UTF-8"); }
+                JsMemoryOutput(Module m) throws IOException { super(m, "UTF-8", false); }
                 @Override public Writer getWriter() { return out; }
                 @Override protected void writeModelFile() throws IOException {}
                 @Override protected void writeModelRetriever() throws IOException {
@@ -85,7 +88,8 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
                         out.close();
                         return 0;
                     }
-                }.stopOnErrors(true);
+                }.stopOnErrors(true).setSourceFiles(files).addSrcDirectory(src);
+                
                 //Don't rely on result flag, check errors instead
                 compiler.generate();
                 //Put errors in this list

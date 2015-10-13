@@ -37,6 +37,10 @@ public class ScriptFile implements VirtualFile {
         this.parent = parent;
     }
     @Override
+    public boolean exists() {
+        return true;
+    }
+    @Override
     public boolean isFolder() {
         return folder;
     }
