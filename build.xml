@@ -24,14 +24,19 @@
             <fileset dir="${ceylon.repo.dir}">
                 <include name="ceylon/language/**/*.js" />
                 <include name="ceylon/language/**/*.js.sha1" />
+                <include name="ceylon/language/**/*.xml" />
                 <include name="com/redhat/ceylon/common/**/*.jar" />
                 <include name="com/redhat/ceylon/common/**/*.jar.sha1" />
+                <include name="com/redhat/ceylon/common/**/*.xml" />
                 <include name="com/redhat/ceylon/model/**/*.jar" />
                 <include name="com/redhat/ceylon/model/**/*.jar.sha1" />
+                <include name="com/redhat/ceylon/model/**/*.xml" />
                 <include name="com/redhat/ceylon/typechecker/**/*.jar" />
                 <include name="com/redhat/ceylon/typechecker/**/*.jar.sha1" />
+                <include name="com/redhat/ceylon/typechecker/**/*.xml" />
                 <include name="com/redhat/ceylon/module-resolver/**/*.jar" />
                 <include name="com/redhat/ceylon/module-resolver/**/*.jar.sha1" />
+                <include name="com/redhat/ceylon/module-resolver/**/*.xml" />
             </fileset>
         </copy>
         <copy todir="${web.lib.dir}" overwrite="${overwrite}">

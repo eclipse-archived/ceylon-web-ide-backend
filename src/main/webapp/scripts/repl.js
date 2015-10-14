@@ -398,15 +398,14 @@ function updateMenuState() {
     w2ui["all"].get("main").toolbar.set("menu", { items: getMenuItems() });
 }
 
-    var sheets = document.styleSheets;
-    console.log(sheets);
-    for (i=0; i<sheets.length; i++) {
-        var sheet = sheets[i];
-        if (sheet.href!=null && 
-            sheet.href.indexOf("cm-ceylon-dark")>0) {
-            sheet.disabled = true;
-        }
+var sheets = document.styleSheets;
+for (i=0; i<sheets.length; i++) {
+    var sheet = sheets[i];
+    if (sheet.href!=null && 
+        sheet.href.indexOf("cm-ceylon-dark")>0) {
+        sheet.disabled = true;
     }
+}
 
 function handleDarkClick() {
     var sheets = document.styleSheets;

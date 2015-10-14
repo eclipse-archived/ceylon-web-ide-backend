@@ -25,7 +25,7 @@
     //     (default "https://api.github.com/")
     //  config.userAgent = Optional user agent string to be used in the
     //     request headers for all remote communication
-    //     (default "Ceylon-Web-Runner-1.1.1")
+    //     (default "Ceylon-Web-Runner-1.2.0")
     //  config.authentication - Optional Authentication to use for all
     //     remote calls. Can be overridden in each specific function call.
     //     Set to `null` in a function call if you don't want authentication
@@ -54,7 +54,7 @@
             config.rootUrl = config.rootUrl + "/";
         }
         if (config.userAgent != null) {
-            config.userAgent = "Ceylon-Web-Runner-1.1.1";
+            config.userAgent = "Ceylon-Web-Runner-1.2.0";
         }
         
         this._etags = {};
