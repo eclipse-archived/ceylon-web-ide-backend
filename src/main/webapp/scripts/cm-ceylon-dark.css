@@ -84,6 +84,49 @@
     background-color:transparent;
 }
 
+.cm-error, .cm-warning {
+    display: inline;
+    position: relative;
+}
+
+.cm-error:hover:after, 
+.cm-warning:hover:after {
+    border-radius: 2px;
+    bottom: 24px;
+    color: white;
+    content: attr(title);
+    left: 0%;
+    padding: 2px 6px;
+    position: absolute;
+    z-index: 98;
+}
+
+.cm-error:hover:before,
+.cm-warning:hover:before {
+    border: solid;
+    border-color: red transparent;
+    border-width: 6px 6px 0 6px;
+    bottom: 18px;
+    content: "";
+    left: 30%;
+    position: absolute;
+    z-index: 99;
+}
+
+.cm-warning:hover:after {
+    background: orange;
+}
+.cm-warning:hover:before {
+    border-color: orange transparent;
+}
+
+.cm-error:hover:after {
+    background: red;
+}
+.cm-error:hover:before {
+    border-color: red transparent;
+}
+
 .CodeMirror-gutters {
     background-color: floralwhite;
 }
