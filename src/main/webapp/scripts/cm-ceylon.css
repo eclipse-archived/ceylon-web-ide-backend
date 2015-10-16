@@ -38,8 +38,16 @@
 .cm-s-ceylon .cm-hr {color: #999;}
 .cm-s-ceylon .cm-link {color: #00c;}
 
-.cm-s-ceylon .cm-warning {background-image:url(../images/underlinew.gif); background-position:bottom; background-repeat:repeat-x;}
-.cm-s-ceylon .cm-error {background-image:url(../images/underline.gif); background-position:bottom; background-repeat:repeat-x;}
+.cm-s-ceylon .cm-warning {
+    background-image:url(../images/underlinew.gif);
+    background-position:bottom;
+    background-repeat:repeat-x;
+}
+.cm-s-ceylon .cm-error {
+    background-image:url(../images/underline.gif);
+    background-position:bottom;
+    background-repeat:repeat-x;
+}
 
 .CodeMirror-gutters {
     background-color: floralwhite;

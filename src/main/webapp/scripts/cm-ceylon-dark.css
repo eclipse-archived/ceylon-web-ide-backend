@@ -23,8 +23,14 @@
 
 .CodeMirror-selected { background: #d9d9d9; }
 .CodeMirror-focused .CodeMirror-selected { background: #68008b; }
-.CodeMirror-line::selection, .CodeMirror-line > span::selection, .CodeMirror-line > span > span::selection { background: #68008b; }
-.CodeMirror-line::-moz-selection, .CodeMirror-line > span::-moz-selection, .CodeMirror-line > span > span::-moz-selection { background: #68008b; }
+.CodeMirror-line::selection, 
+.CodeMirror-line > span::selection, 
+.CodeMirror-line > span > span::selection,
+.CodeMirror-line::-moz-selection,
+.CodeMirror-line > span::-moz-selection, 
+.CodeMirror-line > span > span::-moz-selection {
+  background: #68008b;
+}
 
 .CodeMirror-gutter.CodeMirror-linenumbers {
   background-color: black;
@@ -65,8 +71,18 @@
 .cm-s-ceylon .cm-hr {color: #999;}
 .cm-s-ceylon .cm-link {color: #00c;}
 
-.cm-s-ceylon .cm-warning {background-image:url(../images/underlinew.gif); background-position:bottom; background-repeat:repeat-x;}
-.cm-s-ceylon .cm-error {background-image:url(../images/underline.gif); background-position:bottom; background-repeat:repeat-x;}
+.cm-s-ceylon .cm-warning {
+    background-image:url(../images/underlinew.gif);
+    background-position:bottom;
+    background-repeat:repeat-x;
+    background-color:black;
+}
+.cm-s-ceylon .cm-error {
+    background-image:url(../images/underline.gif);
+    background-position:bottom;
+    background-repeat:repeat-x;
+    background-color:black;
+}
 
 .CodeMirror-gutters {
     background-color: floralwhite;
