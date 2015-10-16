@@ -1428,7 +1428,6 @@ function fetchDoc(cm) {
 function showErrors(errors, print) {
     $.each(errors, function(fileName, fileErrors) {
         $.each(fileErrors, function(index, err) {
-            var errmsg = escapeHtml(err.msg);
             var linedelta = isAdvancedModeActive() ? 0 : 2;
             if (print) {
                 var msg = 
@@ -1447,6 +1446,7 @@ function showErrors(errors, print) {
             if (from >= 0) {
                 var editor = getEditor(editorId(fileName));
                 if (editor != null) {
+                    var errmsg = escapeHtml(err.msg);
                     //This is to add a marker in the gutter
                     var underlineStyle;
                     var img = document.createElement('img');
@@ -1456,7 +1456,8 @@ function showErrors(errors, print) {
                         img.className = "iconwarning"
                         underlineStyle = "cm-warning";
                         getEditorTab(editor.ceylonId).addClass("haswarnings");
-                    } else {
+                    }
+                    else {
                         img.src = "images/error.gif";
                         img.className = "iconerror"
                         underlineStyle = "cm-error";
@@ -1467,11 +1468,11 @@ function showErrors(errors, print) {
                     var marker = editor.markText({line:from,ch:err.from.ch},{line:to,ch:err.to.ch+1},{className:underlineStyle});
                     markers.push(marker);
                     //And this is for the hover
-                    var estilo = "ceylonerr_r"+from+"_c"+err.from.ch;
-                    marker = editor.markText({line:from,ch:err.from.ch},{line:to,ch:err.to.ch+1},{className:estilo});
+                    var pos = err.tp + "_l" + from + "c" + err.from.ch + "_l" + to + "c" + err.to.ch+1;
+                    marker = editor.markText({line:from,ch:err.from.ch},{line:to,ch:err.to.ch+1},{className:pos});
                     markers.push(marker);
-                    bindings.push(estilo);
-                    $("."+estilo).attr("title", errmsg);
+                    bindings.push(pos);
+                    $("."+pos).attr("title", errmsg);
                 }
             }
         });
