@@ -21,6 +21,11 @@
   width: 0;
 }
 
+.CodeMirror-selected { background: #d9d9d9; }
+.CodeMirror-focused .CodeMirror-selected { background: #68008b; }
+.CodeMirror-line::selection, .CodeMirror-line > span::selection, .CodeMirror-line > span > span::selection { background: #68008b; }
+.CodeMirror-line::-moz-selection, .CodeMirror-line > span::-moz-selection, .CodeMirror-line > span > span::-moz-selection { background: #68008b; }
+
 .CodeMirror-gutter.CodeMirror-linenumbers {
   background-color: black;
 }
