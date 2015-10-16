@@ -29,12 +29,15 @@ if (!pagepath.endsWith("/")) {
 
 var ceylonVersion = "1.2.0";
 var ceylonLang = "ceylon/language/" + ceylonVersion + "/ceylon.language-" + ceylonVersion;
+var ceylonCollection = "ceylon/collection/" + ceylonVersion + "/ceylon.collection-" + ceylonVersion;
 var paths = {
     "jquery" : pagepath + "scripts/jquery-1.11.1.min",
     "github" : pagepath + "scripts/github"
 };
 paths[ceylonLang] = pagepath + "scripts/modules/" + ceylonLang;
+paths[ceylonCollection] = pagepath + "scripts/modules/" + ceylonCollection;
 paths[ceylonLang + "-model"] = pagepath + "scripts/modules/" + ceylonLang + "-model";
+paths[ceylonCollection + "-model"] = pagepath + "scripts/modules/" + ceylonCollection + "-model";
 
 require.config({
     baseUrl: "http://modules.ceylon-lang.org/repo/1",
@@ -42,7 +45,7 @@ require.config({
     waitSeconds: 15
 });
 
-require([ceylonLang, "github"],
+require([ceylonLang, ceylonCollection, "github"],
     function(clang) {
         console && console.log("Ceylon language module loaded OK");
         clang.$_process().write = langModWrite;
