@@ -40,4 +40,10 @@ caption, tbody, tfoot, thead, tr {
 
 .jsc_error {
     color: red;
+    list-style-image: url("images/error.gif");
+}
+
+.jsc_warn {
+    color: orange;
+    list-style-image: url("images/warning.gif");
 }

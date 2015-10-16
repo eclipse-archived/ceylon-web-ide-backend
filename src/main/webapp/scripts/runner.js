@@ -89,12 +89,17 @@ function printOutput(txt) {
 
 function printSystem(txt) {
     var output = document.getElementById("output");
-    output.innerHTML = output.innerHTML + "<span class='jsc_msg'>" + escapeHtml(txt) + "</span><br>";
+    output.innerHTML = output.innerHTML + "<span class='jsc_msg'><li>" + escapeHtml(txt) + "</span><br>";
+}
+
+function printWarning(txt) {
+    var output = document.getElementById("output");
+    output.innerHTML = output.innerHTML + "<span class='jsc_warn'><li>" + escapeHtml(txt) + "</span><br>";
 }
 
 function printError(txt) {
     var output = document.getElementById("output");
-    output.innerHTML = output.innerHTML + "<span class='jsc_error'>" + escapeHtml(txt) + "</span><br>";
+    output.innerHTML = output.innerHTML + "<span class='jsc_error'><li>" + escapeHtml(txt) + "</span><br>";
 }
 
 function scrollOutput() {

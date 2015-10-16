@@ -630,6 +630,12 @@ div.ceylonblock ul {
 
 .jsc_error {
     color: red;
+    list-style-image: url("images/error.gif");
+}
+
+.jsc_warn {
+    color: orange;
+    list-style-image: url("images/warning.gif");
 }
 
 /* work around display bug with icons in menus missing bits from the bottom */ 
@@ -638,7 +644,7 @@ div.ceylonblock ul {
 }
 
 td.haswarnings div.w2ui-tab:after {
-    content: url('images/warning.png');
+    content: url('images/warning.gif');
     padding-left: 4px;
 }
 

@@ -1426,18 +1426,21 @@ function fetchDoc(cm) {
 
 //Shows the specified error messages in the code
 function showErrors(errors, print) {
-    if (print) {
-        printError("Code contains errors:");
-    }
     $.each(errors, function(fileName, fileErrors) {
         $.each(fileErrors, function(index, err) {
             var errmsg = escapeHtml(err.msg);
             var linedelta = isAdvancedModeActive() ? 0 : 2;
             if (print) {
                 var msg = 
-                        ((err.tp == "w") ? "warning: " : "error: ") + err.msg + " at " +
-                        (err.from.line-linedelta) + ":" + err.from.ch + " of " + fileName;
-                printError(msg);
+                        err.msg + " \u2014 " + fileName + 
+                        " (" + (err.from.line-linedelta) + 
+                        ":" + err.from.ch + ")";
+                if (err.tp == "w") {
+                    printWarning(msg);
+                }
+                else {
+                    printError(msg);
+                }
             }
             var from = err.from.line-linedelta-1;
             var to = err.to.line-linedelta-1;
@@ -1449,7 +1452,7 @@ function showErrors(errors, print) {
                     var img = document.createElement('img');
                     img.title = errmsg;
                     if (err.tp == "w") {
-                        img.src = "images/warning.png";
+                        img.src = "images/warning.gif";
                         img.className = "iconwarning"
                         underlineStyle = "cm-warning";
                         getEditorTab(editor.ceylonId).addClass("haswarnings");
@@ -2217,6 +2220,14 @@ function printSystem(txt) {
 function printError(txt) {
     var outputwin = $("#outputframe")[0].contentWindow;
     var print = outputwin.printError;
+    if (print) {
+        print(txt);
+    }
+}
+
+function printWarning(txt) {
+    var outputwin = $("#outputframe")[0].contentWindow;
+    var print = outputwin.printWarning;
     if (print) {
         print(txt);
     }
