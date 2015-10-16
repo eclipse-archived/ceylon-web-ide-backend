@@ -88,7 +88,7 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
                         out.close();
                         return 0;
                     }
-                }.stopOnErrors(true).setSourceFiles(files).addSrcDirectory(src);
+                }.stopOnErrors(true).setSourceFiles(files);
                 
                 //Don't rely on result flag, check errors instead
                 compiler.generate();
