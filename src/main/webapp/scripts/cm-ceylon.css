@@ -11,6 +11,17 @@
     height: 100%;
 }
 
+.CodeMirror-selected { background: #d9d9d9; }
+.CodeMirror-focused .CodeMirror-selected { background: #b2d7ff; }
+.CodeMirror-line::selection, 
+.CodeMirror-line > span::selection, 
+.CodeMirror-line > span > span::selection,
+.CodeMirror-line::-moz-selection,
+.CodeMirror-line > span::-moz-selection, 
+.CodeMirror-line > span > span::-moz-selection {
+  background: #b2d7ff;
+}
+
 /* Colors for special Ceylon source elements */
 .cm-s-ceylon .cm-classname {color: rgb(153,0,102);}
 .cm-s-ceylon .cm-annotation {color: rgb(51,153,204);}
@@ -26,7 +37,7 @@
 .cm-s-ceylon .cm-variable {color: rgb(0,51,153);}
 .cm-s-ceylon .cm-variable-2 {color: rgb(102,51,153);}
 .cm-s-ceylon .cm-variable-3 {color: rgb(153,0,102);}
-.cm-s-ceylon .cm-comment {color: darkcyan;}
+.cm-s-ceylon .cm-comment {color: #776e71;}
 .cm-s-ceylon .cm-string {color: blue;}
 .cm-s-ceylon .cm-string-2 {color: blue;}
 .cm-s-ceylon .cm-meta {color: #555;}
@@ -36,17 +47,19 @@
 .cm-s-ceylon .cm-tag {color: #170;}
 .cm-s-ceylon .cm-attribute {color: #00c;}
 .cm-s-ceylon .cm-hr {color: #999;}
-.cm-s-ceylon .cm-link {color: #00c;}
+.cm-s-ceylon .cm-link {color: purple;}
 
 .cm-s-ceylon .cm-warning {
     background-image:url(../images/underlinew.gif);
     background-position:bottom;
     background-repeat:repeat-x;
+    background-color:transparent;
 }
 .cm-s-ceylon .cm-error {
     background-image:url(../images/underline.gif);
     background-position:bottom;
     background-repeat:repeat-x;
+    background-color:transparent;
 }
 
 .CodeMirror-gutters {

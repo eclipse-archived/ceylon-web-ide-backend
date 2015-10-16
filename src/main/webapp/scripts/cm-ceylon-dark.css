@@ -21,7 +21,7 @@
   width: 0;
 }
 
-.CodeMirror-selected { background: #d9d9d9; }
+.CodeMirror-selected { background: #414141; }
 .CodeMirror-focused .CodeMirror-selected { background: #68008b; }
 .CodeMirror-line::selection, 
 .CodeMirror-line > span::selection, 
@@ -69,19 +69,19 @@
 .cm-s-ceylon .cm-tag {color: #170;}
 .cm-s-ceylon .cm-attribute {color: #00c;}
 .cm-s-ceylon .cm-hr {color: #999;}
-.cm-s-ceylon .cm-link {color: #00c;}
+.cm-s-ceylon .cm-link {color: lightgreen;}
 
 .cm-s-ceylon .cm-warning {
     background-image:url(../images/underlinew.gif);
     background-position:bottom;
     background-repeat:repeat-x;
-    background-color:black;
+    background-color:transparent;
 }
 .cm-s-ceylon .cm-error {
     background-image:url(../images/underline.gif);
     background-position:bottom;
     background-repeat:repeat-x;
-    background-color:black;
+    background-color:transparent;
 }
 
 .CodeMirror-gutters {
