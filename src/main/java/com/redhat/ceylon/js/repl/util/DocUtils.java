@@ -1,14 +1,5 @@
-package com.redhat.ceylon.js.util;
+package com.redhat.ceylon.js.repl.util;
 
-import static com.redhat.ceylon.js.repl.Autocompleter.ANNOTATION;
-import static com.redhat.ceylon.js.repl.Autocompleter.END;
-import static com.redhat.ceylon.js.repl.Autocompleter.KEYWORD;
-import static com.redhat.ceylon.js.repl.Autocompleter.TYPE;
-import static com.redhat.ceylon.js.repl.Autocompleter.VARIABLE;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,9 +8,6 @@ import com.github.rjeschke.txtmark.Configuration;
 import com.github.rjeschke.txtmark.Processor;
 import com.github.rjeschke.txtmark.SpanEmitter;
 import com.redhat.ceylon.common.Versions;
-import com.redhat.ceylon.compiler.typechecker.TypeChecker;
-import com.redhat.ceylon.compiler.typechecker.tree.Node;
-import com.redhat.ceylon.js.repl.Autocompleter;
 import com.redhat.ceylon.model.typechecker.model.Annotation;
 import com.redhat.ceylon.model.typechecker.model.Class;
 import com.redhat.ceylon.model.typechecker.model.ClassOrInterface;
@@ -47,6 +35,12 @@ import com.redhat.ceylon.model.typechecker.model.Value;
  */
 public class DocUtils {
 
+    public static final String KEYWORD = "<span class='cm-keyword'>";
+    public static final String VARIABLE = "<span class='cm-variable'>";
+    public static final String TYPE = "<span class='cm-variable-3'>";
+    public static final String ANNOTATION = "<span class='cm-annotation'>";
+    public static final String END = "</span>";
+    
     public static final Configuration MD_CONF = 
             Configuration.builder()
                 .forceExtentedProfile()
@@ -64,104 +58,76 @@ public class DocUtils {
                     }
                 }).build();
 
-    /** Transforms the reference map into a list of locations in a format that CodeMirror can understand. */
-    public static List<Map<String,Object>> referenceMapToList(Map<String, Integer> refs) {
-        List<Map<String,Object>> rval = new ArrayList<Map<String,Object>>(refs.size());
-        for (Map.Entry<String, Integer> entry : refs.entrySet()) {
-            Map<String,Object> ref = locationToMap(entry.getKey(), false);
-            ref.put("ref", entry.getValue());
-            rval.add(ref);
-        }
-        return rval;
-    }
+//    /** Transforms the reference map into a list of locations in a format that CodeMirror can understand. */
+//    public static List<Map<ceylon.language.String,Object>> referenceMapToList(Map<ceylon.language.String, Integer> refs) {
+//        List<Map<ceylon.language.String,Object>> rval = new ArrayList<Map<ceylon.language.String,Object>>(refs.size());
+//        for (Map.Entry<ceylon.language.String, Integer> entry : refs.entrySet()) {
+//            Map<ceylon.language.String,Object> ref = locationToMap(entry.getKey(), false);
+//            ref.put(ceylon.language.String.instance("ref"), entry.getValue());
+//            rval.add(ref);
+//        }
+//        return rval;
+//    }
 
-    /** Transforms a location of form "r:c-r:c" or just "r:c" into a map that CodeMirror can understand.
-     * @param location A string in the form "r:c-r:c" or "r:c".
-     * @param forceEnd if location is only r:c and this flag is true, the same position is used for the 'end' property. */
-    public static Map<String,Object> locationToMap(String location, boolean forceEnd) {
-        String[] parts = location.split("-");
-        final Map<String,Object> locs = new HashMap<String, Object>(3);
-        locs.put("from", encodePosition(parts[0]));
-        if (parts.length == 2) {
-            locs.put("to", encodePosition(parts[1]));
-        } else if (forceEnd) {
-            locs.put("to", locs.get("from"));
-        }
-        return locs;
-    }
+//    /** Transforms a location of form "r:c-r:c" or just "r:c" into a map that CodeMirror can understand.
+//     * @param location A string in the form "r:c-r:c" or "r:c".
+//     * @param forceEnd if location is only r:c and this flag is true, the same position is used for the 'end' property. */
+//    public static Map<ceylon.language.String,Object> locationToMap(ceylon.language.String location, boolean forceEnd) {
+//        String[] parts = location.value.split("-");
+//        final Map<ceylon.language.String,Object> locs = 
+//                new HashMap<ceylon.language.String, Object>(3);
+//        locs.put(ceylon.language.String.instance("from"), encodePosition(parts[0]));
+//        if (parts.length == 2) {
+//            locs.put(ceylon.language.String.instance("to"), encodePosition(parts[1]));
+//        } else if (forceEnd) {
+//            locs.put(ceylon.language.String.instance("to"), locs.get("from"));
+//        }
+//        return locs;
+//    }
+//
+//    public static Map<String,Object> encodePosition(String pos) {
+//        String[] rc = pos.split(":");
+//        final Map<String,Object> m = new HashMap<String, Object>(2);
+//        if (rc.length == 2) {
+//            m.put("line", Integer.parseInt(rc[0], 10));
+//            m.put("ch", Integer.parseInt(rc[1], 10));
+//        }
+//        return m;
+//    }
 
-    public static Map<String,Object> encodePosition(String pos) {
-        String[] rc = pos.split(":");
-        final Map<String,Object> m = new HashMap<String, Object>(2);
-        if (rc.length == 2) {
-            m.put("line", Integer.parseInt(rc[0], 10));
-            m.put("ch", Integer.parseInt(rc[1], 10));
-        }
-        return m;
-    }
-
-    public static Declaration findDeclaration(final TypeChecker typeChecker, final String file, final int row, final int col) {
-        //Run the typechecker
-        typeChecker.process();
-        //Find the node at the specified position
-        final Autocompleter visitor = new Autocompleter(file, row, col, typeChecker);
-        final Node node = visitor.findNode();
-        if (node != null) {
-            //Return its declaration
-            try {
-                try {
-                    Method m = node.getClass().getMethod("getDeclaration");
-                    Object d = m.invoke(node);
-                    if (d instanceof Declaration) {
-                        return (Declaration)d;
+    public static Map<ceylon.language.String,ceylon.language.String> getDocs(final Declaration d) {
+        final Map<ceylon.language.String,ceylon.language.String> json = 
+                new HashMap<ceylon.language.String, ceylon.language.String>(1);
+        if (d!=null) {
+            json.put(ceylon.language.String.instance("name"), 
+                    ceylon.language.String.instance(d.getQualifiedNameString()));
+            if (d.getUnit().getPackage().getModule().getNameAsString().equals("ceylon.language")) {
+                StringBuilder sb = new StringBuilder("http://modules.ceylon-lang.org/repo/1/");
+                sb.append(d.getUnit().getPackage().getNameAsString().replaceAll("\\.", "/")).append('/');
+                sb.append(Versions.CEYLON_VERSION_NUMBER).append("/module-doc/");
+                if (d.isToplevel()) {
+                    if (d instanceof ClassOrInterface) {
+                        sb.append(d.getName()).append(".type.html");
+                    } else if (d instanceof com.redhat.ceylon.model.typechecker.model.Function) {
+                        sb.append("index.html#").append(d.getName());
+                    } else if (d instanceof Value) {
+                        sb.append(d.getName()).append(".object.html");
                     }
-                } catch (NoSuchMethodException ex) {
-                    try {
-                        Method m = node.getClass().getMethod("getDeclarationModel");
-                        Object d = m.invoke(node);
-                        if (d instanceof Declaration) {
-                            return (Declaration)d;
-                        }
-                    } catch (NoSuchMethodException e1) {
-                        //no hubo nada
-                    }
+                } else if (d.getContainer() instanceof ClassOrInterface 
+                        && ((Declaration)d.getContainer()).isToplevel()) {
+                    sb.append(((Declaration)d.getContainer()).getName()).append(".type.html");
+                    sb.append("#").append(d.getName());
                 }
-            } catch (IllegalAccessException e) {
-                //nothing
-            } catch (InvocationTargetException e) {
-                //nothing
+                //json.put("url", sb.toString());
             }
-        }
-        return null;
-    }
-
-    public static Map<String,Object> getDocs(final Declaration d) {
-        final Map<String,Object> json = new HashMap<String, Object>(1);
-        json.put("name", d.getQualifiedNameString());
-        if (d.getUnit().getPackage().getModule().getNameAsString().equals("ceylon.language")) {
-            StringBuilder sb = new StringBuilder("http://modules.ceylon-lang.org/repo/1/");
-            sb.append(d.getUnit().getPackage().getNameAsString().replaceAll("\\.", "/")).append('/');
-            sb.append(Versions.CEYLON_VERSION_NUMBER).append("/module-doc/");
-            if (d.isToplevel()) {
-                if (d instanceof ClassOrInterface) {
-                    sb.append(d.getName()).append(".type.html");
-                } else if (d instanceof com.redhat.ceylon.model.typechecker.model.Function) {
-                    sb.append("index.html#").append(d.getName());
-                } else if (d instanceof Value) {
-                    sb.append(d.getName()).append(".object.html");
-                }
-            } else if (d.getContainer() instanceof ClassOrInterface && ((Declaration)d.getContainer()).isToplevel()) {
-                sb.append(((Declaration)d.getContainer()).getName()).append(".type.html");
-                sb.append("#").append(d.getName());
+            if (!json.containsKey("url")) {
+                json.put(ceylon.language.String.instance("doc"), 
+                        ceylon.language.String.instance(
+                                getSignature(d) + 
+                                getExtraInfo(d) + 
+                                getDoc(d) + 
+                                getParameterInfo(d)));
             }
-            //json.put("url", sb.toString());
-        }
-        if (!json.containsKey("url")) {
-            json.put("doc", 
-                    getSignature(d) + 
-                    getExtraInfo(d) + 
-                    getDoc(d) + 
-                    getParameterInfo(d));
         }
         return json;
     }
