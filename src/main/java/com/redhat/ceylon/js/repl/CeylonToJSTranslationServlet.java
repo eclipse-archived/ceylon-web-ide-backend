@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +24,7 @@ import com.redhat.ceylon.compiler.js.util.JsOutput;
 import com.redhat.ceylon.compiler.js.util.Options;
 import com.redhat.ceylon.compiler.loader.ModelEncoder;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
+import com.redhat.ceylon.compiler.typechecker.io.VirtualFile;
 import com.redhat.ceylon.js.util.CompilerUtils;
 import com.redhat.ceylon.js.util.ServletUtils;
 import com.redhat.ceylon.model.typechecker.model.Module;
@@ -34,7 +36,7 @@ import com.redhat.ceylon.model.typechecker.model.Module;
 public class CeylonToJSTranslationServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	
-    private final Options opts = new Options().comment(false).modulify(false).addSrcDir(".");
+    private final Options opts = new Options().comment(false).modulify(false).addSrcDir("ROOT");
 
 	/** Compiles Ceylon code and returns the resulting Javascript, along with its hover help docs.
 	 * Expects the following keys:
@@ -88,6 +90,13 @@ public class CeylonToJSTranslationServlet extends HttpServlet {
                         out.close();
                         return 0;
                     }
+                    @Override
+                    protected List<VirtualFile> initSourceDirectories(Options arg0) {
+                        List<VirtualFile> result = new ArrayList<VirtualFile>(1);
+                        result.add(src);
+                        return result;
+                    }
+                    
                 }.stopOnErrors(true).setSourceFiles(files);
                 
                 //Don't rely on result flag, check errors instead
