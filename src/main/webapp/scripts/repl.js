@@ -1,7 +1,6 @@
 //"use strict";
 
 var markers = [];
-var bindings = [];
 
 var github;
 var selectedSet;
@@ -1448,31 +1447,27 @@ function showErrors(errors, print) {
                 if (editor != null) {
                     var errmsg = escapeHtml(err.msg);
                     //This is to add a marker in the gutter
-                    var underlineStyle;
                     var img = document.createElement('img');
                     img.title = errmsg;
+                    var underlineStyle, tabstyle;
                     if (err.tp == "w") {
                         img.src = "images/warning.gif";
                         img.className = "iconwarning"
                         underlineStyle = "cm-warning";
-                        getEditorTab(editor.ceylonId).addClass("haswarnings");
+                        tabstyle = "haswarnings";
                     }
                     else {
                         img.src = "images/error.gif";
                         img.className = "iconerror"
                         underlineStyle = "cm-error";
-                        getEditorTab(editor.ceylonId).addClass("haserrors");
+                        tabstyle = "haserrors";
                     }
+                    getEditorTab(editor.ceylonId).addClass(tabstyle);
                     editor.setGutterMarker(from, 'CodeMirror-error-gutter', img);
                     //This is to modify the style (underline or whatever)
-                    var marker = editor.markText({line:from,ch:err.from.ch},{line:to,ch:err.to.ch+1},{className:underlineStyle});
-                    markers.push(marker);
-                    //And this is for the hover
-                    var pos = err.tp + "_l" + from + "c" + err.from.ch + "_l" + to + "c" + err.to.ch+1;
-                    marker = editor.markText({line:from,ch:err.from.ch},{line:to,ch:err.to.ch+1},{className:pos});
-                    markers.push(marker);
-                    bindings.push(pos);
-                    $("."+pos).attr("title", errmsg);
+                    markers.push(editor.markText({line:from,ch:err.from.ch},
+                                                 {line:to,ch:err.to.ch+1},
+                                                 {className:underlineStyle,title:errmsg}));
                 }
             }
         });
@@ -2155,10 +2150,6 @@ function clearEditMarkers() {
         markers[i].clear();
     }
     markers=[];
-    for (var i=0; i<bindings.length;i++) {
-        $(bindings[i]).unbind('mouseenter mouseleave');
-    }
-    bindings=[];
 }
 
 function resetOutput(onReady) {
