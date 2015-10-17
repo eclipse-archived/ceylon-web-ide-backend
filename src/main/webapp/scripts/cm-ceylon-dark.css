@@ -96,7 +96,7 @@
     color: white;
     font-weight: normal;
     content: attr(title);
-    left: 0%;
+    left: 0;
     padding: 2px 6px;
     position: absolute;
     z-index: 98;
@@ -109,7 +109,8 @@
     border-width: 6px 6px 0 6px;
     bottom: 18px;
     content: "";
-    left: 30%;
+    left: 6px;
+    font-size: 0;
     position: absolute;
     z-index: 99;
 }
