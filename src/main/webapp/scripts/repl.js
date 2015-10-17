@@ -1452,15 +1452,15 @@ function showErrors(errors, print) {
                     var underlineStyle, tabstyle;
                     if (err.tp == "w") {
                         img.src = "images/warning.gif";
-                        img.className = "iconwarning"
+                        img.className = "warning";
+                        tabstyle = "warning";
                         underlineStyle = "cm-warning";
-                        tabstyle = "haswarnings";
                     }
                     else {
                         img.src = "images/error.gif";
-                        img.className = "iconerror"
+                        img.className = "error";
+                        tabstyle = "error";
                         underlineStyle = "cm-error";
-                        tabstyle = "haserrors";
                     }
                     getEditorTab(editor.ceylonId).addClass(tabstyle);
                     editor.setGutterMarker(from, 'CodeMirror-error-gutter', img);
@@ -1948,8 +1948,8 @@ function updateEditorDirtyState(id) {
     // Setting the tab state resets any classes we might
     // have added, so we store their states
     var tab = getEditorTab(id);
-    var hasErr = tab.hasClass("haserrors");
-    var hasWrn = tab.hasClass("haswarnings");
+    var hasErr = tab.hasClass("error");
+    var hasWrn = tab.hasClass("warning");
     
     var caption = getEditor(id).ceylonName;
     if (selectedGist != null && isEditorRenamed(id)) {
@@ -1961,8 +1961,8 @@ function updateEditorDirtyState(id) {
     w2ui["editortabs"].set(id, { caption: caption });
 
     // We now restore any classes that we found earlier
-    if (hasErr) tab.addClass("haserrors");
-    if (hasWrn) tab.addClass("haswarnings");
+    if (hasErr) tab.addClass("error");
+    if (hasWrn) tab.addClass("warning");
 }
 
 function clearEditorDirtyState(id) {
@@ -2143,8 +2143,8 @@ function clearEditMarkers() {
     $.each(editors, function(index, editor) {
         editor.clearGutter('CodeMirror-error-gutter');
         var tab = getEditorTab(editor.ceylonId);
-        tab.removeClass("haswarnings");
-        tab.removeClass("haserrors");
+        tab.removeClass("warning");
+        tab.removeClass("error");
     });
     for (var i=0; i<markers.length;i++) {
         markers[i].clear();

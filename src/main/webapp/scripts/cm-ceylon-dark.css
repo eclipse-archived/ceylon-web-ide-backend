@@ -131,7 +131,8 @@
     background-color: floralwhite;
 }
 
-.CodeMirror-gutter-elt img.iconerror {
+.CodeMirror-gutter-elt img.error,
+.CodeMirror-gutter-elt img.warning {
     padding: 1px;
     padding-left: 2px;
 }

@@ -49,13 +49,13 @@
 .cm-s-ceylon .cm-hr {color: #999;}
 .cm-s-ceylon .cm-link {color: purple;}
 
-.cm-s-ceylon .cm-warning {
+.cm-s-ceylon span.cm-warning {
     background-image:url(../images/underlinew.gif);
     background-position:bottom;
     background-repeat:repeat-x;
     background-color:transparent;
 }
-.cm-s-ceylon .cm-error {
+.cm-s-ceylon span.cm-error {
     background-image:url(../images/underline.gif);
     background-position:bottom;
     background-repeat:repeat-x;
@@ -110,7 +110,8 @@
     background-color: floralwhite;
 }
 
-.CodeMirror-gutter-elt img.iconerror {
+.CodeMirror-gutter-elt img.error,
+.CodeMirror-gutter-elt img.warning {
     padding: 1px;
     padding-left: 2px;
 }

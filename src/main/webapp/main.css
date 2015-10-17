@@ -643,12 +643,12 @@ div.ceylonblock ul {
     padding-top: 2px;
 }
 
-td.haswarnings div.w2ui-tab:after {
+td.warning div.w2ui-tab:after {
     content: url('images/warning.gif');
     padding-left: 4px;
 }
 
-td.haserrors div.w2ui-tab:after {
+td.error div.w2ui-tab:after {
     content: url('images/error.gif');
     padding-left: 4px;
 }
