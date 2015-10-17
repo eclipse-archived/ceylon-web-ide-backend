@@ -94,6 +94,7 @@
     border-radius: 2px;
     bottom: 24px;
     color: white;
+    font-weight: normal;
     content: attr(title);
     left: 0%;
     padding: 2px 6px;
@@ -114,10 +115,10 @@
 }
 
 .cm-warning:hover:after {
-    background: orange;
+    background: darkorange;
 }
 .cm-warning:hover:before {
-    border-color: orange transparent;
+    border-color: darkorange transparent;
 }
 
 .cm-error:hover:after {

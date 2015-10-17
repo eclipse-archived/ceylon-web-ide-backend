@@ -1428,9 +1428,12 @@ function showErrors(errors, print) {
     $.each(errors, function(fileName, fileErrors) {
         $.each(fileErrors, function(index, err) {
             var linedelta = isAdvancedModeActive() ? 0 : 2;
+            var text = 
+                err.msg.substring(0,1).toUpperCase() +
+                err.msg.substring(1)
             if (print) {
                 var msg = 
-                        err.msg + " \u2014 " + fileName + 
+                        text + " \u2014 " + fileName + 
                         " (" + (err.from.line-linedelta) + 
                         ":" + err.from.ch + ")";
                 if (err.tp == "w") {
@@ -1445,7 +1448,7 @@ function showErrors(errors, print) {
             if (from >= 0) {
                 var editor = getEditor(editorId(fileName));
                 if (editor != null) {
-                    var errmsg = escapeHtml(err.msg);
+                    var errmsg = escapeHtml(text);
                     //This is to add a marker in the gutter
                     var img = document.createElement('img');
                     img.title = errmsg;

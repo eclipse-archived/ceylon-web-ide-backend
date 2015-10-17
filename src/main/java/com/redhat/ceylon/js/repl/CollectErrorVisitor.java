@@ -30,13 +30,68 @@ import com.redhat.ceylon.compiler.typechecker.analyzer.UsageWarning;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
 import com.redhat.ceylon.compiler.typechecker.parser.RecognitionError;
 import com.redhat.ceylon.compiler.typechecker.tree.AnalysisMessage;
+import com.redhat.ceylon.compiler.typechecker.tree.CustomTree;
 import com.redhat.ceylon.compiler.typechecker.tree.Message;
 import com.redhat.ceylon.compiler.typechecker.tree.Node;
+import com.redhat.ceylon.compiler.typechecker.tree.Tree;
 import com.redhat.ceylon.compiler.typechecker.tree.TreeUtil;
 import com.redhat.ceylon.compiler.typechecker.tree.Visitor;
 import com.redhat.ceylon.js.util.DocUtils;
 
 public class CollectErrorVisitor extends Visitor {
+    
+    private static Node identifyingNode(Node node) {
+        if (node instanceof Tree.Declaration) {
+            Tree.Identifier id = ((Tree.Declaration) node).getIdentifier();
+            if (id!=null && id.getToken()!=null) {
+                node = id;
+            }
+        }
+        else if (node instanceof Tree.NamedArgument) {
+            Tree.Identifier id = ((Tree.NamedArgument) node).getIdentifier();
+            if (id!=null && id.getToken()!=null) {
+                node = id;
+            }
+        }
+        else if (node instanceof Tree.Import) {
+            node = ((Tree.Import) node).getImportPath();
+        }
+        else if (node instanceof Tree.ImportModule) {
+            node = ((Tree.ImportModule) node).getImportPath();
+        }
+        else if (node instanceof Tree.ModuleDescriptor) {
+            node = ((Tree.ModuleDescriptor) node).getImportPath();
+        }
+        else if (node instanceof Tree.PackageDescriptor) {
+            node = ((Tree.PackageDescriptor) node).getImportPath();
+        }
+        else if (node instanceof Tree.SimpleType) {
+            node = ((Tree.SimpleType) node).getIdentifier();
+        }
+        else if (node instanceof Tree.StaticMemberOrTypeExpression) {
+            node = ((Tree.StaticMemberOrTypeExpression) node).getIdentifier();
+        }
+        else if (node instanceof CustomTree.ExtendedTypeExpression) {
+            node = ((CustomTree.ExtendedTypeExpression) node).getType().getIdentifier();
+        }
+        else if (node instanceof Tree.ImportMemberOrType) {
+            node = ((Tree.ImportMemberOrType) node).getIdentifier();
+        }
+        else if (node instanceof Tree.InitializerParameter) {
+            node = ((Tree.InitializerParameter) node).getIdentifier();
+        }
+        else if (node instanceof Tree.MemberLiteral) {
+            node = ((Tree.MemberLiteral) node).getIdentifier();
+        }
+        else if (node instanceof Tree.TypeLiteral) {
+            Tree.StaticType type = ((Tree.TypeLiteral) node).getType();
+            if (type instanceof Tree.SimpleType) {
+                node = ((Tree.SimpleType) type).getIdentifier();
+            }
+        }
+        return node;
+    }
+
     private TypeChecker typeChecker;
     private List<PositionedMessage> analMsgs;
     private List<PositionedMessage> recogErrors;
@@ -115,7 +170,8 @@ public class CollectErrorVisitor extends Visitor {
 //        }
         if (err instanceof AnalysisMessage) {
             AnalysisMessage msg = (AnalysisMessage)err;
-            errmsg.putAll(DocUtils.locationToMap(msg.getTreeNode().getLocation(), true));
+            Node errNode = identifyingNode(msg.getTreeNode());
+            errmsg.putAll(DocUtils.locationToMap(errNode.getLocation(), true));
             if (err instanceof UsageWarning) {
                 warnCnt++;
             } else {

@@ -27,7 +27,7 @@ caption, tbody, tfoot, thead, tr {
     right: 0px;
     height: 100%;
     background: white;
-    white-space: pre-wrap;
+    white-space: pre;
     font-family: Inconsolata, Monaco, Courier, monospace;
     font-size: 14px;
     padding: 2px;
@@ -44,6 +44,6 @@ caption, tbody, tfoot, thead, tr {
 }
 
 .jsc_warn {
-    color: orange;
+    color: darkorange;
     list-style-image: url("images/warning.gif");
 }
