@@ -37,13 +37,16 @@ caption, tbody, tfoot, thead, tr {
     color: gray;
     font-size: small;
 }
+.jsc_msg code { color:rgb(0,51,153); }
 
 .jsc_error {
     color: red;
     list-style-image: url("images/error.gif");
 }
+.jsc_error code { color:rgb(0,51,153); }
 
 .jsc_warn {
     color: darkorange;
     list-style-image: url("images/warning.gif");
 }
+.jsc_warn code { color:rgb(0,51,153); }

@@ -94,31 +94,40 @@ function printOutput(txt) {
     output.innerHTML = output.innerHTML + escapeHtml(txt);
 }
 
+function highlight(txt) {
+    return escapeHtml(txt).replace(/'\w+'/g, 
+         function (m) { return "<code>" + m.substring(1,m.length-1) + "</code>"; });
+}
+
 function printSystem(txt, loc) {
     createMessagesTable();
     var output = document.getElementById("messages");
     output.innerHTML = output.innerHTML 
-        + "<tr><td><li class='jsc_msg'>" 
-        + loc + "</td><td class='jsc_msg'> &mdash; " 
-        + escapeHtml(txt) + "</td></tr>";
+        + "<tr><td><li class='jsc_msg'/><span class='jsc_msg'>" 
+        + loc + 
+        "</td><td class='jsc_msg'> &mdash; </td><td class='jsc_msg'>" 
+        + highlight(txt) + "</td></tr>";
 }
 
 function printWarning(txt, loc) {
     createMessagesTable();
     var output = document.getElementById("messages");
     output.innerHTML = output.innerHTML 
-        + "<tr><td><li class='jsc_warn'>" 
-        + loc + "</td><td class='jsc_warn'> &mdash; " 
-        + escapeHtml(txt) + "</td></tr>";
+        + "<tr><td><li class='jsc_warn'/><span class='jsc_msg'>" 
+        + loc + 
+        "</td><td class='jsc_msg'> &mdash; </td><td class='jsc_warn'>" 
+        + highlight(txt) + 
+        "</td></tr>";
 }
 
 function printError(txt, loc) {
     createMessagesTable();
     var output = document.getElementById("messages");
     output.innerHTML = output.innerHTML 
-        + "<tr><td><li class='jsc_error'>" 
-        + loc + "</td><td class='jsc_error'> &mdash; " 
-        + escapeHtml(txt) + "</td></tr>";
+        + "<tr><td><li class='jsc_error'/><span class='jsc_msg'>" 
+        + loc + 
+        "</td><td class='jsc_msg'> &mdash; </td><td class='jsc_error'>" 
+        + highlight(txt) + "</td></tr>";
 }
 
 function scrollOutput() {
