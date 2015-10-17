@@ -1432,15 +1432,14 @@ function showErrors(errors, print) {
                 err.msg.substring(0,1).toUpperCase() +
                 err.msg.substring(1)
             if (print) {
-                var msg = 
-                        text + " \u2014 " + fileName + 
-                        " (" + (err.from.line-linedelta) + 
-                        ":" + err.from.ch + ")";
+                var loc = fileName +
+                    " (" + (err.from.line-linedelta) + 
+                    ":" + err.from.ch + ")";
                 if (err.tp == "w") {
-                    printWarning(msg);
+                    printWarning(text, loc);
                 }
                 else {
-                    printError(msg);
+                    printError(text, loc);
                 }
             }
             var from = err.from.line-linedelta-1;
@@ -2204,27 +2203,27 @@ function printOutput(txt) {
     }
 }
 
-function printSystem(txt) {
+function printSystem(txt, loc) {
     var outputwin = $("#outputframe")[0].contentWindow;
     var print = outputwin.printSystem;
     if (print) {
-        print(txt);
+        print(txt, loc);
     }
 }
 
-function printError(txt) {
+function printError(txt, loc) {
     var outputwin = $("#outputframe")[0].contentWindow;
     var print = outputwin.printError;
     if (print) {
-        print(txt);
+        print(txt, loc);
     }
 }
 
-function printWarning(txt) {
+function printWarning(txt, loc) {
     var outputwin = $("#outputframe")[0].contentWindow;
     var print = outputwin.printWarning;
     if (print) {
-        print(txt);
+        print(txt, loc);
     }
 }
 

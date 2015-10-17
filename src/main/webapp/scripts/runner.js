@@ -77,6 +77,13 @@ function clearOutput() {
     output.innerHTML = "";
 }
 
+function createMessagesTable() {
+    if (!document.getElementById("messages")) {
+        var output = document.getElementById("output");
+        output.innerHTML = "<table><tbody id='messages'/></table>";
+    }
+}
+
 function printOutputLine(txt) {
     var output = document.getElementById("output");
     output.innerHTML = output.innerHTML + escapeHtml(txt) + "<br>";
@@ -87,19 +94,31 @@ function printOutput(txt) {
     output.innerHTML = output.innerHTML + escapeHtml(txt);
 }
 
-function printSystem(txt) {
-    var output = document.getElementById("output");
-    output.innerHTML = output.innerHTML + "<span class='jsc_msg'><li>" + escapeHtml(txt) + "</span><br>";
+function printSystem(txt, loc) {
+    createMessagesTable();
+    var output = document.getElementById("messages");
+    output.innerHTML = output.innerHTML 
+        + "<tr><td><li class='jsc_msg'>" 
+        + loc + "</td><td class='jsc_msg'> &mdash; " 
+        + escapeHtml(txt) + "</td></tr>";
 }
 
-function printWarning(txt) {
-    var output = document.getElementById("output");
-    output.innerHTML = output.innerHTML + "<span class='jsc_warn'><li>" + escapeHtml(txt) + "</span><br>";
+function printWarning(txt, loc) {
+    createMessagesTable();
+    var output = document.getElementById("messages");
+    output.innerHTML = output.innerHTML 
+        + "<tr><td><li class='jsc_warn'>" 
+        + loc + "</td><td class='jsc_warn'> &mdash; " 
+        + escapeHtml(txt) + "</td></tr>";
 }
 
-function printError(txt) {
-    var output = document.getElementById("output");
-    output.innerHTML = output.innerHTML + "<span class='jsc_error'><li>" + escapeHtml(txt) + "</span><br>";
+function printError(txt, loc) {
+    createMessagesTable();
+    var output = document.getElementById("messages");
+    output.innerHTML = output.innerHTML 
+        + "<tr><td><li class='jsc_error'>" 
+        + loc + "</td><td class='jsc_error'> &mdash; " 
+        + escapeHtml(txt) + "</td></tr>";
 }
 
 function scrollOutput() {
