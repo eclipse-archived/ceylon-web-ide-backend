@@ -103,9 +103,8 @@ function printSystem(txt, loc) {
     createMessagesTable();
     var output = document.getElementById("messages");
     output.innerHTML = output.innerHTML 
-        + "<tr><td><li class='jsc_msg'/><span class='jsc_msg'>" 
-        + loc + 
-        "</td><td class='jsc_msg'> &mdash; </td><td class='jsc_msg'>" 
+        + "<tr><td><li class='jsc_msg'/></td><td>" 
+        + loc + "</td><td> &mdash; </td><td class='jsc_msg'>" 
         + highlight(txt) + "</td></tr>";
 }
 
@@ -113,20 +112,17 @@ function printWarning(txt, loc) {
     createMessagesTable();
     var output = document.getElementById("messages");
     output.innerHTML = output.innerHTML 
-        + "<tr><td><li class='jsc_warn'/><span class='jsc_msg'>" 
-        + loc + 
-        "</td><td class='jsc_msg'> &mdash; </td><td class='jsc_warn'>" 
-        + highlight(txt) + 
-        "</td></tr>";
+        + "<tr><td><li class='jsc_warn'/></td><td>" 
+        + loc + "</td><td> &mdash; </td><td class='jsc_warn'>" 
+        + highlight(txt) + "</td></tr>";
 }
 
 function printError(txt, loc) {
     createMessagesTable();
     var output = document.getElementById("messages");
     output.innerHTML = output.innerHTML 
-        + "<tr><td><li class='jsc_error'/><span class='jsc_msg'>" 
-        + loc + 
-        "</td><td class='jsc_msg'> &mdash; </td><td class='jsc_error'>" 
+        + "<tr><td><li class='jsc_error'/></td><td>" 
+        + loc + "</td><td> &mdash; </td><td class='jsc_error'>" 
         + highlight(txt) + "</td></tr>";
 }
 
