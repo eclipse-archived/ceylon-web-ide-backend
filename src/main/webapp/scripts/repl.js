@@ -1386,14 +1386,6 @@ function fetchDoc(cm) {
                 $("body").click(close);
                 closePopups = close;
                 help.focus();
-            } else if (json['name'].startsWith("ceylon.language::")) {
-                var tok = json['name'].substring(17);
-                if (json['type'] === 'interface' || json['type'] === 'class') {
-                    console.log("URL http://modules.ceylon-lang.org/test/ceylon/language/0.5/module-doc/"
-                            + json['type'] + "_" + tok + ".html");
-                } else {
-                    console.log("URL http://modules.ceylon-lang.org/test/ceylon/language/0.5/module-doc/index.html#" + tok);
-                }
             }
         }
     };
