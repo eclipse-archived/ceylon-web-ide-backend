@@ -2,6 +2,13 @@ import ceylon.json {
     parse,
     JsonObject=Object
 }
+import ceylon.net.http {
+    contentType
+}
+import ceylon.net.http.server {
+    Request,
+    Response
+}
 
 import java.lang {
     System {
@@ -15,30 +22,15 @@ import java.util.logging {
     Logger
 }
 
-import javax.servlet.annotation {
-    webServlet
-}
-import javax.servlet.http {
-    Cookie,
-    HttpServlet,
-    HttpServletRequest,
-    HttpServletResponse
-}
-
-webServlet { urlPatterns = ["/githubauth"]; }
-shared class GitHubAuthServlet() 
-        extends HttpServlet() {
+shared class GitHubAuthServlet() {
     
     value log = Logger.getLogger("GitHubAuthServlet");
     
-    shared actual void doGet(
-            HttpServletRequest req, 
-            HttpServletResponse resp) {
-        resp.contentType = "text/html";
-        value writer = resp.writer;
-        writer.print("<html><body><script>");
+    shared void doGet(Request req, Response resp) {
+        resp.addHeader(contentType("text/html"));
+        resp.writeString("<html><body><script>");
         try {
-            if (exists tmpcode = req.getParameter("code")) {
+            if (exists tmpcode = req.parameter("code")) {
                 log.info("GitHubAuth: temporary code: " + tmpcode);
                 value builder = StringBuilder();
                 builder.append("https://github.com/login/oauth/access_token");
@@ -62,11 +54,11 @@ shared class GitHubAuthServlet()
                 log.info("GitHubAuth: response: " + json);
                 assert (is JsonObject result = parse(json),
                         is String token = result["access_token"]);
-                value cookie = Cookie("githubauth", token.string);
-                cookie.path = "/";
-                cookie.maxAge = 30 * 24 * 60 * 60;
-                resp.addCookie(cookie);
-                writer.print("window.opener.location.reload();");
+                //value cookie = Cookie("githubauth", token.string);
+                //cookie.path = "/";
+                //cookie.maxAge = 30 * 24 * 60 * 60;
+                //resp.addCookie(cookie);
+                //resp.writeString("window.opener.location.reload();");
             }
             else {
                 log.info("GitHubAuth: no temporary code received");
@@ -76,8 +68,7 @@ shared class GitHubAuthServlet()
             log.severe("GitHubAuth: " + ex.message);
         }
         
-        writer.print("window.close();");
-        writer.print("</script></body></html>");
-        writer.flush();
+        resp.writeString("window.close();");
+        resp.writeString("</script></body></html>");
     }
 }

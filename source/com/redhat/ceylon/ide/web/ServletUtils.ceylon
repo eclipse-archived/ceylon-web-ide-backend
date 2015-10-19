@@ -1,9 +1,19 @@
 import ceylon.interop.java {
     javaString
 }
+import ceylon.io.charset {
+    utf8
+}
 import ceylon.json {
     JsonObject=Object,
     JsonArray=Array
+}
+import ceylon.net.http {
+    contentType,
+    contentLength
+}
+import ceylon.net.http.server {
+    Response
 }
 
 import java.io {
@@ -12,35 +22,29 @@ import java.io {
     InputStreamReader
 }
 
-import javax.servlet.http {
-    HttpServletResponse
-}
-
-void sendStringResponse(HttpServletResponse response, 
+void sendStringResponse(Response response, 
         String string, String mimeType) {
-    response.contentType = mimeType;
-    response.characterEncoding = "UTF-8";
+    response.addHeader(contentType(mimeType, utf8));
     value bytes = javaString(string).getBytes("UTF-8");
-    response.setContentLength(bytes.size);
-    response.writer.print(string);
-    response.writer.flush();
+    response.addHeader(contentLength(bytes.size.string));
+    response.writeString(string);
 }
 
-void sendResponse(HttpServletResponse response, String text) 
+void sendResponse(Response response, String text) 
         => sendStringResponse {
             response = response;
             string = text;
             mimeType = "text/plain";
         };
 
-void sendMapResponse(HttpServletResponse response, JsonObject map) 
+void sendMapResponse(Response response, JsonObject map) 
         => sendStringResponse {
             response = response;
             string = map.string;
             mimeType = "application/json";
         };
 
-void sendListResponse(HttpServletResponse response, JsonArray list) 
+void sendListResponse(Response response, JsonArray list) 
         => sendStringResponse {
             response = response;
             string = list.string;
@@ -50,7 +54,8 @@ void sendListResponse(HttpServletResponse response, JsonArray list)
 String readAll(InputStream stream) {
     try {
         value reader = 
-                BufferedReader(InputStreamReader(stream, "UTF-8"));
+                BufferedReader(
+                    InputStreamReader(stream, "UTF-8"));
         value builder = StringBuilder();
         while (exists line = reader.readLine()) {
             if (!builder.empty) {

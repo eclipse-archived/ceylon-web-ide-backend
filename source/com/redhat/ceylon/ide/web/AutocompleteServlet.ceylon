@@ -6,37 +6,27 @@ import ceylon.json {
     JsonObject=Object,
     JsonArray=Array
 }
+import ceylon.net.http.server {
+    Request,
+    Response
+}
 
 import com.redhat.ceylon.compiler.js {
     DocVisitor
 }
 
-import javax.servlet.annotation {
-    webServlet
-}
-import javax.servlet.http {
-    HttpServlet,
-    HttpServletRequest,
-    HttpServletResponse
-}
+shared class AutocompleteServlet() {
 
-webServlet { urlPatterns = ["/assist"]; }
-shared class AutocompleteServlet() extends HttpServlet() {
-
-    shared actual void doPost(
-            HttpServletRequest request, 
-            HttpServletResponse response) {
+    shared void doPost(
+            Request request, 
+            Response response) {
         try {
-            value json = readAll(request.inputStream);
+            assert (exists json = request.parameter("json"));
             assert (is JsonObject result = parse(json),
                     is String file = result["f"],
                     is Integer row = result["r"],
                     is Integer col = result["c"]);
-            value typeChecker = 
-                    getTypeChecker {
-                        context = request.servletContext;
-                        scriptFile = createScriptSource(result);
-                    };
+            value typeChecker = newTypeChecker(createScriptSource(result));
             typeChecker.process();
             value docVisitor = DocVisitor();
             value phasedUnits 
@@ -57,7 +47,7 @@ shared class AutocompleteServlet() extends HttpServlet() {
                 });
         }
         catch (ex) {
-            response.setStatus(500,"");
+            response.responseStatus = 500;
             sendListResponse(response, 
                 JsonArray {
                     "Service error: ``ex.message``"

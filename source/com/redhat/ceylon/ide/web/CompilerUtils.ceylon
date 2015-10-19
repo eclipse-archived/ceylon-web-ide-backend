@@ -2,25 +2,6 @@ import ceylon.json {
     JsonObject=Object
 }
 
-import java.io {
-    File,
-    Writer
-}
-import javax.servlet {
-    ServletContext
-}
-import java.lang {
-    JString=String
-}
-import java.util {
-    ArrayList
-}
-import ceylon.interop.java {
-    javaString
-}
-import com.redhat.ceylon.compiler.typechecker.io.cmr.impl {
-    LeakingLogger
-}
 import com.redhat.ceylon.cmr.ceylon {
     CeylonUtils
 }
@@ -31,35 +12,34 @@ import com.redhat.ceylon.compiler.typechecker {
     TypeCheckerBuilder,
     TypeChecker
 }
+import com.redhat.ceylon.compiler.typechecker.io.cmr.impl {
+    LeakingLogger
+}
+
+import java.io {
+    File,
+    Writer
+}
 
 JsModuleManagerFactory moduleManagerFactory 
         = JsModuleManagerFactory("UTF-8");
 
-TypeChecker getTypeChecker(ServletContext context, ScriptFile scriptFile) {
-    
-    value extraUserRepos = ArrayList<JString>();
-    value repoPath 
-            = context.getRealPath("/WEB-INF/ceylon-repo/system");
-    extraUserRepos.add(javaString(repoPath));
-    
-    value repositoryManager 
+TypeChecker newTypeChecker(ScriptFile scriptFile)
+    => let (repositoryManager 
             = CeylonUtils.repoManager()
-            .extraUserRepos(extraUserRepos)
-            .logger(LeakingLogger())
-            .buildManager();
-    
-    return TypeCheckerBuilder()
+                .logger(LeakingLogger())
+                .buildManager())
+        TypeCheckerBuilder()
             .addSrcDirectory(scriptFile)
             .moduleManagerFactory(moduleManagerFactory)
             .setRepositoryManager(repositoryManager)
             .typeChecker;
-    
-}
 
-"Creates an in-memory directory hierarchy containing the scripts that get passed.
- If a single script gets passed we create our own empty `module.ceylon` script
- with the given module name. If the given module name is `null`, the default name 
- 'web_ide_script' will be used."
+"Creates an in-memory directory hierarchy containing the 
+ scripts that get passed. If a single script gets passed we 
+ create our own empty `module.ceylon` script with the given 
+ module name. If the given module name is `null`, the 
+ default name 'web_ide_script' will be used."
 ScriptFile createScriptSource(JsonObject data) {
     assert (is String modName 
         = data["modName"] else "web_ide_script");

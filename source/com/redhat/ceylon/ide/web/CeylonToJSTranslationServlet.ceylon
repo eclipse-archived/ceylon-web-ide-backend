@@ -6,6 +6,10 @@ import ceylon.json {
     JsonObject=Object,
     JsonArray=Array
 }
+import ceylon.net.http.server {
+    Request,
+    Response
+}
 
 import com.redhat.ceylon.compiler.js {
     JsCompiler
@@ -35,41 +39,24 @@ import java.util {
     }
 }
 
-import javax.servlet.annotation {
-    webServlet
-}
-import javax.servlet.http {
-    HttpServlet,
-    HttpServletRequest,
-    HttpServletResponse
-}
-
 Options options = 
         Options()
             .comment(false)
             .modulify(false)
             .addSrcDir("ROOT");
 
-webServlet { urlPatterns = ["/translate"]; }
-shared class CeylonToJSTranslationServlet() 
-        extends HttpServlet() {
+shared class CeylonToJSTranslationServlet() {
     
-    shared actual void doPost(
-            HttpServletRequest request, 
-            HttpServletResponse response) {
+    shared void doPost(Request request, Response response) {
         try {
-            value json = readAll(request.inputStream);
+            assert (exists json = request.parameter("json"));
             assert (is JsonObject result = parse(json));
             value scriptFile = createScriptSource(result);
             value files = createFilesList(result);
             
             value typecheckOnly = result.get("tc") exists;
             
-            value typeChecker = 
-                    getTypeChecker {
-                        context = request.servletContext;
-                        scriptFile = scriptFile;
-                    };
+            value typeChecker = newTypeChecker(scriptFile);
             typeChecker.process();
             
             value charArrayWriter 
@@ -121,7 +108,7 @@ shared class CeylonToJSTranslationServlet()
             sendMapResponse(response, codeOrErrors);
         }
         catch (ex) {
-            response.setStatus(500,"");
+            response.responseStatus = 500;
             ex.printStackTrace();
             sendListResponse(response, 
                 JsonArray {

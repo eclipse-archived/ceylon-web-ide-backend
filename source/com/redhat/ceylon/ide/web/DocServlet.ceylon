@@ -1,11 +1,14 @@
 import ceylon.interop.java {
-    CeylonIterable,
     CeylonMap
 }
 import ceylon.json {
     parse,
     JsonObject=Object,
     JsonArray=Array
+}
+import ceylon.net.http.server {
+    Request,
+    Response
 }
 
 import com.redhat.ceylon.compiler.typechecker {
@@ -23,26 +26,11 @@ import com.redhat.ceylon.model.typechecker.model {
     Declaration
 }
 
-import javax.servlet {
-    ServletContext
-}
-import javax.servlet.annotation {
-    webServlet
-}
-import javax.servlet.http {
-    HttpServlet,
-    HttpServletRequest,
-    HttpServletResponse
-}
+shared class DocServlet() {
 
-webServlet { urlPatterns = ["/hoverdoc"]; }
-shared class DocServlet() extends HttpServlet() {
-
-    shared actual void doPost(
-            HttpServletRequest request, 
-            HttpServletResponse response) {
+    shared void doPost(Request request, Response response) {
         try {
-            value json = readAll(request.inputStream);
+            assert (exists json = request.parameter("json"));
             assert (is JsonObject result = parse(json));
             assert (is String file = result["f"],
                     is Integer row = result["r"],
@@ -52,14 +40,11 @@ shared class DocServlet() extends HttpServlet() {
                     file = file;
                     row = row;
                     col = col;
-                    typeChecker = getTypeChecker {
-                        context = request.servletContext;
-                        scriptFile = createScriptSource(result);
-                    };
+                    typeChecker = newTypeChecker(createScriptSource(result));
                 }));
         }
         catch (ex) {
-            response.setStatus(500, "");
+            response.responseStatus = 500;
             sendListResponse(response, 
                 JsonArray {
                     "Service error: ``ex.message``"
@@ -67,19 +52,15 @@ shared class DocServlet() extends HttpServlet() {
         }
     }
     
-    shared actual void doGet(
-            HttpServletRequest request, 
-            HttpServletResponse response) {
+    shared void doGet(Request request, Response response) {
         try {
+            assert (exists key = request.parameter("key"));
             sendMapResponse(response, JsonObject {
-                "files" -> files {
-                    context = request.servletContext;
-                    key = request.getParameter("key");
-                }
+                "files" -> files(key)
             });
         }
         catch (ex) {
-            response.setStatus(500, "");
+            response.responseStatus = 500;
             sendListResponse(response, 
                 JsonArray {
                     "Service error:``ex.message``"
@@ -123,37 +104,33 @@ shared class DocServlet() extends HttpServlet() {
         }
     }
     
-    JsonObject files(ServletContext context, String key) {
+    JsonObject files(String key) {
         value files = JsonObject();
-        String respath = "/examples/" + key;
+        String respath = "examples/" + key;
         value sourcePath = respath + ".ceylon";
-        if (context.getResource(sourcePath) exists) {
+        if (`module`.resourceByPath(sourcePath) exists) {
             files.put(*file {
-                context = context;
                 path = respath + ".ceylon";
             });
         }
         else {
-            value paths = context.getResourcePaths(respath);
-            for (path in CeylonIterable(paths)) {
-                if (path.endsWith(".ceylon")) {
-                    files.put(*file {
-                        context = context;
-                        path = path.string;
-                    });
-                }
-            }
+            //value paths = 
+            //        `module`.getResourcePaths(respath);
+            //for (path in CeylonIterable(paths)) {
+            //    if (path.endsWith(".ceylon")) {
+            //        files.put(*file(path));
+            //    }
+            //}
         }
         return files;
     }
     
-    [String, JsonObject] file(
-            ServletContext context, String path) {
+    [String, JsonObject] file(String path) {
         value filename = 
                 if (exists loc = path.lastOccurrence('/')) 
                 then path[loc + 1...] else path;
-        value stream = context.getResourceAsStream(path);
-        value content = readAll(stream);
+        assert (exists file = `module`.resourceByPath(path));
+        value content = file.textContent("UTF-8");
         return [
             filename, 
             JsonObject {
