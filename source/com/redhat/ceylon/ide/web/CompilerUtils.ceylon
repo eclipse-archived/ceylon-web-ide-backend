@@ -35,13 +35,6 @@ import com.redhat.ceylon.compiler.typechecker {
 JsModuleManagerFactory moduleManagerFactory 
         = JsModuleManagerFactory("UTF-8");
 
-ScriptFile moduleFile 
-        = ScriptFile {
-    name = "module.ceylon";
-    path = "ROOT/web_ide_script/module.ceylon";
-    script = "module web_ide_script \"1.0.0\" {}";
-};
-
 TypeChecker getTypeChecker(ServletContext context, ScriptFile scriptFile) {
     
     value extraUserRepos = ArrayList<JString>();
@@ -79,33 +72,40 @@ ScriptFile createScriptSource(JsonObject data) {
         if (is JsonObject jsonFile,
             is String script = jsonFile["content"])
         ScriptFile {
-            name = fileName.string;
-            path = "ROOT/``modName``/``fileName``";
-            script = script.string;
+            name = fileName;
+            path = "source/``modName``/``fileName``";
+            script = script;
         } 
     };
     if (!hasModuleDescriptor) {
+        value moduleFile 
+                = ScriptFile {
+            name = "module.ceylon";
+            path = "source/``modName``/module.ceylon";
+            script = "module web_ide_script \"1.0.0\" {}";
+        };
         files = files.follow(moduleFile);
     }
     
     // Now we create the module hierarchy
-    variable Integer loc = modName.size;
-    while (exists dot = modName.lastOccurrence('.', loc)) {
-        value bit = modName[dot+1..loc];
-        value path = modName[...loc];
+    variable value endIndex = modName.size-1;
+    while (endIndex>0) {
+        value dot = modName.lastOccurrence('.', endIndex) else -1;
+        value end = endIndex; //necessary because {} is lazy!
+        value children = files; //necessary because {} is lazy!
         files = { 
             ScriptFile.withChildren {
-                name = bit;
-                path = "ROOT/" + path;
-                children = files;
+                name = modName[dot+1..end];
+                path = "source/" + modName[...end].replace(".", "/");
+                children = children;
             }
         };
-        loc = dot-1;
+        endIndex = dot-1;
     }
     // And finally the root to hold it all 
     return ScriptFile.withChildren {
-        name = "ROOT";
-        path = "ROOT";
+        name = "source";
+        path = "source";
         children = files;
     };
 }
@@ -116,11 +116,11 @@ List<File> createFilesList(JsonObject data) {
             is JsonObject jsonFiles = data["files"]);
     value files = { 
         for (fileName in jsonFiles.keys) 
-        File("ROOT/``modName``/``fileName``") 
+        File("source/``modName``/``fileName``") 
     };
     return jsonFiles.defines("module.ceylon") 
         then [*files] 
-        else [File("module.ceylon"), *files];
+        else [File("source/``modName``/module.ceylon"), *files];
 }
 
 void writeJSSources(Writer writer, JsonObject data) {
