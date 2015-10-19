@@ -2,3 +2,6 @@
 target
 build
 .settings
+.exploded
+modules
+classes

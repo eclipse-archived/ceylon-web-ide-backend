@@ -3,6 +3,5 @@
 encoding=UTF-8
 
 [compiler]
-source=src/main/java
+source=source
 resource=resource
-source=src/main/resources
