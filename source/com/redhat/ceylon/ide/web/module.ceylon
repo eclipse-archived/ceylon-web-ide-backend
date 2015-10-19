@@ -1,6 +1,6 @@
 native("jvm") 
 module com.redhat.ceylon.ide.web "1.0.0" {
-    shared import java.base "8";
+    import java.base "8";
     import ceylon.interop.java "1.2.0";
     shared import com.redhat.ceylon.typechecker "1.2.0";
     import com.redhat.ceylon.compiler.js "1.2.0";

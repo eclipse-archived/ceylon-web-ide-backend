@@ -15,7 +15,7 @@
 			<arguments>
 				<dictionary>
 					<key>systemRepo</key>
-					<value>/Users/gavin/.ceylon/repo</value>
+					<value></value>
 				</dictionary>
 			</arguments>
 		</buildCommand>
