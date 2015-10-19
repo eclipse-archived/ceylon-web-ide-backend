@@ -1,4 +1,4 @@
-package com.redhat.ceylon.js.repl.util;
+package com.redhat.ceylon.ide.web.util;
 
 import java.util.HashMap;
 import java.util.List;

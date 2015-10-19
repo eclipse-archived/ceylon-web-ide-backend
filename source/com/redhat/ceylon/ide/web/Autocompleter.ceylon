@@ -14,7 +14,7 @@ import com.redhat.ceylon.compiler.typechecker.tree {
     Tree,
     Visitor
 }
-import com.redhat.ceylon.js.repl.util {
+import com.redhat.ceylon.ide.web.util {
     DocUtils {
         ...
     }

@@ -1,5 +1,5 @@
 native("jvm") 
-module com.redhat.ceylon.js.repl "1.0.0" {
+module com.redhat.ceylon.ide.web "1.0.0" {
     shared import java.base "8";
     import ceylon.interop.java "1.2.0";
     shared import com.redhat.ceylon.typechecker "1.2.0";

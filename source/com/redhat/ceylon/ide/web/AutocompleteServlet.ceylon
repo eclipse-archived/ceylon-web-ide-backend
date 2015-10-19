@@ -49,16 +49,16 @@ shared class AutocompleteServlet() extends HttpServlet() {
             for (pu in CeylonIterable(phasedUnits)) {
                 pu.compilationUnit.visit(docVisitor);
             }
+            value autocompleter 
+                    = Autocompleter {
+                file = file;
+                row = row;
+                col = col;
+                checker = typeChecker;
+            };
             sendMapResponse(
                 JsonObject {
-                    "opts" -> 
-                            Autocompleter {
-                                file = file;
-                                row = row;
-                                col = col;
-                                checker = typeChecker;
-                            }
-                            .completions
+                    "opts" -> autocompleter.completions
                 }, 
                 response);
         }
