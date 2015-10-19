@@ -79,7 +79,7 @@ shared class DocServlet() extends HttpServlet() {
             });
         }
         catch (ex) {
-            response.setStatus(500, "");
+            response.status = 500;
             sendListResponse(response, 
                 JsonArray {
                     "Service error:``ex.message``"

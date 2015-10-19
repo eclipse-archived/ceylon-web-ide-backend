@@ -121,7 +121,7 @@ shared class CeylonToJSTranslationServlet()
             sendMapResponse(response, codeOrErrors);
         }
         catch (ex) {
-            response.setStatus(500,"");
+            response.status = 500;
             ex.printStackTrace();
             sendListResponse(response, 
                 JsonArray {
