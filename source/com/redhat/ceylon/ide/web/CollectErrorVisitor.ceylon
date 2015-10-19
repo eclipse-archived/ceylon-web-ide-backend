@@ -24,7 +24,9 @@ import com.redhat.ceylon.compiler.typechecker.tree {
     Message,
     Node,
     Tree,
-    TreeUtil,
+    TreeUtil {
+        getIdentifyingNode
+    },
     Visitor
 }
 import com.redhat.ceylon.ide.web.util {
@@ -133,48 +135,48 @@ class CollectErrorVisitor(TypeChecker typeChecker)
         super.visitAny(that);
     }
     
-    void addError(PositionedMessage msg) {
-        Node node = TreeUtil.getIdentifyingNode(msg.node);
-        String fileName = node.unit?.filename else "unknown";
+    void addError(PositionedMessage message) {
+        value node = getIdentifyingNode(message.node);
+        value fileName = node.unit.filename;
         JsonArray unitErrors;
-        if (is JsonArray list = errorsByFile.get(fileName)) {
+        if (is JsonArray list = errorsByFile[fileName]) {
             unitErrors = list;
         }
         else {
             unitErrors = JsonArray();
             errorsByFile.put(fileName, unitErrors);
         }
-        unitErrors.add(encodeError(node, msg.message));
+        unitErrors.add(encodeError(node, message.message));
     }
     
-    JsonObject encodeError(Node node, Message err) {
-        value errmsg = JsonObject {
-            "msg" -> err.message,
-            "code" -> err.code
+    JsonObject encodeError(Node node, Message message) {
+        value error = JsonObject {
+            "msg" -> message.message,
+            "code" -> message.code
         };
-        if (is AnalysisMessage err) {
-            value errNode = identifyingNode(err.treeNode);
-            errmsg.putAll(locationToMap(errNode.location));
-            if (is UsageWarning err) {
+        if (is AnalysisMessage message) {
+            value errNode = identifyingNode(message.treeNode);
+            error.putAll(location(errNode.location));
+            if (is UsageWarning message) {
                 warnCnt++;
             }
             else {
                 errCnt++;
             }
         }
-        else if (is RecognitionError err) {
-            errmsg.putAll(locationToMap(
-                "``err.line``:``err.characterInLine``"));
+        else if (is RecognitionError message) {
+            error.putAll(location(
+                "``message.line``:``message.characterInLine``"));
             errCnt++;
         }
         
-        if (is UsageWarning err) {
-            errmsg.put("tp", "w");
+        if (is UsageWarning message) {
+            error.put("tp", "w");
         }
         else {
-            errmsg.put("tp", "e");
+            error.put("tp", "e");
         }
-        return errmsg;
+        return error;
     }
     
     shared void process() {
@@ -187,8 +189,8 @@ class CollectErrorVisitor(TypeChecker typeChecker)
                 = recogErrors.empty 
                 then analMsgs 
                 else recogErrors;
-        for (pm in list) {
-            addError(pm);
+        for (message in list) {
+            addError(message);
         }
         if (!recogErrors.empty) {
             warnCnt = 0;
@@ -201,27 +203,28 @@ class CollectErrorVisitor(TypeChecker typeChecker)
     shared Integer warnings => warnCnt;
 }
 
-JsonObject locationToMap(String location, Boolean forceEnd=true) {
-    value parts = location.split('-'.equals).sequence();
-    value locs = JsonObject {};
-    if (exists from = parts[0]) {
-        locs.put("from", encodePosition(from));
-        if (exists to = parts[1]) {
-            locs.put("to", encodePosition(to));
-        }
-        else if (forceEnd) {
-            locs.put("to", locs["from"]);
-        }
+JsonObject location(String location, Boolean forceEnd=true) {
+    value parts = [*location.split('-'.equals)];
+    value result = JsonObject {};
+    value from = parts[0];
+    result.put("from", position(from));
+    if (exists to = parts[1]) {
+        result.put("to", position(to));
     }
-    return locs;
+    else if (forceEnd) {
+        result.put("to", result["from"]);
+    }
+    return result;
 }
 
-JsonObject encodePosition(String pos) {
-    value rc = pos.split(':'.equals).sequence();
+JsonObject position(String pos) {
+    value bits = [*pos.split(':'.equals)];
     value result = JsonObject {};
-    if (exists line = rc[0], exists ch = rc[1]) {
-        result.put("line", parseInteger(line));
-        result.put("ch", parseInteger(ch));
+    if (exists ln = parseInteger(bits[0])) {
+        result.put("line", ln);
+    }
+    if (exists ch = parseInteger(bits[1] else "")) {
+        result.put("ch", ch);
     }
     return result;
 }

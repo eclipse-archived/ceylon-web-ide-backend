@@ -57,9 +57,8 @@ shared class CeylonToJSTranslationServlet()
     shared actual void doPost(
             HttpServletRequest request, 
             HttpServletResponse response) {
-        value stream = request.inputStream;
         try {
-            value json = readAll(stream);
+            value json = readAll(request.inputStream);
             assert (is JsonObject result = parse(json));
             value scriptFile = createScriptSource(result);
             value files = createFilesList(result);
@@ -119,19 +118,15 @@ shared class CeylonToJSTranslationServlet()
             else {
                 codeOrErrors = JsonObject();
             }
-            sendMapResponse(codeOrErrors, response);
+            sendMapResponse(response, codeOrErrors);
         }
         catch (ex) {
             response.setStatus(500,"");
             ex.printStackTrace();
-            sendListResponse(
+            sendListResponse(response, 
                 JsonArray {
                     "Service error: ``ex.message``"
-                }, 
-                response);
-        }
-        finally {
-            stream.close();
+                });
         }
     }
     

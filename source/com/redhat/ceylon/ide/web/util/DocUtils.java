@@ -217,7 +217,7 @@ public class DocUtils {
                     FunctionOrValue model = param.getModel();
                     result.append("<li><p>Accepts ")
                         .append(getSignatureInternal(model))
-                        .append(".</p>")
+                        .append("</p>")
                         .append(getDoc(model));
                 }
             }

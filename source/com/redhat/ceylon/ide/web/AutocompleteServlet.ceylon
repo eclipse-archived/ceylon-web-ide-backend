@@ -11,17 +11,13 @@ import com.redhat.ceylon.compiler.js {
     DocVisitor
 }
 
-import java.lang {
-    NumberFormatException
+import javax.servlet.annotation {
+    webServlet
 }
-
 import javax.servlet.http {
     HttpServlet,
     HttpServletRequest,
     HttpServletResponse
-}
-import javax.servlet.annotation {
-    webServlet
 }
 
 webServlet { urlPatterns = ["/assist"]; }
@@ -30,9 +26,8 @@ shared class AutocompleteServlet() extends HttpServlet() {
     shared actual void doPost(
             HttpServletRequest request, 
             HttpServletResponse response) {
-        value stream = request.inputStream;
         try {
-            value json = readAll(stream);
+            value json = readAll(request.inputStream);
             assert (is JsonObject result = parse(json),
                     is String file = result["f"],
                     is Integer row = result["r"],
@@ -56,30 +51,17 @@ shared class AutocompleteServlet() extends HttpServlet() {
                 col = col;
                 checker = typeChecker;
             };
-            sendMapResponse(
+            sendMapResponse(response, 
                 JsonObject {
                     "opts" -> autocompleter.completions
-                }, 
-                response);
-        }
-        catch (NumberFormatException ex) {
-            response.setStatus(500,"");
-            sendListResponse(
-                JsonArray {
-                    "Current location wasn't provided"
-                }, 
-                response);
+                });
         }
         catch (ex) {
             response.setStatus(500,"");
-            sendListResponse(
+            sendListResponse(response, 
                 JsonArray {
                     "Service error: ``ex.message``"
-                }, 
-                response);
-        }
-        finally {
-            stream.close();
+                });
         }
     }
 }
