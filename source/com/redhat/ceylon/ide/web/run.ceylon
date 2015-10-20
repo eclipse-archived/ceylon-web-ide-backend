@@ -11,32 +11,36 @@ import ceylon.net.http.server {
 import ceylon.net.http.server.endpoints {
     serveStaticFile
 }
+import ceylon.net.http {
+    post,
+    get
+}
 
 shared void run() {
     value server = newServer {
         Endpoint {
             path = startsWith("/translate");
-            //acceptMethod = { post };
+            acceptMethod = { post };
             service => CeylonToJSTranslationServlet().doPost;
         },
         Endpoint {
             path = startsWith("/assist");
-            //acceptMethod = { post };
+            acceptMethod = { post };
             service => AutocompleteServlet().doPost;
         },
         Endpoint {
             path = startsWith("/hoverdoc");
-            //acceptMethod = { get };
+            acceptMethod = { get };
             service => DocServlet().doGet;
         },
         Endpoint {
             path = startsWith("/hoverdoc");
-            //acceptMethod = { post };
+            acceptMethod = { post };
             service => DocServlet().doPost;
         },
         Endpoint {
             path = startsWith("/ceylon-ide");
-            //acceptMethod = { get };
+            acceptMethod = { get };
             service(Request request, Response response) 
                     => serveStaticFile("web-content", 
                             (request) => request.path.replace("/ceylon-ide", ""))
