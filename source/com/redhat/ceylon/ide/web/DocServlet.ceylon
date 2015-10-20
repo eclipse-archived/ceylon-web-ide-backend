@@ -71,12 +71,13 @@ shared class DocServlet() extends HttpServlet() {
             HttpServletRequest request, 
             HttpServletResponse response) {
         try {
-            sendMapResponse(response, JsonObject {
-                "files" -> files {
-                    context = request.servletContext;
-                    key = request.getParameter("key");
-                }
-            });
+            sendMapResponse(response, 
+                JsonObject {
+                    "files" -> files {
+                        context = request.servletContext;
+                        key = request.getParameter("key");
+                    }
+                });
         }
         catch (ex) {
             response.status = 500;
