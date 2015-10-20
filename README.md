@@ -26,7 +26,7 @@ To compile the project, first install the Ceylon [compiler][],
 then go to the `ceylon-web-ide-backend` directory, and type:
 
     ceylon compile
-    ceylon war --name=ceylon-ide.war com.redhat.ceylon.ide.web -R web-content
+    ceylon war -n ceylon-ide.war com.redhat.ceylon.ide.web
 
 This will create a file named `ceylon-ide.war` in the current
 directly.
