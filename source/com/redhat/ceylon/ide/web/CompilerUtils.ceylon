@@ -24,7 +24,7 @@ import com.redhat.ceylon.compiler.typechecker.io.cmr.impl {
 import com.redhat.ceylon.cmr.ceylon {
     CeylonUtils
 }
-import com.redhat.ceylon.compiler.loader {
+import com.redhat.ceylon.compiler.js.loader {
     JsModuleManagerFactory
 }
 import com.redhat.ceylon.compiler.typechecker {
