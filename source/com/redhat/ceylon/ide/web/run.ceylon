@@ -11,10 +11,6 @@ import ceylon.net.http.server {
 import ceylon.net.http.server.endpoints {
     serveStaticFile
 }
-import ceylon.net.http {
-    post,
-    get
-}
 
 shared void run() {
     value server = newServer {
@@ -43,8 +39,7 @@ shared void run() {
             //acceptMethod = { get };
             service(Request request, Response response) 
                     => serveStaticFile("web-content", 
-                            (Request request) 
-                                    => request.path.replace("/ceylon-ide", ""))
+                            (request) => request.path.replace("/ceylon-ide", ""))
                             (request, response, noop);
         }
     };

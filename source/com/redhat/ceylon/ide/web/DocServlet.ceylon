@@ -30,7 +30,7 @@ shared class DocServlet() {
 
     shared void doPost(Request request, Response response) {
         try {
-            assert (exists json = request.parameter("json"));
+            value json = request.read();
             assert (is JsonObject result = parse(json));
             assert (is String file = result["f"],
                     is Integer row = result["r"],

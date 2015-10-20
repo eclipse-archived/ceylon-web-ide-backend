@@ -49,7 +49,7 @@ shared class CeylonToJSTranslationServlet() {
     
     shared void doPost(Request request, Response response) {
         try {
-            assert (exists json = request.parameter("json"));
+            value json = request.read();
             assert (is JsonObject result = parse(json));
             value scriptFile = createScriptSource(result);
             value files = createFilesList(result);

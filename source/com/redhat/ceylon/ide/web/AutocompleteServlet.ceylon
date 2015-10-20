@@ -17,11 +17,9 @@ import com.redhat.ceylon.compiler.js {
 
 shared class AutocompleteServlet() {
 
-    shared void doPost(
-            Request request, 
-            Response response) {
+    shared void doPost(Request request, Response response) {
         try {
-            assert (exists json = request.parameter("json"));
+            value json = request.read();
             assert (is JsonObject result = parse(json),
                     is String file = result["f"],
                     is Integer row = result["r"],
