@@ -33,7 +33,7 @@ the resulting jar from `build/lib`; also from ceylon-js you can get the latest
 ceylon.language.js file by building the project and copying it from
 `build/runtime/ceylon/language/0.1`.
 
-Updating the public OpenShift application (http://try.ceylon-lang.com) is done
+Updating the public OpenShift application (http://try.ceylon-lang.org) is done
 simply by pushing any updated fils to the application's Git repository on OpenShift.
 
 Right now this can only be done by Tako (@quintesse), or you need to supply him with
