@@ -93,10 +93,10 @@
     <dependency>
       <groupId>txtmark</groupId>
       <artifactId>txtmark</artifactId>
-      <version>0.11</version>
+      <version>0.13</version>
       <type>jar</type>
       <scope>system</scope>
-      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/txtmark-0.11.jar</systemPath>
+      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/txtmark-0.13.jar</systemPath>
     </dependency>
   </dependencies>
   <profiles>
