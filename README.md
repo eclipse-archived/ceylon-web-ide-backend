@@ -26,23 +26,16 @@ To compile the project, first install the Ceylon [compiler][],
 then go to the `ceylon-web-ide-backend` directory, and type:
 
     ceylon compile
-    ceylon war --name=ceylon-ide.war com.redhat.ceylon.ide.web -R web-content
 
-This will create a file named `ceylon-ide.war` in the current
-directly.
+To run the server, type:
 
-To deploy the project, first install [WildFly 10][], or any
-other Java EE server, then copy `ceylon-ide.war` to the 
-deployment directory, for example:
-
-    cp ceylon-ide.war ~/wildfly-10.0.0.CR1/standalone/deployments
+    ceylon run com.redhat.ceylon.ide.web
 
 Finally, go to:
 
-<http://localhost:8080/ceylon-ide>
+<http://localhost:8080/ceylon-ide/>
 
 [compiler]: http://ceylon-lang.org/download
-[WildFly 10]: http://wildfly.org/downloads
 
 ## License
 
