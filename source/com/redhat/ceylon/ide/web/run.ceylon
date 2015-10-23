@@ -16,41 +16,39 @@ import ceylon.net.http {
     get
 }
 
-shared void run() {
-    value server = newServer {
-        Endpoint {
-            path = startsWith("/translate");
-            acceptMethod = { post };
-            service => CeylonToJSTranslationServlet().doPost;
-        },
-        Endpoint {
-            path = startsWith("/assist");
-            acceptMethod = { post };
-            service => AutocompleteServlet().doPost;
-        },
-        Endpoint {
-            path = startsWith("/hoverdoc");
-            acceptMethod = { get };
-            service => DocServlet().doGet;
-        },
-        Endpoint {
-            path = startsWith("/hoverdoc");
-            acceptMethod = { post };
-            service => DocServlet().doPost;
-        },
-        Endpoint {
-            path = startsWith("/ceylon-ide");
-            acceptMethod = { get };
-            service(Request request, Response response) 
-                    => serveStaticFile("web-content", 
-                            (request) => request.path.replace("/ceylon-ide", ""))
-                            (request, response, noop);
-        }
-    };
-    
-    //start the server on port 8080
-    server.start(SocketAddress {
+shared void run() 
+        => newServer {
+    Endpoint {
+        path = startsWith("/translate");
+        acceptMethod = { post };
+        service => CeylonToJSTranslationServlet().doPost;
+    },
+    Endpoint {
+        path = startsWith("/assist");
+        acceptMethod = { post };
+        service => AutocompleteServlet().doPost;
+    },
+    Endpoint {
+        path = startsWith("/hoverdoc");
+        acceptMethod = { get };
+        service => DocServlet().doGet;
+    },
+    Endpoint {
+        path = startsWith("/hoverdoc");
+        acceptMethod = { post };
+        service => DocServlet().doPost;
+    },
+    Endpoint {
+        path = startsWith("/ceylon-ide");
+        acceptMethod = { get };
+        service(Request request, Response response) 
+                => serveStaticFile("web-content", 
+                        (request) => request.path.replace("/ceylon-ide", ""))
+                        (request, response, noop);
+    }
+}.start {
+    SocketAddress {
         address = "127.0.0.1";
         port = 8080;
-    });
-}
+    };
+};
