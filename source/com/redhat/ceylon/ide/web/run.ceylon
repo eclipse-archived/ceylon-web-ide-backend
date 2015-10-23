@@ -1,50 +1,51 @@
 import ceylon.io {
     SocketAddress
 }
+import ceylon.net.http {
+    post,
+    get
+}
 import ceylon.net.http.server {
     newServer,
     Endpoint,
     startsWith,
-    Response,
-    Request
+    Request,
+    AsynchronousEndpoint
 }
 import ceylon.net.http.server.endpoints {
     serveStaticFile
-}
-import ceylon.net.http {
-    post,
-    get
 }
 
 shared void run() 
         => newServer {
     Endpoint {
-        path = startsWith("/translate");
+        path = startsWith("/ceylon-ide/translate");
         acceptMethod = { post };
         service => CeylonToJSTranslationServlet().doPost;
     },
     Endpoint {
-        path = startsWith("/assist");
+        path = startsWith("/ceylon-ide/assist");
         acceptMethod = { post };
         service => AutocompleteServlet().doPost;
     },
     Endpoint {
-        path = startsWith("/hoverdoc");
+        path = startsWith("/ceylon-ide/hoverdoc");
         acceptMethod = { get };
         service => DocServlet().doGet;
     },
     Endpoint {
-        path = startsWith("/hoverdoc");
+        path = startsWith("/ceylon-ide/hoverdoc");
         acceptMethod = { post };
         service => DocServlet().doPost;
     },
-    Endpoint {
+    AsynchronousEndpoint {
         path = startsWith("/ceylon-ide");
         acceptMethod = { get };
-        service(Request request, Response response) 
-                => serveStaticFile("web-content", 
-                        (request) => request.path.replace("/ceylon-ide", ""))
-                        (request, response, noop);
+        service = serveStaticFile {
+            externalPath = "web-content";
+            fileMapper(Request request)
+                    => request.path.replace("/ceylon-ide", "");
+        };
     }
 }.start {
     SocketAddress {
