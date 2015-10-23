@@ -35,6 +35,10 @@ Finally, go to:
 
 <http://localhost:8080/ceylon-ide/>
 
+To run the server on a different address and port, use:
+
+    ceylon run com.redhat.ceylon.ide.web -address=<address> -port=<port>
+
 [compiler]: http://ceylon-lang.org/download
 
 ## License

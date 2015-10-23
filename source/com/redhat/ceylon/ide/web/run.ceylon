@@ -60,7 +60,10 @@ shared void run()
     }
 }.start {
     SocketAddress {
-        address = "127.0.0.1";
-        port = 8080;
+        address = process.namedArgumentValue("address") 
+                        else "127.0.0.1";
+        port = if (exists arg = process.namedArgumentValue("port"), 
+                   exists port = parseInteger(arg)) 
+                        then port else 8080;
     };
 };
