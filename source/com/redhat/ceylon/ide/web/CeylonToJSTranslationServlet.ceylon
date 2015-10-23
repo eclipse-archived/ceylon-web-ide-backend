@@ -18,7 +18,7 @@ import com.redhat.ceylon.compiler.js.util {
     JsOutput,
     Options
 }
-import com.redhat.ceylon.compiler.loader {
+import com.redhat.ceylon.compiler.js.loader {
     ModelEncoder {
         encode=encodeModel
     }
