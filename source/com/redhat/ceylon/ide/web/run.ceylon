@@ -61,11 +61,11 @@ shared void run()
 }.start {
     SocketAddress {
         address =
-                    process.propertyValue("server.bind.port") 
+                    process.propertyValue("server.bind.host") 
                else process.namedArgumentValue("address") 
                else "127.0.0.1";
         port = if (exists arg =
-                    process.propertyValue("server.bind.host") 
+                    process.propertyValue("server.bind.port") 
                else process.namedArgumentValue("port"), 
                    exists port = parseInteger(arg)) 
                then port else 8080;
