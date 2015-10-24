@@ -18,8 +18,11 @@ import ceylon.net.http.server.endpoints {
     serveStaticFile
 }
 
-shared void run() 
-        => newServer {
+shared void run() {
+print("starting server");
+print(process.propertyValue("server.bind.host"));
+print(process.propertyValue("server.bind.port"));
+newServer {
     Endpoint {
         path = startsWith("/ceylon-ide/translate");
         acceptMethod = { post };
@@ -71,3 +74,4 @@ shared void run()
                then port else 8080;
     };
 };
+}
