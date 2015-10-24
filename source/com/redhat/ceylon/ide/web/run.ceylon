@@ -22,6 +22,7 @@ shared void run() {
 print("starting server");
 print(process.environmentVariableValue("OPENSHIFT_CEYLON_IP"));
 print(process.environmentVariableValue("OPENSHIFT_CEYLON_HTTP_PORT"));
+print(process.environmentVariableValue("OPENSHIFT_REPO_DIR"));
 newServer {
     Endpoint {
         path = startsWith("/ceylon-ide/translate");
@@ -49,8 +50,9 @@ newServer {
         service = serveStaticFile {
             externalPath = "web-content";
             fileMapper(Request request)
-                    => let (path=request.path.replace("/ceylon-ide", ""))
-                    if (path=="/") then "/index.html" else path;
+                    => (process.environmentVariableValue("OPENSHIFT_REPO_DIR") else "") 
+                      + let (path=request.path.replace("/ceylon-ide", ""))
+                            if (path=="/") then "/index.html" else path;
         };
     },
     Endpoint {
