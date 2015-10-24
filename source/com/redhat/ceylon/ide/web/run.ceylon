@@ -15,7 +15,8 @@ import ceylon.net.http.server {
     Response
 }
 import ceylon.net.http.server.endpoints {
-    serveStaticFile
+    serveStaticFile,
+    redirect
 }
 
 shared void run() {
@@ -56,13 +57,10 @@ newServer {
                          if (path.empty) then "index.html" else path);
         };
     },
-    Endpoint {
+    AsynchronousEndpoint {
         path = startsWith("");
         acceptMethod = { get, post };
-        void service(Request request, Response response) {
-            response.responseStatus = 301;
-            response.addHeader(Header("Location", "/ceylon-ide/"));
-        }
+        service = redirect("/ceylon-ide/");
     }
 }.start {
     SocketAddress {
