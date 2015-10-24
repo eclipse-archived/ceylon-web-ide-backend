@@ -50,9 +50,9 @@ newServer {
         service = serveStaticFile {
             externalPath = "web-content";
             fileMapper(Request request)
-                    => (process.environmentVariableValue("OPENSHIFT_REPO_DIR") else "") 
-                      + let (path=request.path.replace("/ceylon-ide", ""))
-                            if (path=="/") then "/index.html" else path;
+                    => (process.environmentVariableValue("OPENSHIFT_REPO_DIR") else "/") 
+                     + (let (path=request.path.replace("/ceylon-ide/", ""))
+                        path.empty then "index.html" else path);
         };
     },
     Endpoint {
