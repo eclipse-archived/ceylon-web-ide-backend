@@ -48,10 +48,11 @@ newServer {
         path = startsWith("/ceylon-ide/");
         acceptMethod = { get };
         service = serveStaticFile {
-            externalPath = "web-content";
+            externalPath 
+                    = (process.environmentVariableValue("OPENSHIFT_REPO_DIR") else "/") 
+                    + "web-content/";
             fileMapper(Request request)
-                    => (process.environmentVariableValue("OPENSHIFT_REPO_DIR") else "/") 
-                     + (let (path=request.path.replace("/ceylon-ide/", ""))
+                    => (let (path=request.path.replace("/ceylon-ide/", ""))
                          if (path.empty) then "index.html" else path);
         };
     },
