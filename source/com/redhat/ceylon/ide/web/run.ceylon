@@ -21,7 +21,7 @@ import ceylon.net.http.server.endpoints {
 shared void run() {
 print("starting server");
 print(process.environmentVariableValue("OPENSHIFT_CEYLON_IP"));
-print(process.environmentVariableValue("OPENSHIFT_CEYLON_PORT"));
+print(process.environmentVariableValue("OPENSHIFT_CEYLON_HTTP_PORT"));
 newServer {
     Endpoint {
         path = startsWith("/ceylon-ide/translate");
@@ -68,7 +68,7 @@ newServer {
                else process.namedArgumentValue("address") 
                else "127.0.0.1";
         port = if (exists arg =
-                    process.environmentVariableValue("OPENSHIFT_CEYLON_PORT")
+                    process.environmentVariableValue("OPENSHIFT_CEYLON_HTTP_PORT")
                else process.namedArgumentValue("port"), 
                    exists port = parseInteger(arg)) 
                then port else 8080;
