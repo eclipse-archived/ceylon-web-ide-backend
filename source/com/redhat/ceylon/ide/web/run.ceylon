@@ -60,10 +60,14 @@ shared void run()
     }
 }.start {
     SocketAddress {
-        address = process.namedArgumentValue("address") 
-                        else "127.0.0.1";
-        port = if (exists arg = process.namedArgumentValue("port"), 
+        address =
+                    process.propertyValue("server.bind.port") 
+               else process.namedArgumentValue("address") 
+               else "127.0.0.1";
+        port = if (exists arg =
+                    process.propertyValue("server.bind.host") 
+               else process.namedArgumentValue("port"), 
                    exists port = parseInteger(arg)) 
-                        then port else 8080;
+               then port else 8080;
     };
 };
