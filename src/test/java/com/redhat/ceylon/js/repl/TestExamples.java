@@ -1,4 +1,4 @@
-package com.redhat.ceylon.js.repl;
+package com.redhat.ceylon.ide.web;
 
 import java.io.BufferedReader;
 import java.io.File;

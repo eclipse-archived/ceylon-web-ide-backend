@@ -1,49 +1,50 @@
-Ceylon Web Runner Backend
-=========================
+Ceylon Web IDE
+==============
 
-Right now this is an OpenShift project that implements a webservice that translates
-Ceylon code into JavaScript.
+This is a web-based IDE for writing and testing [Ceylon][]
+modules, itself written in pure Ceylon, with the following
+features:
 
-To test the webservice locally a demo page exists which will allow you to run the
-application on a local JBossAS 7 server. The demo uses the [ACE] (http://ace.ajax.org/) 
-Cloud 9 editor.
+- code editor based on [Code Mirror][]
+- support for editing Ceylon, JavaScript, and MarkDown
+- syntax highlighting
+- live error reporting
+- autocompletion
+- online documentation "hover"
+- run and stop
+- multi-file support ("Advanced" mode)
+- support for importing modules from [Ceylon Herd][]
+- persistence to [Gist][] and sharing 
+- light and dark editor themes
 
-To build this project you need Maven. Simply run:
+[Ceylon]: http://ceylon-lang.org
+[Ceylon Herd]: http://modules.ceylon-lang.org
+[Code Mirror]: http://codemirror.net
+[Gist]: http://gist.github.com
 
-    mvn package
+To compile the project, first install the Ceylon [compiler][], 
+then go to the `ceylon-web-ide-backend` directory, and type:
 
-And then deploy the resulting web-ide-backend-1.0.war to your JEE container.
+    ceylon compile
 
-Due to OpenShift restrictions, you must manually update to the lastest versions of
-typechecker-0.1.jar, jscompiler-0.1.jar, and ceylon.language.js BEFORE packaging
-the war. The ceylon.language.js must reside in:
+To run the server, type:
 
-    src/main/webapp/scripts/modules/ceylon/language/0.1/ceylon.language.js
+    ceylon run com.redhat.ceylon.ide.web
 
-The typechecker and jscompiler jars must reside in:
+Finally, go to:
 
-    src/main/webapp/WEB-INF/lib
+<http://localhost:8080/ceylon-ide/>
 
-You can get the latest typechecker.jar by building the ceylon-spec project and
-copying the resulting jar from inside the `build/dist` directory, or from your Ceylon
-repo at `.ceylon/repo/com/redhat/ceylon/typechecker` inside your home directory.
+To run the server on a different address and port, use:
 
-You can get the latest jscompiler.jar by building the ceylon-js project and copying
-the resulting jar from `build/lib`; also from ceylon-js you can get the latest
-ceylon.language.js file by building the project and copying it from
-`build/runtime/ceylon/language/0.1`.
-
-Updating the public OpenShift application (http://try.ceylon-lang.org) is done
-simply by pushing any updated fils to the application's Git repository on OpenShift.
-
-Right now this can only be done by Tako (@quintesse), or you need to supply him with
-an SSH public key to give you push access to the application's Git repository.
+    ceylon run com.redhat.ceylon.ide.web -address=<address> -port=<port>
 
 ## License
 
 The content of this repository is released under the ASL v2.0
 as provided in the LICENSE file that accompanied this code.
 
-By submitting a "pull request" or otherwise contributing to this repository, you
-agree to license your contribution under the license mentioned above.
+By submitting a "pull request" or otherwise contributing to 
+this repository, you agree to license your contribution under 
+the license mentioned above.
 
