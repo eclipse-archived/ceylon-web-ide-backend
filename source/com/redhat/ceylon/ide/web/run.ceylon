@@ -52,7 +52,7 @@ newServer {
             fileMapper(Request request)
                     => (process.environmentVariableValue("OPENSHIFT_REPO_DIR") else "/") 
                      + (let (path=request.path.replace("/ceylon-ide/", ""))
-                        path.empty then "index.html" else path);
+                         if (path.empty) then "index.html" else path);
         };
     },
     Endpoint {
