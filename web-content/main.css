@@ -356,11 +356,13 @@ div.bp p code, div.bp ul code, div.bp ol code {
 .header-bar {
   background: url("images/bkg_header.png") repeat-x;
   height: 100%;
-  @media only screen and (min--moz-device-pixel-ratio: 2),
+}
+@media only screen and (min--moz-device-pixel-ratio: 2),
   only screen and (-o-min-device-pixel-ratio: 2/1),
   only screen and (-webkit-min-device-pixel-ratio: 2),
   only screen and (min-device-pixel-ratio: 2) {
-    background: url("images/sidebar_bkg_elephant-2x.png") repeat-x;
+  .header-bar {
+    background: url("images/bkg_header-2x.png") repeat-x;
     background-size: 32px 100px;
   }
 }
@@ -383,15 +385,17 @@ div.bp p code, div.bp ul code, div.bp ol code {
 /* line 162 */
 #header #header-logo {
   background: url("images/ceylon-logo.png") no-repeat 0px 0px;
-  height: 100px;
+  height: 92px;
   width: 325px;
   display: block;
   float: left;
   /* for high resolution display */
-  @media only screen and (min--moz-device-pixel-ratio: 2),
+}
+@media only screen and (min--moz-device-pixel-ratio: 2),
   only screen and (-o-min-device-pixel-ratio: 2/1),
   only screen and (-webkit-min-device-pixel-ratio: 2),
   only screen and (min-device-pixel-ratio: 2) {
+  #header #header-logo {
     background: url("images/ceylon-logo-2x.png") no-repeat 0px 0px;
     background-size: 325px 100px;
   }
@@ -414,10 +418,12 @@ div.bp p code, div.bp ul code, div.bp ol code {
 /* line 147, /usr/lib64/ruby/gems/1.8/gems/compass-0.11.7/frameworks/blueprint/stylesheets/blueprint/_grid.scss */
 div.trompon {
   background: url("images/sidebar_bkg_elephant.png") no-repeat 0px 0px #d4e5e5;
-  @media only screen and (min--moz-device-pixel-ratio: 2),
+}
+@media only screen and (min--moz-device-pixel-ratio: 2),
   only screen and (-o-min-device-pixel-ratio: 2/1),
   only screen and (-webkit-min-device-pixel-ratio: 2),
   only screen and (min-device-pixel-ratio: 2) {
+  div.trompon {
     background: url("images/sidebar_bkg_elephant-2x.png") no-repeat 0px 0px #d4e5e5;
     background-size: 220px 450px;
   }
