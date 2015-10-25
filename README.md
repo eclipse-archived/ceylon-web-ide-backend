@@ -33,7 +33,7 @@ To run the server, type:
 
 Finally, go to:
 
-<http://localhost:8080/ceylon-ide/>
+<http://localhost:8080/>
 
 To run the server on a different address and port, use:
 
