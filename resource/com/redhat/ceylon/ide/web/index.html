@@ -51,11 +51,82 @@ var clientid = "``clientId``";
 
 <div id="all"></div>
 
+<div id="holder" class ="invis">
+
 <!-- Header -->
 <div id="header-bar-small" class="bp header-bar">
   <div id="header">Ceylon Web IDE</div>
 </div>
 <!-- header-bar-small -->
+
+<!-- Header bar for large screens -->
+<div id="header-bar" class="bp header-bar">
+  <div id="header">
+    <a id="header-logo" href=".">
+      <h1 id="ceylon">Ceylon</h1>
+    </a>
+    <div id="header-tagline">
+      <p id="say_more_more_clearly">Say more, more clearly</p>
+    </div>
+  </div>
+  <div class="badges">
+    <div class="badge">
+        <a href="https://twitter.com/ceylonlang" 
+           class="twitter-follow-button" 
+           data-show-screen-name="false">
+           Follow @ceylonlang
+        </a>
+        <script type="text/javascript">
+          !function(d,s,id){
+            var js,fjs=d.getElementsByTagName(s)[0];
+            if(!d.getElementById(id)){
+              js=d.createElement(s);
+              js.id=id;
+              js.src="//platform.twitter.com/widgets.js";
+              fjs.parentNode.insertBefore(js,fjs);
+            }
+          }(document,"script","twitter-wjs");
+        </script>
+      </div>
+      <div class="badge">
+        <div class="g-follow" 
+             data-annotation="bubble" 
+             data-height="20" 
+             data-href="https://plus.google.com/102481741611133754149" 
+             data-rel="publisher">
+        </div>
+        <script type="text/javascript">
+          (function() {
+            var po = document.createElement('script');
+            po.type = 'text/javascript';
+            po.async = true;
+            po.src = 'https://apis.google.com/js/platform.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(po, s);
+          })();
+        </script>
+      </div>
+      <div class="badge">
+        <div class="fb-like" 
+             data-href="https://www.facebook.com/ceylonlang" 
+             data-layout="button_count" 
+             data-action="like" 
+             data-show-faces="false" 
+             data-share="true"/>
+      </div>
+      <script type="text/javascript">
+        (function(d,s,id) {
+          var js, fjs = d.getElementsByTagName(s)[0];
+          if (d.getElementById(id)) return;
+          js=d.createElement(s);
+          js.id=id;
+          js.src="//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.4";
+          fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));
+      </script>
+  </div>
+</div>
+<!-- header-bar -->
 
 <!-- Editor -->
 <div id="core-page">
@@ -147,7 +218,41 @@ var clientid = "``clientId``";
 </div>
 <!-- sidebar -->
 
+<!-- footer with copyright info -->
+<div id='footer-bar' class='footer-bar bp'>
+    <div id='footer'>
+        <div id='footer-core'>
+            <div id="powered">
+                <p>The 
+                <a href="http://github.com/ceylon/ceylon-web-ide-backend">Ceylon Web IDE</a>
+                is powered by
+                <a href="http://github.com/ceylon/ceylon-js">Ceylon JS</a>, 
+                <a href="http://openshift.redhat.com">OpenShift</a>,
+                <a href="http://requirejs.org">RequireJS</a>,
+                <a href="http://codemirror.net">CodeMirror</a>,
+                <a href="http://jquery.com">jQuery</a>,
+                <a href="http://w2ui.com">w2ui</a>, and
+                <a href="https://github.com">GitHub</a>.</p>
+            </div>
+            <div id='copyright'>
+                <p id='copyright_copy_2010_2015_red...'>
+                  Copyright &copy; 2010-2015, Red Hat, Inc. 
+                  or third-party contributors -
+                  Ceylon is a trademark of Red Hat, Inc. - 
+                  <a href='http://www.redhat.com/legal/legal_statement.html'>terms of Use</a> - 
+                  <a href='http://www.redhat.com/legal/privacy_statement.html'>Privacy policy</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- footer -->
+
+
 <pre id="result" class="invis"></pre>
+
+</div>
+<!-- holder -->
 
 </body>
 </html>
