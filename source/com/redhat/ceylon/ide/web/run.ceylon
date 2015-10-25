@@ -13,7 +13,8 @@ import ceylon.language {
 import ceylon.net.http {
     post,
     get,
-    contentType
+    contentType,
+    contentLength
 }
 import ceylon.net.http.server {
     newServer,
@@ -26,6 +27,9 @@ import ceylon.net.http.server {
 }
 import ceylon.net.http.server.endpoints {
     serveStaticFile
+}
+import ceylon.time {
+    now
 }
 
 String ipVar = "OPENSHIFT_CEYLON_IP";
@@ -58,6 +62,16 @@ shared void run()
         path = startsWith("/githubauth");
         acceptMethod = { get };
         service => authenticate;
+    },
+    Endpoint {
+        path = startsWith("/time");
+        acceptMethod = { get, post };
+        void service(Request request, Response response) {
+            value datetime = now().dateTime().string;
+            response.addHeader(contentType("text/plain", utf8));
+            response.addHeader(contentLength(datetime.size.string));
+            response.writeString(datetime);
+        }
     },
     Endpoint {
         object path extends Matcher() {
