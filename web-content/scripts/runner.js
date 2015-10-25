@@ -34,15 +34,31 @@ if (!pagepath.endsWith("/")) {
     pagepath = pagepath.substring(0, p + 1);
 }
 
+var paths = {
+    "jquery" : pagepath + "scripts/jquery-1.11.1.min",
+    "github" : pagepath + "scripts/github"
+};
+
+var ceylonLang = "ceylon/language/" + ceylonVersion + "/ceylon.language-" + ceylonVersion;
+paths[ceylonLang] = pagepath + "scripts/modules/" + ceylonLang;
+paths[ceylonLang + "-model"] = pagepath + "scripts/modules/" + ceylonLang + "-model";
+
+var runnerVersion = "1.0.0";
+var runner = "com/redhat/ceylon/ide/client/runner/" + runnerVersion + "/com.redhat.ceylon.ide.client.runner-" + runnerVersion;
+paths[runner] = pagepath + "scripts/modules/" + runner;
+paths[runner + "-model"] = pagepath + "scripts/modules/" + runner + "-model";
+
 require.config({
     baseUrl: "modules",
     waitSeconds: 15
 });
 
-var ceylonLang = "ceylon/language/" + ceylonVersion + "/ceylon.language-" + ceylonVersion;
-require([ceylonLang],
-    function(clang) {
+require([ceylonLang, runner, "github"],
+    function(clang, runner) {
         console && console.log("ceylon.language module loaded");
+        for (x in runner) {
+            window[x] = runner[x];
+        }
         clang.$_process().write = function (txt) {
             clprinted=true;
             printOutput(txt.string);
@@ -63,71 +79,6 @@ function clearLangModOutputState() {
 
 function hasLangModOutput() {
     return clprinted;
-}
-
-function clearOutput() {
-    var output = document.getElementById("output");
-    output.innerHTML = "";
-}
-
-function printOutputLine(txt) {
-    var output = document.getElementById("output");
-    output.innerHTML = output.innerHTML + escapeHtml(txt) + "<br>";
-}
-
-function printOutput(txt) {
-    var output = document.getElementById("output");
-    output.innerHTML = output.innerHTML + escapeHtml(txt);
-}
-
-// Basic HTML escaping.
-function escapeHtml(html) {
-  return (''+html)
-         .replace(/&/g, '&amp;')
-         .replace(/</g, '&lt;')
-         .replace(/>/g, '&gt;');
-}
-
-function highlight(txt) {
-    return escapeHtml(txt).replace(/'[^']+'/g, 
-         function (m) { return "<code>" + m.substring(1,m.length-1) + "</code>"; });
-}
-
-function createMessagesTable() {
-    if (!document.getElementById("messages")) {
-        var output = document.getElementById("output");
-        output.innerHTML = "<table><tbody id='messages'/></table>";
-    }
-}
-
-function printSystem(txt, loc) {
-    createMessagesTable();
-    var output = document.getElementById("messages");
-    output.innerHTML = output.innerHTML 
-        + "<tr><td colspan='4' class='jsc_msg'>"
-        + txt + "</td></tr>";
-}
-
-function printWarning(txt, loc) {
-    createMessagesTable();
-    var output = document.getElementById("messages");
-    output.innerHTML = output.innerHTML 
-        + "<tr><td><img src='images/warning.gif' alt='warning'/>&nbsp;</td><td>" 
-        + loc + "</td><td> &mdash; </td><td class='jsc_warn'>" 
-        + highlight(txt) + "</td></tr>";
-}
-
-function printError(txt, loc) {
-    createMessagesTable();
-    var output = document.getElementById("messages");
-    output.innerHTML = output.innerHTML 
-        + "<tr><td><img src='images/error.gif' alt='error'/>&nbsp;</td><td>" 
-        + loc + "</td><td> &mdash; </td><td class='jsc_error'>" 
-        + highlight(txt) + "</td></tr>";
-}
-
-function scrollOutput() {
-    window.scrollTo(0, 9999999);
 }
 
 // Take a string containing the translated code for a Ceylon 
