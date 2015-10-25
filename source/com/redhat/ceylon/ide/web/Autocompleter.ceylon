@@ -315,7 +315,7 @@ class FindParentVisitor(shared variable Node node)
             return;
         }
         
-        if (that.identifier == node) {
+        if (exists id = that.identifier, id == node) {
             node = that;
             found = true;
             return;
@@ -329,7 +329,7 @@ class FindParentVisitor(shared variable Node node)
             return;
         }
         
-        if (that.memberOperator == node) {
+        if (exists op = that.memberOperator, op == node) {
             node = that;
             found = true;
             return;
@@ -343,7 +343,7 @@ class FindParentVisitor(shared variable Node node)
             return;
         }
         
-        if (that.identifier == node) {
+        if (exists id = that.identifier, id == node) {
             node = that;
             found = true;
             return;
@@ -357,7 +357,7 @@ class FindParentVisitor(shared variable Node node)
             return;
         }
         
-        if (that.identifier == node) {
+        if (exists id = that.identifier, id == node) {
             node = that;
             found = true;
             return;
@@ -371,7 +371,7 @@ class FindParentVisitor(shared variable Node node)
             return;
         }
         
-        if (that.identifier == node) {
+        if (exists id = that.identifier, id == node) {
             node = that;
             found = true;
             return;
@@ -385,7 +385,7 @@ class FindParentVisitor(shared variable Node node)
             return;
         }
         
-        if (that.identifier == node) {
+        if (exists id = that.identifier, id == node) {
             node = that;
             found = true;
             return;
@@ -399,7 +399,7 @@ class FindParentVisitor(shared variable Node node)
             return;
         }
         
-        if (that.identifier == node) {
+        if (exists id = that.identifier, id == node) {
             node = that;
             found = true;
             return;
@@ -413,7 +413,7 @@ class FindParentVisitor(shared variable Node node)
             return;
         }
         
-        if (that.identifier == node) {
+        if (exists id = that.identifier, id == node) {
             node = that;
             found = true;
             return;
@@ -427,7 +427,7 @@ class FindParentVisitor(shared variable Node node)
             return;
         }
         
-        if (that.identifier == node) {
+        if (exists id = that.identifier, id == node) {
             node = that;
             found = true;
             return;
@@ -441,7 +441,7 @@ class FindParentVisitor(shared variable Node node)
             return;
         }
         
-        if (that.identifier == node) {
+        if (exists id = that.identifier, id == node) {
             node = that;
             found = true;
             return;
