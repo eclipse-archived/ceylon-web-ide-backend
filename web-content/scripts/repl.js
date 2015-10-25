@@ -10,8 +10,6 @@ var fileDeleted;
 var spinCount = 0;
 var closePopups = undefined;
 
-embedded = false;
-
 var wrappedTag = "//$webrun_wrapped\n";
 var codePrefix = "shared void run() {\n";
 var codePostfix = "\n}";
