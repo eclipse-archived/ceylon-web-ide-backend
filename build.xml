@@ -7,65 +7,11 @@
     <property name="ceylon.lib.dir" value="${ceylon.dist.dir}/lib" />
     <property name="ceylon.repo.dir" value="${ceylon.dist.dir}/repo" />
 
-    <property name="web.app.dir" value="${basedir}/src/main/webapp" />
+    <property name="web.app.dir" value="${basedir}/web-content" />
     <property name="web.modules.dir" value="${web.app.dir}/scripts/modules" />
-    <property name="web.inf.dir" value="${web.app.dir}/WEB-INF" />
-    <property name="web.lib.dir" value="${web.inf.dir}/lib" />
-    <property name="web.repo.dir" value="${web.inf.dir}/ceylon-repo/system" />
-
-    <target name="update" depends="update-js" description="Update the JARs and CARs needed for the Web IDE">
+    
+    <target name="update" description="Update the JS files needed for the Web IDE">
         <copy todir="${web.modules.dir}" overwrite="${overwrite}">
-            <fileset dir="${ceylon.repo.dir}">
-                <include name="ceylon/language/**/*.js" />
-                <include name="ceylon/language/**/*.js.sha1" />
-            </fileset>
-        </copy>
-        <copy todir="${web.repo.dir}" overwrite="${overwrite}">
-            <fileset dir="${ceylon.repo.dir}">
-                <include name="ceylon/language/**/*.js" />
-                <include name="ceylon/language/**/*.js.sha1" />
-                <include name="ceylon/language/**/*.xml" />
-                <include name="com/redhat/ceylon/common/**/*.jar" />
-                <include name="com/redhat/ceylon/common/**/*.jar.sha1" />
-                <include name="com/redhat/ceylon/common/**/*.xml" />
-                <include name="com/redhat/ceylon/model/**/*.jar" />
-                <include name="com/redhat/ceylon/model/**/*.jar.sha1" />
-                <include name="com/redhat/ceylon/model/**/*.xml" />
-                <include name="com/redhat/ceylon/typechecker/**/*.jar" />
-                <include name="com/redhat/ceylon/typechecker/**/*.jar.sha1" />
-                <include name="com/redhat/ceylon/typechecker/**/*.xml" />
-                <include name="com/redhat/ceylon/module-resolver/**/*.jar" />
-                <include name="com/redhat/ceylon/module-resolver/**/*.jar.sha1" />
-                <include name="com/redhat/ceylon/module-resolver/**/*.xml" />
-            </fileset>
-        </copy>
-        <copy todir="${web.lib.dir}" overwrite="${overwrite}">
-            <fileset dir="${ceylon.repo.dir}/com/redhat/ceylon/common/${ceylon.version}">
-                <include name="*.jar" />
-            </fileset>
-            <fileset dir="${ceylon.repo.dir}/com/redhat/ceylon/model/${ceylon.version}">
-                <include name="*.jar" />
-            </fileset>
-            <fileset dir="${ceylon.repo.dir}/com/redhat/ceylon/typechecker/${ceylon.version}">
-                <include name="*.jar" />
-            </fileset>
-            <fileset dir="${ceylon.repo.dir}/com/redhat/ceylon/module-resolver/${ceylon.version}">
-                <include name="*.jar" />
-            </fileset>
-            <fileset dir="${ceylon.repo.dir}/com/redhat/ceylon/compiler/js/${ceylon.version}">
-                <include name="*.jar" />
-            </fileset>
-        </copy>
-    </target>
-
-    <target name="update-js" description="Update the JS files needed for the Web IDE">
-        <copy todir="${web.modules.dir}" overwrite="${overwrite}">
-            <fileset dir="${ceylon.repo.dir}">
-                <include name="ceylon/language/**/*.js" />
-                <include name="ceylon/language/**/*.js.sha1" />
-            </fileset>
-        </copy>
-        <copy todir="${web.repo.dir}" overwrite="${overwrite}">
             <fileset dir="${ceylon.repo.dir}">
                 <include name="ceylon/language/**/*.js" />
                 <include name="ceylon/language/**/*.js.sha1" />
