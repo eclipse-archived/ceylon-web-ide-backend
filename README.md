@@ -22,6 +22,8 @@ features:
 [Code Mirror]: http://codemirror.net
 [Gist]: http://gist.github.com
 
+## Compiling and running
+
 To compile the project, first install the Ceylon [compiler][], 
 then go to the `ceylon-web-ide-backend` directory, and type:
 
@@ -40,6 +42,68 @@ To run the server on a different address and port, use:
     ceylon run com.redhat.ceylon.ide.web -address=<address> -port=<port>
 
 [compiler]: http://ceylon-lang.org/download
+
+## Running from Ceylon IDE
+
+To run the project from [Ceylon IDE][], first use 
+'File > Import...' to import this project into the IDE, then
+select the module `com.redhat.ceylon.ide.web` in the Ceylon
+Explorer and, from the context menu, select 
+'Run As > Ceylon Java Application'.
+
+[Ceylon IDE]: http://ceylon-lang.org/documentation/current/ide/
+
+## Deploying to OpenShift
+
+You can deploy the server to [OpenShift][] via the web 
+console or using the command line tool. If you've made 
+changes to the code, you must first publish your fork of 
+this project to a Git repository.
+
+### Via the OpenShift web console
+
+To deploy the server via the [OpenShift web console][]:
+
+1. Click 'Add Application...'
+2. Click 'Ceylon' in the list of cartridge types.
+3. Choose a 'Public URL', `ide`, or whatever you like, enter 
+   the 'Source Code' URL
+   <https://github.com/ceylon/ceylon-web-ide-backend.git>,
+   or the URL of your fork of this project,
+   and click 'Create Application'.
+4. Wait for the application to be deployed.
+
+### Using rhc
+
+To deploy the server with the `rhc` command line tool, first
+install [rhc][], and then type:
+
+    rhc app create ide\
+    --from-code https://github.com/ceylon/ceylon-web-ide-backend.git\
+    https://raw.github.com/ceylon/openshift-cartridge/master/metadata/manifest.yml
+
+Replace the first URL with the URL of your fork of this 
+project if necessary.
+
+### Enabling GitHub authentication
+
+Finally, you must set the environment variables 
+`GITHUB_CLIENTID` and `GITHUB_CLIENTSECRET` in order to 
+enable GitHub authentication. (If you skip this step,
+everything else will still work, but you won't be able to
+connect to Gist.)
+
+First, [register your application with GitHub][register] to
+obtain an OAuth Client ID and Client Secret.
+
+Now use `rhc` to set the environment variables on the server:
+
+    rhc env set GITHUB_CLIENTID=<Client-ID> GITHUB_CLIENTSECRET=<Client-Secret> -a ide
+
+[OpenShift]: https://openshift.redhat.com
+[OpenShift web console]: https://openshift.redhat.com/app/console
+[rhc]: https://developers.openshift.com/en/managing-client-tools.html
+[register]: https://github.com/settings/applications/new
 
 ## License
 
