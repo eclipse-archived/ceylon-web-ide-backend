@@ -22,7 +22,8 @@ void autocomplete(Request request, Response response) {
                 is String file = result["f"],
                 is Integer row = result["r"],
                 is Integer col = result["c"]);
-        value typeChecker = newTypeChecker(createScriptSource(result));
+        value typeChecker 
+                = newTypeChecker(createScriptSource(result));
         typeChecker.process();
         value docVisitor = DocVisitor();
         value phasedUnits 

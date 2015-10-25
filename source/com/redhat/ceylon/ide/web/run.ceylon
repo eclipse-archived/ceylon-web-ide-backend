@@ -62,7 +62,9 @@ shared void run()
     Endpoint {
         object path extends Matcher() {
             matches(String path) 
-                    => path in ["", "/", "/index.html"];
+                    => path in ["", "/", 
+                                "/index.html", 
+                                "/embedded.html"];
             relativePath(String requestPath) => requestPath;
         }
         acceptMethod = { get };
@@ -70,9 +72,15 @@ shared void run()
             response.addHeader(contentType("text/html", utf8));
             assert (exists resource 
                     = `module`.resourceByPath("index.html"));
-            response.writeString(resource.textContent()
-                .replaceFirst("\`\`GITHUB_CLIENTID\`\`", 
-                    env("GITHUB_CLIENTID") else ""));
+            value embedded 
+                    = request.path.endsWith("embedded.html");
+            value html 
+                    = resource.textContent()
+                    .replaceFirst("\`\`embedded\`\`", 
+                                  embedded.string)
+                    .replaceFirst("\`\`clientId\`\`", 
+                                  clientId);
+            response.writeString(html);
         }
     },
     AsynchronousEndpoint {
