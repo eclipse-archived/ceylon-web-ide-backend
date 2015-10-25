@@ -1,20 +1,31 @@
 import ceylon.io {
     SocketAddress
 }
+import ceylon.io.charset {
+    utf8
+}
+import ceylon.language {
+    process {
+        env=environmentVariableValue,
+        arg=namedArgumentValue
+    }
+}
 import ceylon.net.http {
     post,
-    get
+    get,
+    contentType
 }
 import ceylon.net.http.server {
     newServer,
     Endpoint,
     startsWith,
     Request,
-    AsynchronousEndpoint
+    AsynchronousEndpoint,
+    Response,
+    Matcher
 }
 import ceylon.net.http.server.endpoints {
-    serveStaticFile,
-    redirect
+    serveStaticFile
 }
 
 String ipVar = "OPENSHIFT_CEYLON_IP";
@@ -24,53 +35,62 @@ String dirVar = "OPENSHIFT_REPO_DIR";
 shared void run()
         => newServer {
     Endpoint {
-        path = startsWith("/ceylon-ide/translate");
+        path = startsWith("/translate");
         acceptMethod = { post };
         service => translate;
     },
     Endpoint {
-        path = startsWith("/ceylon-ide/assist");
+        path = startsWith("/assist");
         acceptMethod = { post };
         service => autocomplete;
     },
     Endpoint {
-        path = startsWith("/ceylon-ide/hoverdoc");
+        path = startsWith("/hoverdoc");
         acceptMethod = { get };
         service => examples;
     },
     Endpoint {
-        path = startsWith("/ceylon-ide/hoverdoc");
+        path = startsWith("/hoverdoc");
         acceptMethod = { post };
         service => hover;
     },
+    Endpoint {
+        path = startsWith("/githubauth");
+        acceptMethod = { get };
+        service => authenticate;
+    },
+    Endpoint {
+        object path extends Matcher() {
+            matches(String path) 
+                    => path in ["", "/", "/index.html"];
+            relativePath(String requestPath) => requestPath;
+        }
+        acceptMethod = { get };
+        void service(Request request, Response response) {
+            response.addHeader(contentType("text/html", utf8));
+            assert (exists resource 
+                    = `module`.resourceByPath("index.html"));
+            response.writeString(resource.textContent()
+                .replaceFirst("\`\`GITHUB_CLIENTID\`\`", 
+                    env("GITHUB_CLIENTID") else ""));
+        }
+    },
     AsynchronousEndpoint {
-        path = startsWith("/ceylon-ide/");
+        path = startsWith("/");
         acceptMethod = { get };
         service = serveStaticFile {
             externalPath 
-                    = (process.environmentVariableValue(dirVar) else "/") 
-                    + "web-content/";
-            fileMapper(Request request)
-                    => (let (path=request.path.replace("/ceylon-ide/", ""))
-                         if (path.empty) then "index.html" else path);
+                    = (env(dirVar) else "") 
+                    + "web-content";
         };
-    },
-    AsynchronousEndpoint {
-        path = startsWith("");
-        acceptMethod = { get, post };
-        service = redirect("/ceylon-ide/");
     }
 }.start {
     SocketAddress {
-        address =
-                    process.environmentVariableValue(ipVar) 
-               else process.namedArgumentValue("address") 
-               else "127.0.0.1";
-        port = 
-               if (exists arg =
-                    process.environmentVariableValue(portVar)
-               else process.namedArgumentValue("port"), 
+        address = env(ipVar) else arg("address") 
+                else "127.0.0.1";
+        port = if (exists arg = env(portVar) else arg("port"), 
                    exists port = parseInteger(arg)) 
-               then port else 8080;
+                then port 
+                else 8080;
     };
 };
