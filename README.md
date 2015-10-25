@@ -68,9 +68,9 @@ To run the server on a different address and port, use:
 ## Running from Ceylon IDE
 
 To run the project from [Ceylon IDE][], first use 
-_File > Import..._ to import this project into the IDE, then
-select the module `com.redhat.ceylon.ide.web` in the Ceylon
-Explorer and, from the context menu, select 
+__File > Import...__ to import this project into the IDE, 
+then select the module `com.redhat.ceylon.ide.web` in the 
+Ceylon Explorer and, from the context menu, select 
 __Run As > Ceylon Java Application__ or 
 __Debug As > Ceylon Java Application__.
 
