@@ -51,22 +51,3 @@ void sendListResponse(Response response, JsonArray list)
             mimeType = "application/json";
         };
 
-String readAll(InputStream stream) {
-    try {
-        value reader = 
-                BufferedReader(
-                    InputStreamReader(stream, "UTF-8"));
-        value builder = StringBuilder();
-        while (exists line = reader.readLine()) {
-            if (!builder.empty) {
-                builder.appendCharacter('\n');
-            }        
-            builder.append(line);
-        }
-        return builder.string;
-    }
-    finally {
-        stream.close();
-    }
-}
-
