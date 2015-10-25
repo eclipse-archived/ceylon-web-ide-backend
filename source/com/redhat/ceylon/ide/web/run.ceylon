@@ -15,11 +15,16 @@ import ceylon.net.http.server {
     Response
 }
 import ceylon.net.http.server.endpoints {
-    serveStaticFile
+    serveStaticFile,
+    redirect
 }
 
-shared void run() 
-        => newServer {
+shared void run() {
+print("starting server");
+print(process.environmentVariableValue("OPENSHIFT_CEYLON_IP"));
+print(process.environmentVariableValue("OPENSHIFT_CEYLON_HTTP_PORT"));
+print(process.environmentVariableValue("OPENSHIFT_REPO_DIR"));
+newServer {
     Endpoint {
         path = startsWith("/ceylon-ide/translate");
         acceptMethod = { post };
@@ -44,26 +49,30 @@ shared void run()
         path = startsWith("/ceylon-ide/");
         acceptMethod = { get };
         service = serveStaticFile {
-            externalPath = "web-content";
+            externalPath 
+                    = (process.environmentVariableValue("OPENSHIFT_REPO_DIR") else "/") 
+                    + "web-content/";
             fileMapper(Request request)
-                    => let (path=request.path.replace("/ceylon-ide", ""))
-                    if (path=="/") then "/index.html" else path;
+                    => (let (path=request.path.replace("/ceylon-ide/", ""))
+                         if (path.empty) then "index.html" else path);
         };
     },
-    Endpoint {
+    AsynchronousEndpoint {
         path = startsWith("");
         acceptMethod = { get, post };
-        void service(Request request, Response response) {
-            response.responseStatus = 301;
-            response.addHeader(Header("Location", "/ceylon-ide/"));
-        }
+        service = redirect("/ceylon-ide/");
     }
 }.start {
     SocketAddress {
-        address = process.namedArgumentValue("address") 
-                        else "127.0.0.1";
-        port = if (exists arg = process.namedArgumentValue("port"), 
+        address =
+                    process.environmentVariableValue("OPENSHIFT_CEYLON_IP") 
+               else process.namedArgumentValue("address") 
+               else "127.0.0.1";
+        port = if (exists arg =
+                    process.environmentVariableValue("OPENSHIFT_CEYLON_HTTP_PORT")
+               else process.namedArgumentValue("port"), 
                    exists port = parseInteger(arg)) 
-                        then port else 8080;
+               then port else 8080;
     };
 };
+}

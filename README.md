@@ -39,8 +39,6 @@ To run the server on a different address and port, use:
 
     ceylon run com.redhat.ceylon.ide.web -address=<address> -port=<port>
 
-[compiler]: http://ceylon-lang.org/download
-
 ## License
 
 The content of this repository is released under the ASL v2.0
