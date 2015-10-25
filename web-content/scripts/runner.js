@@ -44,25 +44,20 @@ require.config({
 
 require([ceylonLang, "github"],
     function(clang) {
-        console && console.log("Ceylon language module loaded OK");
-        clang.$_process().write = langModWrite;
-        clang.$_process().writeLine = langModWriteLine;
-        console && console.log("ceylon.language.print() patched OK");
-        if (window.parent.outputReady) {
-            window.parent.outputReady();
-        }
+        console && console.log("ceylon.language module loaded");
+        clang.$_process().write = function (txt) {
+            clprinted=true;
+            printOutput(txt.string);
+        };
+        clang.$_process().writeLine = function (txt) {
+            clprinted=true;
+            printOutputLine(txt.string);
+        };
+        console && console.log("ceylon.language::print() patched");
+        var outputReady = window.parent.outputReady;
+        if (outputReady) outputReady();
     }
 );
-
-function langModWrite(txt) {
-    clprinted=true;
-    printOutput(txt.string);
-}
-
-function langModWriteLine(txt) {
-    clprinted=true;
-    printOutputLine(txt.string);
-}
 
 function clearLangModOutputState() {
     clprinted = false;
@@ -77,13 +72,6 @@ function clearOutput() {
     output.innerHTML = "";
 }
 
-function createMessagesTable() {
-    if (!document.getElementById("messages")) {
-        var output = document.getElementById("output");
-        output.innerHTML = "<table><tbody id='messages'/></table>";
-    }
-}
-
 function printOutputLine(txt) {
     var output = document.getElementById("output");
     output.innerHTML = output.innerHTML + escapeHtml(txt) + "<br>";
@@ -94,9 +82,24 @@ function printOutput(txt) {
     output.innerHTML = output.innerHTML + escapeHtml(txt);
 }
 
+// Basic HTML escaping.
+function escapeHtml(html) {
+  return (''+html)
+         .replace(/&/g, '&amp;')
+         .replace(/</g, '&lt;')
+         .replace(/>/g, '&gt;');
+}
+
 function highlight(txt) {
     return escapeHtml(txt).replace(/'\w+'/g, 
          function (m) { return "<code>" + m.substring(1,m.length-1) + "</code>"; });
+}
+
+function createMessagesTable() {
+    if (!document.getElementById("messages")) {
+        var output = document.getElementById("output");
+        output.innerHTML = "<table><tbody id='messages'/></table>";
+    }
 }
 
 function printSystem(txt, loc) {
@@ -130,17 +133,13 @@ function scrollOutput() {
     window.scrollTo(0, 9999999);
 }
 
-// Basic HTML escaping.
-function escapeHtml(html) {
-  return (''+html).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-// Take a string containing the translated code for a Ceylon module,
-// extracts the meta data and parses it to get at the dependencies
-// and then pre-loads those dependencies using rewritten paths that
-// RequireJS will understand. It will then evaluate the actual
-// sources and finally execute the "func()" that was passed.
-// Quite a bit of jumping through hoops to get this all to work
+// Take a string containing the translated code for a Ceylon 
+// module, extracts the meta data and parses it to get at the 
+// dependencies and then pre-loads those dependencies using 
+// rewritten paths that RequireJS will understand. It will 
+// then evaluate the actual sources and finally execute the 
+// "func()" that was passed. Quite a bit of jumping through 
+// hoops to get this all to work
 function loadModuleAsString(src, func, err) {
     delete window.ex$;
     delete window._CTM$;
