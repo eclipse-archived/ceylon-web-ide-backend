@@ -14,11 +14,6 @@ import com.redhat.ceylon.compiler.typechecker.tree {
     Tree,
     Visitor
 }
-import com.redhat.ceylon.ide.web.util {
-    DocUtils {
-        ...
-    }
-}
 import com.redhat.ceylon.model.typechecker.model {
     Class,
     Declaration,
@@ -36,8 +31,7 @@ import com.redhat.ceylon.model.typechecker.model {
 }
 
 import java.lang {
-    JString=String,
-    StringBuilder
+    JString=String
 }
 import java.util {
     JMap=Map,
@@ -160,13 +154,13 @@ class Autocompleter(String file,
             Function m = declaration;
             insert.append(m.name);
             if (m.annotation) {
-                display.append(\iANNOTATION).append(m.name).append(\iEND);
+                display.append(annotationId).append(m.name).append(end);
                 if (!m.firstParameterList.parameters.empty) {
                     addParameterLists(display, insert, m.parameterLists);
                 }
             }
             else {
-                display.append(\iVARIABLE).append(m.name).append(\iEND);
+                display.append(variableId).append(m.name).append(end);
                 if (withArgs) {
                     addParameterLists(display, insert, m.parameterLists);
                 }
@@ -178,7 +172,7 @@ class Autocompleter(String file,
         else if (is Class declaration) {
             Class c = declaration;
             insert.append(c.name);
-            display.append(\iTYPE).append(c.name).append(\iEND);
+            display.append(typeId).append(c.name).append(end);
             if (withArgs) {
                 addParameterLists(display, insert, c.parameterLists);
             }
@@ -188,11 +182,11 @@ class Autocompleter(String file,
         }
         else if (declaration is Value || declaration is Setter){
             insert.append(declaration.name);
-            display.append(\iVARIABLE).append(declaration.name).append(\iEND);
+            display.append(variableId).append(declaration.name).append(end);
         }
         else if (is TypeDeclaration declaration){
             insert.append(declaration.name);
-            display.append(\iTYPE).append(declaration.name).append(\iEND);
+            display.append(typeId).append(declaration.name).append(end);
             if (!withArgs) {
                 TypeDeclaration td = declaration;
                 addTypeParameters(display, insert, td.typeParameters);
@@ -227,7 +221,7 @@ class Autocompleter(String file,
                 }
                 
                 insert.append(param.name);
-                display.append(\iTYPE).append(param.name).append(\iEND);
+                display.append(typeId).append(param.name).append(end);
             }
             
             insert.append(">");
@@ -251,19 +245,19 @@ class Autocompleter(String file,
                 }
                 
                 if (param.declaredVoid) {
-                    display.append(\iKEYWORD).append("void").append(\iEND);
+                    display.append(keyword).append("void").append(end);
                 } else if (exists t = param.type) {
                     value type 
                             = if (param.sequenced) 
                             then t.declaration.unit.getIteratedType(t) 
                             else param.type;
-                    display.append(\iTYPE).append(escape(type)).append(\iEND);
+                    display.append(typeId).append(escape(type)).append(end);
                     if (param.sequenced) {
                         display.append(if (param.atLeastOne) then "+" else "*");
                     }
                 }
                 
-                display.append(" ").append(\iVARIABLE).append(param.name).append(\iEND);
+                display.append(" ").append(variableId).append(param.name).append(end);
                 appendParameters(param.model, display);
                 insert.append(param.name);
             }

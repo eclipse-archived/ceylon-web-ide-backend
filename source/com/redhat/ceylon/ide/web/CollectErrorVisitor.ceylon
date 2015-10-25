@@ -29,11 +29,6 @@ import com.redhat.ceylon.compiler.typechecker.tree {
     },
     Visitor
 }
-import com.redhat.ceylon.ide.web.util {
-    DocUtils {
-        ...
-    }
-}
 
 class PositionedMessage {
     shared Node node;

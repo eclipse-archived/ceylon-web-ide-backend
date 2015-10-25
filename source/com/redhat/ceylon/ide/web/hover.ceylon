@@ -1,6 +1,3 @@
-import ceylon.interop.java {
-    CeylonMap
-}
 import ceylon.json {
     parse,
     JsonObject=Object,
@@ -17,11 +14,6 @@ import com.redhat.ceylon.compiler.typechecker {
 import com.redhat.ceylon.compiler.typechecker.tree {
     Tree
 }
-import com.redhat.ceylon.ide.web.util {
-    DocUtils {
-        getDocs
-    }
-}
 import com.redhat.ceylon.model.typechecker.model {
     Declaration
 }
@@ -34,7 +26,7 @@ void hover(Request request, Response response) {
                 is Integer row = result["r"],
                 is Integer col = result["c"]);
         sendMapResponse(response,
-            documentation(findDeclaration {
+            getDocs(findDeclaration {
                 file = file;
                 row = row;
                 col = col;
@@ -49,9 +41,6 @@ void hover(Request request, Response response) {
             });
     }
 }
-
-JsonObject documentation(Declaration? declaration) 
-        => JsonObject(CeylonMap(getDocs(declaration)));
 
 Declaration? findDeclaration(TypeChecker typeChecker, 
         String file, Integer row, Integer col) {
