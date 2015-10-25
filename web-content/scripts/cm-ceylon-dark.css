@@ -140,7 +140,7 @@
 }
 
 .cm-locked {
-    background-color: rgb(255, 243, 243);
+    background-color: darkblue;
 }
 
 div.CodeMirror span.CodeMirror-matchingbracket {color: red;}
