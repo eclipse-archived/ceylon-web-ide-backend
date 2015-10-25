@@ -8,23 +8,25 @@ var embedded = ``embedded``;
 var clientid = "``clientId``";
 </script>
 
-<meta name="viewport" content="width=device-width,maximum-scale=2.0,initial-scale=1.0,minimum-scale=0.5,user-scalable=yes">
-<meta charset="utf-8">
+<meta name="viewport" 
+      content="width=device-width,maximum-scale=2.0,initial-scale=1.0,minimum-scale=0.5,user-scalable=yes"/>
+<meta charset="utf-8"/>
 
-<link rel='stylesheet' media='screen, projection' type='text/css' href='main.css'/>
 <link rel='stylesheet' type='text/css'
-     href='http://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Sans|PT+Sans:700|Inconsolata|Inconsolata:700'/>
+      href='http://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Sans|PT+Sans:700|Inconsolata|Inconsolata:700'/>
+<link rel='stylesheet' media='screen, projection' type='text/css' href='main.css'/>
 <!--[if lt IE 8]>
-    <link href='http://ceylon-lang.org/stylesheets/ie.css' media='screen, projection' rel='stylesheet' type='text/css' />
+<link media='screen, projection' rel='stylesheet' type='text/css'
+      href='http://ceylon-lang.org/stylesheets/ie.css'/>
 <![endif]-->
 <link rel='stylesheet' type='text/css' href='scripts/w2ui-1.4.3.css'/>
-<link rel='stylesheet' type='text/css' href="scripts/codemirror.css" />
+<link rel='stylesheet' type='text/css' href="scripts/codemirror.css"/>
 <link rel='stylesheet' type='text/css' href='scripts/autocomplete.css'/>
 <link rel='stylesheet' type='text/css' href="scripts/cm-ceylon-dark.css"/>
-<link rel='stylesheet' type='text/css' href="scripts/cm-ceylon.css" />
+<link rel='stylesheet' type='text/css' href="scripts/cm-ceylon.css"/>
 <link rel='stylesheet' type='text/css' href='scripts/jquery-ui-1.11.2.css'/>
 <link rel='stylesheet' type='text/css' href='scripts/jquery-ui-1.11.2.structure.css'/>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css"/>
 
 <script type="text/javascript" src="scripts/codemirror.js" charset="utf-8"></script>
 <script type="text/javascript" src="scripts/mode/clike/clike.js" charset="utf-8"></script>
@@ -47,121 +49,18 @@ var clientid = "``clientId``";
 
 <body>
 
-<div id="fb-root"></div>
-
 <div id="all"></div>
 
-<div id="holder" class ="invis">
-
-<!-- Header bar for mobile devices -->
+<!-- Header -->
 <div id="header-bar-small" class="bp header-bar">
-  <div id="header">
-    Ceylon Web IDE
-  </div>
+  <div id="header">Ceylon Web IDE</div>
 </div>
 <!-- header-bar-small -->
 
-<!-- Header bar for large screens -->
-<div id="header-bar" class="bp header-bar">
-  <div id="header">
-    <a id="header-logo" href=".">
-      <h1 id="ceylon">Ceylon</h1>
-    </a>
-    <div id="header-tagline">
-      <p id="say_more_more_clearly">Say more, more clearly</p>
-    </div>
-  </div>
-  <div class="badges">
-    <div class="badge">
-        <a href="https://twitter.com/ceylonlang" 
-           class="twitter-follow-button" 
-           data-show-screen-name="false">
-           Follow @ceylonlang
-        </a>
-        <script type="text/javascript">
-          !function(d,s,id){
-            var js,fjs=d.getElementsByTagName(s)[0];
-            if(!d.getElementById(id)){
-              js=d.createElement(s);
-              js.id=id;
-              js.src="//platform.twitter.com/widgets.js";
-              fjs.parentNode.insertBefore(js,fjs);
-            }
-          }(document,"script","twitter-wjs");
-        </script>
-      </div>
-      <div class="badge">
-        <div class="g-follow" 
-             data-annotation="bubble" 
-             data-height="20" 
-             data-href="https://plus.google.com/102481741611133754149" 
-             data-rel="publisher">
-        </div>
-        <script type="text/javascript">
-          (function() {
-            var po = document.createElement('script');
-            po.type = 'text/javascript';
-            po.async = true;
-            po.src = 'https://apis.google.com/js/platform.js';
-            var s = document.getElementsByTagName('script')[0];
-            s.parentNode.insertBefore(po, s);
-          })();
-        </script>
-      </div>
-      <div class="badge">
-        <div class="fb-like" 
-             data-href="https://www.facebook.com/ceylonlang" 
-             data-layout="button_count" 
-             data-action="like" 
-             data-show-faces="false" 
-             data-share="true"/>
-      </div>
-      <script type="text/javascript">
-        (function(d,s,id) {
-          var js, fjs = d.getElementsByTagName(s)[0];
-          if (d.getElementById(id)) return;
-          js=d.createElement(s);
-          js.id=id;
-          js.src="//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.4";
-          fjs.parentNode.insertBefore(js, fjs);
-        }(document, 'script', 'facebook-jssdk'));
-      </script>
-  </div>
-</div>
-<!-- header-bar -->
-
+<!-- Editor -->
 <div id="core-page">
-
     <div id="editortabs"></div>
     <div id="editorspane"></div>
-
-    <div class="invis">
-      <span class="alignRight">
-        <input type="checkbox" 
-               id="fullscript" 
-               onclick="toggleFullScript()" 
-               disabled/>
-        full script&nbsp;&nbsp;
-        <input type="checkbox" 
-               id="imports" 
-               onclick="toggleImports()" 
-               disabled/>
-        imports
-      </span>
-      <div style="clear: both"></div>
-    </div>
-    
-    <div class="invis">
-      <span class="alignRight invis">
-        <input type="checkbox" 
-               id="fullmodule" 
-               onclick="toggleFullModule()" 
-               disabled/>
-        full module
-      </span>
-      <div style="clear: both"></div>
-    </div>
-    
 </div>
 <!-- core-page -->
 
@@ -207,10 +106,12 @@ var clientid = "``clientId``";
   </div>
 </div>
 
-<!-- output window -->    
+<!-- Output window -->    
 <div id="output"><iframe id="outputframe" src="runner.html"></iframe></div>
 
+<!-- Right sidebar with examples list -->
 <div id="sidebar" class="bp trompon ceylonblock">
+  <!-- collapses -->
   <div id="sidebarhandle" class="w2ui-toolbar">
     <table cellpadding="0" cellspacing="0"
            title="Hide side bar"
@@ -239,46 +140,14 @@ var clientid = "``clientId``";
       </tbody>
     </table>
   </div>
+  <!-- the actual list -->
   <div id="sidebarblock" class="sidebar-block">
       <div></div>
   </div>
 </div>
 <!-- sidebar -->
 
-<!-- footer with copyright info -->
-<div id='footer-bar' class='footer-bar bp'>
-    <div id='footer'>
-        <div id='footer-core'>
-            <div id="powered">
-                <p>The 
-                <a href="http://github.com/ceylon/ceylon-web-ide-backend">Ceylon Web Runner</a>
-                is powered by
-                <a href="http://github.com/ceylon/ceylon-js">Ceylon JS</a>, 
-                <a href="http://openshift.redhat.com">OpenShift</a>,
-                <a href="http://requirejs.org">RequireJS</a>,
-                <a href="http://codemirror.net">CodeMirror</a>,
-                <a href="http://jquery.com">jQuery</a>,
-                <a href="http://w2ui.com">w2ui</a>,
-                <a href="https://github.com">GitHub</a>.</p>
-            </div>
-            <div id='copyright'>
-                <p id='copyright_copy_2010_2015_red...'>
-                  Copyright &copy; 2010-2015, Red Hat, Inc. 
-                  or third-party contributors -
-                  Ceylon is a trademark of Red Hat, Inc. - 
-                  <a href='http://www.redhat.com/legal/legal_statement.html'>terms of Use</a> - 
-                  <a href='http://www.redhat.com/legal/privacy_statement.html'>Privacy policy</a>
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- footer -->
-
 <pre id="result" class="invis"></pre>
-    
-</div>
-<!-- holder -->
 
 </body>
 </html>
