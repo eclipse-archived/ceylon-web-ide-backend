@@ -29,10 +29,10 @@ import ceylon.net.uri {
 
 String clientId = 
         env("GITHUB_CLIENTID") 
-        else "be3a7db25dc6cb19a5d5"; //for localhost:8080
+        else "ef3727725eeee1d1bae2"; //for localhost:8080
 String clientSecret =
         env("GITHUB_CLIENTSECRET") 
-        else "743ebe142cf019034b4f901b9ca5e61fe31a553b"; //for localhost:8080
+        else "2bbf6b4cc39dc9015c8de4c83e92cc6bab620151"; //for localhost:8080
 
 Uri gitHubAuth 
         = parseUri("https://github.com/login/oauth/access_token");
