@@ -38,6 +38,8 @@ String variableId = "<span class='cm-variable'>";
 String typeId = "<span class='cm-variable-3'>";
 String annotationId = "<span class='cm-annotation'>";
 String end = "</span>";
+String code = "<code class='cm-s-ceylon'>";
+String endCode = "</code>";
 
 object spanEmitter satisfies SpanEmitter {
     shared actual void emitSpan(JSB result, String content) {
@@ -107,7 +109,8 @@ String getDoc(Declaration? declaration) {
         Declaration refined = declaration.refinedDeclaration;
         if (refined!=declaration) {
             assert (is Declaration container = refined.container);
-            result.append("<ul><li>Refines <code class='cm-s-ceylon'>")
+            result.append("<ul><li>Refines ")
+                  .append(code)
                   .append(typeId)
                   .append(container.name)
                   .append(end)
@@ -115,7 +118,8 @@ String getDoc(Declaration? declaration) {
                   .append(variableId)
                   .append(refined.name)
                   .append(end)
-                  .append("</code></ul>")
+                  .append(endCode)
+                  .append("</ul>")
                   .append(getDoc(refined));
         }
     }
@@ -127,7 +131,7 @@ String getSignature(Declaration declaration)
 
 String getSignatureInternal(Declaration declaration) {
     value result = StringBuilder();
-    result.append("<code class='cm-s-ceylon'>");
+    result.append(code);
     if (ModelUtil.isConstructor(declaration)) {
         result.append(keyword)
               .append("new")
@@ -207,7 +211,7 @@ String getSignatureInternal(Declaration declaration) {
         }
     }
     appendParameters(declaration, result);
-    result.append("</code>");
+    result.append(endCode);
     return result.string;
 }
 
@@ -216,33 +220,40 @@ String getExtraInfo(Declaration declaration) {
     value container = declaration.container;
     if (is Package container) {
         if (exists name = container.qualifiedNameString) {
-            result.append("<p>Member of package <code class='cm-s-ceylon'>")
+            result.append("<p>Member of package ")
+                  .append(code)
                   .append(name)
-                  .append("</code>.</p>");
+                  .append(endCode)
+                  .append(".</p>");
         }
     }
     else if (declaration.classOrInterfaceMember) {
         assert (is Declaration container);
-        result.append("<p>Member of <code class='cm-s-ceylon'>")
+        result.append("<p>Member of ")
+              .append(code)
               .append(typeId)
               .append(container.name)
               .append(end)
-              .append("</code>.</p>");
+              .append(endCode)
+              .append(".</p>");
     }
     if (is Class declaration) {
         if (exists extendedType=declaration.extendedType) {
-            result.append("<ul><li>Extends <code class='cm-s-ceylon'>")
+            result.append("<ul><li>Extends ")
+                  .append(code)
                   .append(typeId)
                   .append(escape(extendedType))
                   .append(end)
-                  .append("</code>.</ul>");
+                  .append(endCode)
+                  .append(".</ul>");
         }
     }
     if (is TypeDeclaration declaration,
             declaration is ClassOrInterface || 
             declaration is TypeParameter) {
         if (!declaration.satisfiedTypes.empty) {
-            result.append("<ul><li>Satisfies <code class='cm-s-ceylon'>");
+            result.append("<ul><li>Satisfies ")
+                  .append(code);
             variable value first = true;
             for (type in CeylonIterable(declaration.satisfiedTypes)) {
                 if (first) {
@@ -255,7 +266,8 @@ String getExtraInfo(Declaration declaration) {
                       .append(escape(type))
                       .append(end);
             }
-            result.append("</code>.</ul>");
+            result.append(endCode)
+                  .append(".</ul>");
         }
     }
     return result.string;
@@ -325,22 +337,25 @@ String getParameterInfo(Declaration declaration) {
         }
     }
     if (is TypedDeclaration declaration) {
-        result.append("<ul><li>Returns <code class='cm-s-ceylon'>")
+        result.append("<ul><li>Returns ")
+                .append(code)
                 .append(typeId)
                 .append(escape(declaration.type))
                 .append(end)
-                .append("</code></ul>");
+                .append(endCode)
+                .append("</ul>");
     }
     for (ann in CeylonIterable(declaration.annotations)) {
         value positionalArguments = ann.positionalArguments;
         if ("throws".equals(ann.name) 
                 && !positionalArguments.empty) {
             value type = positionalArguments.get(0);
-            result.append("<ul><li>Throws <code class='cm-s-ceylon'>")
+            result.append("<ul><li>Throws ")
+                  .append(code)
                   .append(typeId)
                   .append(type.string)
                   .append(end)
-                  .append("</code>");
+                  .append(endCode);
             if (positionalArguments.size()>1) {
                 value doc = positionalArguments.get(1).string;
                 result.append("<p>")
