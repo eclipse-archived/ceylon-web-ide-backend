@@ -16,12 +16,6 @@ import ceylon.net.http.server {
     Response
 }
 
-import java.io {
-    InputStream,
-    BufferedReader,
-    InputStreamReader
-}
-
 void sendStringResponse(Response response, 
         String string, String mimeType) {
     response.addHeader(contentType(mimeType, utf8));
