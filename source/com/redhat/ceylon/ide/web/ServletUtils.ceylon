@@ -16,32 +16,19 @@ import ceylon.net.http.server {
     Response
 }
 
-void sendStringResponse(Response response, 
-        String string, String mimeType) {
+void sendResponse(Response response, String string, 
+                  String mimeType = "text/plain") {
     response.addHeader(contentType(mimeType, utf8));
     value bytes = javaString(string).getBytes("UTF-8");
     response.addHeader(contentLength(bytes.size.string));
     response.writeString(string);
 }
 
-void sendResponse(Response response, String text) 
-        => sendStringResponse {
+void sendJsonResponse(Response response, 
+                      JsonObject|JsonArray json)
+        => sendResponse {
             response = response;
-            string = text;
-            mimeType = "text/plain";
-        };
-
-void sendMapResponse(Response response, JsonObject map) 
-        => sendStringResponse {
-            response = response;
-            string = map.string;
-            mimeType = "application/json";
-        };
-
-void sendListResponse(Response response, JsonArray list) 
-        => sendStringResponse {
-            response = response;
-            string = list.string;
+            string = json.string;
             mimeType = "application/json";
         };
 

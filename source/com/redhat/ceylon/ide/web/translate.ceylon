@@ -103,12 +103,12 @@ void translate(Request request, Response response) {
         else {
             codeOrErrors = JsonObject();
         }
-        sendMapResponse(response, codeOrErrors);
+        sendJsonResponse(response, codeOrErrors);
     }
     catch (ex) {
         response.responseStatus = 500;
         ex.printStackTrace();
-        sendListResponse(response, 
+        sendJsonResponse(response, 
             JsonArray {
                 "Service error: ``ex.message``"
             });

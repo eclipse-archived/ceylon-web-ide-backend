@@ -38,14 +38,14 @@ void autocomplete(Request request, Response response) {
             col = col;
             checker = typeChecker;
         };
-        sendMapResponse(response, 
+        sendJsonResponse(response, 
             JsonObject {
                 "opts" -> autocompleter.completions
             });
     }
     catch (ex) {
         response.responseStatus = 500;
-        sendListResponse(response, 
+        sendJsonResponse(response, 
             JsonArray {
                 "Service error: ``ex.message``"
             });

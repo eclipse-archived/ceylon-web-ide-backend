@@ -25,7 +25,7 @@ void hover(Request request, Response response) {
         assert (is String file = result["f"],
                 is Integer row = result["r"],
                 is Integer col = result["c"]);
-        sendMapResponse(response,
+        sendJsonResponse(response,
             getDocs(findDeclaration {
                 file = file;
                 row = row;
@@ -35,7 +35,7 @@ void hover(Request request, Response response) {
     }
     catch (ex) {
         response.responseStatus = 500;
-        sendListResponse(response, 
+        sendJsonResponse(response, 
             JsonArray {
                 "Service error: ``ex.message``"
             });

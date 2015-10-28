@@ -10,14 +10,14 @@ import ceylon.json {
 void examples(Request request, Response response) {
     try {
         assert (exists key = request.parameter("key"));
-        sendMapResponse(response, 
+        sendJsonResponse(response, 
             JsonObject {
                 "files" -> files(key)
             });
     }
     catch (ex) {
         response.responseStatus = 500;
-        sendListResponse(response, 
+        sendJsonResponse(response, 
             JsonArray {
                 "Service error:``ex.message``"
             });
