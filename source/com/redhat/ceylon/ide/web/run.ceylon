@@ -50,11 +50,6 @@ shared void run()
     },
     Endpoint {
         path = startsWith("/hoverdoc");
-        acceptMethod = { get };
-        service => examples;
-    },
-    Endpoint {
-        path = startsWith("/hoverdoc");
         acceptMethod = { post };
         service => hover;
     },
