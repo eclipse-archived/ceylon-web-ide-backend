@@ -1,5 +1,7 @@
 //"use strict";
 
+document.domain = "ceylon-lang.org";
+
 var clprinted = false;
 
 if (typeof String.prototype.startsWith != 'function') {

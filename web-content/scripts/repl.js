@@ -1,5 +1,7 @@
 //"use strict";
 
+document.domain = "ceylon-lang.org";
+
 var markers = [];
 
 var github;
@@ -166,53 +168,57 @@ $(document).ready(function() {
     $('#shareurl').hide();
     $('#gistlink').hide();
     $('#deletegist').hide();
-
-    if ("usrlow" in uriparams) {
-        // With "usrlow" set the user's gists will be shown
-        // at the bottom of the sidebar instead of the top
-        addExamplesContainer();
-        addUserGistsContainer();
-    } else {
-        addUserGistsContainer();
-        addExamplesContainer();
-    }
     
-    var noDefault = false;
-    if (uriparams.src != null) {
-        // Code is directly in URL
-        var code = decodeURIComponent(uriparams.src);
-        setTimeout(function() {
-            editSource(code);
-        }, 1);
-        noDefault = true;
-    } else if (uriparams.sample != null) {
-        // Retrieve code from the given sample id
-        editExample("ex", uriparams.sample);
-        noDefault = true;
-    } else if (uriparams.gist != null) {
-        // Retrieve code from the given sample id
-        editGist(uriparams.gist);
-        noDefault = true;
-    } else {
-        if (uriparams.set == null) {
-            window.outputReady = function() {
-                window.outputReady = null;
-                startSpinner();
-            	runCode('print("Ceylon ``language.version`` \\"``language.versionName``\\"");');
-                stopSpinner();
-            };
+    if (!embedded) {
+    
+        if ("usrlow" in uriparams) {
+            // With "usrlow" set the user's gists will be shown
+            // at the bottom of the sidebar instead of the top
+            addExamplesContainer();
+            addUserGistsContainer();
+        } else {
+            addUserGistsContainer();
+            addExamplesContainer();
         }
-    }
+        
+        var noDefault = false;
+        if (uriparams.src != null) {
+            // Code is directly in URL
+            var code = decodeURIComponent(uriparams.src);
+            setTimeout(function() {
+                editSource(code);
+            }, 1);
+            noDefault = true;
+        } else if (uriparams.sample != null) {
+            // Retrieve code from the given sample id
+            editExample("ex", uriparams.sample);
+            noDefault = true;
+        } else if (uriparams.gist != null) {
+            // Retrieve code from the given sample id
+            editGist(uriparams.gist);
+            noDefault = true;
+        } else {
+            if (uriparams.set == null) {
+                window.outputReady = function() {
+                    window.outputReady = null;
+                    startSpinner();
+                	runCode('print("Ceylon ``language.version`` \\"``language.versionName``\\"");');
+                    stopSpinner();
+                };
+            }
+        }
+        
+        if (uriparams.set != null) {
+            handleSelectSet(uriparams.set, noDefault);
+        } else {
+            // This is the default set of examples stored in our
+            // special "ceylonwebide" GitHub account
+            handleSelectSet("6e03a3db46854ff825e9", noDefault);
+        }
+        
+        listUserGists();
     
-    if (uriparams.set != null) {
-        handleSelectSet(uriparams.set, noDefault);
-    } else {
-        // This is the default set of examples stored in our
-        // special "ceylonwebide" GitHub account
-        handleSelectSet("6e03a3db46854ff825e9", noDefault);
     }
-    
-    listUserGists();
     
     setupLiveTypechecker();
 });
