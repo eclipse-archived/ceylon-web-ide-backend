@@ -98,7 +98,7 @@ String getDoc(Declaration? declaration) {
     }
     value result = StringBuilder();
     for (ann in CeylonIterable(declaration.annotations)) {
-        if ("doc".equals(ann.name) 
+        if ("doc" == ann.name 
                 && !ann.positionalArguments.empty) {
             value doc = ann.positionalArguments.get(0).string;
             result.append(process(unquote(doc), markdownConfig));
@@ -318,7 +318,7 @@ String getParameterInfo(Declaration declaration) {
     value result = StringBuilder();
     for (ann in CeylonIterable(declaration.annotations)) {
         value positionalArguments = ann.positionalArguments;
-        if ("see".equals(ann.name) 
+        if ("see" == ann.name 
                 && !positionalArguments.empty) {
             result.append("<p>See ");
             variable value first = true;
@@ -347,7 +347,7 @@ String getParameterInfo(Declaration declaration) {
     }
     for (ann in CeylonIterable(declaration.annotations)) {
         value positionalArguments = ann.positionalArguments;
-        if ("throws".equals(ann.name) 
+        if ("throws" == ann.name 
                 && !positionalArguments.empty) {
             value type = positionalArguments.get(0);
             result.append("<ul><li>Throws ")

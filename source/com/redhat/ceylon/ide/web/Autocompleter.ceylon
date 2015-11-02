@@ -1,5 +1,6 @@
 import ceylon.interop.java {
-    CeylonIterable
+    CeylonIterable,
+    CeylonMap
 }
 import ceylon.json {
     JsonArray=Array,
@@ -36,16 +37,19 @@ import java.lang {
 import java.util {
     JMap=Map,
     JHashMap=HashMap,
-    JList=List
+    JList=List,
+    Collections { emptyMap }
 }
 
 class Autocompleter(String file, 
     Integer row, Integer col, 
     TypeChecker checker) {
     
+    value noCompletions = emptyMap<JString,DeclarationWithProximity>();
+    
     shared [Node,String]? selectedNode {
         for (pu in CeylonIterable(checker.phasedUnits.phasedUnits)) {
-            if (file.equals(pu.unitFile.name)) {
+            if (file == pu.unitFile.name) {
                 value fiv = FindIdentifierVisitor(row,col);
                 pu.compilationUnit.visit(fiv);
                 if (exists [node, text] = fiv.result) {
@@ -65,17 +69,15 @@ class Autocompleter(String file,
             JMap<JString,DeclarationWithProximity> completions;
             switch (node)
             case (is Tree.QualifiedMemberOrTypeExpression) {
-                Tree.QualifiedMemberOrTypeExpression exp = node;
-                Tree.Primary p = exp.primary;
-                if (exp.staticMethodReference) {
-                    assert (is Tree.StaticMemberOrTypeExpression smte = p);
+                if (node.staticMethodReference) {
+                    assert (is Tree.StaticMemberOrTypeExpression smte = node.primary);
                     assert (is TypeDeclaration td = smte.declaration);
                     completions = td.getMatchingMemberDeclarations(unit, scope, prefix, 0);
                 }
                 else {
                     Type type;
-                    if (exists t = p.typeModel) {
-                        switch (op = exp.memberOperator)
+                    if (exists t = node.primary.typeModel) {
+                        switch (op = node.memberOperator)
                         case (is Tree.SafeMemberOp) {
                             type = unit.getDefiniteType(t);
                         }
@@ -88,7 +90,7 @@ class Autocompleter(String file,
                         completions = type.declaration.getMatchingMemberDeclarations(unit, scope, prefix, 0);
                     }
                     else {
-                        completions = JHashMap<JString,DeclarationWithProximity>();
+                        completions = noCompletions;
                     }
                 }
             }
@@ -103,7 +105,7 @@ class Autocompleter(String file,
                     completions = type.declaration.getMatchingMemberDeclarations(unit, scope, prefix, 0);
                 }
                 else {
-                    completions = JHashMap<JString,DeclarationWithProximity>(); 
+                    completions = noCompletions; 
                 }
             }
             case (is Tree.Variable) {
@@ -111,20 +113,20 @@ class Autocompleter(String file,
             }
             else {
                 //TODO!!
-                completions = JHashMap<JString,DeclarationWithProximity>();
+                completions = noCompletions;
             }
             
-            return translateCompletions(completions);
+            return translateCompletions(CeylonMap(completions));
         }
         else {
             return JsonArray();
         }
     }
     
-    JsonArray translateCompletions(JMap<JString,DeclarationWithProximity> comps) {
+    JsonArray translateCompletions(Map<JString,DeclarationWithProximity> comps) {
         value completions = JsonArray();
-        for (entry in CeylonIterable(comps.entrySet())) {
-            translateCompletion(entry.\ivalue, completions);
+        for (entry in comps) {
+            translateCompletion(entry.item, completions);
         }
         return completions;
     }
@@ -148,36 +150,34 @@ class Autocompleter(String file,
     
     JsonObject constructCompletion(Declaration declaration, Boolean withArgs) {
         value completion = JsonObject();
-        StringBuilder insert = StringBuilder();
-        StringBuilder display = StringBuilder();
+        value insert = StringBuilder();
+        value display = StringBuilder();
         if(is Function declaration) {
-            Function m = declaration;
-            insert.append(m.name);
-            if (m.annotation) {
-                display.append(annotationId).append(m.name).append(end);
-                if (!m.firstParameterList.parameters.empty) {
-                    addParameterLists(display, insert, m.parameterLists);
+            insert.append(declaration.name);
+            if (declaration.annotation) {
+                display.append(annotationId).append(declaration.name).append(end);
+                if (!declaration.firstParameterList.parameters.empty) {
+                    addParameterLists(display, insert, declaration.parameterLists);
                 }
             }
             else {
-                display.append(variableId).append(m.name).append(end);
+                display.append(variableId).append(declaration.name).append(end);
                 if (withArgs) {
-                    addParameterLists(display, insert, m.parameterLists);
+                    addParameterLists(display, insert, declaration.parameterLists);
                 }
                 else {
-                    addTypeParameters(display, insert, m.typeParameters);
+                    addTypeParameters(display, insert, declaration.typeParameters);
                 }
             }
         }
         else if (is Class declaration) {
-            Class c = declaration;
-            insert.append(c.name);
-            display.append(typeId).append(c.name).append(end);
+            insert.append(declaration.name);
+            display.append(typeId).append(declaration.name).append(end);
             if (withArgs) {
-                addParameterLists(display, insert, c.parameterLists);
+                addParameterLists(display, insert, declaration.parameterLists);
             }
             else {
-                addTypeParameters(display, insert, c.typeParameters);
+                addTypeParameters(display, insert, declaration.typeParameters);
             }
         }
         else if (declaration is Value || declaration is Setter){
@@ -188,8 +188,7 @@ class Autocompleter(String file,
             insert.append(declaration.name);
             display.append(typeId).append(declaration.name).append(end);
             if (!withArgs) {
-                TypeDeclaration td = declaration;
-                addTypeParameters(display, insert, td.typeParameters);
+                addTypeParameters(display, insert, declaration.typeParameters);
             }
         }
         else {
