@@ -1477,10 +1477,10 @@ function showErrors(errors, print) {
 }
 
 function loadModuleAsString(src, func) {
-    var outputwin = $("#outputframe")[0].contentWindow;
-    if (outputwin.loadModuleAsString) {
+    var load = safeOutputRef("loadModuleAsString");
+    if (load) {
         startSpinner();
-        outputwin.loadModuleAsString(src, function() {
+        load(src, function() {
                 func();
                 stopSpinner();
             }, function(when, err) {
@@ -1522,9 +1522,9 @@ function afterTranslate() {
 }
 
 function executeCode() {
-    var outputwin = $("#outputframe")[0].contentWindow;
-    if (outputwin.run) {
-        outputwin.run();
+    var run = safeOutputRef("run");
+    if (run) {
+        run();
     } else {
         printError("Entry point 'run()' not found!")
         printError("When advanced mode is active your code should contain a method like:");
@@ -1634,7 +1634,6 @@ function editGist(key) {
 // Sets the code for the editor(s) from the given object
 function setEditorSourcesFromGist(files) {
     fileDeleted = false;
-    clearOutput();
     deleteEditors();
     var cnt = 0;
     var hasModule = false;
@@ -2137,6 +2136,7 @@ function isWrappedModule(code) {
 function doReset() {
     clearOutput();
     clearEditMarkers();
+    focusSelectedEditor();
 }
 
 // Clears all error markers and hover docs.
@@ -2159,77 +2159,80 @@ function resetOutput(onReady) {
         window.outputReady = null;
         onReady();
     }
-    $("#outputframe")[0].contentWindow.location.reload();
+    var loc = safeOutputRef("location");
+    if (loc) {
+        loc.reload();
+    }
+}
+
+function safeOutputRef(memberName) {
+    try {
+        var outputwin = $("#outputframe")[0].contentWindow;
+        return outputwin[memberName];
+    } catch(e) {
+        // Catch and ignore domain errors
+        return null;
+    }
 }
 
 function clearLangModOutputState() {
-    var outputwin = $("#outputframe")[0].contentWindow;
-    var clear = outputwin.clearLangModOutputState;
+    var clear = safeOutputRef("clearLangModOutputState");
     if (clear) {
         clear();
     }
 }
 
 function hasLangModOutput() {
-    var outputwin = $("#outputframe")[0].contentWindow;
-    var hasOutput = outputwin.hasLangModOutput;
+    var hasOutput = safeOutputRef("hasLangModOutput");
     if (hasOutput) {
         return hasOutput();
     }
 }
 
 function clearOutput() {
-    var outputwin = $("#outputframe")[0].contentWindow;
-    var clear = outputwin.clearOutput;
+    var clear = safeOutputRef("clearOutput");
     if (clear) {
         clear();
     }
-    focusSelectedEditor();
 }
 
 function printOutputLine(txt) {
-    var outputwin = $("#outputframe")[0].contentWindow;
-    var print = outputwin.printOutputLine;
+    var print = safeOutputRef("printOutputLine");
     if (print) {
         print(txt);
     }
 }
 
 function printOutput(txt) {
-    var outputwin = $("#outputframe")[0].contentWindow;
-    var print = outputwin.printOutput;
+    var print = safeOutputRef("printOutput");
     if (print) {
         print(txt);
     }
 }
 
 function printSystem(txt, loc) {
-    var outputwin = $("#outputframe")[0].contentWindow;
-    var print = outputwin.printSystem;
+    var print = safeOutputRef("printSystem");
     if (print) {
         print(txt, loc);
     }
 }
 
 function printError(txt, loc) {
-    var outputwin = $("#outputframe")[0].contentWindow;
-    var print = outputwin.printError;
+    var print = safeOutputRef("printError");
     if (print) {
         print(txt, loc);
     }
 }
 
 function printWarning(txt, loc) {
-    var outputwin = $("#outputframe")[0].contentWindow;
-    var print = outputwin.printWarning;
+    var print = safeOutputRef("printWarning");
     if (print) {
         print(txt, loc);
     }
 }
 
 function scrollOutput() {
-    var outputwin = $("#outputframe")[0].contentWindow;
-    var scroll = outputwin.scrollOutput;
+    var scroll = safeOutputRef("scrollOutput");
     if (scroll) {
         scroll();
     }
