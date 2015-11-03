@@ -1,6 +1,6 @@
 native("jvm") 
 module com.redhat.ceylon.ide.web "1.0.0" {
-    import ceylon.net "1.2.0";
+    import ceylon.net "1.2.0-1";
     import ceylon.json "1.2.0";
     import ceylon.time "1.2.0";
     import ceylon.interop.java "1.2.0";
