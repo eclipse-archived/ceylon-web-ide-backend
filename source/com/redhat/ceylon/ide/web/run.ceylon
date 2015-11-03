@@ -14,7 +14,8 @@ import ceylon.net.http {
     post,
     get,
     contentType,
-    contentLength
+    contentLength,
+    Header
 }
 import ceylon.net.http.server {
     newServer,
@@ -28,6 +29,9 @@ import ceylon.net.http.server.endpoints {
 }
 import ceylon.time {
     now
+}
+import ceylon.file {
+    File
 }
 
 String ipVar = "OPENSHIFT_CEYLON_IP";
@@ -91,6 +95,10 @@ shared void run()
             externalPath 
                     = (env(dirVar) else "") 
                     + "web-content";
+            headers(File file) => { 
+                Header("Cache-Control", 
+                    "max-age=0, must-revalidate") 
+            };
         };
     }
 }.start {
