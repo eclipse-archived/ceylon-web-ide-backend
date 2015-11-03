@@ -60,13 +60,16 @@ void authenticate(Request request, Response response) {
         response.addHeader(cookie(token, 30 * 24 * 60 * 60));
         response.addHeader(contentType("text/html", utf8));
         response.writeString(
-            "<html>
-               <body>
-                 <script>
-                   window.opener.location.reload();
-                   window.close();
-                 </script>
-               </body>
-             </html>");
+            """<html>
+                 <body>
+                   <script>
+                     if (document.domain != "localhost") {
+                       document.domain = "ceylon-lang.org";
+                     }
+                     window.opener.location.reload();
+                     window.close();
+                   </script>
+                 </body>
+               </html>""");
     }
 }
