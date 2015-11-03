@@ -1,7 +1,8 @@
 //"use strict";
 
-if (document.domain == "try.ceylon-lang.org")
+if (document.domain != "localhost") {
     document.domain = "ceylon-lang.org";
+}
 
 var clprinted = false;
 
