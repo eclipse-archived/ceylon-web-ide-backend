@@ -39,34 +39,34 @@ String dirVar = "OPENSHIFT_REPO_DIR";
 shared void run()
         => newServer {
     Endpoint {
-        path = startsWith("/translate");
+        startsWith("/translate");
         acceptMethod = { post };
-        service => translate;
+        service = translate;
     },
     Endpoint {
-        path = startsWith("/assist");
+        startsWith("/assist");
         acceptMethod = { post };
-        service => autocomplete;
+        service = autocomplete;
     },
     Endpoint {
-        path = startsWith("/hoverdoc");
+        startsWith("/hoverdoc");
         acceptMethod = { post };
-        service => hover;
+        service = hover;
     },
     Endpoint {
-        path = startsWith("/githubauth");
+        startsWith("/githubauth");
         acceptMethod = { get };
-        service => authenticate;
+        service = authenticate;
     },
     Endpoint {
-        path = startsWith("/time");
+        startsWith("/time");
         acceptMethod = { get, post };
-        void service(Request request, Response response) {
+        (request, response) {
             value datetime = now().dateTime().string;
             response.addHeader(contentType("text/plain", utf8));
             response.addHeader(contentLength(datetime.size.string));
             response.writeString(datetime);
-        }
+        };
     },
     Endpoint {
         object path extends Matcher() {
@@ -77,7 +77,7 @@ shared void run()
             relativePath(String requestPath) => requestPath;
         }
         acceptMethod = { get };
-        void service(Request request, Response response) {
+        (request, response) {
             response.addHeader(contentType("text/html", utf8));
             assert (exists resource 
                     = `module`.resourceByPath("index.html"));
@@ -90,12 +90,12 @@ shared void run()
                     .replaceFirst("\`\`clientId\`\`", 
                                   clientId);
             response.writeString(html);
-        }
+        };
     },
     AsynchronousEndpoint {
-        path = startsWith("/");
+        startsWith("/");
         acceptMethod = { get };
-        service = serveStaticFile {
+        serveStaticFile {
             externalPath 
                     = (env(dirVar) else "") 
                     + "web-content";
