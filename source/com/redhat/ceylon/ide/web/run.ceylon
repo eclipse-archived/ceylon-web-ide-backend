@@ -22,7 +22,8 @@ import ceylon.net.http.server {
     Endpoint,
     startsWith,
     AsynchronousEndpoint,
-    isRoot
+    isRoot,
+    Request
 }
 import ceylon.net.http.server.endpoints {
     serveStaticFile,
@@ -94,9 +95,13 @@ shared void run()
         startsWith("/");
         acceptMethod = { get };
         serveStaticFile {
-            externalPath 
-                    = (env(dirVar) else "") 
-                    + "web-content";
+            externalPath = env(dirVar) else "";
+            fileMapper(Request request)
+                    => let (path = request.path)
+                    if (path.startsWith("/modules/") &&
+                        path.endsWith(".js"))
+                    then path.trimLeading('/'.equals) 
+                    else "web-content" + path;
             headers(File file) => { 
                 Header("Cache-Control", 
                     "max-age=0, must-revalidate") 
