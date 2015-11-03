@@ -20,10 +20,8 @@ import ceylon.net.http.server {
     newServer,
     Endpoint,
     startsWith,
-    Request,
     AsynchronousEndpoint,
-    Response,
-    Matcher
+    isRoot
 }
 import ceylon.net.http.server.endpoints {
     serveStaticFile
@@ -69,20 +67,14 @@ shared void run()
         };
     },
     Endpoint {
-        object path extends Matcher() {
-            matches(String path) 
-                    => path in ["", "/", 
-                                "/index.html", 
-                                "/embedded.html"];
-            relativePath(String requestPath) => requestPath;
-        }
+        startsWith("/index.html").or(isRoot());
         acceptMethod = { get };
         (request, response) {
             response.addHeader(contentType("text/html", utf8));
             assert (exists resource 
                     = `module`.resourceByPath("index.html"));
             value embedded 
-                    = request.path.endsWith("embedded.html");
+                    = request.parameter("embedded") exists;
             value html 
                     = resource.textContent()
                     .replaceFirst("\`\`embedded\`\`", 
