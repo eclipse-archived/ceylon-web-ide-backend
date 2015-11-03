@@ -36,9 +36,10 @@ import java.lang {
 }
 import java.util {
     JMap=Map,
-    JHashMap=HashMap,
     JList=List,
-    Collections { emptyMap }
+    Collections {
+        emptyMap
+    }
 }
 
 class Autocompleter(String file, 
