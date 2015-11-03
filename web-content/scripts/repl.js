@@ -321,8 +321,8 @@ function handleResizeMain(event, data) {
     } else if (newwidth >= toolbarMinimalSize) {
         buttonShow("share", !embedded);
         buttonShow("advanced", !embedded);
-        buttonShow("dark", !embedded);
-        buttonShow("help", !embedded);
+        buttonShow("dark", true);
+        buttonShow("help", true);
         buttonShow("connect", !isGitHubConnected() && !embedded);
         buttonShow("connected", isGitHubConnected() && !embedded);
     }
@@ -370,8 +370,8 @@ function getToolbarItems() {
         { type: 'break',  id: 'break1', hidden: embedded },
         { type: 'button',  id: 'advanced', caption: 'Advanced', hint: 'Enable more complex code constructs', icon: 'fa fa-square-o', checkicon: 'fa fa-check-square-o', uncheckicon: 'fa fa-square-o', hidden: embedded },
         { type: 'spacer' },
-        { type: 'button',  id: 'dark', caption: 'Dark', hint: 'Switch theme', icon: 'fa fa-square', checkicon: 'fa fa-check-square', uncheckicon: 'fa fa-square', hidden: embedded },
-        { type: 'button',  id: 'help', caption: 'Help', hint: 'Help on how this Web IDE works', icon: 'fa fa-question', hidden: embedded },
+        { type: 'button',  id: 'dark', caption: 'Dark', hint: 'Switch theme', icon: 'fa fa-square', checkicon: 'fa fa-check-square', uncheckicon: 'fa fa-square', hidden: false },
+        { type: 'button',  id: 'help', caption: 'Help', hint: 'Help on how this Web IDE works', icon: 'fa fa-question', hidden: false },
         { type: 'button',  id: 'connect', caption: 'Connect', hint: 'Connect to GitHub', icon: 'fa fa-github', hidden: isGitHubConnected() || embedded },
         { type: 'menu',   id: 'connected', caption: 'Connected', hint: 'Connected to GitHub', icon: 'fa fa-github', hidden: !isGitHubConnected() || embedded,
             items: [
