@@ -1015,7 +1015,7 @@ function listUserGists(page) {
     
     function onEnd(list) {
         if (list.hasMoreElements()) {
-            $('#yrcodemore').click(function() { return listUserGists(list.pages.length + 1); });
+            $('#yrcodemore').off().click(function() { return listUserGists(list.lastPage + 1); });
             $('#yrcodemore').show();
         } else {
             $('#yrcodemore').hide();
