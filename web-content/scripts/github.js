@@ -570,6 +570,7 @@
             if (link == null || link.indexOf('rel="next"') < 0) {
                 that.pageCount = idx + 1;
             }
+            that.lastPage = idx + 1;
             args.success(items);
         }
         
