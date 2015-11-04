@@ -71,16 +71,7 @@ var fileDeleted;
 var spinCount = 0;
 var closePopups = undefined;
 
-var wrappedTag = "//$webrun_wrapped\n";
-var codePrefix = "shared void run() {\n";
-var codePostfix = "\n}";
-
-var modulePrefix = "module web_ide_script \"1.0.0\" {\n";
-var modulePostfix = "\n}";
-var defaultImportSrc = modulePrefix +
-		"    // Add module imports here" + 
-		modulePostfix;
-
+var runner=window.parent.runner;
 var uri = new URI();
 var uriparams = uri.search(true);
 
@@ -822,7 +813,7 @@ function newFile(name) {
 }
 
 function newModuleFile() {
-    var neweditor = addSourceEditor("module.ceylon", defaultImportSrc);
+    var neweditor = addSourceEditor("module.ceylon", runner.defaultImportSrc());
     markWrapperReadOnly(neweditor.ceylonId);
     updateEditorDirtyState(neweditor.ceylonId);
     return neweditor;
@@ -1302,7 +1293,7 @@ function performRun() {
 function createFilesFromCode(code) {
     return {
         "main.ceylon": {
-            content: wrappedTag + codePrefix + code + codePostfix
+            content: runner.wrappedTag() + runner.codePrefix() + code + runner.codePostfix()
         }
     };
 }
@@ -2155,9 +2146,9 @@ function checkForChangesAndRun(func, negative, edids) {
 function wrapCode(code, noTag) {
 	if (isFullScript(code) == false) {
 	    if (noTag) {
-	        return codePrefix + code + codePostfix;
+	        return runner.codePrefix() + code + runner.codePostfix();
 	    } else {
-	        return wrappedTag + codePrefix + code + codePostfix;
+	        return runner.wrappedTag() + runner.codePrefix() + code + runner.codePostfix();
 	    }
 	} else {
 		return code;
@@ -2167,9 +2158,9 @@ function wrapCode(code, noTag) {
 function unwrapCode(code, allowMissingTag) {
     if (isWrapped(code, allowMissingTag)) {
         var len = 0;
-        len += (code.startsWith(wrappedTag)) ? wrappedTag.length : 0;
-        len += (code.startsWith(codePrefix, len)) ? codePrefix.length : 0;
-        return code.substring(len, code.length - codePostfix.length);
+        len += (code.startsWith(runner.wrappedTag())) ? runner.wrappedTag().length : 0;
+        len += (code.startsWith(runner.codePrefix(), len)) ? runner.codePrefix().length : 0;
+        return code.substring(len, code.length - runner.codePostfix().length);
     } else {
         return code;
     }
@@ -2180,12 +2171,12 @@ function isFullScript() {
 }
 
 function isWrapped(code, allowMissingTag) {
-    return code.startsWith(wrappedTag + codePrefix)
-        || allowMissingTag && code.startsWith(codePrefix);
+    return code.startsWith(runner.wrappedTag() + runner.codePrefix())
+        || allowMissingTag && code.startsWith(runner.codePrefix());
 }
 
 function isWrappedModule(code) {
-    return code.startsWith(modulePrefix) && code.endsWith(modulePostfix);
+    return code.startsWith(runner.modulePrefix()) && code.endsWith(runner.modulePostfix());
 }
 
 function doReset() {
