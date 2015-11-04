@@ -4,6 +4,63 @@ if (document.domain != "localhost") {
     document.domain = "ceylon-lang.org";
 }
 
+var docCookies = {
+  getItem: function (sKey) {
+    if (!sKey) { return null; }
+    return decodeURIComponent(document.cookie.replace(new RegExp("(?:(?:^|.*;)\\s*" + encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1")) || null;
+  },
+  setItem: function (sKey, sValue, vEnd, sPath, sDomain, bSecure) {
+    if (!sKey || /^(?:expires|max\-age|path|domain|secure)$/i.test(sKey)) { return false; }
+    var sExpires = "";
+    if (vEnd) {
+      switch (vEnd.constructor) {
+        case Number:
+          sExpires = vEnd === Infinity ? "; expires=Fri, 31 Dec 9999 23:59:59 GMT" : "; max-age=" + vEnd;
+          break;
+        case String:
+          sExpires = "; expires=" + vEnd;
+          break;
+        case Date:
+          sExpires = "; expires=" + vEnd.toUTCString();
+          break;
+      }
+    }
+    document.cookie = encodeURIComponent(sKey) + "=" + encodeURIComponent(sValue) + sExpires + (sDomain ? "; domain=" + sDomain : "") + (sPath ? "; path=" + sPath : "") + (bSecure ? "; secure" : "");
+    return true;
+  },
+  removeItem: function (sKey, sPath, sDomain) {
+    if (!this.hasItem(sKey)) { return false; }
+    document.cookie = encodeURIComponent(sKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT" + (sDomain ? "; domain=" + sDomain : "") + (sPath ? "; path=" + sPath : "");
+    return true;
+  },
+  hasItem: function (sKey) {
+    if (!sKey) { return false; }
+    return (new RegExp("(?:^|;\\s*)" + encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie);
+  },
+  keys: function () {
+    var aKeys = document.cookie.replace(/((?:^|\s*;)[^\=]+)(?=;|$)|^\s*|\s*(?:\=[^;]*)?(?:\1|$)/g, "").split(/\s*(?:\=[^;]*)?;\s*/);
+    for (var nLen = aKeys.length, nIdx = 0; nIdx < nLen; nIdx++) { aKeys[nIdx] = decodeURIComponent(aKeys[nIdx]); }
+    return aKeys;
+  }
+};
+
+var dark = 
+    docCookies.hasItem("dark") && 
+    docCookies.getItem("dark")=="true";
+var sheets = document.styleSheets;
+for (i=0; i<sheets.length; i++) {
+    var sheet = sheets[i];
+    var href = sheet.href;
+    if (href!=null) { 
+        if (href.indexOf("cm-ceylon-dark")>0) {
+            sheet.disabled = !dark;
+        }
+        else if (href.indexOf("cm-ceylon")>0) {
+            sheet.disabled = dark;
+        }
+    }
+}
+
 var markers = [];
 
 var github;
@@ -170,6 +227,9 @@ $(document).ready(function() {
     $('#shareurl').hide();
     $('#gistlink').hide();
     $('#deletegist').hide();
+    
+    buttonSetIcon("dark", dark?"fa fa-check-square":"fa fa-square");
+    buttonCheck("dark", dark);
     
     if (!embedded) {
     
@@ -405,27 +465,22 @@ function updateMenuState() {
     w2ui["all"].get("main").toolbar.set("menu", { items: getMenuItems() });
 }
 
-var sheets = document.styleSheets;
-for (i=0; i<sheets.length; i++) {
-    var sheet = sheets[i];
-    if (sheet.href!=null && 
-        sheet.href.indexOf("cm-ceylon-dark")>0) {
-        sheet.disabled = true;
-    }
-}
-
 function handleDarkClick() {
+    dark = !dark;
     var sheets = document.styleSheets;
-    console.log(sheets);
     for (i=0; i<sheets.length; i++) {
         var sheet = sheets[i];
-        if (sheet.href!=null && 
-            sheet.href.indexOf("cm-ceylon")>0) {
-            sheet.disabled = !sheet.disabled;
-            buttonSetIcon("dark", sheet.disabled?"fa fa-check-square":"fa fa-square");
-            buttonCheck("dark", sheet.disabled);
+        var href = sheet.href;
+        if (href!=null) {
+            if (href.indexOf("cm-ceylon")>0) {
+                sheet.disabled = !sheet.disabled;
+            }
         }
     }
+    buttonSetIcon("dark", dark?"fa fa-check-square":"fa fa-square");
+    buttonCheck("dark", dark);
+    
+    docCookies.setItem("dark",dark?"true":"false",60*60*24*30);
 }
 
 function handleHelpClick() {
