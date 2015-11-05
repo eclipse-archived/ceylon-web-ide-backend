@@ -1192,6 +1192,30 @@
     // COMMENT
     //****************************************************
     
+    // Returns a List object that can be used to iterate over a repository's Comments
+    //  owner - The name of a repository's owner
+    //  repo - The name of a repository
+    //  args.parameters - Optional parameters to pass to the search
+    //     query, https://developer.github.com/v3/issues/comments/#parameters-1
+    //  args.pageSize - Optional page size to use for the list requests.
+    //     NB: not all list queries support this parameter see GitHub API docs
+    //  args.maxRequests - Optional number indicating the maximum number of
+    //     remote calls the function `each()` will make (default 5)
+    //  args.error - Optional callback to be called on erroneous
+    //     termination of the remote call
+    //  args.authentication - Optional Authentication to use for the
+    //     remote call
+    GitHub.prototype.repositoryComments = function(owner, repo, args) {
+        var that = this;
+        if (owner == null) {
+            throw "Missing required `owner`";
+        }
+        if (repo == null) {
+            throw "Missing required `repo`";
+        }
+        return that._comments("repos/" + owner + "/" + repo + "/issues/comments", null, args);
+    }
+    
     GitHub.prototype._comments = function(url, item, args) {
         var that = this;
         if (args == null) {
