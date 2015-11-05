@@ -32,6 +32,8 @@
     //     even if set on the base GitHub object
     //  config.debug = Optional boolean to turn on debugging mode that
     //     logs certain operations to the console
+    //  config.monitor = Optional function that will be called for each
+    //     successful Ajax call
     //////////////////////////////////////////////////////////////////////
     function GitHub(config) {
         if (config == null) {
@@ -59,100 +61,6 @@
         
         this._etags = {};
         this._cache = {};
-    }
-    
-    // Create a dummy Gist that can be used for operations
-    // like `edit()` and `remove()` that only need an id
-    //  id - The id of a Gist
-    GitHub.prototype.gist = function(id) {
-        var that = this;
-        if (id == null) {
-            throw "Missing required `id`";
-        }
-        return new Gist(that, { id: id, _state: "idonly" });
-    }
-    
-    // Create a Gist
-    //  args.data - The data used to create the Gist, see https://developer.github.com/v3/gists/#create-a-gist
-    //  args.success - Optional callback to be called on successful
-    //     termination of the remote call
-    //  args.error - Optional callback to be called on erroneous
-    //     termination of the remote call
-    //  args.authentication - Optional Authentication to use for the
-    //     remote call
-    GitHub.prototype.createGist = function(args) {
-        var that = this;
-        if (args.data == null) {
-            throw "Missing required `args.data`";
-        }
-        if (args.data.files == null) {
-            throw "Missing required `args.data.files`";
-        }
-        
-        function handleGist(json, status, xhr) {
-            if (args.success != null) {
-                var gist = new Gist(that, json);
-                args.success(gist);
-            }
-        }
-        
-        that._call({
-            url: "gists",
-            method: "POST",
-            data: args.data,
-            authentication: args.authentication,
-            success: handleGist,
-            error: args.error
-        });
-    }
-    
-    // Returns a List object that can be used to iterate over Gists
-    //  args.pageSize - Optional page size to use for the list requests.
-    //     NB: not all list queries support this parameter see GitHub API docs
-    //  args.maxRequests - Optional number indicating the maximum number of
-    //     remote calls the function `each()` will make (default 5)
-    //  args.error - Optional callback to be called on erroneous
-    //     termination of the remote call
-    //  args.authentication - Optional Authentication to use for the
-    //     remote call
-    GitHub.prototype.gists = function(args) {
-        var that = this;
-        if (args == null) {
-            args = {};
-        }
-        
-        function decodeGist(json) {
-            json["_state"] = "summary";
-            return new Gist(that, json);
-        }
-        
-        return that._list({
-            url: "gists",
-            decode: decodeGist,
-            pageSize: args.pageSize,
-            maxRequests: args.maxRequests,
-            authentication: args.authentication,
-            error: args.error
-        });
-    }
-    
-    // Private function that handles remote calls returning lists.
-    // Returns an object that can be used to iterate over the items.
-    //  args.url - The URL part that added to the `config.rootUrl`
-    //     forms the actual URL to use for the remote list call
-    //  args.decode - Optional decoder function that takes a JSON object
-    //     and returns a user-defined object
-    //  args.pageSize - Optional page size to use for the list requests.
-    //     NB: not all list queries support this parameter see GitHub API docs
-    //  args.maxRequests - Optional number indicating the maximum number of
-    //     remote calls the function `each()` will make (default 5)
-    //  args.error - Optional callback to be called on erroneous
-    //     termination of any remote calls
-    //  args.authentication - Optional Authentication to use for the
-    //     remote calls
-    GitHub.prototype._list = function(args) {
-        var that = this;
-        return new List(that, args);
     }
     
     // Private function that handles the actual remote calls
@@ -204,8 +112,19 @@
                     }
                 }
             }
+            if (that.config.monitor != null) {
+                that.config.monitor(json, status, xhr);
+            }
             if (args.success != null) {
                 args.success(json, status, xhr);
+            }
+        }
+        function handleError(xhr, status, err) {
+            if (that.config.debug) { console.log("Error: " + err, "Status: " + xhr.status + "\n", xhr.getAllResponseHeaders()); }
+            if (args.error != null) {
+                args.error(json, status, xhr);
+            } else {
+                console.log("Error: " + err);
             }
         }
         
@@ -217,9 +136,7 @@
         if (typeof auth === "undefined") {
             auth = that.config.authentication;
         }
-        if (auth != null && auth.type == "oauth" && auth.token != null) {
-            hdr = { "Authorization": "token " + auth.token };
-        }
+        var data = args.data || {};
         var jqargs = {
             "url": that.config.rootUrl + args.url,
             type: args.method,
@@ -229,11 +146,11 @@
             complete: that.config.complete,
             dataType: 'json',
             headers: hdr,
-            success: handleSuccess
+            success: handleSuccess,
+            error: handleError
         };
-        if (auth != null && auth.type == "basic") {
-            jqargs.username = auth.username;
-            jqargs.password = auth.password;
+        if (auth != null) {
+            auth.apply(jqargs, hdr, data);
         }
         if (args.method == "GET") {
             var etag = that._etags[key];
@@ -241,25 +158,870 @@
                 hdr["If-None-Match"] = etag;
             }
             if (args.data != null) {
-                jqargs.data = args.data;
+                jqargs.data = data;
             }
         } else if (args.method == "POST" || args.method == "PATCH") {
             jqargs.contentType = 'application/json; charset=utf-8';
-            if (args.data != null) {
+            if (!$.isEmptyObject(data)) {
                 jqargs.data = JSON.stringify(args.data);
             }
         } else if (args.method == "DELETE") {
-            if (args.data != null) {
-                jqargs.data = args.data;
+            if (!$.isEmptyObject(data)) {
+                jqargs.data = data;
             }
         } else {
             throw "Unsupported method " + args.method;
         }
-        if (args.error != null) {
-            jqargs.error = args.error;
-        }
         if (that.config.debug) { console.log(jqargs); }
         $.ajax(jqargs);
+    }
+    
+    //****************************************************
+    // ISSUE
+    //****************************************************
+    
+    // Create a dummy Issue that can be used for an operation
+    // like `edit()` that only needs an owner, repo and number
+    //  owner - The repository's owner
+    //  repo - The repository where the issue is stored
+    //  number - The number of an Issue
+    GitHub.prototype.issue = function(owner, repo, number) {
+        var that = this;
+        if (owner == null) {
+            throw "Missing required `owner`";
+        }
+        if (repo == null) {
+            throw "Missing required `repo`";
+        }
+        if (number == null) {
+            throw "Missing required `number`";
+        }
+        var url = "repos/" + owner + "/" + repo + "/issues/" + number;
+        return new Issue(that, { id: id, url: url, _state: "idonly" });
+    }
+    
+    // Returns a List object that can be used to iterate over all the Issues
+    // across all the authenticated user’s visible repositories including
+    // owned repositories, member repositories, and organization repositories
+    //  args.authentication - Authentication to use for the remote call
+    //  args.parameters - Optional parameters to pass to the search
+    //     query, see https://developer.github.com/v3/issues/#parameters
+    //  args.pageSize - Optional page size to use for the list requests.
+    //     NB: not all list queries support this parameter see GitHub API docs
+    //  args.maxRequests - Optional number indicating the maximum number of
+    //     remote calls the function `each()` will make (default 5)
+    //  args.error - Optional callback to be called on erroneous
+    //     termination of the remote call
+    GitHub.prototype.issues = function(args) {
+        var that = this;
+        if (args == null) {
+            args = {};
+        }
+        if (args.authentication == null && that.github.config.authentication == null) {
+            throw "Authentication required";
+        }
+        return that._issues("issues", args);
+    }
+    
+    // Returns a List object that can be used to iterate over all the Issues
+    // across owned and member repositories for the authenticated user
+    //  args.authentication - Authentication to use for the remote call
+    //  args.parameters - Optional parameters to pass to the search
+    //     query, see https://developer.github.com/v3/issues/#parameters
+    //  args.pageSize - Optional page size to use for the list requests.
+    //     NB: not all list queries support this parameter see GitHub API docs
+    //  args.maxRequests - Optional number indicating the maximum number of
+    //     remote calls the function `each()` will make (default 5)
+    //  args.error - Optional callback to be called on erroneous
+    //     termination of the remote call
+    GitHub.prototype.userIssues = function(args) {
+        var that = this;
+        if (args == null) {
+            args = {};
+        }
+        if (args.authentication == null && that.github.config.authentication == null) {
+            throw "Authentication required";
+        }
+        return that._issues("user/issues", args);
+    }
+    
+    // Returns a List object that can be used to iterate all the Issues
+    // for a given organization for the authenticated user
+    //  org - The name of one of the authenticated user's organizations
+    //  args.authentication - Authentication to use for the remote call
+    //  args.parameters - Optional parameters to pass to the search
+    //     query, see https://developer.github.com/v3/issues/#parameters
+    //  args.pageSize - Optional page size to use for the list requests.
+    //     NB: not all list queries support this parameter see GitHub API docs
+    //  args.maxRequests - Optional number indicating the maximum number of
+    //     remote calls the function `each()` will make (default 5)
+    //  args.error - Optional callback to be called on erroneous
+    //     termination of the remote call
+    GitHub.prototype.organizationIssues = function(org, args) {
+        var that = this;
+        if (args == null) {
+            args = {};
+        }
+        if (org == null) {
+            throw "Missing required `org`";
+        }
+        if (args.authentication == null && that.github.config.authentication == null) {
+            throw "Authentication required";
+        }
+        return that._issues("orgs/" + org + "/issues", args);
+    }
+    
+    // Returns a List object that can be used to iterate over a repository's Issues
+    //  owner - The name of a repository's owner
+    //  repo - The name of a repository
+    //  args.parameters - Optional parameters to pass to the search
+    //     query, see https://developer.github.com/v3/issues/#parameters-1
+    //  args.pageSize - Optional page size to use for the list requests.
+    //     NB: not all list queries support this parameter see GitHub API docs
+    //  args.maxRequests - Optional number indicating the maximum number of
+    //     remote calls the function `each()` will make (default 5)
+    //  args.error - Optional callback to be called on erroneous
+    //     termination of the remote call
+    //  args.authentication - Optional Authentication to use for the
+    //     remote call
+    GitHub.prototype.repositoryIssues = function(owner, repo, args) {
+        var that = this;
+        if (owner == null) {
+            throw "Missing required `owner`";
+        }
+        if (repo == null) {
+            throw "Missing required `repo`";
+        }
+        return that._issues("repos/" + owner + "/" + repo + "/issues", args);
+    }
+    
+    GitHub.prototype._issues = function(url, args) {
+        var that = this;
+        if (args == null) {
+            args = {};
+        }
+        
+        function decodeIssue(json) {
+            json["_state"] = "summary";
+            return new Issue(that, json);
+        }
+        
+        return that._list({
+            url: url,
+            parameters: args.parameters,
+            decode: decodeIssue,
+            pageSize: args.pageSize,
+            maxRequests: args.maxRequests,
+            authentication: args.authentication,
+            error: args.error
+        });
+    }
+    
+    //////////////////////////////////////////////////////////////////////
+    // Object holding Issue data
+    //  github - A `GitHub` object
+    //  data - The information held by the Issue, see
+    //     https://developer.github.com/v3/issues/#response
+    //////////////////////////////////////////////////////////////////////
+    function Issue(github, data) {
+        this.github = github;
+        this.data = data;
+        var url = data.url;
+        if (url == null) {
+            throw "Missing required `data.url`";
+        }
+        var p = url.indexOf("/repos/");
+        if (p >= 0) {
+            url = url.substring(p + 1);
+        }
+        this.apiurl = url;
+    }
+    
+    // Fetch the Issue
+    //  args.success - Optional callback to be called on successful
+    //     termination of the remote call
+    //  args.error - Optional callback to be called on erroneous
+    //     termination of the remote call
+    //  args.authentication - Optional Authentication to use for the
+    //     remote call
+    Issue.prototype.fetch = function(args) {
+        var that = this;
+        if (args == null) {
+            args = {};
+        }
+        
+        function handleIssue(json, status, xhr) {
+            that.data = json;
+            delete that.data._state;
+            if (args.success != null) {
+                args.success(that);
+            }
+        }
+        
+        if (that.data._state) {
+            that.github._call({
+                url: that.apiurl,
+                method: "GET",
+                authentication: args.authentication,
+                success: handleIssue,
+                error: args.error
+            });
+        }
+    }
+    
+    // Returns a List object that can be used to iterate over all the Labels
+    // defined on the given issue
+    //  args.pageSize - Optional page size to use for the list requests.
+    //     NB: not all list queries support this parameter see GitHub API docs
+    //  args.maxRequests - Optional number indicating the maximum number of
+    //     remote calls the function `each()` will make (default 5)
+    //  args.error - Optional callback to be called on erroneous
+    //     termination of the remote call
+    //  args.authentication - Optional Authentication to use for the
+    //     remote call
+    Issue.prototype.labels = function(args) {
+        var that = this;
+        return that.github._labels(that.apiurl + "/labels", args);
+    }
+    
+    // Returns a List object that can be used to iterate over all the
+    // comments of this Issue
+    //  args.pageSize - Optional page size to use for the list requests.
+    //     NB: not all list queries support this parameter see GitHub API docs
+    //  args.maxRequests - Optional number indicating the maximum number of
+    //     remote calls the function `each()` will make (default 5)
+    //  args.error - Optional callback to be called on erroneous
+    //     termination of the remote call
+    //  args.authentication - Optional Authentication to use for the
+    //     remote call
+    Issue.prototype.comments = function(args) {
+        var that = this;
+        return that.github._comments(that.apiurl + "/comments", that, args);
+    }
+
+    // Create a Comment
+    //  args.data - The data used to create the Comment,
+    //     see https://developer.github.com/v3/issues/comments/#create-a-comment
+    //  args.success - Optional callback to be called on successful
+    //     termination of the remote call
+    //  args.error - Optional callback to be called on erroneous
+    //     termination of the remote call
+    //  args.authentication - Optional Authentication to use for the
+    //     remote call
+    Issue.prototype.createComment = function(args) {
+        var that = this;
+        if (args == null) {
+            args = {};
+        }
+        if (args.data == null) {
+            throw "Missing required `args.data`";
+        }
+        
+        function handleComment(json, status, xhr) {
+            if (args.success != null) {
+                var comment = new Comment(that.github, that, json);
+                args.success(comment);
+            }
+        }
+        
+        that.github._call({
+            url: that.apiurl + "/comments",
+            method: "POST",
+            data: args.data,
+            authentication: args.authentication,
+            success: handleComment,
+            error: args.error
+        });
+    }
+    
+    //****************************************************
+    // LABEL
+    //****************************************************
+    
+    // Create a dummy Label that can be used for an operation
+    // like `edit()` or `remove()` that only needs an owner,
+    // repo and name
+    //  owner - The repository's owner
+    //  repo - The repository where the issue is stored
+    //  name - The name of a Label
+    GitHub.prototype.label = function(owner, repo, name) {
+        var that = this;
+        if (owner == null) {
+            throw "Missing required `owner`";
+        }
+        if (repo == null) {
+            throw "Missing required `repo`";
+        }
+        if (name == null) {
+            throw "Missing required `name`";
+        }
+        var url = "repos/" + owner + "/" + repo + "/labels/" + name;
+        return new Label(that, { name: name, url: url, _state: "idonly" });
+    }
+    
+    // Create a Label
+    //  owner - The repository's owner
+    //  repo - The repository where the issue is stored
+    //  args.data - The data used to create the Label, see
+    //     https://developer.github.com/v3/issues/labels/#parameters
+    //  args.success - Optional callback to be called on successful
+    //     termination of the remote call
+    //  args.error - Optional callback to be called on erroneous
+    //     termination of the remote call
+    //  args.authentication - Optional Authentication to use for the
+    //     remote call
+    GitHub.prototype.createLabel = function(owner, repo, args) {
+        var that = this;
+        if (args == null) {
+            args = {};
+        }
+        if (owner == null) {
+            throw "Missing required `owner`";
+        }
+        if (repo == null) {
+            throw "Missing required `repo`";
+        }
+        if (args.data == null) {
+            throw "Missing required `args.data`";
+        }
+        
+        function handleLabel(json, status, xhr) {
+            if (args.success != null) {
+                var gist = new Label(that, json);
+                args.success(gist);
+            }
+        }
+        
+        var url = "repos/" + owner + "/" + repo + "/labels";
+        that._call({
+            url: url,
+            method: "POST",
+            data: args.data,
+            authentication: args.authentication,
+            success: handleLabel,
+            error: args.error
+        });
+    }
+    
+    // Returns a List object that can be used to iterate over all the Labels
+    // defined for the given repository
+    //  owner - The repository's owner
+    //  repo - The repository where the issue is stored
+    //  args.pageSize - Optional page size to use for the list requests.
+    //     NB: not all list queries support this parameter see GitHub API docs
+    //  args.maxRequests - Optional number indicating the maximum number of
+    //     remote calls the function `each()` will make (default 5)
+    //  args.error - Optional callback to be called on erroneous
+    //     termination of the remote call
+    //  args.authentication - Optional Authentication to use for the
+    //     remote call
+    GitHub.prototype.labels = function(owner, repo, args) {
+        var that = this;
+        if (owner == null) {
+            throw "Missing required `owner`";
+        }
+        if (repo == null) {
+            throw "Missing required `repo`";
+        }
+        return that._labels("repos/" + owner + "/" + repo + "/labels", args);
+    }
+    
+    GitHub.prototype._labels = function(url, args) {
+        var that = this;
+        if (args == null) {
+            args = {};
+        }
+        
+        function decodeLabel(json) {
+            json["_state"] = "summary";
+            return new Label(that, json);
+        }
+        
+        return that._list({
+            url: url,
+            parameters: args.parameters,
+            decode: decodeLabel,
+            pageSize: args.pageSize,
+            maxRequests: args.maxRequests,
+            authentication: args.authentication,
+            error: args.error
+        });
+    }
+    
+    //////////////////////////////////////////////////////////////////////
+    // Object holding Label data
+    //  github - A `GitHub` object
+    //  data - The information held by the Label, see
+    //     https://developer.github.com/v3/issues/labels/#response
+    //////////////////////////////////////////////////////////////////////
+    function Label(github, data) {
+        this.github = github;
+        this.data = data;
+        var url = data.url;
+        if (url == null) {
+            throw "Missing required `data.url`";
+        }
+        var p = url.indexOf("/repos/");
+        if (p >= 0) {
+            url = url.substring(p + 1);
+        }
+        this.apiurl = url;
+    }
+    
+    // Fetch the Label
+    //  args.success - Optional callback to be called on successful
+    //     termination of the remote call
+    //  args.error - Optional callback to be called on erroneous
+    //     termination of the remote call
+    //  args.authentication - Optional Authentication to use for the
+    //     remote call
+    Label.prototype.fetch = function(args) {
+        var that = this;
+        if (args == null) {
+            args = {};
+        }
+        
+        function handleLabel(json, status, xhr) {
+            that.data = json;
+            delete that.data._state;
+            if (args.success != null) {
+                args.success(that);
+            }
+        }
+        
+        if (that.data._state) {
+            that.github._call({
+                url: that.apiurl,
+                method: "GET",
+                authentication: args.authentication,
+                success: handleLabel,
+                error: args.error
+            });
+        }
+    }
+    
+    // Edit a Label
+    //  args.data - The data used to edit the Label, see
+    //     https://developer.github.com/v3/issues/labels/#update-a-label
+    //  args.success - Optional callback to be called on successful
+    //     termination of the remote call
+    //  args.error - Optional callback to be called on erroneous
+    //     termination of the remote call
+    //  args.authentication - Optional Authentication to use for the
+    //     remote call
+    Label.prototype.edit = function(args) {
+        var that = this;
+        if (args == null) {
+            args = {};
+        }
+        if (args.data == null) {
+            throw "Missing required `args.data`";
+        }
+        
+        function handleLabel(json, status, xhr) {
+            that.data = json;
+            if (args.success != null) {
+                args.success(that);
+            }
+        }
+        
+        that.github._call({
+            url: that.apiurl,
+            method: "PATCH",
+            data: args.data,
+            authentication: args.authentication,
+            success: handleLabel,
+            error: args.error
+        });
+    }
+    
+    // Remove a Label
+    //  args.authentication - Authentication to use for the remote call
+    //  args.success - Optional callback to be called on successful
+    //     termination of the remote call
+    //  args.error - Optional callback to be called on erroneous
+    //     termination of the remote call
+    Label.prototype.remove = function(args) {
+        var that = this;
+        if (args == null) {
+            args = {};
+        }
+        if (args.authentication == null && that.github.config.authentication == null) {
+            throw "Authentication required";
+        }
+        
+        function handleRemove(json, status, xhr) {
+            if (args.success != null) {
+                args.success(that);
+            }
+        }
+        
+        that.github._call({
+            url: that.apiurl,
+            method: "DELETE",
+            authentication: args.authentication,
+            success: handleRemove,
+            error: args.error
+        });
+    }
+    
+    //****************************************************
+    // MILESTONE
+    //****************************************************
+    
+    // Create a dummy Milestone that can be used for an operation
+    // like `edit()` or `remove()` that only needs an owner,
+    // repo and number
+    //  owner - The repository's owner
+    //  repo - The repository where the issue is stored
+    //  number - The number of a Milestone
+    GitHub.prototype.milestone = function(owner, repo, number) {
+        var that = this;
+        if (owner == null) {
+            throw "Missing required `owner`";
+        }
+        if (repo == null) {
+            throw "Missing required `repo`";
+        }
+        if (name == null) {
+            throw "Missing required `number`";
+        }
+        var url = "repos/" + owner + "/" + repo + "/milestones/" + number;
+        return new Milestone(that, { number: number, url: url, _state: "idonly" });
+    }
+    
+    // Create a Milestone
+    //  owner - The repository's owner
+    //  repo - The repository where the issue is stored
+    //  args.data - The data used to create the Milestone, see
+    //     https://developer.github.com/v3/issues/milestones/#parameters
+    //  args.success - Optional callback to be called on successful
+    //     termination of the remote call
+    //  args.error - Optional callback to be called on erroneous
+    //     termination of the remote call
+    //  args.authentication - Optional Authentication to use for the
+    //     remote call
+    GitHub.prototype.createMilestone = function(owner, repo, args) {
+        var that = this;
+        if (args == null) {
+            args = {};
+        }
+        if (owner == null) {
+            throw "Missing required `owner`";
+        }
+        if (repo == null) {
+            throw "Missing required `repo`";
+        }
+        if (args.data == null) {
+            throw "Missing required `args.data`";
+        }
+        
+        function handleMilestone(json, status, xhr) {
+            if (args.success != null) {
+                var gist = new Milestone(that, json);
+                args.success(gist);
+            }
+        }
+        
+        var url = "repos/" + owner + "/" + repo + "/milestones";
+        that._call({
+            url: url,
+            method: "POST",
+            data: args.data,
+            authentication: args.authentication,
+            success: handleMilestone,
+            error: args.error
+        });
+    }
+    
+    // Returns a List object that can be used to iterate over all the Milestones
+    // defined for the given repository
+    //  owner - The repository's owner
+    //  repo - The repository where the issue is stored
+    //  args.parameters - Optional parameters to pass to the search
+    //     query, see https://developer.github.com/v3/issues/milestones/#parameters
+    //  args.pageSize - Optional page size to use for the list requests.
+    //     NB: not all list queries support this parameter see GitHub API docs
+    //  args.maxRequests - Optional number indicating the maximum number of
+    //     remote calls the function `each()` will make (default 5)
+    //  args.error - Optional callback to be called on erroneous
+    //     termination of the remote call
+    //  args.authentication - Optional Authentication to use for the
+    //     remote call
+    GitHub.prototype.milestones = function(owner, repo, args) {
+        var that = this;
+        if (owner == null) {
+            throw "Missing required `owner`";
+        }
+        if (repo == null) {
+            throw "Missing required `repo`";
+        }
+        return that._milestones("repos/" + owner + "/" + repo + "/milestones", args);
+    }
+    
+    GitHub.prototype._milestones = function(url, args) {
+        var that = this;
+        if (args == null) {
+            args = {};
+        }
+        
+        function decodeMilestone(json) {
+            json["_state"] = "summary";
+            return new Milestone(that, json);
+        }
+        
+        return that._list({
+            url: url,
+            parameters: args.parameters,
+            decode: decodeMilestone,
+            pageSize: args.pageSize,
+            maxRequests: args.maxRequests,
+            authentication: args.authentication,
+            error: args.error
+        });
+    }
+    
+    //////////////////////////////////////////////////////////////////////
+    // Object holding Milestone data
+    //  github - A `GitHub` object
+    //  data - The information held by the Milestone, see
+    //     https://developer.github.com/v3/issues/milestones/#response
+    //////////////////////////////////////////////////////////////////////
+    function Milestone(github, data) {
+        this.github = github;
+        this.data = data;
+        var url = data.url;
+        if (url == null) {
+            throw "Missing required `data.url`";
+        }
+        var p = url.indexOf("/repos/");
+        if (p >= 0) {
+            url = url.substring(p + 1);
+        }
+        this.apiurl = url;
+    }
+    
+    // Fetch the Milestone
+    //  args.success - Optional callback to be called on successful
+    //     termination of the remote call
+    //  args.error - Optional callback to be called on erroneous
+    //     termination of the remote call
+    //  args.authentication - Optional Authentication to use for the
+    //     remote call
+    Milestone.prototype.fetch = function(args) {
+        var that = this;
+        if (args == null) {
+            args = {};
+        }
+        
+        function handleMilestone(json, status, xhr) {
+            that.data = json;
+            delete that.data._state;
+            if (args.success != null) {
+                args.success(that);
+            }
+        }
+        
+        if (that.data._state) {
+            that.github._call({
+                url: that.apiurl,
+                method: "GET",
+                authentication: args.authentication,
+                success: handleMilestone,
+                error: args.error
+            });
+        }
+    }
+    
+    // Edit a Milestone
+    //  args.data - The data used to edit the Milestone, see
+    //     https://developer.github.com/v3/issues/milestones/#update-a-milestone
+    //  args.success - Optional callback to be called on successful
+    //     termination of the remote call
+    //  args.error - Optional callback to be called on erroneous
+    //     termination of the remote call
+    //  args.authentication - Optional Authentication to use for the
+    //     remote call
+    Milestone.prototype.edit = function(args) {
+        var that = this;
+        if (args == null) {
+            args = {};
+        }
+        if (args.data == null) {
+            throw "Missing required `args.data`";
+        }
+        
+        function handleMilestone(json, status, xhr) {
+            that.data = json;
+            if (args.success != null) {
+                args.success(that);
+            }
+        }
+        
+        that.github._call({
+            url: that.apiurl,
+            method: "PATCH",
+            data: args.data,
+            authentication: args.authentication,
+            success: handleMilestone,
+            error: args.error
+        });
+    }
+    
+    // Remove a Milestone
+    //  args.authentication - Authentication to use for the remote call
+    //  args.success - Optional callback to be called on successful
+    //     termination of the remote call
+    //  args.error - Optional callback to be called on erroneous
+    //     termination of the remote call
+    Milestone.prototype.remove = function(args) {
+        var that = this;
+        if (args == null) {
+            args = {};
+        }
+        if (args.authentication == null && that.github.config.authentication == null) {
+            throw "Authentication required";
+        }
+        
+        function handleRemove(json, status, xhr) {
+            if (args.success != null) {
+                args.success(that);
+            }
+        }
+        
+        that.github._call({
+            url: that.apiurl,
+            method: "DELETE",
+            authentication: args.authentication,
+            success: handleRemove,
+            error: args.error
+        });
+    }
+    
+    //****************************************************
+    // GIST
+    //****************************************************
+    
+    // Create a dummy Gist that can be used for operations
+    // like `edit()` and `remove()` that only need an id
+    //  id - The id of a Gist
+    GitHub.prototype.gist = function(id) {
+        var that = this;
+        if (id == null) {
+            throw "Missing required `id`";
+        }
+        return new Gist(that, { id: id, _state: "idonly" });
+    }
+    
+    // Create a Gist
+    //  args.data - The data used to create the Gist, see
+    //     https://developer.github.com/v3/gists/#create-a-gist
+    //  args.success - Optional callback to be called on successful
+    //     termination of the remote call
+    //  args.error - Optional callback to be called on erroneous
+    //     termination of the remote call
+    //  args.authentication - Optional Authentication to use for the
+    //     remote call
+    GitHub.prototype.createGist = function(args) {
+        var that = this;
+        if (args == null) {
+            args = {};
+        }
+        if (args.data == null) {
+            throw "Missing required `args.data`";
+        }
+        if (args.data.files == null) {
+            throw "Missing required `args.data.files`";
+        }
+        
+        function handleGist(json, status, xhr) {
+            if (args.success != null) {
+                var gist = new Gist(that, json);
+                args.success(gist);
+            }
+        }
+        
+        that._call({
+            url: "gists",
+            method: "POST",
+            data: args.data,
+            authentication: args.authentication,
+            success: handleGist,
+            error: args.error
+        });
+    }
+    
+    // Returns a List object that can be used to iterate over an
+    // authenticated user's Gists or over all public Gists if called
+    // anonymously
+    //  args.parameters - Optional parameters to pass to the search
+    //     query, see https://developer.github.com/v3/gists/#parameters
+    //  args.pageSize - Optional page size to use for the list requests.
+    //     NB: not all list queries support this parameter see GitHub API docs
+    //  args.maxRequests - Optional number indicating the maximum number of
+    //     remote calls the function `each()` will make (default 5)
+    //  args.error - Optional callback to be called on erroneous
+    //     termination of the remote call
+    //  args.authentication - Optional Authentication to use for the
+    //     remote call
+    GitHub.prototype.gists = function(args) {
+        var that = this;
+        return that._gists("gists", args);
+    }
+    
+    // Returns a List object that can be used to iterate over all public Gists
+    //  args.parameters - Optional parameters to pass to the search
+    //     query, see https://developer.github.com/v3/gists/#parameters
+    //  args.pageSize - Optional page size to use for the list requests.
+    //     NB: not all list queries support this parameter see GitHub API docs
+    //  args.maxRequests - Optional number indicating the maximum number of
+    //     remote calls the function `each()` will make (default 5)
+    //  args.error - Optional callback to be called on erroneous
+    //     termination of the remote call
+    //  args.authentication - Optional Authentication to use for the
+    //     remote call
+    GitHub.prototype.publicGists = function(args) {
+        var that = this;
+        return that._gists("gists/public", args);
+    }
+    
+    // Returns a List object that can be used to iterate over all an
+    // authenticated user's starred Gists
+    //  args.parameters - Optional parameters to pass to the search
+    //     query, see https://developer.github.com/v3/gists/#parameters
+    //  args.pageSize - Optional page size to use for the list requests.
+    //     NB: not all list queries support this parameter see GitHub API docs
+    //  args.maxRequests - Optional number indicating the maximum number of
+    //     remote calls the function `each()` will make (default 5)
+    //  args.error - Optional callback to be called on erroneous
+    //     termination of the remote call
+    //  args.authentication - Optional Authentication to use for the
+    //     remote call
+    GitHub.prototype.starredGists = function(args) {
+        var that = this;
+        return that._gists("gists/starred", args);
+    }
+
+    GitHub.prototype._gists = function(url, args) {
+        var that = this;
+        if (args == null) {
+            args = {};
+        }
+        
+        function decodeGist(json) {
+            json["_state"] = "summary";
+            return new Gist(that, json);
+        }
+        
+        return that._list({
+            url: url,
+            parameters: args.parameters,
+            decode: decodeGist,
+            pageSize: args.pageSize,
+            maxRequests: args.maxRequests,
+            authentication: args.authentication,
+            error: args.error
+        });
     }
     
     //////////////////////////////////////////////////////////////////////
@@ -271,6 +1033,7 @@
     function Gist(github, data) {
         this.github = github;
         this.data = data;
+        this.apiurl = "gists/" + data.id;
     }
     
     // Fetch the Gist
@@ -283,6 +1046,9 @@
     //     remote call
     Gist.prototype.fetch = function(args) {
         var that = this;
+        if (args == null) {
+            args = {};
+        }
         
         function handleGist(json, status, xhr) {
             that.data = json;
@@ -293,7 +1059,7 @@
         }
         
         if (that.data._state) {
-            var url = "gists/" + that.data.id;
+            var url = that.apiurl;
             if (args.revision != null) {
                 url = url + "/" + args.revision;
             }
@@ -318,6 +1084,9 @@
     //     remote call
     Gist.prototype.edit = function(args) {
         var that = this;
+        if (args == null) {
+            args = {};
+        }
         if (args.data == null) {
             throw "Missing required `args.data`";
         }
@@ -330,7 +1099,7 @@
         }
         
         that.github._call({
-            url: "gists/" + that.data.id,
+            url: that.apiurl,
             method: "PATCH",
             data: args.data,
             authentication: args.authentication,
@@ -348,6 +1117,9 @@
     //     remote call
     Gist.prototype.remove = function(args) {
         var that = this;
+        if (args == null) {
+            args = {};
+        }
         if (args.authentication == null && that.github.config.authentication == null) {
             throw "Authentication required";
         }
@@ -359,7 +1131,7 @@
         }
         
         that.github._call({
-            url: "gists/" + that.data.id,
+            url: that.apiurl,
             method: "DELETE",
             authentication: args.authentication,
             success: handleRemove,
@@ -367,6 +1139,21 @@
         });
     }
     
+    // Returns a List object that can be used to iterate over all the
+    // comments of this Gist
+    //  args.pageSize - Optional page size to use for the list requests.
+    //     NB: not all list queries support this parameter see GitHub API docs
+    //  args.maxRequests - Optional number indicating the maximum number of
+    //     remote calls the function `each()` will make (default 5)
+    //  args.error - Optional callback to be called on erroneous
+    //     termination of the remote call
+    //  args.authentication - Optional Authentication to use for the
+    //     remote call
+    Gist.prototype.comments = function(args) {
+        var that = this;
+        return that.github._comments(that.apiurl + "/comments", that, args);
+    }
+
     // Create a Comment
     //  args.data - The data used to create the Comment, see https://developer.github.com/v3/gists/comments/#create-a-comment
     //  args.success - Optional callback to be called on successful
@@ -377,6 +1164,9 @@
     //     remote call
     Gist.prototype.createComment = function(args) {
         var that = this;
+        if (args == null) {
+            args = {};
+        }
         if (args.data == null) {
             throw "Missing required `args.data`";
         }
@@ -389,11 +1179,37 @@
         }
         
         that.github._call({
-            url: "gists/" + that.data.id + "/comments",
+            url: that.apiurl + "/comments",
             method: "POST",
             data: args.data,
             authentication: args.authentication,
             success: handleComment,
+            error: args.error
+        });
+    }
+    
+    //****************************************************
+    // COMMENT
+    //****************************************************
+    
+    GitHub.prototype._comments = function(url, item, args) {
+        var that = this;
+        if (args == null) {
+            args = {};
+        }
+        
+        function decodeComment(json) {
+            json["_state"] = "summary";
+            return new Comment(that, item, json);
+        }
+        
+        return that._list({
+            url: url,
+            parameters: args.parameters,
+            decode: decodeComment,
+            pageSize: args.pageSize,
+            maxRequests: args.maxRequests,
+            authentication: args.authentication,
             error: args.error
         });
     }
@@ -404,11 +1220,48 @@
     //  item - The GitHub object the comment is meant for, eg. a `Gist`
     //  data - The information held by the Comment, see
     //     https://developer.github.com/v3/gists/comments/#response
+    //     https://developer.github.com/v3/issues/comments/#response
     //////////////////////////////////////////////////////////////////////
     function Comment(github, item, data) {
         this.github = github;
         this.item = item;
         this.data = data;
+    }
+    
+    // Edit a Comment
+    //  args.data - The data used to edit the Comment, see
+    //     https://developer.github.com/v3/gists/comments/#edit-a-comment
+    //     https://developer.github.com/v3/issues/comments/#edit-a-comment
+    //  args.success - Optional callback to be called on successful
+    //     termination of the remote call
+    //  args.error - Optional callback to be called on erroneous
+    //     termination of the remote call
+    //  args.authentication - Optional Authentication to use for the
+    //     remote call
+    Comment.prototype.edit = function(args) {
+        var that = this;
+        if (args == null) {
+            args = {};
+        }
+        if (args.data == null) {
+            throw "Missing required `args.data`";
+        }
+        
+        function handleCommit(json, status, xhr) {
+            that.data = json;
+            if (args.success != null) {
+                args.success(that);
+            }
+        }
+        
+        that.github._call({
+            url: that.apiurl,
+            method: "PATCH",
+            data: args.data,
+            authentication: args.authentication,
+            success: handleCommit,
+            error: args.error
+        });
     }
     
     // Remove a Comment
@@ -420,6 +1273,9 @@
     //     remote call
     Comment.prototype.remove = function(args) {
         var that = this;
+        if (args == null) {
+            args = {};
+        }
         
         function handleRemove(json, status, xhr) {
             if (args.success != null) {
@@ -427,12 +1283,10 @@
             }
         }
         
-        var url;
-        if (item instanceof Gist) {
-            url = "gists/" + item.data.id + "/comments/" + that.data.id;
-        } else {
+        if (item.apiurl == null) {
             throw "Removing comments not supported for " + item.constructor.name;
         }
+        var url = item.apiurl + "/comments/" + that.data.id;
         that.github._call({
             url: url,
             method: "DELETE",
@@ -442,10 +1296,35 @@
         });
     }
     
+    //****************************************************
+    // Lists
+    //****************************************************
+    
+    // Private function that handles remote calls returning lists.
+    // Returns an object that can be used to iterate over the items.
+    //  args.url - The URL part that added to the `config.rootUrl`
+    //     forms the actual URL to use for the remote list call
+    //  args.parameters - Optional parameters to pass to the search query
+    //  args.decode - Optional decoder function that takes a JSON object
+    //     and returns a user-defined object
+    //  args.pageSize - Optional page size to use for the list requests.
+    //     NB: not all list queries support this parameter see GitHub API docs
+    //  args.maxRequests - Optional number indicating the maximum number of
+    //     remote calls the function `each()` will make (default 5)
+    //  args.error - Optional callback to be called on erroneous
+    //     termination of any remote calls
+    //  args.authentication - Optional Authentication to use for the
+    //     remote calls
+    GitHub.prototype._list = function(args) {
+        var that = this;
+        return new List(that, args);
+    }
+    
     //////////////////////////////////////////////////////////////////////
     // Object for handling lists
     //  data.url - The URL part that added to the `config.rootUrl`
     //     forms the actual URL to use for the remote list call
+    //  data.parameters - Optional parameters to pass to the search query
     //  data.decode - Optional decoder function that takes a JSON object
     //     and returns a user-defined object
     //  data.pageSize - Optional page size to use for the list requests.
@@ -489,17 +1368,38 @@
 
         var func, page, requestCount;
         if (typeof args === "function") {
-            func = args;
-            page = 1;
-            requestCount = 0;
-        } else {
-            if (args.func == null) {
-                throw "Missing required `args.func`";
-            }
-            func = args.func;
-            page = args.page || 1;
-            requestCount = args._requestCount || 0;
+            args = { func: args };
         }
+        
+        return that._each(args);
+    }
+    
+    // Just like `each()` except that it doesn't start over from the
+    // beginning on every call but starts where the previous call
+    // left off. When there are no pages left to fetch this method
+    // won't do anything and just return `null`
+    List.prototype.next = function(args) {
+        var that = this;
+
+        var func, page, requestCount;
+        if (typeof args === "function") {
+            args = { func: args };
+        }
+        args.page = args.page || that.pages.length + 1;
+        
+        return that._each(args);
+    }
+    
+    List.prototype._each = function(args) {
+        var that = this;
+
+        var func, page, requestCount;
+        if (args.func == null) {
+            throw "Missing required `args.func`";
+        }
+        func = args.func;
+        page = args.page || 1;
+        requestCount = args._requestCount || 0;
         
         var idx = 0;
         if (page != null && page > 0) {
@@ -532,9 +1432,12 @@
                 page: idx + 1,
                 success: continueEach
             });
+            args.page = idx + that.data.maxRequests + 1;
+            return args;
         } else if (args.finish != null) {
             args.finish(that);
         }
+        return null;
     }
     
     // Private function that fetches a page of data from a remote list
@@ -543,6 +1446,9 @@
     //  args.page - Optional page number to fetch (default 1)
     List.prototype._fetch = function(args) {
         var that = this;
+        if (args == null) {
+            args = {};
+        }
         if (args.success == null) {
             throw "Missing required `args.success`";
         }
@@ -574,19 +1480,25 @@
             args.success(items);
         }
         
-        var url = addParam(that.data.url, "page", idx + 1);
+        var data = that.data.parameters || {};
+        data.page = idx + 1;
         if (that.data.pageSize != null) {
-            url = addParam(url, "per_page", that.data.pageSize);
+            data.per_page = that.data.pageSize;
         }
         
         that.github._call({
-            url: url,
+            url: that.data.url,
+            data: data,
             method: "GET",
             authentication: that.data.authentication,
             success: handleList,
             error: that.data.error
         });
     }
+    
+    //****************************************************
+    // Authentication
+    //****************************************************
     
     //////////////////////////////////////////////////////////////////////
     // Object used for authentication
@@ -605,11 +1517,14 @@
         this.token = data.token;
     }
     
-    function addParam(url, name, value) {
-        if (url.indexOf("?") >= 0) {
-            return url + "&" + name + "=" + value;
-        } else {
-            return url + "?" + name + "=" + value;
+    Authentication.prototype.apply = function(jqargs, hdr, params) {
+        var that = this;
+        if (that.type == "oauth" && that.token != null) {
+            hdr["Authorization"] = "token " + that.token;
+        } else if (that.type == "basic") {
+            var encuser = encodeURIComponent(escape(that.username));
+            var encpwd = encodeURIComponent(escape(that.password));
+            hdr["Authorization"] = "Basic " + btoa(encuser + ":" + encpwd);
         }
     }
     
