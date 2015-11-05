@@ -217,7 +217,7 @@
         if (args == null) {
             args = {};
         }
-        if (args.authentication == null && that.github.config.authentication == null) {
+        if (args.authentication == null && that.config.authentication == null) {
             throw "Authentication required";
         }
         return that._issues("issues", args);
@@ -239,7 +239,7 @@
         if (args == null) {
             args = {};
         }
-        if (args.authentication == null && that.github.config.authentication == null) {
+        if (args.authentication == null && that.config.authentication == null) {
             throw "Authentication required";
         }
         return that._issues("user/issues", args);
@@ -265,7 +265,7 @@
         if (org == null) {
             throw "Missing required `org`";
         }
-        if (args.authentication == null && that.github.config.authentication == null) {
+        if (args.authentication == null && that.config.authentication == null) {
             throw "Authentication required";
         }
         return that._issues("orgs/" + org + "/issues", args);
