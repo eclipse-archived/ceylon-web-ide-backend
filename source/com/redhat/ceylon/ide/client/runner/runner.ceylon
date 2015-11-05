@@ -41,7 +41,7 @@ String highlight(String txt)
 
 void createMessagesTable() {
     dynamic {
-        if (!document.getElementById("messages")) {
+        if (!document.getElementById("messages") exists) {
             getOutput().innerHTML 
                     = "<table><tbody id='messages'/></table>";
         }
@@ -62,7 +62,7 @@ shared void printError(String txt, String? loc)
 void printFormatted(String txt, String? loc, String cssClass, String image) {
     createMessagesTable();
     dynamic {
-        dynamic output = getOutput();
+        dynamic output = document.getElementById("messages");
         output.innerHTML 
                 = output.innerHTML 
                 + "<tr>
