@@ -87,7 +87,7 @@ function escapeHtml(html) {
 }
 
 function highlight(txt) {
-    return escapeHtml(txt).replace(/'\w+'/g, 
+    return escapeHtml(txt).replace(/'[^']+'/g, 
          function (m) { return "<code>" + m.substring(1,m.length-1) + "</code>"; });
 }
 
