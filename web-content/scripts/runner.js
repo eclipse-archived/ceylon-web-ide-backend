@@ -211,7 +211,7 @@ function rewriteDependency(dep) {
     var p = dep.indexOf("/");
     var name = dep.substring(0, p);
     var version = dep.substring(p + 1);
-    var path = name.replace(".", "/");
+    var path = name.replace(/\./g, "/");
     return path + "/" + version + "/" + name + "-" + version;
 }
 
