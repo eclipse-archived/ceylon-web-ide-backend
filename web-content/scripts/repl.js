@@ -1502,10 +1502,9 @@ function showErrors(errors, print) {
             if (from >= 0) {
                 var editor = getEditor(editorId(fileName));
                 if (editor != null) {
-                    var errmsg = escapeHtml(text);
                     //This is to add a marker in the gutter
                     var img = document.createElement('img');
-                    img.title = errmsg;
+                    img.title = text;
                     var underlineStyle, tabstyle;
                     if (err.tp == "w") {
                         img.src = "images/warning.gif";
@@ -1524,7 +1523,7 @@ function showErrors(errors, print) {
                     //This is to modify the style (underline or whatever)
                     markers.push(editor.markText({line:from,ch:err.from.ch},
                                                  {line:to,ch:err.to.ch+1},
-                                                 {className:underlineStyle,title:errmsg}));
+                                                 {className:underlineStyle,title:text}));
                 }
             }
         });
