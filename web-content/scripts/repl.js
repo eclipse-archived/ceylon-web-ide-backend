@@ -363,7 +363,7 @@ function handleResizeMain(event, data) {
     } else if (newwidth >= toolbarContractSize) {
         buttonSetCaption("run", "Run");
         buttonSetCaption("stop", "Stop");
-        buttonSetCaption("reset", "Reset");
+        buttonSetCaption("reset", "Clear");
         buttonSetCaption("share", "Share");
         buttonSetCaption("advanced", "Advanced");
         buttonSetCaption("dark", "Dark");
@@ -425,7 +425,7 @@ function getToolbarItems() {
         { type: 'break',  id: 'break0', hidden: embedded },
         { type: 'button',  id: 'run', caption: 'Run', hint: 'Compile & execute', icon: 'fa fa-play' },
         { type: 'button',  id: 'stop', caption: 'Stop', hint: 'Stop program', icon: 'fa fa-stop', disabled: true },
-        { type: 'button',  id: 'reset', caption: 'Reset', hint: 'Clear output & errors', icon: 'fa fa-exclamation' },
+        { type: 'button',  id: 'reset', caption: 'Clear', hint: 'Clear output & errors', icon: 'fa fa-remove' },
         { type: 'button',  id: 'share', caption: 'Share', hint: 'Share the code on GitHub', icon: 'fa fa-share', hidden: embedded },
         { type: 'break',  id: 'break1', hidden: embedded },
         { type: 'button',  id: 'advanced', caption: 'Advanced', hint: 'Enable more complex code constructs', icon: 'fa fa-square-o', checkicon: 'fa fa-check-square-o', uncheckicon: 'fa fa-square-o', hidden: embedded },
