@@ -4,6 +4,34 @@ if (document.domain != "localhost") {
     document.domain = "ceylon-lang.org";
 }
 
+var loc = window.parent.location;
+var repo = "http://" + loc.host + "/modules";
+var ceylonVersion = "1.2.0";
+var replVersion = "1.0.0";
+var ceylonLang = "ceylon/language/" + ceylonVersion + "/ceylon.language-" + ceylonVersion;
+var repl = "com/redhat/ceylon/ide/client/repl/" + replVersion + "/com.redhat.ceylon.ide.client.repl-" + replVersion;
+
+console.log("REPL", repo);
+
+require.config({
+    baseUrl: "",
+    paths: {
+        com: repo + "/com",
+        ceylon: "http://modules.ceylon-lang.org/repo/1/ceylon"
+    },
+    waitSeconds: 15
+});
+
+require([ceylonLang, repl],
+    function(clang, rrepl) {
+        console && console.log("ceylon.language module loaded for REPL");
+        repl=rrepl;
+        ceylonLang=clang;
+		repl.setJQuery($);
+		$(document).ready(setupLiveTypechecker);
+    }
+);
+
 var docCookies = {
   getItem: function (sKey) {
     if (!sKey) { return null; }
@@ -71,7 +99,6 @@ var fileDeleted;
 var spinCount = 0;
 var closePopups = undefined;
 
-var runner=window.parent.runner;
 var uri = new URI();
 var uriparams = uri.search(true);
 
@@ -80,49 +107,6 @@ var isLimitedHeight = window.matchMedia("only screen and (max-height: 760px)").m
 var limitWidth = isLimitedWidth || embedded;
 var limitHeight = isLimitedHeight || embedded;
 var isMobile = isLimitedWidth || isLimitedHeight;
-
-var live_tc = {
-    _timeout: 3000,
-    _status: "disabled",
-    _last: Date.now(),
-    _files: null,
-    shouldTypecheck: function(files) {
-        if (live_tc._status == "ready" && Date.now()-live_tc._last > live_tc._timeout) {
-            var files = getCompilerFiles();
-            if (!$.isEmptyObject(files)) {
-                return JSON.stringify(files) != live_tc._files;
-            }
-        }
-        return false;
-    },
-    ready: function() {
-        live_tc._status = "ready";
-    },
-    pause: function() {
-        live_tc._status = "paused";
-    },
-    disable: function() {
-        live_tc._status = "disabled";
-    },
-    update: function() {
-        live_tc._files = JSON.stringify(getCompilerFiles());
-    },
-    postpone: function(files) {
-        live_tc._last = Date.now();
-        if (live_tc._status != "disabled") {
-            live_tc.ready();
-        }
-    },
-    done: function() {
-        live_tc.update();
-        live_tc.pause();
-    },
-    now: function() {
-        live_tc._files = {};
-        live_tc._last = Date.now() - live_tc._timeout - 1;
-        live_tc.ready();
-    }
-};
 
 if (typeof String.prototype.startsWith != 'function') {
     String.prototype.startsWith = function(prefix, position) {
@@ -268,12 +252,8 @@ $(document).ready(function() {
             // special "ceylonwebide" GitHub account
             handleSelectSet("6e03a3db46854ff825e9", noDefault);
         }
-        
         listUserGists();
-    
     }
-    
-    setupLiveTypechecker();
 });
 
 function jqContent(jqElem) {
@@ -519,34 +499,7 @@ function handleGitHubDisconnect() {
 }
 
 function setupLiveTypechecker() {
-    window.setInterval(function(){
-        if (live_tc.shouldTypecheck()) {
-            console.log("typechecking...");
-            live_tc.pause();
-            $.ajax('translate', {
-                cache: false,
-                type: 'POST',
-                dataType: 'json',
-                timeout: 5000,
-                success: function(json, status, xhr) {
-                    live_tc.done();
-                    clearEditMarkers();
-                    var errs = json['errors'];
-                    if (errs && !$.isEmptyObject(errs)) {
-                        showErrors(errs, false);
-                    }
-                },
-                error: function() {
-                    live_tc.done();
-                },
-                contentType: 'application/json; charset=UTF-8',
-                data: JSON.stringify({
-                    tc: 1,
-                    files: getCompilerFiles()
-                })
-            });
-        }
-    },500);
+    window.setInterval(repl.setupLiveTypechecker,500);
 }
 
 // Mark the given Gist as selected and updates the proper GUI elements
@@ -813,7 +766,7 @@ function newFile(name) {
 }
 
 function newModuleFile() {
-    var neweditor = addSourceEditor("module.ceylon", runner.defaultImportSrc());
+    var neweditor = addSourceEditor("module.ceylon", repl.defaultImportSrc());
     markWrapperReadOnly(neweditor.ceylonId);
     updateEditorDirtyState(neweditor.ceylonId);
     return neweditor;
@@ -1209,7 +1162,7 @@ function applyAdvanced() {
         }
     });
     newModuleFile();
-    live_tc.ready();
+    repl.live_tc&&repl.live_tc().ready();
     updateMenuState();
     // Need to put this in a timeout or the update
     // of the button conflicts with the w2 framework
@@ -1287,13 +1240,20 @@ function stopSpinner() {
 
 //Sends the code from the editor to the server for compilation and it successful, runs the resulting js.
 function performRun() {
-    translate(afterTranslate);
+    repl.translate(afterTranslate);
 }
 
 function createFilesFromCode(code) {
+    if (repl.wrappedTag===undefined) {
+        return {
+            "main.ceylon": {
+                content: "//$webrun_wrapped\nshared void run() {" + code + "\n}"
+            }
+        };
+    }
     return {
         "main.ceylon": {
-            content: runner.wrappedTag() + runner.codePrefix() + code + runner.codePostfix()
+            content: repl.wrappedTag() + repl.codePrefix() + code + repl.codePostfix()
         }
     };
 }
@@ -1302,23 +1262,6 @@ function createFilesFromCode(code) {
 function runCode(code) {
     var files = createFilesFromCode(code);
     translateCode(files, afterTranslate);
-}
-
-// Wraps the contents of the editors in an object and sends it to the server for compilation.
-// On response, executes the script if compilation was OK, otherwise shows errors.
-// In any case it sets the hover docs if available.
-function translate(onTranslation) {
-    var files = getCompilerFiles();
-    if (!$.isEmptyObject(files)) {
-        if (shouldCompile(files)) {
-            clearEditMarkers();
-            translateCode(files, onTranslation);
-        } else {
-            if (onTranslation) {
-                onTranslation();
-            }
-        }
-    }
 }
 
 function translateCode(files, onTranslation) {
@@ -1336,7 +1279,7 @@ function doTranslateCode(files, onTranslation) {
     transok = false;
     
     function onSuccess(json, status, xhr) {
-        live_tc.done();
+        repl.live_tc&&repl.live_tc().done();
         var translatedcode = json['code'];
         if (translatedcode != null) {
             markCompiled(files);
@@ -1355,7 +1298,7 @@ function doTranslateCode(files, onTranslation) {
         }
     }
     function onError(xhr, status, err) {
-        live_tc.done();
+        repl.live_tc&&repl.live_tc().done();
         transok = false;
         printError("An error occurred while compiling your code:");
         printError("--- " + (err?err:status));
@@ -1380,7 +1323,7 @@ function doTranslateCode(files, onTranslation) {
 function complete(editor){
     var cursor = editor.getCursor();
     var files = getCompilerFiles();
-    live_tc.pause();
+    repl.live_tc&&repl.live_tc().pause();
     jQuery.ajax('assist', {
         cache:false, type:'POST',
         dataType:'json',
@@ -1388,7 +1331,7 @@ function complete(editor){
         beforeSend: startSpinner,
         success: function(json, status, xhr){
             stopSpinner();
-            live_tc.ready();
+            repl.live_tc&&repl.live_tc().ready();
             CodeMirror.autocomplete(editor, function(){
                 return {
                     list: json.opts,
@@ -1398,7 +1341,7 @@ function complete(editor){
             });
         },
         error:function(xhr, status, err) {
-            live_tc.ready();
+            repl.live_tc&&repl.live_tc().ready();
             printError("An error occurred while retrieving completions for your code:");
             printError("--- " + (err?err:status));
         },
@@ -1425,7 +1368,7 @@ function fetchDoc(cm) {
         help.parentNode.removeChild(help);
     }
     var docHandler = function(json, status, xhr) {
-        live_tc.ready();
+        repl.live_tc&&repl.live_tc().ready();
         if (json && json['name']) {
             if (json['doc']) {
                 var pos = editor.cursorCoords(true);
@@ -1444,7 +1387,7 @@ function fetchDoc(cm) {
     };
     var editor = getEditor(selectedTabId());
     var cursor = editor.getCursor();
-    live_tc.pause();
+    repl.live_tc&&repl.live_tc().pause();
     jQuery.ajax('hoverdoc', {
         cache: false,
         type: 'POST',
@@ -1454,7 +1397,7 @@ function fetchDoc(cm) {
         complete: stopSpinner,
         success: docHandler,
         error: function(xhr,status,err){
-            live_tc.ready();
+            repl.live_tc&&repl.live_tc().ready();
             printError("An error occurred while retrieving documentation for your code:");
             printError("--- " + (err?err:status));
         },
@@ -1616,7 +1559,7 @@ function editSource(src) {
      var files = createFilesFromCode(src);
      setEditorSourcesFromGist(files);
      clearListSelectState();
-     live_tc.now();
+     repl.live_tc&&repl.live_tc().now();
 }
 
 function handleEditExample(setName, key) {
@@ -1628,7 +1571,7 @@ function handleEditExample(setName, key) {
 // Retrieves the specified example from the editor, along with its hover docs.
 function editExample(setName, key) {
     // Retrieve code
-    live_tc.pause();
+    repl.live_tc&&repl.live_tc().pause();
     jQuery.ajax('hoverdoc?key='+key, {
         cache:true,
         dataType:'json',
@@ -1642,11 +1585,11 @@ function editExample(setName, key) {
             selectedGist = null;
             markExampleSelected(setName, key);
             setEditorSourcesFromGist(json.files);
-            live_tc.now();
+            repl.live_tc&&repl.live_tc().now();
         },
         error:function(xhr, status, err) {
             printError("Error retrieving example '" + key + "': " + (err?err:status));
-            live_tc.ready();
+            repl.live_tc&&repl.live_tc().ready();
         }
     });
 }
@@ -1662,15 +1605,15 @@ function editGist(key) {
     function onSuccess(gist) {
         selectGist(gist);
         setEditorSourcesFromGist(gist.data.files);
-        live_tc.now();
+        repl.live_tc&&repl.live_tc().now();
     }
     function onError(xhr, status, err) {
         printError("Error retrieving Gist '" + key + "': " + (err?err:status));
-        live_tc.ready();
+        repl.live_tc&&repl.live_tc().ready();
     }
     
     // Retrieve code
-    live_tc.pause();
+    repl.live_tc&&repl.live_tc().pause();
     github.gist(key).fetch({
         success: onSuccess,
         error: onError
@@ -1734,7 +1677,7 @@ function setEditorSourcesFromGist(files) {
     clearEditorDirtyStates();
     updateMenuState();
     updateAdvancedState();
-    live_tc.ready();
+    repl.live_tc&&repl.live_tc().ready();
 }
 
 // Creates a new editor with the given name and source
@@ -1911,7 +1854,7 @@ function createEditor(name) {
         updateEditorDirtyState(editor.ceylonId);
         updateMenuState();
         updateAdvancedState();
-        live_tc.postpone();
+        repl.live_tc&&repl.live_tc().postpone();
         editor.ceylonPreviewUpdate = true;
     });
     editor.on('cursorActivity', function() {
@@ -2120,7 +2063,7 @@ function deleteEditors() {
     $(tabs).each(function(index, item) {
         w2ui["editortabs"].remove(item.id);
     });
-    live_tc.done();
+    repl.live_tc&&repl.live_tc().done();
 }
 
 // This function checks for dirty editors and will run `func()`
@@ -2146,9 +2089,9 @@ function checkForChangesAndRun(func, negative, edids) {
 function wrapCode(code, noTag) {
 	if (isFullScript(code) == false) {
 	    if (noTag) {
-	        return runner.codePrefix() + code + runner.codePostfix();
+	        return repl.codePrefix() + code + repl.codePostfix();
 	    } else {
-	        return runner.wrappedTag() + runner.codePrefix() + code + runner.codePostfix();
+	        return repl.wrappedTag() + repl.codePrefix() + code + repl.codePostfix();
 	    }
 	} else {
 		return code;
@@ -2158,9 +2101,9 @@ function wrapCode(code, noTag) {
 function unwrapCode(code, allowMissingTag) {
     if (isWrapped(code, allowMissingTag)) {
         var len = 0;
-        len += (code.startsWith(runner.wrappedTag())) ? runner.wrappedTag().length : 0;
-        len += (code.startsWith(runner.codePrefix(), len)) ? runner.codePrefix().length : 0;
-        return code.substring(len, code.length - runner.codePostfix().length);
+        len += (code.startsWith(repl.wrappedTag())) ? repl.wrappedTag().length : 0;
+        len += (code.startsWith(repl.codePrefix(), len)) ? repl.codePrefix().length : 0;
+        return code.substring(len, code.length - repl.codePostfix().length);
     } else {
         return code;
     }
@@ -2171,12 +2114,12 @@ function isFullScript() {
 }
 
 function isWrapped(code, allowMissingTag) {
-    return code.startsWith(runner.wrappedTag() + runner.codePrefix())
-        || allowMissingTag && code.startsWith(runner.codePrefix());
+    return code.startsWith(repl.wrappedTag() + repl.codePrefix())
+        || allowMissingTag && code.startsWith(repl.codePrefix());
 }
 
 function isWrappedModule(code) {
-    return code.startsWith(runner.modulePrefix()) && code.endsWith(runner.modulePostfix());
+    return code.startsWith(repl.modulePrefix()) && code.endsWith(repl.modulePostfix());
 }
 
 function doReset() {

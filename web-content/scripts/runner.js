@@ -59,7 +59,6 @@ require([ceylonLang, runner, "github"],
         for (x in runner) {
             window[x] = runner[x];
         }
-        window.parent.runner=runner;
         clang.$_process().write = function (txt) {
             clprinted=true;
             printOutput(txt.string);
