@@ -343,13 +343,13 @@ div.bp pre {
   padding-left: 10px;
   font-family: Inconsolata, Monaco, Courier, monospace;
   font-style: normal;
-  font-size: 14px;
+  font-size: 14.5px;
 }
 /* line 103 */
 div.bp p code, div.bp ul code, div.bp ol code {
   font-family: Inconsolata, Monaco, Courier, monospace;
   font-style: normal;
-  font-size: 14px;
+  font-size: 14.5px;
   color: #2E5C00;
 }
 /* line 152 */
@@ -589,7 +589,7 @@ div.ceylonblock ul {
     background: white;
     white-space: pre-wrap;
     font-family: Inconsolata, Monaco, Courier, monospace;
-    font-size: 14px;
+    font-size: 14.5px;
 }
 
 #output {
@@ -599,7 +599,7 @@ div.ceylonblock ul {
     background: white;
     white-space: pre-wrap;
     font-family: Inconsolata, Monaco, Courier, monospace;
-    font-size: 14px;
+    font-size: 14.5px;
 }
 
 #outputframe {
