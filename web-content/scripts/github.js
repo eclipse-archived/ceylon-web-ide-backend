@@ -122,7 +122,7 @@
         function handleError(xhr, status, err) {
             if (that.config.debug) { console.log("Error: " + err, "Status: " + xhr.status + "\n", xhr.getAllResponseHeaders()); }
             if (args.error != null) {
-                args.error(json, status, xhr);
+                args.error(xhr, status, err);
             } else {
                 console.log("Error: " + err);
             }
