@@ -88,6 +88,7 @@
     //     termination of the remote call
     //  args.authentication - Optional Authentication to use for the
     //     remote call
+    //  args.headers - Optional map of headers to add to the request
     GitHub.prototype._call = function(args) {
         var that = this;
         if (args.url == null) {
@@ -150,6 +151,11 @@
             "Accept": "application/vnd.github.v3+json",
             "User-Agent": that.config.userAgent
         };
+        if (args.headers) {
+            $.each(args.headers, function(name, value) {
+                hdr[name] = value;
+            })
+        }
         var auth = args.authentication;
         if (typeof auth === "undefined") {
             auth = that.config.authentication;
