@@ -67,6 +67,8 @@
         
         this._etags = {};
         this._cache = {};
+        this.rateLimitRemaining = null;
+        this.rateLimitLimit = null;
     }
     
     // Private function that handles the actual remote calls
@@ -107,6 +109,16 @@
         }
         function handleSuccess(json, status, xhr) {
             if (that.config.debug) { console.log("Status: " + xhr.status + "\n", xhr.getAllResponseHeaders(), json); }
+            // Remember our rate limits
+            var limit = xhr.getResponseHeader("X-RateLimit-Remaining");
+            if (limit != null) {
+                that.rateLimitRemaining = parseInt(limit);
+            }
+            limit = xhr.getResponseHeader("X-RateLimit-Limit");
+            if (limit != null) {
+                that.rateLimitLimit = parseInt(limit);
+            }
+            // Cache GET responses that have an ETag
             if (args.method == "GET") {
                 var etag = stripEtag(xhr.getResponseHeader("ETag"));
                 if (etag != null) {
