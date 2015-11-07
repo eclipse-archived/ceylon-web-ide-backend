@@ -30,6 +30,9 @@
     //     remote calls. Can be overridden in each specific function call.
     //     Set to `null` in a function call if you don't want authentication
     //     even if set on the base GitHub object
+    //  config.pageSize - Optional default page size to use for List
+    //  config.maxRequests - Optional default max requests to use for List
+    //     (defaults to 5)
     //  config.debug = Optional boolean to turn on debugging mode that
     //     logs certain operations to the console
     //  config.monitor = Optional function that will be called for each
@@ -57,6 +60,9 @@
         }
         if (config.userAgent != null) {
             config.userAgent = "Ceylon-Web-Runner-1.2.0";
+        }
+        if (config.maxRequests == null) {
+            config.maxRequests = 5;
         }
         
         this._etags = {};
@@ -1366,9 +1372,6 @@
         if (data.url == null) {
             throw "Missing required `data.url`";
         }
-        if (data.maxRequests == null) {
-            data.maxRequests = 5;
-        }
         
         this.pages = [];
         this.pageCount = -1;
@@ -1451,12 +1454,13 @@
             });
         }
         
-        if (requestCount < that.data.maxRequests && (that.pageCount < 0 || idx < that.pageCount)) {
+        var maxRequests = that.data.maxRequests || that.github.config.maxRequests;
+        if (requestCount < maxRequests && (that.pageCount < 0 || idx < that.pageCount)) {
             that._fetch({
                 page: idx + 1,
                 success: continueEach
             });
-            args.page = idx + that.data.maxRequests + 1;
+            args.page = idx + maxRequests + 1;
             return args;
         } else if (args.finish != null) {
             args.finish(that);
@@ -1506,8 +1510,9 @@
         
         var data = that.data.parameters || {};
         data.page = idx + 1;
-        if (that.data.pageSize != null) {
-            data.per_page = that.data.pageSize;
+        var pageSize = that.data.pageSize || that.github.config.pageSize;
+        if (pageSize != null) {
+            data.per_page = pageSize;
         }
         
         that.github._call({
