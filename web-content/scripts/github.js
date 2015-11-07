@@ -1575,6 +1575,87 @@
         }
     }
     
+    //****************************************************
+    // Rates
+    //****************************************************
+    
+    GitHub.prototype.rateLimit = function(args) {
+        var that = this;
+        if (args == null) {
+            args = {};
+        }
+        
+        that._call({
+            url: "/rate_limit",
+            method: "GET",
+            data: args.data,
+            authentication: args.authentication,
+            success: args.success,
+            error: args.error
+        });
+    }
+    
+    //****************************************************
+    // Importing
+    //****************************************************
+    
+    GitHub.prototype.importIssue = function(owner, repo, args) {
+        var that = this;
+        if (args == null) {
+            args = {};
+        }
+        if (owner == null) {
+            throw "Missing required `owner`";
+        }
+        if (repo == null) {
+            throw "Missing required `repo`";
+        }
+        if (args.data == null) {
+            throw "Missing required `args.data`";
+        }
+        
+        var url = "repos/" + owner + "/" + repo + "/import/issues";
+        that._call({
+            url: url,
+            method: "POST",
+            headers: {
+                "Accept": "application/vnd.github.golden-comet-preview"
+            },
+            data: args.data,
+            authentication: args.authentication,
+            success: args.success,
+            error: args.error
+        });
+    }
+    
+    GitHub.prototype.importStatus = function(owner, repo, args) {
+        var that = this;
+        if (args == null) {
+            args = {};
+        }
+        if (owner == null) {
+            throw "Missing required `owner`";
+        }
+        if (repo == null) {
+            throw "Missing required `repo`";
+        }
+        if (args.data == null) {
+            throw "Missing required `args.data`";
+        }
+        
+        var url = "repos/" + owner + "/" + repo + "/import/issues/" + args.data.id;
+        that._call({
+            url: url,
+            method: "GET",
+            headers: {
+                "Accept": "application/vnd.github.golden-comet-preview"
+            },
+            authentication: args.authentication,
+            success: args.success,
+            error: args.error
+        });
+    }
+    
     exports.GitHub = GitHub;
     exports.Authentication = Authentication;
 }));
