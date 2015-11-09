@@ -102,9 +102,8 @@ function printSystem(txt, loc) {
     createMessagesTable();
     var output = document.getElementById("messages");
     output.innerHTML = output.innerHTML 
-        + "<tr><td></td><td>" 
-        + loc + "</td><td> &mdash; </td><td class='jsc_msg'>" 
-        + highlight(txt) + "</td></tr>";
+        + "<tr><td colspan='4' class='jsc_msg'>"
+        + txt + "</td></tr>";
 }
 
 function printWarning(txt, loc) {
