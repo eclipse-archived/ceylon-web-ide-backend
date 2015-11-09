@@ -42,16 +42,14 @@ import java.util {
     }
 }
 
-class Autocompleter(String file, 
-    Integer row, Integer col, 
-    TypeChecker checker) {
+class Autocompleter(TypeChecker checker, String file, Integer row, Integer column) {
     
     value noCompletions = emptyMap<JString,DeclarationWithProximity>();
     
     shared [Node,String]? selectedNode {
         for (pu in CeylonIterable(checker.phasedUnits.phasedUnits)) {
             if (file == pu.unitFile.name) {
-                value fiv = FindIdentifierVisitor(row,col);
+                value fiv = FindIdentifierVisitor(row,column);
                 pu.compilationUnit.visit(fiv);
                 if (exists [node, text] = fiv.result) {
                     value fpv = FindParentVisitor(node);

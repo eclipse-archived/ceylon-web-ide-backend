@@ -49,7 +49,7 @@ Declaration? findDeclaration(TypeChecker typeChecker,
             Autocompleter {
                 file = file;
                 row = row;
-                col = col;
+                column = col;
                 checker = typeChecker;
             }
             .selectedNode) {

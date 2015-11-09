@@ -35,7 +35,7 @@ void autocomplete(Request request, Response response) {
                 = Autocompleter {
             file = file;
             row = row;
-            col = col;
+            column = col;
             checker = typeChecker;
         };
         sendJsonResponse(response, 
