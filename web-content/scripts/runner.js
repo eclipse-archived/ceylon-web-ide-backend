@@ -169,15 +169,17 @@ function loadModuleAsString(src, func, err) {
 }
 
 function evalAndRun(src, func, err) {
+    var ok = false;
     try {
         globalEval(src);
+        ok = true;
     } catch (ex) {
         if (err) {
             err("parsing", ex);
         }
     }
     try {
-        if (func) {
+        if (ok && func) {
             func();
         }
     } catch (ex) {

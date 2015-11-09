@@ -1350,7 +1350,6 @@ function doTranslateCode(files, onTranslation) {
         if (translatedcode != null) {
             markCompiled(files);
             try {
-                transok = true;
                 $("#result").text(translatedcode);
                 loadModuleAsString(translatedcode, onTranslation);
             } catch(err) {
@@ -1535,9 +1534,11 @@ function loadModuleAsString(src, func) {
     if (load) {
         startSpinner();
         load(src, function() {
+                transok = true;
                 func();
                 stopSpinner();
             }, function(when, err) {
+                transok = false;
                 stopSpinner();
                 if (when == "parsing") {
                     printError("Translated code could not be parsed:");
