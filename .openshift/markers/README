@@ -7,6 +7,9 @@ enable_aether - Will add the aether repo to your compilation and run (there is m
     `--rep aether`, because we need to tell Maven where to cache stuff so we have to create folders and a
     `settings.xml` and point to it, so just use this rather than deal with it yourself)
 
+enable_jscompiler - Will activate the JavaScript compiler with the exact some compile options as the
+    JVM compiler. Make sure you have at least one module compilable to JavaScript or the build will fail
+
 enable_jpda - Will run your application with JPDA enabled on port 8787
 
 force_clean_build - Will remove all previous php pears and start installing
