@@ -33,6 +33,7 @@ TypeChecker newTypeChecker(ScriptFile scriptFile)
             .addSrcDirectory(scriptFile)
             .moduleManagerFactory(moduleManagerFactory)
             .setRepositoryManager(repositoryManager)
+            .encoding("UTF-8")
             .typeChecker;
 
 "Creates an in-memory directory hierarchy containing the 
