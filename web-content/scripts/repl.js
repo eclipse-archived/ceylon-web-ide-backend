@@ -141,12 +141,9 @@ require([ceylonLang, repl],
                     noDefault = true;
                 } else {
                     if (uriparams.set == null) {
-                        window.outputReady = function() {
-                            window.outputReady = null;
-                            startSpinner();
-                            runCode('print("Ceylon ``language.version`` \\"``language.versionName``\\"");');
-                            stopSpinner();
-                        };
+                        startSpinner();
+                        runCode('print("Ceylon ``language.version`` \\"``language.versionName``\\"");');
+                        stopSpinner();
                     }
                 }
                 if (uriparams.set != null) {
