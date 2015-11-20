@@ -22,15 +22,29 @@ require.config({
     waitSeconds: 15
 });
 
-require([ceylonLang, repl],
-    function(clang, rrepl) {
-        console && console.log("ceylon.language module loaded for REPL");
-        repl=rrepl;
-        ceylonLang=clang;
-		repl.setJQuery($);
-		$(document).ready(setupLiveTypechecker);
-    }
-);
+var markers = [];
+
+var github;
+var selectedSet;
+var selectedGist;
+var selectedExample;
+var fileDeleted;
+var spinCount = 0;
+var closePopups = undefined;
+
+var uri = new URI();
+var uriparams = uri.search(true);
+
+var isLimitedWidth = window.matchMedia("only screen and (max-width: 760px)").matches;
+var isLimitedHeight = window.matchMedia("only screen and (max-height: 760px)").matches;
+var limitWidth = isLimitedWidth || embedded;
+var limitHeight = isLimitedHeight || embedded;
+var isMobile = isLimitedWidth || isLimitedHeight;
+var pagepath = window.location.pathname;
+if (!pagepath.endsWith("/")) {
+    var p = pagepath.lastIndexOf("/");
+    pagepath = pagepath.substring(0, p + 1);
+}
 
 var docCookies = {
   getItem: function (sKey) {
@@ -89,24 +103,65 @@ for (i=0; i<sheets.length; i++) {
     }
 }
 
-var markers = [];
-
-var github;
-var selectedSet;
-var selectedGist;
-var selectedExample;
-var fileDeleted;
-var spinCount = 0;
-var closePopups = undefined;
-
-var uri = new URI();
-var uriparams = uri.search(true);
-
-var isLimitedWidth = window.matchMedia("only screen and (max-width: 760px)").matches;
-var isLimitedHeight = window.matchMedia("only screen and (max-height: 760px)").matches;
-var limitWidth = isLimitedWidth || embedded;
-var limitHeight = isLimitedHeight || embedded;
-var isMobile = isLimitedWidth || isLimitedHeight;
+require([ceylonLang, repl],
+    function(clang, rrepl) {
+        console && console.log("ceylon.language module loaded for REPL");
+        repl=rrepl;
+        ceylonLang=clang;
+        repl.setJQuery($);
+        $(document).ready(function(){
+            window.setInterval(repl.setupLiveTypechecker,500);
+        });
+        if (!embedded) {
+            $(document).ready(function(){
+                if ("usrlow" in uriparams) {
+                    // With "usrlow" set the user's gists will be shown
+                    // at the bottom of the sidebar instead of the top
+                    repl.addExamplesContainer();
+                    addUserGistsContainer();
+                } else {
+                    addUserGistsContainer();
+                    repl.addExamplesContainer();
+                }
+                var noDefault = false;
+                if (uriparams.src != null) {
+                    // Code is directly in URL
+                    var code = decodeURIComponent(uriparams.src);
+                    setTimeout(function() {
+                        editSource(code);
+                    }, 1);
+                    noDefault = true;
+                } else if (uriparams.sample != null) {
+                    // Retrieve code from the given sample id
+                    repl.editExample("ex", uriparams.sample);
+                    noDefault = true;
+                } else if (uriparams.gist != null) {
+                    // Retrieve code from the given sample id
+                    editGist(uriparams.gist);
+                    noDefault = true;
+                } else {
+                    if (uriparams.set == null) {
+                        window.outputReady = function() {
+                            window.outputReady = null;
+                            startSpinner();
+                            runCode('print("Ceylon ``language.version`` \\"``language.versionName``\\"");');
+                            stopSpinner();
+                        };
+                    }
+                }
+                if (uriparams.set != null) {
+                    handleSelectSet(uriparams.set, noDefault);
+                } else {
+                    // This is the default set of examples stored in our
+                    // special "ceylonwebide" GitHub account
+                    handleSelectSet("6e03a3db46854ff825e9", noDefault);
+                }
+                listUserGists();
+            });
+        }
+    }
+);
+        $(document).ready(setupComponents);
 
 if (typeof String.prototype.startsWith != 'function') {
     String.prototype.startsWith = function(prefix, position) {
@@ -127,13 +182,8 @@ if (typeof String.prototype.endsWith != 'function') {
     };
 }
 
-var pagepath = window.location.pathname;
-if (!pagepath.endsWith("/")) {
-    var p = pagepath.lastIndexOf("/");
-    pagepath = pagepath.substring(0, p + 1);
-}
-
-$(document).ready(function() {
+//This can't be moved to Ceylon yet
+function setupComponents() {
     $('form').submit(false);
     
     var auth;
@@ -208,53 +258,9 @@ $(document).ready(function() {
     
     if (!embedded) {
     
-        if ("usrlow" in uriparams) {
-            // With "usrlow" set the user's gists will be shown
-            // at the bottom of the sidebar instead of the top
-            addExamplesContainer();
-            addUserGistsContainer();
-        } else {
-            addUserGistsContainer();
-            addExamplesContainer();
-        }
         
-        var noDefault = false;
-        if (uriparams.src != null) {
-            // Code is directly in URL
-            var code = decodeURIComponent(uriparams.src);
-            setTimeout(function() {
-                editSource(code);
-            }, 1);
-            noDefault = true;
-        } else if (uriparams.sample != null) {
-            // Retrieve code from the given sample id
-            editExample("ex", uriparams.sample);
-            noDefault = true;
-        } else if (uriparams.gist != null) {
-            // Retrieve code from the given sample id
-            editGist(uriparams.gist);
-            noDefault = true;
-        } else {
-            if (uriparams.set == null) {
-                window.outputReady = function() {
-                    window.outputReady = null;
-                    startSpinner();
-                	runCode('print("Ceylon ``language.version`` \\"``language.versionName``\\"");');
-                    stopSpinner();
-                };
-            }
-        }
-        
-        if (uriparams.set != null) {
-            handleSelectSet(uriparams.set, noDefault);
-        } else {
-            // This is the default set of examples stored in our
-            // special "ceylonwebide" GitHub account
-            handleSelectSet("6e03a3db46854ff825e9", noDefault);
-        }
-        listUserGists();
     }
-});
+}
 
 function jqContent(jqElem) {
     return {
@@ -498,10 +504,6 @@ function handleGitHubDisconnect() {
     }
 }
 
-function setupLiveTypechecker() {
-    window.setInterval(repl.setupLiveTypechecker,500);
-}
-
 // Mark the given Gist as selected and updates the proper GUI elements
 function selectGist(gist) {
     selectedGist = gist;
@@ -519,23 +521,14 @@ function clearGist(gist) {
     updateAdvancedState();
 }
 
-function clearListSelectState() {
-    $("#sidebar li").removeClass("selected");
-}
-
 function markGistSelected(set, gist) {
-    clearListSelectState();
+    repl.clearListSelectState();
     if (set != null) {
         $("#sidebar li#set_" + set).addClass("selected");
     }
     if (gist != null) {
         $("#sidebar li#gist_" + gist.data.id).addClass("selected");
     }
-}
-
-function markExampleSelected(setName, key) {
-    clearListSelectState();
-    $("#sidebar #examples_" + setName + " li#example_" + setName + "_" + key).addClass("selected");
 }
 
 // Asks the user for a name and stores the code on the server
@@ -865,7 +858,7 @@ function newProject() {
     fileDeleted = false;
     clearOutput();
     deleteEditors();
-    clearListSelectState();
+    repl.clearListSelectState();
     newFile("main.ceylon");
 }
 
@@ -1042,9 +1035,9 @@ function listSetGists(setGistId, noDefault) {
     function onSuccess(gist) {
         try {
             var index = JSON.parse(gist.data.files["index.json"].content);
-            clearExampleSets();
+            repl.clearExampleSets();
             $.each(index.sets, function(idxs, set) {
-                addExamplesSet(idxs, set.title);
+                repl.addExamplesSet(idxs, set.title);
                 $.each(set.items, function(idxi, item) {
                     if (item.gist != null) {
                         addGist(idxs, item.gist, item.title);
@@ -1060,13 +1053,14 @@ function listSetGists(setGistId, noDefault) {
             handleResizeSidebar();
         } catch (ex) {
             printError("Error in Set '" + setGistId + "': " + ex);
-            addExamples(); // Add our fixed example set
+            console.log(ex.stack);
+            repl.addExamples(); // Add our fixed example set
         }
     }
     
     function onError(xhr, status, err) {
         printError("Error retrieving Set '" + setGistId + "': " + (err?err:status));
-        addExamples(); // Add our fixed example set
+        repl.addExamples(); // Add our fixed example set
     }
     
     // Retrieve code
@@ -1558,39 +1552,13 @@ function editSource(src) {
      selectedGist = null;
      var files = createFilesFromCode(src);
      setEditorSourcesFromGist(files);
-     clearListSelectState();
+     repl.clearListSelectState();
      repl.live_tc&&repl.live_tc().now();
 }
 
 function handleEditExample(setName, key) {
     checkForChangesAndRun(function() {
-        editExample(setName, key);
-    });
-}
-
-// Retrieves the specified example from the editor, along with its hover docs.
-function editExample(setName, key) {
-    // Retrieve code
-    repl.live_tc&&repl.live_tc().pause();
-    jQuery.ajax('hoverdoc?key='+key, {
-        cache:true,
-        dataType:'json',
-        timeout:20000,
-        beforeSend:startSpinner,
-        complete:stopSpinner,
-        contentType:'application/x-www-form-urlencoded; charset=UTF-8',
-        success:function(json, status, xhr) {
-            doReset();
-            selectedExample = key;
-            selectedGist = null;
-            markExampleSelected(setName, key);
-            setEditorSourcesFromGist(json.files);
-            repl.live_tc&&repl.live_tc().now();
-        },
-        error:function(xhr, status, err) {
-            printError("Error retrieving example '" + key + "': " + (err?err:status));
-            repl.live_tc&&repl.live_tc().ready();
-        }
+        repl.editExample(setName, key);
     });
 }
 
@@ -2354,45 +2322,4 @@ function addUserGistsContainer() {
     $("#sidebarblock > div").append('<div id="yrcodediv"><h3 id="yrcodehdr" class="invis">Your code:</h3>');
     $("#sidebarblock > div").append('<ol id="yrcode" class="invis"></ol>');
     $("#sidebarblock > div").append('<a id="yrcodemore" class="invis" href="#" onCLick="">more...</a></div>');
-}
-
-function addExamplesContainer() {
-    $("#sidebarblock > div").append('<div id="examplesdiv"></div>');
-}
-
-function addExamplesSet(setName, title) {
-    $("#examplesdiv").append('<h3 id="exampleshdr_' + setName + '">' + title + '</h3>');
-    $("#examplesdiv").append('<ol id="examples_' + setName + '"></ol>');
-}
-
-function addExample(setName, key, title) {
-    $("#examples_" + setName).append('<li id="example_' + setName + '_' + key + '" class="news_entry"><a href="#" onClick="return handleEditExample(\'' + setName + '\', \'' + key + '\')">' + title + '</a></li>');
-}
-
-function clearExampleSets() {
-    $("#examplesdiv").empty();
-}
-
-function addExamples() {
-    clearExampleSets();
-    addExamplesSet("ex", "Try out a sample:");
-    addExample("ex", "hello_world", "Hello World");
-    addExample("ex", "basics", "Basics");
-    addExample("ex", "null_and_union", "Null values and union types");
-    addExample("ex", "conditions", "Conditions and assertions");
-    addExample("ex", "classes_and_functions", "Classes and functions 1");
-    addExample("ex", "interfaces", "Interfaces and mixin inheritance");
-    addExample("ex", "classes_and_functions2", "Classes and functions 2");
-    addExample("ex", "collections", "Collections and sequence comprehensions");
-    addExample("ex", "named_arguments", "Named argument syntax");
-    addExample("ex", "generics", "Type parameters");
-    addExample("ex", "switch1", "Enumerations and the switch statement");
-    addExample("ex", "interop", "Interoperability");
-    addExample("ex", "request", "Interoperability 2");
-    addExample("ex", "dynints", "Dynamic interfaces");
-    addExample("ex", "operators", "Operator polymorphism");
-    addExample("ex", "metamodel", "Type-safe Metamodel");
-    addExample("ex", "game_of_life", "Game of Life");
-    addExample("ex", "importtest1", "Local Import");
-    addExample("ex", "importtest2", "Module Import");
 }
