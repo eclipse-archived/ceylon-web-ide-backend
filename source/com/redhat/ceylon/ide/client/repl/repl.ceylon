@@ -31,6 +31,7 @@ shared void translate(dynamic onTranslation) {
     }
 }
 
+"This should be called when from the onDocumentReady event"
 shared void setupLiveTypechecker() {
     if (live_tc.shouldTypecheck()) {
         print("typechecking...");

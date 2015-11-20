@@ -9,3 +9,10 @@ shared dynamic JQuery {
 shared dynamic Event {
 	shared formal String target;
 }
+
+shared void clearListSelectState() {
+    dynamic {
+        jQuery("#sidebar li").removeClass("selected");
+    }
+}
+
