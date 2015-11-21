@@ -60,3 +60,33 @@ shared void setupLiveTypechecker() {
         }
     }
 }
+
+shared String wrapCode(String code, Boolean noTag) {
+    dynamic {
+        if (isFullScript(code) == false) {
+            if (noTag) {
+                return codePrefix + code + codePostfix;
+            } else {
+                return wrappedTag + codePrefix + code + codePostfix;
+            }
+        } else {
+            return code;
+        }
+    }
+}
+
+shared String unwrapCode(String code, Boolean allowMissingTag) {
+    dynamic {
+        if (isWrapped(code, allowMissingTag)) {
+            return let (
+                l1=(code.startsWith(repl.wrappedTag())) then repl.wrappedTag().size else 0,
+                l2=(code.spanFrom(l1).startsWith(repl.codePrefix())) then repl.codePrefix().length else 0
+            ) code.span(l1+l2, code.size - codePostfix.size);
+        } else {
+            return code;
+        }
+    }
+}
+
+shared Boolean isWrappedModule(String code) =>
+    code.startsWith(modulePrefix) && code.endsWith(modulePostfix);

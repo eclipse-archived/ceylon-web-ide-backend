@@ -1058,7 +1058,7 @@ function applyAdvanced() {
         if (editor.ceylonName.endsWith(".ceylon")) {
             editor.execCommand("selectAll");
             editor.execCommand("indentMore");
-            var src = wrapCode(getEditorCode(editor.ceylonId, true), true);
+            var src = repl.wrapCode(getEditorCode(editor.ceylonId, true), true);
             setEditorCode(editor.ceylonId, src, true);
         }
     });
@@ -1080,7 +1080,7 @@ function undoAdvanced() {
     var editors = getEditors();
     $.each(editors, function (index, editor) {
         if (editor.ceylonName.endsWith(".ceylon")) {
-            var src = unwrapCode(getEditorCode(editor.ceylonId, true), true);
+            var src = repl.unwrapCode(getEditorCode(editor.ceylonId, true), true);
             setEditorCode(editor.ceylonId, src, true);
             editor.execCommand("selectAll");
             editor.execCommand("indentLess");
@@ -1510,7 +1510,7 @@ function setEditorSourcesFromGist(files) {
             var neweditor = addSourceEditor(index, item.content);
             if (index == "module.ceylon") {
                 hasModule = true;
-                if (isWrappedModule(item.content)) {
+                if (repl.isWrappedModule(item.content)) {
                     markWrapperReadOnly(neweditor.ceylonId);
                 }
             } else if (index.endsWith(".md")) {
@@ -1875,7 +1875,7 @@ function getEditorCode(id, noWrap) {
     var src = editor.getValue();
     var name = editor.ceylonName;
     if (name.endsWith(".ceylon") && (name != "module.ceylon") && !noWrap) {
-        return wrapCode(src);
+        return repl.wrapCode(src);
     } else {
         return src;
     }
@@ -1887,7 +1887,7 @@ function setEditorCode(id, src, noUnwrap) {
         var name = editor.ceylonName;
         if (name.endsWith(".ceylon") && (name != "module.ceylon") && !noUnwrap) {
             if (isWrapped(src)) {
-                src = unwrapCode(src);
+                src = repl.unwrapCode(src);
             }
         }
         editor.setValue(src);
@@ -1941,29 +1941,6 @@ function checkForChangesAndRun(func, negative, edids) {
     }
 }
 
-function wrapCode(code, noTag) {
-	if (isFullScript(code) == false) {
-	    if (noTag) {
-	        return repl.codePrefix() + code + repl.codePostfix();
-	    } else {
-	        return repl.wrappedTag() + repl.codePrefix() + code + repl.codePostfix();
-	    }
-	} else {
-		return code;
-	}
-}
-
-function unwrapCode(code, allowMissingTag) {
-    if (isWrapped(code, allowMissingTag)) {
-        var len = 0;
-        len += (code.startsWith(repl.wrappedTag())) ? repl.wrappedTag().length : 0;
-        len += (code.startsWith(repl.codePrefix(), len)) ? repl.codePrefix().length : 0;
-        return code.substring(len, code.length - repl.codePostfix().length);
-    } else {
-        return code;
-    }
-}
-
 function isFullScript() {
     return advanced;
 }
@@ -1971,10 +1948,6 @@ function isFullScript() {
 function isWrapped(code, allowMissingTag) {
     return code.startsWith(repl.wrappedTag() + repl.codePrefix())
         || allowMissingTag && code.startsWith(repl.codePrefix());
-}
-
-function isWrappedModule(code) {
-    return code.startsWith(repl.modulePrefix()) && code.endsWith(repl.modulePostfix());
 }
 
 function doReset() {
