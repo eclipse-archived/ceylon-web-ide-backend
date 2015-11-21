@@ -66,7 +66,7 @@ shared void editExample(String setName, String key) {
                 live_tc.now();
             };
             error=void(dynamic xhr, dynamic status, dynamic err) {
-                printError("Error retrieving example '" + key + "': " + (err else status));
+                printError("Error retrieving example '``key``': ``err else status``");
                 live_tc.ready();
             };
         ]);
