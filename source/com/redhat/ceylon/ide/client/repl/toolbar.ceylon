@@ -1,3 +1,4 @@
+"Show the panel with the URL for the gist"
 shared void shareSource() {
     String weburl;
     dynamic {

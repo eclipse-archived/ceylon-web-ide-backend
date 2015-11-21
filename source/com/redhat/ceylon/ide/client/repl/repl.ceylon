@@ -90,3 +90,130 @@ shared String unwrapCode(String code, Boolean allowMissingTag) {
 
 shared Boolean isWrappedModule(String code) =>
     code.startsWith(modulePrefix) && code.endsWith(modulePostfix);
+
+shared dynamic safeOutputRef(String memberName) {
+    dynamic {
+        try {
+            dynamic outputFrame = jQuery("#outputframe");
+            dynamic outputwin = outputFrame[0].contentWindow;
+            return outputwin[memberName];
+        } catch(e) {
+            // Catch and ignore domain errors
+            return null;
+        }
+    }
+}
+                                        
+shared void clearLangModOutputState() {
+    dynamic {
+        if (exists clear = safeOutputRef("clearLangModOutputState")) {
+            clear();
+        }
+    }
+}
+
+shared void executeCode() {
+    dynamic {
+        if (exists run = repl.safeOutputRef("run")) {
+            run();
+        } else {
+            printError("Entry point 'run()' not found!");
+            printError("When advanced mode is active your code should contain a method like:");
+            printError("");
+            printError("shared void run() {");
+            printError("    // Your program starts here");
+            printError("}");
+        }
+    }
+}
+
+shared void printOutputLine(String txt) {
+    dynamic {
+        if (exists p = repl.safeOutputRef("printOutputLine")) {
+            p(txt);
+        }
+    }
+}
+
+shared void printOutput(String txt) {
+    dynamic {
+        if (exists p = repl.safeOutputRef("printOutput")) {
+            p(txt);
+        }
+    }
+}
+
+shared void printSystem(String txt, String? loc=null) {
+    dynamic {
+        if (exists p = repl.safeOutputRef("printSystem")) {
+            p(txt, loc);
+        }
+    }
+}
+
+shared void printError(String txt, String? loc=null) {
+    dynamic {
+        if (exists p = repl.safeOutputRef("printError")) {
+            p(txt, loc);
+        }
+    }
+}
+
+shared void printWarning(String txt, dynamic loc) {
+    dynamic {
+        if (exists p = repl.safeOutputRef("printWarning")) {
+            p(txt, loc);
+        }
+    }
+}
+
+shared void clearOutput() {
+    dynamic {
+        if (exists p = repl.safeOutputRef("clearOutput")) {
+            p();
+        }
+    }
+}
+
+shared void scrollOutput() {
+    dynamic {
+        if (exists scroll = repl.safeOutputRef("scrollOutput")) {
+            scroll();
+        }
+    }
+}
+
+shared Boolean hasLangModOutput() {
+    dynamic {
+        if (exists hasOutput = repl.safeOutputRef("hasLangModOutput")) {
+            return hasOutput();
+        }
+    }
+    return false;
+}
+
+"This function is called if compilation runs OK"
+shared void afterTranslate() {
+    Boolean ok;
+    dynamic {
+        ok = transok;
+    }
+    if (ok) {
+        clearLangModOutputState();
+        //printSystem("// Script start at " + (new Date()));
+        try {
+            executeCode();
+        } catch(Throwable err) {
+            printError("Runtime error:");
+            dynamic {
+                dynamic ex=err;
+                printError("--- " + ex);
+            }
+        }
+        if (!hasLangModOutput()) {
+            printSystem("Script ended with no output");
+        }
+        scrollOutput();
+    }
+}
+

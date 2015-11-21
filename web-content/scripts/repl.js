@@ -534,9 +534,9 @@ function saveSource(title) {
 }
 
 function onStoreGistError(xhr, status, err) {
-    printError("Error storing Gist: " + (err?err:status));
+    repl.printError("Error storing Gist: " + (err?err:status));
     if (xhr.status == 404) {
-        printError(
+        repl.printError(
             "This can happen when you are trying to save a Gist\n" +
             "that has been deleted in the mean time or you might\n" +
             "be trying to change a Gist that is not owned by you.\n" +
@@ -951,14 +951,14 @@ function listSetGists(setGistId, noDefault) {
             repl.markGistSelected(selectedSet, selectedGist);
             handleResizeSidebar();
         } catch (ex) {
-            printError("Error in Set '" + setGistId + "': " + ex);
+            repl.printError("Error in Set '" + setGistId + "': " + ex);
             console.log(ex.stack);
             repl.addExamples(); // Add our fixed example set
         }
     }
     
     function onError(xhr, status, err) {
-        printError("Error retrieving Set '" + setGistId + "': " + (err?err:status));
+        repl.printError("Error retrieving Set '" + setGistId + "': " + (err?err:status));
         repl.addExamples(); // Add our fixed example set
     }
     
@@ -1120,7 +1120,7 @@ function stopSpinner() {
 
 //Sends the code from the editor to the server for compilation and it successful, runs the resulting js.
 function performRun() {
-    repl.translate(afterTranslate);
+    repl.translate(repl.afterTranslate);
 }
 
 function createFilesFromCode(code) {
@@ -1141,7 +1141,7 @@ function createFilesFromCode(code) {
 //Sends the given code to the server for compilation and it successful, runs the resulting js.
 function runCode(code) {
     var files = createFilesFromCode(code);
-    translateCode(files, afterTranslate);
+    translateCode(files, repl.afterTranslate);
 }
 
 function translateCode(files, onTranslation) {
@@ -1150,7 +1150,7 @@ function translateCode(files, onTranslation) {
     });
 }
 
-var transok;
+var transok=false;
 
 // Wraps the contents of the editor in an object and sends it to the server for compilation.
 // On response, executes the script if compilation was OK, otherwise shows errors.
@@ -1167,8 +1167,8 @@ function doTranslateCode(files, onTranslation) {
                 $("#result").text(translatedcode);
                 loadModuleAsString(translatedcode, onTranslation);
             } catch(err) {
-                printError("Translated code could not be parsed:");
-                printError("--- " + err);
+                repl.printError("Translated code could not be parsed:");
+                repl.printError("--- " + err);
             }
         }
         //errors?
@@ -1180,8 +1180,8 @@ function doTranslateCode(files, onTranslation) {
     function onError(xhr, status, err) {
         repl.live_tc&&repl.live_tc().done();
         transok = false;
-        printError("An error occurred while compiling your code:");
-        printError("--- " + (err?err:status));
+        repl.printError("An error occurred while compiling your code:");
+        repl.printError("--- " + (err?err:status));
     }
     
     jQuery.ajax('translate', {
@@ -1222,8 +1222,8 @@ function complete(editor){
         },
         error:function(xhr, status, err) {
             repl.live_tc&&repl.live_tc().ready();
-            printError("An error occurred while retrieving completions for your code:");
-            printError("--- " + (err?err:status));
+            repl.printError("An error occurred while retrieving completions for your code:");
+            repl.printError("--- " + (err?err:status));
         },
         contentType: 'application/json; charset=UTF-8',
         data: JSON.stringify({ 
@@ -1278,8 +1278,8 @@ function fetchDoc(cm) {
         success: docHandler,
         error: function(xhr,status,err){
             repl.live_tc&&repl.live_tc().ready();
-            printError("An error occurred while retrieving documentation for your code:");
-            printError("--- " + (err?err:status));
+            repl.printError("An error occurred while retrieving documentation for your code:");
+            repl.printError("--- " + (err?err:status));
         },
         contentType: 'application/json; charset=UTF-8',
         data: JSON.stringify({ 
@@ -1304,10 +1304,10 @@ function showErrors(errors, print) {
                     " (" + (err.from.line-linedelta) + 
                     ":" + err.from.ch + ")";
                 if (err.tp == "w") {
-                    printWarning(text, loc);
+                    repl.printWarning(text, loc);
                 }
                 else {
-                    printError(text, loc);
+                    repl.printError(text, loc);
                 }
             }
             var from = err.from.line-linedelta-1;
@@ -1344,7 +1344,7 @@ function showErrors(errors, print) {
 }
 
 function loadModuleAsString(src, func) {
-    var load = safeOutputRef("loadModuleAsString");
+    var load = repl.safeOutputRef("loadModuleAsString");
     if (load) {
         startSpinner();
         load(src, function() {
@@ -1355,52 +1355,20 @@ function loadModuleAsString(src, func) {
                 transok = false;
                 stopSpinner();
                 if (when == "parsing") {
-                    printError("Translated code could not be parsed:");
-                    printError("--- " + err);
+                    repl.printError("Translated code could not be parsed:");
+                    repl.printError("--- " + err);
                 } else if (when == "running") {
-                    printError("Error running code:");
-                    printError("--- " + err);
+                    repl.printError("Error running code:");
+                    repl.printError("--- " + err);
                 } else if (when == "require") {
-                    printError("Error loading external modules:");
-                    printError("--- " + err);
+                    repl.printError("Error loading external modules:");
+                    repl.printError("--- " + err);
                 } else {
-                    printError("Unknown error:");
-                    printError("--- " + err);
+                    repl.printError("Unknown error:");
+                    repl.printError("--- " + err);
                 }
             }
         );
-    }
-}
-
-// This function is called if compilation runs OK
-function afterTranslate() {
-    if (transok == true) {
-        clearLangModOutputState();
-        //printSystem("// Script start at " + (new Date()));
-        try {
-            executeCode();
-        } catch(err) {
-            printError("Runtime error:");
-            printError("--- " + err);
-        }
-        if (!hasLangModOutput()) {
-            printSystem("Script ended with no output");
-        }
-        scrollOutput();
-    }
-}
-
-function executeCode() {
-    var run = safeOutputRef("run");
-    if (run) {
-        run();
-    } else {
-        printError("Entry point 'run()' not found!")
-        printError("When advanced mode is active your code should contain a method like:");
-        printError("");
-        printError("shared void run() {");
-        printError("    // Your program starts here");
-        printError("}");
     }
 }
 
@@ -1427,7 +1395,7 @@ function stop() {
 		stopfunc = null;
 		buttonEnable("run", true);
 		buttonEnable("stop", false);
-		scrollOutput();
+		repl.scrollOutput();
 	}
 }
 
@@ -1930,7 +1898,7 @@ function isWrapped(code, allowMissingTag) {
 }
 
 function doReset() {
-    clearOutput();
+    repl.clearOutput();
     clearEditMarkers();
     focusSelectedEditor();
 }
@@ -1955,82 +1923,9 @@ function resetOutput(onReady) {
         window.outputReady = null;
         onReady();
     }
-    var loc = safeOutputRef("location");
+    var loc = repl.safeOutputRef("location");
     if (loc) {
         loc.reload();
-    }
-}
-
-function safeOutputRef(memberName) {
-    try {
-        var outputwin = $("#outputframe")[0].contentWindow;
-        return outputwin[memberName];
-    } catch(e) {
-        // Catch and ignore domain errors
-        return null;
-    }
-}
-
-function clearLangModOutputState() {
-    var clear = safeOutputRef("clearLangModOutputState");
-    if (clear) {
-        clear();
-    }
-}
-
-function hasLangModOutput() {
-    var hasOutput = safeOutputRef("hasLangModOutput");
-    if (hasOutput) {
-        return hasOutput();
-    }
-}
-
-function clearOutput() {
-    var clear = safeOutputRef("clearOutput");
-    if (clear) {
-        clear();
-    }
-}
-
-function printOutputLine(txt) {
-    var print = safeOutputRef("printOutputLine");
-    if (print) {
-        print(txt);
-    }
-}
-
-function printOutput(txt) {
-    var print = safeOutputRef("printOutput");
-    if (print) {
-        print(txt);
-    }
-}
-
-function printSystem(txt, loc) {
-    var print = safeOutputRef("printSystem");
-    if (print) {
-        print(txt, loc);
-    }
-}
-
-function printError(txt, loc) {
-    var print = safeOutputRef("printError");
-    if (print) {
-        print(txt, loc);
-    }
-}
-
-function printWarning(txt, loc) {
-    var print = safeOutputRef("printWarning");
-    if (print) {
-        print(txt, loc);
-    }
-}
-
-function scrollOutput() {
-    var scroll = safeOutputRef("scrollOutput");
-    if (scroll) {
-        scroll();
     }
 }
 
