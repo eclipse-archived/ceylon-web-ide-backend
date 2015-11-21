@@ -114,3 +114,94 @@ shared void editGist(String key) {
         ]);
     }
 }
+
+"Mark the given Gist as selected and updates the proper GUI elements"
+shared void selectGist(dynamic gist) {
+    dynamic {
+        selectedGist = gist;
+        selectedExample = null;
+        markGistSelected(selectedSet, gist);
+        updateMenuState();
+        updateAdvancedState();
+    }
+}
+
+"Clear selected Gist"
+shared void clearGist(dynamic gist) {
+    dynamic {
+        selectedGist = null;
+        markGistSelected(selectedSet, null);
+        updateMenuState();
+        updateAdvancedState();
+    }
+}
+
+shared void markGistSelected(dynamic set, dynamic gist) {
+    clearListSelectState();
+    dynamic {
+        if (set exists) {
+            jQuery("#sidebar li#set_" + set).addClass("selected");
+        }
+        if (gist exists) {
+            jQuery("#sidebar li#gist_" + gist.data.id).addClass("selected");
+        }
+    }
+}
+
+shared void newProject() {
+    dynamic {
+        selectedGist = null;
+        selectedExample = null;
+        fileDeleted = false;
+        clearOutput();
+        deleteEditors();
+    }
+    clearListSelectState();
+    dynamic {
+        newFile("main.ceylon");
+    }
+}
+
+"Deletes a Gist from the server"
+shared void deleteGist() {
+    dynamic {
+        void onRemove(dynamic gist) {
+            doReset();
+            clearGist(gist);
+            updateGists();
+        }
+        void onDeleteGistError(dynamic xhr, dynamic status, dynamic err) {
+            printError("Error deleting Gist: " + (err else status));
+            if (xhr.status == 404) {
+                printError(
+                    "This can happen when you are trying to delete a Gist\n" +
+                            "that was already deleted in the mean time or you might\n" +
+                            "be trying to delete a Gist that is not owned by you.\n");
+            }
+        }
+        selectedGist.remove(dynamic[
+            success=onRemove;
+            error=onDeleteGistError;
+        ]);
+    }
+}
+
+"Updates the code and or name of an existing Gist on the server
+ Is called when the \"Rename\" button is pressed"
+shared void renameGist(String title) {
+    dynamic {
+        void onSuccess(dynamic gist) {
+            selectGist(gist);
+            updateGists();
+        }
+        dynamic data = dynamic[
+            description="Ceylon Web Runner: ``title``";
+        ];
+        selectedGist.edit(dynamic[
+            data=data;
+            success=onSuccess;
+            error=onStoreGistError;
+        ]);
+    }
+}
+

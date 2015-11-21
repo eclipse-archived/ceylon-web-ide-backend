@@ -501,33 +501,6 @@ function handleGitHubDisconnect() {
     }
 }
 
-// Mark the given Gist as selected and updates the proper GUI elements
-function selectGist(gist) {
-    selectedGist = gist;
-    selectedExample = null;
-    markGistSelected(selectedSet, gist);
-    updateMenuState();
-    updateAdvancedState();
-}
-
-// Clear selected Gist
-function clearGist(gist) {
-    selectedGist = null;
-    markGistSelected(selectedSet, null);
-    updateMenuState();
-    updateAdvancedState();
-}
-
-function markGistSelected(set, gist) {
-    repl.clearListSelectState();
-    if (set != null) {
-        $("#sidebar li#set_" + set).addClass("selected");
-    }
-    if (gist != null) {
-        $("#sidebar li#gist_" + gist.data.id).addClass("selected");
-    }
-}
-
 // Asks the user for a name and stores the code on the server
 // Is called when the "Save As" menu item is selected
 function handleSaveAs() {
@@ -542,7 +515,7 @@ function handleSaveAs() {
 function saveSource(title) {
     function onSuccess(gist) {
         clearEditorDirtyStates();
-        selectGist(gist);
+        repl.selectGist(gist);
         createComment(gist);
         updateGists();
     }
@@ -630,25 +603,8 @@ function handleRenameGist() {
     var oldname = getGistName(selectedGist);
     w2prompt("Enter a new name for the current Gist", "Name", oldname, "Rename", function(name) {
         if (name != null && name != "" && name != oldname) {
-            renameGist(name);
+            repl.renameGist(name);
         }
-    });
-}
-
-// Updates the code and or name of an existing Gist on the server
-// Is called when the "Rename" button is pressed
-function renameGist(title) {
-    function onSuccess(gist) {
-        selectGist(gist);
-        updateGists();
-    }
-    var data = {
-        "description": "Ceylon Web Runner: " + title,
-    };
-    selectedGist.edit({
-        data: data,
-        success: onSuccess,
-        error: onStoreGistError
     });
 }
 
@@ -668,7 +624,7 @@ function handleSaveAll() {
 function updateSource() {
     function onSuccess(gist) {
         clearEditorDirtyStates();
-        selectGist(gist);
+        repl.selectGist(gist);
         updateGists();
     }
     var files = getGistFiles();
@@ -710,7 +666,7 @@ function handleNewFile() {
     var suggestion = suggestFileName();
     askFileName("New File", suggestion, true, function(newname) {
         if (!isAdvancedModeActive()
-                && countCeylonFiles() == 1
+                && repl.countCeylonFiles() == 1
                 && newname.endsWith(".ceylon")) {
             // Creating a second .ceylon file when in "simplified"
             // mode means we'll have to switch to "advanced" mode.
@@ -731,7 +687,7 @@ function handleNewFile() {
 
 function newFile(name) {
     var neweditor;
-    if (!isAdvancedModeActive() && name.endsWith(".ceylon") && countCeylonFiles() >= 1) {
+    if (!isAdvancedModeActive() && name.endsWith(".ceylon") && repl.countCeylonFiles() >= 1) {
         // We switch to advanced mode
         applyAdvanced();
         if (name == "module.ceylon") {
@@ -849,16 +805,6 @@ function handleNewProject() {
     });
 }
 
-function newProject() {
-    selectedGist = null;
-    selectedExample = null;
-    fileDeleted = false;
-    clearOutput();
-    deleteEditors();
-    repl.clearListSelectState();
-    newFile("main.ceylon");
-}
-
 function handleImportProject() {
     checkForChangesAndRun(function() {
         importProject();
@@ -879,31 +825,8 @@ function handleDeleteGist() {
     if (selectedGist != null) {
         w2confirm("Do you really want to delete this Gist?")
             .yes(function() {
-                deleteGist();
+                repl.deleteGist();
             });
-    }
-}
-
-// Deletes a Gist from the server
-function deleteGist() {
-    function onRemove(gist) {
-        doReset();
-        clearGist();
-        updateGists();
-    }
-    selectedGist.remove({
-        success: onRemove,
-        error: onDeleteGistError
-    });
-}
-
-function onDeleteGistError(xhr, status, err) {
-    printError("Error deleting Gist: " + (err?err:status));
-    if (xhr.status == 404) {
-        printError(
-            "This can happen when you are trying to delete a Gist\n" +
-            "that was already deleted in the mean time or you might\n" +
-            "be trying to delete a Gist that is not owned by you.\n");
     }
 }
 
@@ -955,7 +878,7 @@ function listUserGists(page) {
             $('#yrcodemore').hide();
         }
         if (selectedSet != null || selectedGist != null) {
-            markGistSelected(selectedSet, selectedGist);
+            repl.markGistSelected(selectedSet, selectedGist);
         }
         handleResizeSidebar();
     }
@@ -1046,7 +969,7 @@ function listSetGists(setGistId, noDefault) {
             if (!noDefault && index["default"] != null) {
                 repl.editGist(index["default"].gist);
             }
-            markGistSelected(selectedSet, selectedGist);
+            repl.markGistSelected(selectedSet, selectedGist);
             handleResizeSidebar();
         } catch (ex) {
             printError("Error in Set '" + setGistId + "': " + ex);
@@ -1109,19 +1032,6 @@ function buttonCheck(name, check) {
 
 function tabCloseable(id, onClose) {
     w2ui["editortabs"].set(id, { closable: onClose != null, onClose: onClose });
-}
-
-// Returns the number of Ceylon files that are available
-// (this incldues module descriptors)
-function countCeylonFiles() {
-    var cnt = 0;
-    var editors = getEditors();
-    $.each(editors, function(index, editor) {
-        if (editor.ceylonName.endsWith(".ceylon")) {
-            cnt++;
-        }
-    });
-    return cnt;
 }
 
 var advanced = false;
@@ -1187,7 +1097,7 @@ function undoAdvanced() {
 
 function isCodeUnwrappable() {
     var canUnwrap = true;
-    var cnt = countCeylonFiles();
+    var cnt = repl.countCeylonFiles();
     var editors = getEditors();
     $.each(editors, function(index, editor) {
         if (editor.ceylonName.endsWith(".ceylon")
@@ -1199,7 +1109,7 @@ function isCodeUnwrappable() {
 }
 
 function updateAdvancedState() {
-    var cnt = countCeylonFiles();
+    var cnt = repl.countCeylonFiles();
     advanced = (cnt > 1) || (cnt == 1) && isCodeUnwrappable();
     buttonCheck("advanced", advanced);
     buttonEnable("advanced", !advanced || ((cnt == 1) || (cnt == 2)) && isCodeUnwrappable());

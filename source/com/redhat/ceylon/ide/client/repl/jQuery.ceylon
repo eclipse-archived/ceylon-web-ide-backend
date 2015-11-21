@@ -16,3 +16,17 @@ shared void clearListSelectState() {
     }
 }
 
+"Returns the number of Ceylon files that are available
+ (this incldues module descriptors)"
+shared Integer countCeylonFiles() {
+    variable value cnt = 0;
+    dynamic {
+        jQuery.each(getEditors(), void(Integer index, dynamic editor) {
+            if (editor.ceylonName.endsWith(".ceylon")) {
+                cnt++;
+            }
+        });
+    }
+    return cnt;
+}
+
