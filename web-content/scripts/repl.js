@@ -158,7 +158,6 @@ require([ceylonLang, repl],
         }
     }
 );
-        $(document).ready(setupComponents);
 
 if (typeof String.prototype.startsWith != 'function') {
     String.prototype.startsWith = function(prefix, position) {
@@ -178,6 +177,8 @@ if (typeof String.prototype.endsWith != 'function') {
         return lastIndex !== -1 && lastIndex === position;
     };
 }
+
+$(document).ready(setupComponents);
 
 //This can't be moved to Ceylon yet
 function setupComponents() {
@@ -276,7 +277,7 @@ function handleToolbarClick(event) {
     } else if (event.target == "reset") {
         doReset();
     } else if (event.target == "share") {
-        shareSource();
+        repl.shareSource();
     } else if (event.target == "advanced") {
         handleAdvanced(event);
     } else if (event.target == "dark") {
@@ -636,28 +637,6 @@ function updateSource() {
         success: onSuccess,
         error: onStoreGistError
     });
-}
-
-function shareSource() {
-    var weburl;
-    if (selectedGist != null) {
-        weburl = window.location.origin + pagepath + "?gist=" + selectedGist.data.id;
-    } else {
-        weburl = window.location.origin + pagepath + "?sample=" + selectedExample;
-    }
-    var html = '<div style="padding: 10px" class="ceylon_share_links">' +
-        'Direct link to this page showing the current code:<br>' +
-        '<div><input type="text" value="' + weburl + '" readonly onclick="this.select();">' +
-        '<a href="' + weburl + '" target="share_webide"><i class="fa fa-external-link"></i></a></div>';
-    if (selectedGist != null) {
-        var githuburl = selectedGist.data.html_url;
-        html += '<br><br>' +
-            'Link to GitHub Gist where the current code is stored:<br>' +
-            '<div><input type="text" value="' + githuburl + '" readonly onclick="this.select();">' +
-            '<a href="' + githuburl + '" target="share_github"><i class="fa fa-external-link"></i></a></div>';
-    }
-    html += '</div>';
-    $("#tb_all_main_toolbar_item_share").w2overlay(html);
 }
 
 // Deletes a Gist from the server (asks the user for confirmation first)
