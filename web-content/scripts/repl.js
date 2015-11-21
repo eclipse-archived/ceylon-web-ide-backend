@@ -118,9 +118,9 @@ require([ceylonLang, repl],
                     // With "usrlow" set the user's gists will be shown
                     // at the bottom of the sidebar instead of the top
                     repl.addExamplesContainer();
-                    addUserGistsContainer();
+                    repl.addUserGistsContainer();
                 } else {
-                    addUserGistsContainer();
+                    repl.addUserGistsContainer();
                     repl.addExamplesContainer();
                 }
                 var noDefault = false;
@@ -137,7 +137,7 @@ require([ceylonLang, repl],
                     noDefault = true;
                 } else if (uriparams.gist != null) {
                     // Retrieve code from the given sample id
-                    editGist(uriparams.gist);
+                    repl.editGist(uriparams.gist);
                     noDefault = true;
                 } else {
                     if (uriparams.set == null) {
@@ -868,7 +868,7 @@ function handleImportProject() {
 function importProject() {
     popupSelectGist(function(gistId) {
         if (gistId != null) {
-            editGist(gistId);
+            repl.editGist(gistId);
         }
     });
 }
@@ -1044,7 +1044,7 @@ function listSetGists(setGistId, noDefault) {
                 });
             });
             if (!noDefault && index["default"] != null) {
-                editGist(index["default"].gist);
+                repl.editGist(index["default"].gist);
             }
             markGistSelected(selectedSet, selectedGist);
             handleResizeSidebar();
@@ -1561,27 +1561,7 @@ function handleEditExample(setName, key) {
 
 function handleEditGist(key) {
     checkForChangesAndRun(function() {
-        editGist(key);
-    });
-}
-
-// Retrieves the specified code from GitHub
-function editGist(key) {
-    function onSuccess(gist) {
-        selectGist(gist);
-        setEditorSourcesFromGist(gist.data.files);
-        repl.live_tc&&repl.live_tc().now();
-    }
-    function onError(xhr, status, err) {
-        printError("Error retrieving Gist '" + key + "': " + (err?err:status));
-        repl.live_tc&&repl.live_tc().ready();
-    }
-    
-    // Retrieve code
-    repl.live_tc&&repl.live_tc().pause();
-    github.gist(key).fetch({
-        success: onSuccess,
-        error: onError
+        repl.editGist(key);
     });
 }
 
@@ -2315,8 +2295,3 @@ function popupSelectGist(onClose) {
     });
 }
 
-function addUserGistsContainer() {
-    $("#sidebarblock > div").append('<div id="yrcodediv"><h3 id="yrcodehdr" class="invis">Your code:</h3>');
-    $("#sidebarblock > div").append('<ol id="yrcode" class="invis"></ol>');
-    $("#sidebarblock > div").append('<a id="yrcodemore" class="invis" href="#" onCLick="">more...</a></div>');
-}

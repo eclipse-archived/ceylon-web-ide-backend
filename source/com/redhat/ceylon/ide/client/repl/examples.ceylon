@@ -79,3 +79,38 @@ shared void markExampleSelected(Object setName, Object key) {
         jQuery("#sidebar #examples_``setName`` li#example_``setName``_``key``").addClass("selected");
     }
 }
+
+shared void addUserGistsContainer() {
+    dynamic {
+        jQuery("#sidebarblock > div").append("<div id=\"yrcodediv\"><h3 id=\"yrcodehdr\" class=\"invis\">Your code:</h3>");
+        jQuery("#sidebarblock > div").append("<ol id=\"yrcode\" class=\"invis\"></ol>");
+        jQuery("#sidebarblock > div").append("<a id=\"yrcodemore\" class=\"invis\" href=\"#\" onClick=\"\">more...</a></div>");
+    }
+}
+                                                                                                                                                                              
+shared Boolean isGitHubConnected() {
+    dynamic {
+        return jQuery.cookie("githubauth") exists;
+    }
+}
+
+"Retrieves the specified code from GitHub"
+shared void editGist(String key) {
+    dynamic {
+        void onSuccess(dynamic gist) {
+            selectGist(gist);
+            setEditorSourcesFromGist(gist.data.files);
+            live_tc.now();
+        }
+        void onError(dynamic xhr, Integer status, dynamic err) {
+            printError("Error retrieving Gist '" + key + "': " + (err else status));
+            live_tc.ready();
+        }
+        // Retrieve code
+        live_tc.pause();
+        github.gist(key).fetch(dynamic [
+            success= onSuccess;
+            error=onError;
+        ]);
+    }
+}
