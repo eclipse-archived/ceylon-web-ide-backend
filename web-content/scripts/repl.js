@@ -275,7 +275,7 @@ function handleToolbarClick(event) {
     } else if (event.target == "stop") {
         stop();
     } else if (event.target == "reset") {
-        doReset();
+        repl.doReset();
     } else if (event.target == "share") {
         repl.shareSource();
     } else if (event.target == "advanced") {
@@ -421,7 +421,7 @@ function getToolbarItems() {
 
 function getMenuItems() {
     var cnt = getEditors().length;
-    var editorSelected = getEditors().length > 0 && getEditor(selectedTabId()) != null;
+    var editorSelected = getEditors().length > 0 && repl.getEditor(selectedTabId()) != null;
     var hasGist = (selectedGist != null);
     return [
         { text: 'New File...', id: 'newfile', icon: 'fa fa-file-o' },
@@ -459,7 +459,7 @@ function handleDarkClick() {
 }
 
 function handleHelpClick() {
-    openHelpView();
+    repl.openHelpView();
 }
 
 function doMaximize() {
@@ -551,7 +551,7 @@ function getGistFiles() {
     var files = {};
     var editors = getEditors();
     $.each(editors, function(index, editor) {
-        var content = { content: getEditorCode(editor.ceylonId) };
+        var content = { content: repl.getEditorCode(editor.ceylonId) };
         if (isEditorRenamed(editor.ceylonId)) {
             content.filename = editor.ceylonName;
             files[editor.ceylonSavedName] = content;
@@ -562,7 +562,7 @@ function getGistFiles() {
     // See if we need to delete any files
     if (selectedGist != null) {
         $.each(selectedGist.data.files, function(index, item) {
-            if (getEditor(editorId(index)) == null) {
+            if (repl.getEditor(editorId(index)) == null) {
                 files[index] = null;
             }
         });
@@ -577,7 +577,7 @@ function getCompilerFiles() {
     var editors = getEditors();
     $.each(editors, function(index, editor) {
         if (compilerAccepts(editor.ceylonName)) {
-            var content = { content: getEditorCode(editor.ceylonId) };
+            var content = { content: repl.getEditorCode(editor.ceylonId) };
             files[editor.ceylonName] = content;
         }
     });
@@ -672,7 +672,7 @@ function newFile(name) {
         if (name == "module.ceylon") {
             // The switch to advanced mode will have created
             // this editor already, we just select it
-            neweditor = getEditor(editorId("module.ceylon"));
+            neweditor = repl.getEditor(editorId("module.ceylon"));
         } else {
             // We still need to create the new file
             neweditor = createEditor(name);
@@ -691,7 +691,7 @@ function newFile(name) {
 }
 
 function newModuleFile() {
-    var neweditor = addSourceEditor("module.ceylon", repl.defaultImportSrc());
+    var neweditor = repl.addSourceEditor("module.ceylon", repl.defaultImportSrc());
     markWrapperReadOnly(neweditor.ceylonId);
     updateEditorDirtyState(neweditor.ceylonId);
     return neweditor;
@@ -699,14 +699,14 @@ function newModuleFile() {
 
 function handleRenameFile() {
     var id = selectedTabId();
-    var editor = getEditor(id);
+    var editor = repl.getEditor(id);
     askFileName("Rename File", editor.ceylonName, false, function(newname) {
         renameFile(id, newname);
     });
 }
 
 function renameFile(id, newname) {
-    var editor = getEditor(id);
+    var editor = repl.getEditor(id);
     var oldname = editor.ceylonName;
     if (oldname != newname) {
         editor.ceylonName = newname;
@@ -733,7 +733,7 @@ function askFileName(title, suggestion, nodup, func) {
                 form.error('The file name has to end in ".ceylon", ".js", ".md" or ".txt"');
             } else if (!/^[-_.a-zA-Z0-9]+$/.test(name)) {
                 form.error('The file name can only contain letters, digits, "_", "-" and "."');
-            } else if (nodup && getEditor(editorId(name)) != null) {
+            } else if (nodup && repl.getEditor(editorId(name)) != null) {
                 form.error('A file with that name already exists');
             } else {
                 ok = true;
@@ -748,14 +748,14 @@ function suggestFileName() {
     var cnt = 1;
     do {
         suggestion = "new" + (cnt++) + ".ceylon";
-    } while (getEditor(editorId(suggestion)) != null);
+    } while (repl.getEditor(editorId(suggestion)) != null);
     return suggestion;
 }
 
 // Deletes a Gist from the server (asks the user for confirmation first)
 // Is called when the "Delete" menu item is selected
 function handleDeleteFile() {
-    var editor = getEditor(selectedTabId());
+    var editor = repl.getEditor(selectedTabId());
     w2confirm("Do you really want to delete this file '" + editor.ceylonName + "'?")
         .yes(function() {
             deleteFile(selectedTabId());
@@ -1037,8 +1037,8 @@ function applyAdvanced() {
         if (editor.ceylonName.endsWith(".ceylon")) {
             editor.execCommand("selectAll");
             editor.execCommand("indentMore");
-            var src = repl.wrapCode(getEditorCode(editor.ceylonId, true), true);
-            setEditorCode(editor.ceylonId, src, true);
+            var src = repl.wrapCode(repl.getEditorCode(editor.ceylonId, true), true);
+            repl.setEditorCode(editor.ceylonId, src, true);
         }
     });
     newModuleFile();
@@ -1059,8 +1059,8 @@ function undoAdvanced() {
     var editors = getEditors();
     $.each(editors, function (index, editor) {
         if (editor.ceylonName.endsWith(".ceylon")) {
-            var src = repl.unwrapCode(getEditorCode(editor.ceylonId, true), true);
-            setEditorCode(editor.ceylonId, src, true);
+            var src = repl.unwrapCode(repl.getEditorCode(editor.ceylonId, true), true);
+            repl.setEditorCode(editor.ceylonId, src, true);
             editor.execCommand("selectAll");
             editor.execCommand("indentLess");
             editor.setCursor(0);
@@ -1114,7 +1114,7 @@ function stopSpinner() {
     if (spinCount == 0) {
         buttonEnable("run", true);
         buttonSetIcon("run", "fa fa-play");
-        focusSelectedEditor();
+        repl.focusSelectedEditor();
     }
 }
 
@@ -1265,7 +1265,7 @@ function fetchDoc(cm) {
             }
         }
     };
-    var editor = getEditor(selectedTabId());
+    var editor = repl.getEditor(selectedTabId());
     var cursor = editor.getCursor();
     repl.live_tc&&repl.live_tc().pause();
     jQuery.ajax('hoverdoc', {
@@ -1313,7 +1313,7 @@ function showErrors(errors, print) {
             var from = err.from.line-linedelta-1;
             var to = err.to.line-linedelta-1;
             if (from >= 0) {
-                var editor = getEditor(editorId(fileName));
+                var editor = repl.getEditor(editorId(fileName));
                 if (editor != null) {
                     //This is to add a marker in the gutter
                     var img = document.createElement('img');
@@ -1331,7 +1331,7 @@ function showErrors(errors, print) {
                         tabstyle = "error";
                         underlineStyle = "cm-error";
                     }
-                    getEditorTab(editor.ceylonId).addClass(tabstyle);
+                    repl.getEditorTab(editor.ceylonId).addClass(tabstyle);
                     editor.setGutterMarker(from, 'CodeMirror-error-gutter', img);
                     //This is to modify the style (underline or whatever)
                     markers.push(editor.markText({line:from,ch:err.from.ch},
@@ -1401,7 +1401,7 @@ function stop() {
 
 // Retrieves the specified example from the editor, along with its hover docs.
 function editSource(src) {
-     doReset();
+     repl.doReset();
      selectedExample = null;
      selectedGist = null;
      var files = createFilesFromCode(src);
@@ -1454,7 +1454,7 @@ function setEditorSourcesFromGist(files) {
             if (index == "README.md") {
                 readme = index;
             }
-            var neweditor = addSourceEditor(index, item.content);
+            var neweditor = repl.addSourceEditor(index, item.content);
             if (index == "module.ceylon") {
                 hasModule = true;
                 if (repl.isWrappedModule(item.content)) {
@@ -1480,13 +1480,6 @@ function setEditorSourcesFromGist(files) {
     updateMenuState();
     updateAdvancedState();
     repl.live_tc&&repl.live_tc().ready();
-}
-
-// Creates a new editor with the given name and source
-function addSourceEditor(name, src) {
-    var editor = createEditor(name);
-    setEditorCode(editor.ceylonId, src);
-    return editor;
 }
 
 function editorId(name) {
@@ -1517,15 +1510,6 @@ function editorMode(name) {
     }
 }
 
-function createTab(newid, name, template) {
-    w2ui["editortabs"].add({ id: newid, caption: name });
-    var tabTemplate = $("#" + template);
-    var newTabContent = tabTemplate.clone();
-    newTabContent[0].id = newid;
-    $("#editorspane").append(newTabContent);
-    return newTabContent;
-}
-
 //Delete a tab (not the content pane! Remove that first)
 function deleteTab(id) {
     // Remove the tab
@@ -1550,7 +1534,7 @@ function canvasId() {
 
 function createCanvas() {
     var id = canvasId();
-    var elem = createTab(id, "Canvas", 'canvas-template');
+    var elem = repl.createTab(id, "Canvas", 'canvas-template');
     elem[0].ceylonCanvas = elem.find("canvas")[0];
     tabCloseable(id, function() {
         stop();
@@ -1574,51 +1558,23 @@ function openCanvasWindow() {
 }
 
 function createMarkdownView(editorId) {
-    var editor = getEditor(editorId);
+    var editor = repl.getEditor(editorId);
     var name = editor.ceylonName.substring(0, editor.ceylonName.length - 3);
-    createTab("preview_" + editorId, name + " <i class='fa fa-eye'></i>", 'preview-template');
+    repl.createTab("preview_" + editorId, name + " <i class='fa fa-eye'></i>", 'preview-template');
     updateMarkdownView(editorId);
 }
 
 function updateMarkdownView(editorId) {
-    var editor = getEditor(editorId);
-    var src = getEditorCode(editorId, true);
+    var editor = repl.getEditor(editorId);
+    var src = repl.getEditorCode(editorId, true);
     var mdHtml = marked(src);
     $("#preview_" + editorId + " > div").html(mdHtml);
     editor.ceylonPreviewUpdate = false;
 }
 
-function helpViewId() {
-    return "webide_help";
-}
-
-function createHelpView() {
-    var id = helpViewId();
-    var elem = createTab(id, "Help", 'help-template');
-    tabCloseable(id, function() {
-        deleteHelpView();
-    });
-    selectTab(id);
-}
-
-function deleteHelpView() {
-    var id = helpViewId();
-    $("#" + id).remove();
-    deleteTab(id);
-}
-
-function openHelpView() {
-    var id = helpViewId();
-    if (w2ui["editortabs"].get(id) == null) {
-        createHelpView();
-    }
-    selectTab(id);
-    return $("#" + id)[0];
-}
-
 function createEditor(name) {
     var newid = editorId(name);
-    createTab(newid, name, 'editor-template');
+    repl.createTab(newid, name, 'editor-template');
     var div = $("#" + newid)[0];
     var editor = CodeMirror(div, {
         mode: editorMode(name),
@@ -1679,19 +1635,6 @@ function getEditorDiv(id) {
     return $("#" + id);
 }
 
-function getEditorTab(id) {
-    return $("#tabs_editortabs_tab_" + id);    
-}
-
-function getEditor(id) {
-    var codemirrordiv = $("#" + id + " > div");
-    if (codemirrordiv.length == 1) {
-        return codemirrordiv[0].CodeMirror;
-    } else {
-        return null;
-    }
-}
-
 function getEditors() {
     var editors = [];
     var codemirrordivs = $("#editorspane > div > div.CodeMirror");
@@ -1707,7 +1650,7 @@ function selectTab(id) {
     getEditorDiv(id).removeClass("invis");
     updateMenuState();
     // If it's an editor set the focus to it
-    var editor = getEditor(id);
+    var editor = repl.getEditor(id);
     if (editor != null) {
         editor.refresh();
         if (!isMobile) {
@@ -1717,7 +1660,7 @@ function selectTab(id) {
     // If it's a preview check if it needs to be refreshed
     if (id.startsWith("preview_")) {
         var editorId = id.substring(8);
-        var editor = getEditor(editorId);
+        var editor = repl.getEditor(editorId);
         if (editor != null && editor.ceylonPreviewUpdate) {
             updateMarkdownView(editorId);
         }
@@ -1725,25 +1668,25 @@ function selectTab(id) {
 }
 
 function isEditorDirty(id) {
-    var editor = getEditor(id);
+    var editor = repl.getEditor(id);
     var src = editor.getValue();
     var oldsrc = editor.ceylonSavedSource;
     return (src != oldsrc);
 }
 
 function isEditorRenamed(id) {
-    var editor = getEditor(id);
+    var editor = repl.getEditor(id);
     return editor.ceylonSavedName != null && editor.ceylonSavedName != editor.ceylonName;
 }
 
 function updateEditorDirtyState(id) {
     // Setting the tab state resets any classes we might
     // have added, so we store their states
-    var tab = getEditorTab(id);
+    var tab = repl.getEditorTab(id);
     var hasErr = tab.hasClass("error");
     var hasWrn = tab.hasClass("warning");
     
-    var caption = getEditor(id).ceylonName;
+    var caption = repl.getEditor(id).ceylonName;
     if (selectedGist != null && isEditorRenamed(id)) {
         caption = "[" + caption + "]";
     }
@@ -1758,7 +1701,7 @@ function updateEditorDirtyState(id) {
 }
 
 function clearEditorDirtyState(id) {
-    var editor = getEditor(id);
+    var editor = repl.getEditor(id);
     editor.ceylonSavedName = editor.ceylonName;
     editor.ceylonSavedSource = editor.getValue();
     updateEditorDirtyState(editor.ceylonId);
@@ -1807,46 +1750,9 @@ function selectedTabId() {
     return (w2ui["editortabs"].tabs.length > 0) ? w2ui["editortabs"].active : null;
 }
 
-function focusSelectedEditor() {
-    var id = selectedTabId();
-    if (id != null) {
-        var editor = getEditor(id);
-        if (editor != null && !isMobile) {
-            editor.focus();
-        }
-    }
-}
-
-function getEditorCode(id, noWrap) {
-    var editor = getEditor(id);
-    var src = editor.getValue();
-    var name = editor.ceylonName;
-    if (name.endsWith(".ceylon") && (name != "module.ceylon") && !noWrap) {
-        return repl.wrapCode(src);
-    } else {
-        return src;
-    }
-}
-
-function setEditorCode(id, src, noUnwrap) {
-    if (src != getEditorCode(id)) {
-        var editor = getEditor(id);
-        var name = editor.ceylonName;
-        if (name.endsWith(".ceylon") && (name != "module.ceylon") && !noUnwrap) {
-            if (isWrapped(src)) {
-                src = repl.unwrapCode(src);
-            }
-        }
-        editor.setValue(src);
-        if (!noUnwrap) {
-            editor.ceylonSavedSource = src;
-        }
-    }
-}
-
 // This will mark the first and final lines of the editor read-only
 function markWrapperReadOnly(id) {
-    var editor = getEditor(id);
+    var editor = repl.getEditor(id);
     // First line
     var opts1 = { readOnly:true, inclusiveLeft:true, inclusiveRight:false, atomic: true };
     editor.markText({line:0,ch:0}, {line:1,ch:0}, opts1);
@@ -1895,27 +1801,6 @@ function isFullScript() {
 function isWrapped(code, allowMissingTag) {
     return code.startsWith(repl.wrappedTag() + repl.codePrefix())
         || allowMissingTag && code.startsWith(repl.codePrefix());
-}
-
-function doReset() {
-    repl.clearOutput();
-    clearEditMarkers();
-    focusSelectedEditor();
-}
-
-// Clears all error markers and hover docs.
-function clearEditMarkers() {
-    var editors = getEditors();
-    $.each(editors, function(index, editor) {
-        editor.clearGutter('CodeMirror-error-gutter');
-        var tab = getEditorTab(editor.ceylonId);
-        tab.removeClass("warning");
-        tab.removeClass("error");
-    });
-    for (var i=0; i<markers.length;i++) {
-        markers[i].clear();
-    }
-    markers=[];
 }
 
 function resetOutput(onReady) {
