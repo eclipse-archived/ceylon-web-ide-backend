@@ -1,6 +1,5 @@
 import ceylon.file {
-    File,
-    parsePath
+    File
 }
 import ceylon.io {
     SocketAddress
