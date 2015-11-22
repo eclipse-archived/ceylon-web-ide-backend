@@ -1,3 +1,7 @@
+import ceylon.file {
+    File,
+    parsePath
+}
 import ceylon.io {
     SocketAddress
 }
@@ -7,8 +11,7 @@ import ceylon.buffer.charset {
 import ceylon.language {
     process {
         env=environmentVariableValue,
-        arg=namedArgumentValue,
-        prop=propertyValue
+        arg=namedArgumentValue
     }
 }
 import ceylon.net.http {
@@ -23,8 +26,7 @@ import ceylon.net.http.server {
     Endpoint,
     startsWith,
     AsynchronousEndpoint,
-    isRoot,
-    Request
+    isRoot
 }
 import ceylon.net.http.server.endpoints {
     serveStaticFile,
@@ -33,27 +35,17 @@ import ceylon.net.http.server.endpoints {
 import ceylon.time {
     now
 }
-import ceylon.file {
-    File,
-    parsePath
-}
 
 String ipVar = "OPENSHIFT_CEYLON_IP";
 String portVar = "OPENSHIFT_CEYLON_HTTP_PORT";
 String dirVar = "OPENSHIFT_REPO_DIR";
 
+{Header*} cacheControlHeaders = { 
+    Header("Cache-Control", "max-age=0, must-revalidate")
+};
+{Header*} headers(File file) => cacheControlHeaders;
+
 shared void run() {
-    value repoDir = env(dirVar) else "";
-    value systemRepoDir = prop("ceylon.system.repo") else "";
-    value userCacheDir = (prop("user.home") else "")
-            + "/.ceylon/cache";
-    value cacheDir = process.propertyValue("ceylon.cache.repo")
-            else parsePath(userCacheDir).absolutePath.string;
-        
-    function ccHeaders(File file) => {
-        Header("Cache-Control",
-            "max-age=0, must-revalidate")
-    };
     
     newServer {
         Endpoint {
@@ -109,24 +101,19 @@ shared void run() {
             acceptMethod = { get };
             serveStaticFile {
                 externalPath = "";
-                headers = ccHeaders;
-                fileMapper(Request request)
-                        => let (path = request.path[8...])
-                            if (path.contains("/ceylon.language-"))
-                                then systemRepoDir + path
-                                else if (fileExists(repoDir, path))
-                                    then repoDir + "modules" + path
-                                    else cacheDir + path;
+                headers = headers;
+                (request) 
+                        => resolveClientModule(request.path)
+                            else "";
             };
         },
         AsynchronousEndpoint {
             startsWith("/");
             acceptMethod = { get };
             serveStaticFile {
-                externalPath = repoDir;
-                headers = ccHeaders;
-                fileMapper(Request request)
-                        => "web-content" + request.path;
+                externalPath = env(dirVar) else "";
+                headers = headers;
+                (request) => "web-content" + request.path;
             };
         }
     }.start {
@@ -139,6 +126,7 @@ shared void run() {
                     else 8080;
         };
     };
+    
 }
 
 Boolean fileExists(String repoDir, String path) {

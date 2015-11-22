@@ -20,16 +20,20 @@ import java.io {
     File,
     Writer
 }
+import com.redhat.ceylon.cmr.api {
+    RepositoryManager
+}
 
 JsModuleManagerFactory moduleManagerFactory 
         = JsModuleManagerFactory("UTF-8");
 
-TypeChecker newTypeChecker(ScriptFile scriptFile)
-    => let (repositoryManager 
-            = CeylonUtils.repoManager()
-                .logger(LeakingLogger())
-                .buildManager())
-        TypeCheckerBuilder()
+RepositoryManager repositoryManager = 
+        CeylonUtils.repoManager()
+            .logger(LeakingLogger())
+            .buildManager();
+
+TypeChecker newTypeChecker(ScriptFile scriptFile) 
+        => TypeCheckerBuilder()
             .addSrcDirectory(scriptFile)
             .moduleManagerFactory(moduleManagerFactory)
             .setRepositoryManager(repositoryManager)
