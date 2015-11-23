@@ -17,7 +17,7 @@ features:
 - persistence to [Gist][] and sharing 
 - light and dark editor themes
 
-The Web IDE is used in production at <http:try.ceylon-lang.org>.
+The Web IDE is used in production at <http://try.ceylon-lang.org>.
 
 [Ceylon]: http://ceylon-lang.org
 [Ceylon Herd]: http://modules.ceylon-lang.org
