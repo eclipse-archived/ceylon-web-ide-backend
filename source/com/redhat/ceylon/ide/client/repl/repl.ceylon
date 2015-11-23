@@ -79,8 +79,8 @@ shared String unwrapCode(String code, Boolean allowMissingTag) {
     dynamic {
         if (isWrapped(code, allowMissingTag)) {
             return let (
-                l1=(code.startsWith(repl.wrappedTag())) then repl.wrappedTag().size else 0,
-                l2=(code.spanFrom(l1).startsWith(repl.codePrefix())) then repl.codePrefix().length else 0
+                l1=(code.startsWith(wrappedTag)) then wrappedTag.size else 0,
+                l2=(code.spanFrom(l1).startsWith(codePrefix)) then codePrefix.size else 0
             ) code.span(l1+l2, code.size - codePostfix.size);
         } else {
             return code;
@@ -114,7 +114,7 @@ shared void clearLangModOutputState() {
 
 shared void executeCode() {
     dynamic {
-        if (exists run = repl.safeOutputRef("run")) {
+        if (exists run = safeOutputRef("run")) {
             run();
         } else {
             printError("Entry point 'run()' not found!");
@@ -129,7 +129,7 @@ shared void executeCode() {
 
 shared void printOutputLine(String txt) {
     dynamic {
-        if (exists p = repl.safeOutputRef("printOutputLine")) {
+        if (exists p = safeOutputRef("printOutputLine")) {
             p(txt);
         }
     }
@@ -137,7 +137,7 @@ shared void printOutputLine(String txt) {
 
 shared void printOutput(String txt) {
     dynamic {
-        if (exists p = repl.safeOutputRef("printOutput")) {
+        if (exists p = safeOutputRef("printOutput")) {
             p(txt);
         }
     }
@@ -145,7 +145,7 @@ shared void printOutput(String txt) {
 
 shared void printSystem(String txt, String? loc=null) {
     dynamic {
-        if (exists p = repl.safeOutputRef("printSystem")) {
+        if (exists p = safeOutputRef("printSystem")) {
             p(txt, loc);
         }
     }
@@ -153,7 +153,7 @@ shared void printSystem(String txt, String? loc=null) {
 
 shared void printError(String txt, String? loc=null) {
     dynamic {
-        if (exists p = repl.safeOutputRef("printError")) {
+        if (exists p = safeOutputRef("printError")) {
             p(txt, loc);
         }
     }
@@ -161,7 +161,7 @@ shared void printError(String txt, String? loc=null) {
 
 shared void printWarning(String txt, dynamic loc) {
     dynamic {
-        if (exists p = repl.safeOutputRef("printWarning")) {
+        if (exists p = safeOutputRef("printWarning")) {
             p(txt, loc);
         }
     }
@@ -169,7 +169,7 @@ shared void printWarning(String txt, dynamic loc) {
 
 shared void clearOutput() {
     dynamic {
-        if (exists p = repl.safeOutputRef("clearOutput")) {
+        if (exists p = safeOutputRef("clearOutput")) {
             p();
         }
     }
@@ -177,7 +177,7 @@ shared void clearOutput() {
 
 shared void scrollOutput() {
     dynamic {
-        if (exists scroll = repl.safeOutputRef("scrollOutput")) {
+        if (exists scroll = safeOutputRef("scrollOutput")) {
             scroll();
         }
     }
@@ -185,7 +185,7 @@ shared void scrollOutput() {
 
 shared Boolean hasLangModOutput() {
     dynamic {
-        if (exists hasOutput = repl.safeOutputRef("hasLangModOutput")) {
+        if (exists hasOutput = safeOutputRef("hasLangModOutput")) {
             return hasOutput();
         }
     }
@@ -214,6 +214,90 @@ shared void afterTranslate() {
             printSystem("Script ended with no output");
         }
         scrollOutput();
+    }
+}
+
+shared void resetOutput(void onReady()) {
+    dynamic {
+        window.outputReady = void() {
+            window.outputReady = null;
+            onReady();
+        };
+        if (exists loc = safeOutputRef("location")) {
+            loc.reload();
+        }
+    }
+}
+
+"Wraps the contents of the editor in an object and sends it to the server for compilation.
+ On response, executes the script if compilation was OK, otherwise shows errors.
+ In any case it sets the hover docs if available."
+shared void doTranslateCode(dynamic files, void onTranslation()) {
+    dynamic {
+        transok = false;
+    
+        void onSuccess(dynamic json, dynamic status, dynamic xhr) {
+            live_tc.done();
+            String? translatedcode = json.code;
+            if (exists translatedcode) {
+                markCompiled(files);
+                try {
+                    jQuery("#result").text(translatedcode);
+                    loadModuleAsString(translatedcode, onTranslation);
+                } catch(Throwable err) {
+                    printError("Translated code could not be parsed:");
+                    printError("--- ``err``");
+                }
+            }
+            //errors?
+            dynamic errs = json.errors;
+            if (errs && !jQuery.isEmptyObject(errs)) {
+                showErrors(errs, !translatedcode exists);
+            }
+        }
+        void onError(dynamic xhr, dynamic status, dynamic err) {
+            live_tc.done();
+            transok = false;
+            printError("An error occurred while compiling your code:");
+            printError("--- ``err else status``");
+        }
+        jQuery.ajax("translate", dynamic[
+            cache=false; type="POST";
+            dataType="json";
+            timeout=20000;
+            beforeSend=startSpinner;
+            complete=stopSpinner;
+            success=onSuccess;
+            error=onError;
+            contentType="application/json; charset=utf-8";
+            data=\iJSON.stringify(dynamic[files=files;]);
+        ]);
+    }
+}
+
+shared void loadModuleAsString(String src, void func()) {
+    dynamic {
+        if (exists load = repl.safeOutputRef("loadModuleAsString")) {
+            startSpinner();
+            load(src, void() {
+                transok = true;
+                func();
+                stopSpinner();
+            }, void(String when, String err) {
+                transok = false;
+                stopSpinner();
+                if (when == "parsing") {
+                    repl.printError("Translated code could not be parsed:");
+                } else if (when == "running") {
+                    repl.printError("Error running code:");
+                } else if (when == "require") {
+                    repl.printError("Error loading external modules:");
+                } else {
+                    repl.printError("Unknown error:");
+                }
+                repl.printError("--- ``err``");
+            });
+        }
     }
 }
 

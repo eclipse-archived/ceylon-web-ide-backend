@@ -233,7 +233,7 @@
       jQuery(input).unbind('keydown', keydown);
       jQuery("body").unbind('click', bodyClick);
       complete.parentNode.removeChild(complete);
-      live_tc.status=1;
+      repl.live_tc().status=1;
     }
     closePopups=close;
     function pick() {

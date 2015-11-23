@@ -103,6 +103,9 @@ for (i=0; i<sheets.length; i++) {
     }
 }
 
+var transok=false;
+var help;
+
 require([ceylonLang, repl],
     function(clang, rrepl) {
         console && console.log("ceylon.language module loaded for REPL");
@@ -681,7 +684,7 @@ function newFile(name) {
         neweditor = createEditor(name);
     }
     if (name.endsWith(".md")) {
-        createMarkdownView(neweditor.ceylonId);
+        repl.createMarkdownView(neweditor.ceylonId);
     }
     selectTab(neweditor.ceylonId);
     updateEditorDirtyState(neweditor.ceylonId);
@@ -692,7 +695,7 @@ function newFile(name) {
 
 function newModuleFile() {
     var neweditor = repl.addSourceEditor("module.ceylon", repl.defaultImportSrc());
-    markWrapperReadOnly(neweditor.ceylonId);
+    repl.markWrapperReadOnly(neweditor.ceylonId);
     updateEditorDirtyState(neweditor.ceylonId);
     return neweditor;
 }
@@ -1145,151 +1148,11 @@ function runCode(code) {
 }
 
 function translateCode(files, onTranslation) {
-    resetOutput(function() {
-        doTranslateCode(files, onTranslation);
+    repl.resetOutput(function() {
+        repl.doTranslateCode(files, onTranslation);
     });
 }
 
-var transok=false;
-
-// Wraps the contents of the editor in an object and sends it to the server for compilation.
-// On response, executes the script if compilation was OK, otherwise shows errors.
-// In any case it sets the hover docs if available.
-function doTranslateCode(files, onTranslation) {
-    transok = false;
-    
-    function onSuccess(json, status, xhr) {
-        repl.live_tc&&repl.live_tc().done();
-        var translatedcode = json['code'];
-        if (translatedcode != null) {
-            markCompiled(files);
-            try {
-                $("#result").text(translatedcode);
-                loadModuleAsString(translatedcode, onTranslation);
-            } catch(err) {
-                repl.printError("Translated code could not be parsed:");
-                repl.printError("--- " + err);
-            }
-        }
-        //errors?
-        var errs = json['errors'];
-        if (errs && !$.isEmptyObject(errs)) {
-            showErrors(errs, translatedcode == null);
-        }
-    }
-    function onError(xhr, status, err) {
-        repl.live_tc&&repl.live_tc().done();
-        transok = false;
-        repl.printError("An error occurred while compiling your code:");
-        repl.printError("--- " + (err?err:status));
-    }
-    
-    jQuery.ajax('translate', {
-        cache: false, type:'POST',
-        dataType: 'json',
-        timeout: 20000,
-        beforeSend: startSpinner,
-        complete: stopSpinner,
-        success: onSuccess,
-        error: onError,
-        contentType: 'application/json; charset=utf-8',
-        data: JSON.stringify({
-            files: files
-        })
-    });
-}
-
-// Autocompletion support
-function complete(editor){
-    var cursor = editor.getCursor();
-    var files = getCompilerFiles();
-    repl.live_tc&&repl.live_tc().pause();
-    jQuery.ajax('assist', {
-        cache:false, type:'POST',
-        dataType:'json',
-        timeout:20000,
-        beforeSend: startSpinner,
-        success: function(json, status, xhr){
-            stopSpinner();
-            repl.live_tc&&repl.live_tc().ready();
-            CodeMirror.autocomplete(editor, function(){
-                return {
-                    list: json.opts,
-                    from: cursor,
-                    to: cursor
-                };
-            });
-        },
-        error:function(xhr, status, err) {
-            repl.live_tc&&repl.live_tc().ready();
-            repl.printError("An error occurred while retrieving completions for your code:");
-            repl.printError("--- " + (err?err:status));
-        },
-        contentType: 'application/json; charset=UTF-8',
-        data: JSON.stringify({ 
-            files: files,
-            f: editor.ceylonName,
-            r: cursor.line + (isAdvancedModeActive() ? 1 : 3),
-            c: cursor.ch
-        })
-    });
-}
-
-var help;
-
-function fetchDoc(cm) {
-    var files = getCompilerFiles();
-    var done = false;
-    function close() {
-        if (done) return;
-        done = true;
-        $("body").unbind('keydown', close);
-        $("body").unbind('click', close);
-        help.parentNode.removeChild(help);
-    }
-    var docHandler = function(json, status, xhr) {
-        repl.live_tc&&repl.live_tc().ready();
-        if (json && json['name']) {
-            if (json['doc']) {
-                var pos = editor.cursorCoords(true);
-                help = document.createElement("div");
-                help.className = "help infront";
-                help.innerHTML = json['doc'];
-                help.style.left = pos.left + "px";
-                help.style.top = pos.bottom + "px";
-                document.body.appendChild(help);
-                $("body").keydown(close);
-                $("body").click(close);
-                closePopups = close;
-                help.focus();
-            }
-        }
-    };
-    var editor = repl.getEditor(selectedTabId());
-    var cursor = editor.getCursor();
-    repl.live_tc&&repl.live_tc().pause();
-    jQuery.ajax('hoverdoc', {
-        cache: false,
-        type: 'POST',
-        dataType: 'json',
-        timeout: 20000,
-        beforeSend: startSpinner,
-        complete: stopSpinner,
-        success: docHandler,
-        error: function(xhr,status,err){
-            repl.live_tc&&repl.live_tc().ready();
-            repl.printError("An error occurred while retrieving documentation for your code:");
-            repl.printError("--- " + (err?err:status));
-        },
-        contentType: 'application/json; charset=UTF-8',
-        data: JSON.stringify({ 
-            files: files,
-            f: editor.ceylonName,
-            r: cursor.line + (isAdvancedModeActive() ? 1 : 3),
-            c: cursor.ch-1
-        })
-    });
-}
 
 //Shows the specified error messages in the code
 function showErrors(errors, print) {
@@ -1341,35 +1204,6 @@ function showErrors(errors, print) {
             }
         });
     });
-}
-
-function loadModuleAsString(src, func) {
-    var load = repl.safeOutputRef("loadModuleAsString");
-    if (load) {
-        startSpinner();
-        load(src, function() {
-                transok = true;
-                func();
-                stopSpinner();
-            }, function(when, err) {
-                transok = false;
-                stopSpinner();
-                if (when == "parsing") {
-                    repl.printError("Translated code could not be parsed:");
-                    repl.printError("--- " + err);
-                } else if (when == "running") {
-                    repl.printError("Error running code:");
-                    repl.printError("--- " + err);
-                } else if (when == "require") {
-                    repl.printError("Error loading external modules:");
-                    repl.printError("--- " + err);
-                } else {
-                    repl.printError("Unknown error:");
-                    repl.printError("--- " + err);
-                }
-            }
-        );
-    }
 }
 
 var stopfunc = null;
@@ -1435,7 +1269,7 @@ function setEditorSourcesFromGist(files) {
             if (firstFile == null) {
                 firstFile = index;
             }
-            if (firstEditModeFile == null && editorMode(index) != null) {
+            if (firstEditModeFile == null && repl.editorMode(index) != null) {
                 firstEditModeFile = index;
             }
             if (firstCeylonFile == null
@@ -1458,10 +1292,10 @@ function setEditorSourcesFromGist(files) {
             if (index == "module.ceylon") {
                 hasModule = true;
                 if (repl.isWrappedModule(item.content)) {
-                    markWrapperReadOnly(neweditor.ceylonId);
+                    repl.markWrapperReadOnly(neweditor.ceylonId);
                 }
             } else if (index.endsWith(".md")) {
-                createMarkdownView(neweditor.ceylonId);
+                repl.createMarkdownView(neweditor.ceylonId);
             }
         }
     });
@@ -1487,27 +1321,13 @@ function editorId(name) {
 }
 
 function editorAccepts(name) {
-    return editorMode(name) != null
+    return repl.editorMode(name) != null
             || name.endsWith(".txt");
 }
 
 function compilerAccepts(name) {
     return name.endsWith(".ceylon")
             || name.endsWith(".js");
-}
-
-function editorMode(name) {
-    if (name.endsWith(".ceylon")) {
-        return "text/x-ceylon";
-    } else if (name.endsWith(".js")) {
-        return "javascript";
-    } else if (name.endsWith(".json")) {
-        return {name: "javascript", json: true};
-    } else if (name.endsWith(".md")) {
-        return "markdown";
-    } else {
-        return undefined;
-    }
 }
 
 //Delete a tab (not the content pane! Remove that first)
@@ -1557,27 +1377,12 @@ function openCanvasWindow() {
     return $("#" + id)[0];
 }
 
-function createMarkdownView(editorId) {
-    var editor = repl.getEditor(editorId);
-    var name = editor.ceylonName.substring(0, editor.ceylonName.length - 3);
-    repl.createTab("preview_" + editorId, name + " <i class='fa fa-eye'></i>", 'preview-template');
-    updateMarkdownView(editorId);
-}
-
-function updateMarkdownView(editorId) {
-    var editor = repl.getEditor(editorId);
-    var src = repl.getEditorCode(editorId, true);
-    var mdHtml = marked(src);
-    $("#preview_" + editorId + " > div").html(mdHtml);
-    editor.ceylonPreviewUpdate = false;
-}
-
 function createEditor(name) {
     var newid = editorId(name);
     repl.createTab(newid, name, 'editor-template');
     var div = $("#" + newid)[0];
     var editor = CodeMirror(div, {
-        mode: editorMode(name),
+        mode: repl.editorMode(name),
         theme: 'ceylon',
         gutters: ["CodeMirror-error-gutter", "CodeMirror-gutter"],
         lineNumbers: true,
@@ -1589,10 +1394,10 @@ function createEditor(name) {
         extraKeys: {
             "Ctrl-S": function(cm) { handleSaveAll(); },
             "Cmd-S": function(cm) { handleSaveAll(); },
-            "Ctrl-D": function(cm) { fetchDoc(cm); },
-            "Cmd-D": function(cm) { fetchDoc(cm); },
-            "Ctrl-Space": function() { complete(editor); },
-            "Cmd-.": function() { complete(editor); }
+            "Ctrl-D": function(cm) { repl.fetchDoc(cm); },
+            "Cmd-D": function(cm) { repl.fetchDoc(cm); },
+            "Ctrl-Space": function() { repl.complete(editor); },
+            "Cmd-.": function() { repl.complete(editor); }
         }
     });
     editor.ceylonId = newid;
@@ -1662,7 +1467,7 @@ function selectTab(id) {
         var editorId = id.substring(8);
         var editor = repl.getEditor(editorId);
         if (editor != null && editor.ceylonPreviewUpdate) {
-            updateMarkdownView(editorId);
+            repl.updateMarkdownView(editorId);
         }
     }
 }
@@ -1750,19 +1555,6 @@ function selectedTabId() {
     return (w2ui["editortabs"].tabs.length > 0) ? w2ui["editortabs"].active : null;
 }
 
-// This will mark the first and final lines of the editor read-only
-function markWrapperReadOnly(id) {
-    var editor = repl.getEditor(id);
-    // First line
-    var opts1 = { readOnly:true, inclusiveLeft:true, inclusiveRight:false, atomic: true };
-    editor.markText({line:0,ch:0}, {line:1,ch:0}, opts1);
-    editor.addLineClass(0, "background", "cm-locked");
-    // Last line
-    var opts2 = { readOnly:true, inclusiveLeft:false, inclusiveRight:true, atomic: true };
-    editor.markText({line:editor.lineCount() - 1,ch:0}, {line:editor.lineCount(),ch:0}, opts2);
-    editor.addLineClass(editor.lineCount() - 1, "background", "cm-locked");
-}
-
 // Deletes all editors
 function deleteEditors() {
     $("#editorspane").empty();
@@ -1801,17 +1593,6 @@ function isFullScript() {
 function isWrapped(code, allowMissingTag) {
     return code.startsWith(repl.wrappedTag() + repl.codePrefix())
         || allowMissingTag && code.startsWith(repl.codePrefix());
-}
-
-function resetOutput(onReady) {
-    window.outputReady = function() {
-        window.outputReady = null;
-        onReady();
-    }
-    var loc = repl.safeOutputRef("location");
-    if (loc) {
-        loc.reload();
-    }
 }
 
 // Basic HTML escaping.
