@@ -116,48 +116,7 @@ require([ceylonLang, repl],
             window.setInterval(repl.setupLiveTypechecker,500);
         });
         if (!embedded) {
-            $(document).ready(function(){
-                if ("usrlow" in uriparams) {
-                    // With "usrlow" set the user's gists will be shown
-                    // at the bottom of the sidebar instead of the top
-                    repl.addExamplesContainer();
-                    repl.addUserGistsContainer();
-                } else {
-                    repl.addUserGistsContainer();
-                    repl.addExamplesContainer();
-                }
-                var noDefault = false;
-                if (uriparams.src != null) {
-                    // Code is directly in URL
-                    var code = decodeURIComponent(uriparams.src);
-                    setTimeout(function() {
-                        editSource(code);
-                    }, 1);
-                    noDefault = true;
-                } else if (uriparams.sample != null) {
-                    // Retrieve code from the given sample id
-                    repl.editExample("ex", uriparams.sample);
-                    noDefault = true;
-                } else if (uriparams.gist != null) {
-                    // Retrieve code from the given sample id
-                    repl.editGist(uriparams.gist);
-                    noDefault = true;
-                } else {
-                    if (uriparams.set == null) {
-                        startSpinner();
-                        runCode('print("Ceylon ``language.version`` \\"``language.versionName``\\"");');
-                        stopSpinner();
-                    }
-                }
-                if (uriparams.set != null) {
-                    handleSelectSet(uriparams.set, noDefault);
-                } else {
-                    // This is the default set of examples stored in our
-                    // special "ceylonwebide" GitHub account
-                    handleSelectSet("6e03a3db46854ff825e9", noDefault);
-                }
-                listUserGists();
-            });
+            $(document).ready(repl.onDocumentReady);
         }
     }
 );
@@ -378,6 +337,7 @@ function handleResizeSidebar(event, data) {
     }
 }
 
+//This can't be moved to Ceylon because it's called too early on
 function getLayoutPanels() {
     var pstyle = 'border: 0px; padding: 0px; overflow: hidden;';
     var zstyle = 'border: 1px solid #dfdfdf; padding: 0px; overflow: hidden;';
@@ -395,6 +355,7 @@ function getLayoutPanels() {
     ];
 }
 
+//Can't be moved either
 function getToolbarItems() {
     return [
         { type: 'menu',  id: 'menu', hint: 'Manage your code', icon: 'fa fa-bars', hidden: embedded,
@@ -422,6 +383,7 @@ function getToolbarItems() {
     ];
 }
 
+//Can't be moved
 function getMenuItems() {
     var cnt = getEditors().length;
     var editorSelected = getEditors().length > 0 && repl.getEditor(selectedTabId()) != null;
@@ -551,6 +513,7 @@ function onStoreGistError(xhr, status, err) {
 // Creates the proper "files" element necessary for creating and
 // updating Gists using the contents of the current editor(s)
 function getGistFiles() {
+
     var files = {};
     var editors = getEditors();
     $.each(editors, function(index, editor) {
@@ -573,18 +536,9 @@ function getGistFiles() {
     return files;
 }
 
-// Creates the proper "files" element necessary for compilation,
-// autocomplete and documentation handling
-function getCompilerFiles() {
-    var files = {};
-    var editors = getEditors();
-    $.each(editors, function(index, editor) {
-        if (compilerAccepts(editor.ceylonName)) {
-            var content = { content: repl.getEditorCode(editor.ceylonId) };
-            files[editor.ceylonName] = content;
-        }
-    });
-    return files;
+//Aux function for the time being
+function setObjectProperty(obj, prop, val) {
+  obj[prop] = val;
 }
 
 // Creates a commit for the given Gist with a link to the Web Runner
@@ -782,13 +736,13 @@ function deleteFile(id) {
 }
 
 function handleNewProject() {
-    checkForChangesAndRun(function() {
+    repl.checkForChangesAndRun(function() {
         newProject();
     });
 }
 
 function handleImportProject() {
-    checkForChangesAndRun(function() {
+    repl.checkForChangesAndRun(function() {
         importProject();
     });
 }
@@ -1020,7 +974,7 @@ var advanced = false;
 
 function handleAdvanced(event) {
     if (isAdvancedModeActive()) {
-        checkForChangesAndRun(function() {
+        repl.checkForChangesAndRun(function() {
             buttonSetIcon("advanced", "fa fa-square-o");
             undoAdvanced();
         }, function() {
@@ -1233,25 +1187,14 @@ function stop() {
 	}
 }
 
-// Retrieves the specified example from the editor, along with its hover docs.
-function editSource(src) {
-     repl.doReset();
-     selectedExample = null;
-     selectedGist = null;
-     var files = createFilesFromCode(src);
-     setEditorSourcesFromGist(files);
-     repl.clearListSelectState();
-     repl.live_tc&&repl.live_tc().now();
-}
-
 function handleEditExample(setName, key) {
-    checkForChangesAndRun(function() {
+    repl.checkForChangesAndRun(function() {
         repl.editExample(setName, key);
     });
 }
 
 function handleEditGist(key) {
-    checkForChangesAndRun(function() {
+    repl.checkForChangesAndRun(function() {
         repl.editGist(key);
     });
 }
@@ -1566,26 +1509,6 @@ function deleteEditors() {
     repl.live_tc&&repl.live_tc().done();
 }
 
-// This function checks for dirty editors and will run `func()`
-// immediately if non of them are. Otherwise it will show a
-// question to the user asking if they want to discard the 
-// changes. When affirmative `func()` will be run or 'negative()'
-// otherwise. Can have an optional list of editor ids to check
-// for dirty state (by default all editors are checked)
-function checkForChangesAndRun(func, negative, edids) {
-    if (isRunning()) {
-        w2alert("Program is running, stop it first before doing anything else", "Program Running", negative);
-    } else if (isAnyEditorDirty(edids)) {
-        var conf = w2confirm("This will discard any changes! Are you sure you want to continue?");
-        conf.yes(func);
-        if (negative != null) {
-            conf.no(negative);
-        }
-    } else {
-        func();
-    }
-}
-
 function isFullScript() {
     return advanced;
 }
@@ -1717,4 +1640,3 @@ function popupSelectGist(onClose) {
         }
     });
 }
-

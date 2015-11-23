@@ -277,7 +277,7 @@ shared void doTranslateCode(dynamic files, void onTranslation()) {
 
 shared void loadModuleAsString(String src, void func()) {
     dynamic {
-        if (exists load = repl.safeOutputRef("loadModuleAsString")) {
+        if (exists load = safeOutputRef("loadModuleAsString")) {
             startSpinner();
             load(src, void() {
                 transok = true;
@@ -287,17 +287,111 @@ shared void loadModuleAsString(String src, void func()) {
                 transok = false;
                 stopSpinner();
                 if (when == "parsing") {
-                    repl.printError("Translated code could not be parsed:");
+                    printError("Translated code could not be parsed:");
                 } else if (when == "running") {
-                    repl.printError("Error running code:");
+                    printError("Error running code:");
                 } else if (when == "require") {
-                    repl.printError("Error loading external modules:");
+                    printError("Error loading external modules:");
                 } else {
-                    repl.printError("Unknown error:");
+                    printError("Unknown error:");
                 }
-                repl.printError("--- ``err``");
+                printError("--- ``err``");
             });
         }
+    }
+}
+
+"This function checks for dirty editors and will run `func()`
+ immediately if non of them are. Otherwise it will show a
+ question to the user asking if they want to discard the 
+ changes. When affirmative `func()` will be run or 'negative()'
+ otherwise. Can have an optional list of editor ids to check
+ for dirty state (by default all editors are checked)."
+shared void checkForChangesAndRun(void func(), dynamic negative, dynamic edids) {
+    dynamic {
+        if (isRunning()) {
+            w2alert("Program is running, stop it first before doing anything else", "Program Running", negative);
+        } else if (isAnyEditorDirty(edids)) {
+            dynamic conf = w2confirm("This will discard any changes! Are you sure you want to continue?");
+            conf.yes(func);
+            if (negative exists) {
+                conf.no(negative);
+            }
+        } else {
+            func();
+        }
+    }
+}
+
+"Retrieves the specified example from the editor, along with its hover docs."
+shared void editSource(String src) {
+    doReset();
+    dynamic {
+        selectedExample = null;
+        selectedGist = null;
+        dynamic files = createFilesFromCode(src);
+        setEditorSourcesFromGist(files);
+    }
+    clearListSelectState();
+    live_tc.now();
+}
+
+shared void onDocumentReady(){
+    dynamic {
+        if (uriparams?.usrlow exists) {
+            // With "usrlow" set the user's gists will be shown
+            // at the bottom of the sidebar instead of the top
+            addExamplesContainer();
+            addUserGistsContainer();
+        } else {
+            addUserGistsContainer();
+            addExamplesContainer();
+        }
+        variable Boolean noDefault = false;
+        if (uriparams?.src exists) {
+            // Code is directly in URL
+            String code = decodeURIComponent(uriparams.src);
+            setTimeout(void() => editSource(code), 1);
+            noDefault = true;
+        } else if (uriparams?.sample exists) {
+            // Retrieve code from the given sample id
+            editExample("ex", uriparams.sample);
+            noDefault = true;
+        } else if (uriparams?.gist exists) {
+            // Retrieve code from the given sample id
+            editGist(uriparams?.gist);
+            noDefault = true;
+        } else {
+            if (!uriparams?.set exists) {
+                startSpinner();
+                runCode("""print("Ceylon ``language.version`` \"``language.versionName``\"");""");
+                stopSpinner();
+            }
+        }
+        if (uriparams?.set exists) {
+            handleSelectSet(uriparams.set, noDefault);
+        } else {
+            // This is the default set of examples stored in our
+            // special "ceylonwebide" GitHub account
+            handleSelectSet("6e03a3db46854ff825e9", noDefault);
+        }
+        listUserGists();
+    }
+}
+
+"Creates the proper 'files' element necessary for compilation,
+ autocomplete and documentation handling"
+shared dynamic getCompilerFiles() {
+    dynamic {
+        dynamic files = dynamic[];
+        dynamic editors = getEditors();
+        jQuery.each(editors, void(Integer index, dynamic editor) {
+            if (compilerAccepts(editor.ceylonName)) {
+                dynamic content = dynamic[ content=repl.getEditorCode(editor.ceylonId); ];
+                setObjectProperty(files, editor.ceylonName, content);
+            }
+        });
+        return files;
     }
 }
 
