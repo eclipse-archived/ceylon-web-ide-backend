@@ -201,7 +201,7 @@ function setupComponents() {
         name: 'editortabs',
         tabs: [],
         onClick: function(event) {
-            selectTab(event.target);
+            repl.selectTab(event.target);
         }
     });
     
@@ -406,21 +406,7 @@ function updateMenuState() {
 }
 
 function handleDarkClick() {
-    dark = !dark;
-    var sheets = document.styleSheets;
-    for (i=0; i<sheets.length; i++) {
-        var sheet = sheets[i];
-        var href = sheet.href;
-        if (href!=null) {
-            if (href.indexOf("cm-ceylon")>0) {
-                sheet.disabled = !sheet.disabled;
-            }
-        }
-    }
-    buttonSetIcon("dark", dark?"fa fa-check-square":"fa fa-square");
-    buttonCheck("dark", dark);
-    
-    docCookies.setItem("dark",dark?"true":"false",60*60*24*30);
+    repl.darkClick();
 }
 
 function handleHelpClick() {
@@ -480,12 +466,12 @@ function handleSaveAs() {
 // Stores the code by creating a new Gist on the server
 function saveSource(title) {
     function onSuccess(gist) {
-        clearEditorDirtyStates();
+        repl.clearEditorDirtyStates();
         repl.selectGist(gist);
         createComment(gist);
         updateGists();
     }
-    var files = getGistFiles();
+    var files = repl.getGistFiles();
     var data = {
         "description": "Ceylon Web Runner: " + title,
         "public": false,
@@ -508,32 +494,6 @@ function onStoreGistError(xhr, status, err) {
             "In that case use 'Save As' to create your own\n" +
             "personal copy.");
     }
-}
-
-// Creates the proper "files" element necessary for creating and
-// updating Gists using the contents of the current editor(s)
-function getGistFiles() {
-
-    var files = {};
-    var editors = getEditors();
-    $.each(editors, function(index, editor) {
-        var content = { content: repl.getEditorCode(editor.ceylonId) };
-        if (isEditorRenamed(editor.ceylonId)) {
-            content.filename = editor.ceylonName;
-            files[editor.ceylonSavedName] = content;
-        } else {
-            files[editor.ceylonName] = content;
-        }
-    });
-    // See if we need to delete any files
-    if (selectedGist != null) {
-        $.each(selectedGist.data.files, function(index, item) {
-            if (repl.getEditor(editorId(index)) == null) {
-                files[index] = null;
-            }
-        });
-    }
-    return files;
 }
 
 //Aux function for the time being
@@ -581,11 +541,11 @@ function handleSaveAll() {
 // Is called when the "Save All" button is pressed
 function updateSource() {
     function onSuccess(gist) {
-        clearEditorDirtyStates();
+        repl.clearEditorDirtyStates();
         repl.selectGist(gist);
         updateGists();
     }
-    var files = getGistFiles();
+    var files = repl.getGistFiles();
     var data = {
             "files": files
     };
@@ -613,44 +573,18 @@ function handleNewFile() {
                     'simply type statements anymore but you will have ' +
                     'to write proper Ceylon code. Are you sure you ' +
                     'want to continue?').yes(function() {
-                        newFile(newname);
+                        repl.newFile(newname);
                     });
         } else {
-            newFile(newname);
+            repl.newFile(newname);
         }
     });
-}
-
-function newFile(name) {
-    var neweditor;
-    if (!isAdvancedModeActive() && name.endsWith(".ceylon") && repl.countCeylonFiles() >= 1) {
-        // We switch to advanced mode
-        applyAdvanced();
-        if (name == "module.ceylon") {
-            // The switch to advanced mode will have created
-            // this editor already, we just select it
-            neweditor = repl.getEditor(editorId("module.ceylon"));
-        } else {
-            // We still need to create the new file
-            neweditor = createEditor(name);
-        }
-    } else {
-        neweditor = createEditor(name);
-    }
-    if (name.endsWith(".md")) {
-        repl.createMarkdownView(neweditor.ceylonId);
-    }
-    selectTab(neweditor.ceylonId);
-    updateEditorDirtyState(neweditor.ceylonId);
-    updateMenuState();
-    updateAdvancedState();
-    return neweditor;
 }
 
 function newModuleFile() {
     var neweditor = repl.addSourceEditor("module.ceylon", repl.defaultImportSrc());
     repl.markWrapperReadOnly(neweditor.ceylonId);
-    updateEditorDirtyState(neweditor.ceylonId);
+    repl.updateEditorDirtyState(neweditor.ceylonId);
     return neweditor;
 }
 
@@ -667,7 +601,7 @@ function renameFile(id, newname) {
     var oldname = editor.ceylonName;
     if (oldname != newname) {
         editor.ceylonName = newname;
-        updateEditorDirtyState(id);
+        repl.updateEditorDirtyState(id);
         updateMenuState();
         updateAdvancedState();
     }
@@ -737,7 +671,7 @@ function deleteFile(id) {
 
 function handleNewProject() {
     repl.checkForChangesAndRun(function() {
-        newProject();
+        repl.newProject();
     });
 }
 
@@ -1199,66 +1133,6 @@ function handleEditGist(key) {
     });
 }
 
-// Sets the code for the editor(s) from the given object
-function setEditorSourcesFromGist(files) {
-    fileDeleted = false;
-    deleteEditors();
-    var cnt = 0;
-    var hasModule = false;
-    var hasWrapped = false;
-    var firstFile, firstCeylonFile, firstEditModeFile, readme;
-    $.each(files, function(index, item) {
-        if (editorAccepts(index)) {
-            if (firstFile == null) {
-                firstFile = index;
-            }
-            if (firstEditModeFile == null && repl.editorMode(index) != null) {
-                firstEditModeFile = index;
-            }
-            if (firstCeylonFile == null
-                    && index.endsWith(".ceylon")
-                    && (index != "module.ceylon")) {
-                firstCeylonFile = index;
-            }
-            if (index.endsWith(".ceylon")) {
-                cnt++;
-            }
-            if (index.endsWith(".ceylon")
-                    && (index != "module.ceylon")
-                    && isWrapped(item.content)) {
-                hasWrapped = true;
-            }
-            if (index == "README.md") {
-                readme = index;
-            }
-            var neweditor = repl.addSourceEditor(index, item.content);
-            if (index == "module.ceylon") {
-                hasModule = true;
-                if (repl.isWrappedModule(item.content)) {
-                    repl.markWrapperReadOnly(neweditor.ceylonId);
-                }
-            } else if (index.endsWith(".md")) {
-                repl.createMarkdownView(neweditor.ceylonId);
-            }
-        }
-    });
-    if (!hasModule && (cnt > 1 || cnt == 1 && !hasWrapped)) {
-        newModuleFile();
-    }
-    var selectFile = readme || firstCeylonFile || firstEditModeFile || firstFile;
-    if (selectFile != null) {
-        var tabid = editorId(selectFile);
-        if (selectFile.endsWith(".md")) {
-            tabid = "preview_" + tabid;
-        }
-        selectTab(tabid);
-    }
-    clearEditorDirtyStates();
-    updateMenuState();
-    updateAdvancedState();
-    repl.live_tc&&repl.live_tc().ready();
-}
-
 function editorId(name) {
     return "editor_" + name.replace(".", "_");
 }
@@ -1284,7 +1158,7 @@ function deleteTab(id) {
     if (cnt > 0) {
         var newindex = (index < cnt) ? index : cnt - 1;
         var newid = editors[newindex].ceylonId;
-        selectTab(newid);
+        repl.selectTab(newid);
     } else {
         updateMenuState();
     }
@@ -1303,7 +1177,7 @@ function createCanvas() {
         stop();
         deleteCanvas();
     });
-    selectTab(id);
+    repl.selectTab(id);
 }
 
 function deleteCanvas() {
@@ -1339,6 +1213,7 @@ function createEditor(name) {
             "Cmd-S": function(cm) { handleSaveAll(); },
             "Ctrl-D": function(cm) { repl.fetchDoc(cm); },
             "Cmd-D": function(cm) { repl.fetchDoc(cm); },
+            //These two keys prevent the whole thing from being ported over to Ceylon
             "Ctrl-Space": function() { repl.complete(editor); },
             "Cmd-.": function() { repl.complete(editor); }
         }
@@ -1357,7 +1232,7 @@ function createEditor(name) {
         closePopups = undefined;
     });
     editor.on('change', function() {
-        updateEditorDirtyState(editor.ceylonId);
+        repl.updateEditorDirtyState(editor.ceylonId);
         updateMenuState();
         updateAdvancedState();
         repl.live_tc&&repl.live_tc().postpone();
@@ -1383,6 +1258,7 @@ function getEditorDiv(id) {
     return $("#" + id);
 }
 
+//This gets called before loading Ceylon code
 function getEditors() {
     var editors = [];
     var codemirrordivs = $("#editorspane > div > div.CodeMirror");
@@ -1392,79 +1268,9 @@ function getEditors() {
     return editors;
 }
 
-function selectTab(id) {
-    w2ui["editortabs"].select(id);
-    $("#editorspane > div").addClass("invis");
-    getEditorDiv(id).removeClass("invis");
-    updateMenuState();
-    // If it's an editor set the focus to it
-    var editor = repl.getEditor(id);
-    if (editor != null) {
-        editor.refresh();
-        if (!isMobile) {
-            editor.focus();
-        }
-    }
-    // If it's a preview check if it needs to be refreshed
-    if (id.startsWith("preview_")) {
-        var editorId = id.substring(8);
-        var editor = repl.getEditor(editorId);
-        if (editor != null && editor.ceylonPreviewUpdate) {
-            repl.updateMarkdownView(editorId);
-        }
-    }
-}
-
-function isEditorDirty(id) {
-    var editor = repl.getEditor(id);
-    var src = editor.getValue();
-    var oldsrc = editor.ceylonSavedSource;
-    return (src != oldsrc);
-}
-
 function isEditorRenamed(id) {
     var editor = repl.getEditor(id);
     return editor.ceylonSavedName != null && editor.ceylonSavedName != editor.ceylonName;
-}
-
-function updateEditorDirtyState(id) {
-    // Setting the tab state resets any classes we might
-    // have added, so we store their states
-    var tab = repl.getEditorTab(id);
-    var hasErr = tab.hasClass("error");
-    var hasWrn = tab.hasClass("warning");
-    
-    var caption = repl.getEditor(id).ceylonName;
-    if (selectedGist != null && isEditorRenamed(id)) {
-        caption = "[" + caption + "]";
-    }
-    if (isEditorDirty(id)) {
-        caption = "*" + caption;
-    }
-    w2ui["editortabs"].set(id, { caption: caption });
-
-    // We now restore any classes that we found earlier
-    if (hasErr) tab.addClass("error");
-    if (hasWrn) tab.addClass("warning");
-}
-
-function clearEditorDirtyState(id) {
-    var editor = repl.getEditor(id);
-    editor.ceylonSavedName = editor.ceylonName;
-    editor.ceylonSavedSource = editor.getValue();
-    updateEditorDirtyState(editor.ceylonId);
-}
-
-function clearEditorDirtyStates() {
-    var editors = getEditors();
-    $.each(editors, function(index, editor) {
-        editor.ceylonSavedName = editor.ceylonName;
-        editor.ceylonSavedSource = editor.getValue();
-        updateEditorDirtyState(editor.ceylonId);
-    });
-    updateMenuState();
-    updateAdvancedState();
-    fileDeleted = false;
 }
 
 // Returns true is any of the editors is dirty or if
@@ -1476,7 +1282,7 @@ function isAnyEditorDirty(edids) {
     var editors = getEditors();
     $.each(editors, function(index, editor) {
         if (edids == null || $.inArray(editor.ceylonName, edids) >= 0) {
-            dirty = dirty || isEditorDirty(editor.ceylonId);
+            dirty = dirty || repl.isEditorDirty(editor.ceylonId);
         }
     });
     return dirty;
@@ -1498,17 +1304,6 @@ function selectedTabId() {
     return (w2ui["editortabs"].tabs.length > 0) ? w2ui["editortabs"].active : null;
 }
 
-// Deletes all editors
-function deleteEditors() {
-    $("#editorspane").empty();
-    var tabs = w2ui["editortabs"].tabs;
-    // WARNING: do NOT change this to $.each(tabs, ...) !
-    $(tabs).each(function(index, item) {
-        w2ui["editortabs"].remove(item.id);
-    });
-    repl.live_tc&&repl.live_tc().done();
-}
-
 function isFullScript() {
     return advanced;
 }
@@ -1528,6 +1323,7 @@ function w2prompt(msg, label, value, title, onClose, onValidate) {
     if (w2ui.promptform) {
         w2ui.promptform.destroy();
     }
+    //This is the exact call that breaks because of array enhancement, because of "fields"
     $().w2form({
         name: 'promptform',
         style: 'border: 0px; background-color: transparent;',

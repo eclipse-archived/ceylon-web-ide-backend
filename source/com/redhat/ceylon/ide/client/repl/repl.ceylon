@@ -387,7 +387,9 @@ shared dynamic getCompilerFiles() {
         dynamic editors = getEditors();
         jQuery.each(editors, void(Integer index, dynamic editor) {
             if (compilerAccepts(editor.ceylonName)) {
-                dynamic content = dynamic[ content=repl.getEditorCode(editor.ceylonId); ];
+                dynamic content = dynamic[
+                    content=getEditorCode(editor.ceylonId, false);
+                ];
                 setObjectProperty(files, editor.ceylonName, content);
             }
         });
@@ -395,3 +397,59 @@ shared dynamic getCompilerFiles() {
     }
 }
 
+shared dynamic newFile(String name) {
+    dynamic {
+        dynamic neweditor;
+        if (!isAdvancedModeActive() && name.endsWith(".ceylon") && countCeylonFiles() >= 1) {
+            // We switch to advanced mode
+            applyAdvanced();
+            if (name == "module.ceylon") {
+                // The switch to advanced mode will have created
+                // this editor already, we just select it
+                neweditor = getEditor(editorId("module.ceylon"));
+            } else {
+                // We still need to create the new file
+                neweditor = createEditor(name);
+            }
+        } else {
+            neweditor = createEditor(name);
+        }
+        if (name.endsWith(".md")) {
+            createMarkdownView(neweditor.ceylonId);
+        }
+        selectTab(neweditor.ceylonId);
+        updateEditorDirtyState(neweditor.ceylonId);
+        updateMenuState();
+        updateAdvancedState();
+        return neweditor;
+    }
+}
+
+"Creates the proper \"files\" element necessary for creating and
+ updating Gists using the contents of the current editor(s)"
+shared dynamic getGistFiles() {
+    dynamic {
+        dynamic files = dynamic[];
+        dynamic editors = getEditors();
+        jQuery.each(editors, void(Integer index, dynamic editor) {
+            dynamic content = dynamic[
+                content=getEditorCode(editor.ceylonId, false);
+            ];
+            if (isEditorRenamed(editor.ceylonId)) {
+                content.filename = editor.ceylonName;
+                setObjectProperty(files, editor.ceylonSavedName, content);
+            } else {
+                setObjectProperty(files, editor.ceylonName, content);
+            }
+        });
+        // See if we need to delete any files
+        if (selectedGist exists) {
+            jQuery.each(selectedGist.data.files, void(Integer index, dynamic item) {
+                if (!getEditor(editorId(index)) exists) {
+                    setObjectProperty(files, index, null);
+                }
+            });
+        }
+        return files;
+    }
+}

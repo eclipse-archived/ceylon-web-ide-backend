@@ -23,3 +23,24 @@ shared void shareSource() {
         jQuery("#tb_all_main_toolbar_item_share").w2overlay(html.string);
     }
 }
+
+shared void darkClick() {
+     dynamic {
+         dark = !dark;
+         dynamic sheets = document.styleSheets;
+         variable value i=0;
+         while (i<sheets.length) {
+             dynamic sheet = sheets[i];
+             if (exists href = sheet.href) {
+                 if (href.indexOf("cm-ceylon")>0) {
+                     sheet.disabled = !sheet.disabled;
+                 }
+             }
+             i++;
+         }
+         buttonSetIcon("dark", dark then "fa fa-check-square" else "fa fa-square");
+         buttonCheck("dark", dark);
+         
+         docCookies.setItem("dark",dark then "true" else "false",60*60*24*30);
+     }
+}

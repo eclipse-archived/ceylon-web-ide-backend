@@ -75,7 +75,7 @@ shared dynamic getEditorTab(dynamic id) {
     }
 }
 
-shared dynamic getEditor(dynamic id) {
+shared dynamic getEditor(String? id) {
     dynamic {
         dynamic codemirrordiv = jQuery("#" + (id else "null") + " > div");
         if (codemirrordiv.length == 1) {
@@ -265,5 +265,175 @@ shared void fetchDoc(dynamic cm) {
             data=\iJSON.stringify(dynamic[
                 files=files; f=editor.ceylonName; r=cursor.line + (isAdvancedModeActive() then 1 else 3); c=cursor.ch-1;]);
         ]);
+    }
+}
+
+"Deletes all editors"
+shared void deleteEditors() {
+    dynamic {
+        jQuery("#editorspane").empty();
+        dynamic tabs = w2ui.editortabs.tabs;
+        // WARNING: do NOT change this to $.each(tabs, ...) !
+        jQuery(tabs).each(void(Integer index, dynamic item) =>
+            w2ui.editortabs.remove(item.id));
+        live_tc.done();
+    }
+}
+
+"Sets the code for the editor(s) from the given object"
+shared void setEditorSourcesFromGist(dynamic files) {
+    variable value cnt = 0;
+    variable value hasModule = false;
+    variable value hasWrapped = false;
+    dynamic {
+        fileDeleted = false;
+        deleteEditors();
+        variable String? firstFile = null;
+        variable String? firstCeylonFile = null;
+        variable String? firstEditModeFile = null;
+        variable String? readme = null;
+        jQuery.each(files, void(String index, dynamic item) {
+            if (editorAccepts(index)) {
+                if (!firstFile exists) {
+                    firstFile = index;
+                }
+                if (!firstEditModeFile exists && editorMode(index) exists) {
+                    firstEditModeFile = index;
+                }
+                if (!firstCeylonFile exists
+                    && index.endsWith(".ceylon")
+                        && (index != "module.ceylon")) {
+                    firstCeylonFile = index;
+                }
+                if (index.endsWith(".ceylon")) {
+                    cnt++;
+                }
+                if (index.endsWith(".ceylon")
+                    && (index != "module.ceylon")
+                        && isWrapped(item.content)) {
+                    hasWrapped = true;
+                }
+                if (index == "README.md") {
+                    readme = index;
+                }
+                dynamic neweditor = addSourceEditor(index, item.content);
+                if (index == "module.ceylon") {
+                    hasModule = true;
+                    if (isWrappedModule(item.content)) {
+                        markWrapperReadOnly(neweditor.ceylonId);
+                    }
+                } else if (index.endsWith(".md")) {
+                    createMarkdownView(neweditor.ceylonId);
+                }
+            }
+        });
+        if (!hasModule && (cnt > 1 || cnt == 1 && !hasWrapped)) {
+            newModuleFile();
+        }
+        String? selectFile =
+                if (readme exists) then readme
+                else if (firstCeylonFile exists) then firstCeylonFile
+                else if (firstEditModeFile exists) then firstEditModeFile
+                else firstFile;
+        if (exists selectFile) {
+            dynamic tabid = let (edid = editorId(selectFile))
+                if (selectFile.endsWith(".md")) then
+                "preview_" + edid
+                else edid;
+            selectTab(tabid);
+        }
+        clearEditorDirtyStates();
+        updateMenuState();
+        updateAdvancedState();
+        live_tc.ready();
+    }
+}
+
+shared void selectTab(String id) {
+    dynamic {
+        w2ui.editortabs.select(id);
+        jQuery("#editorspane > div").addClass("invis");
+        getEditorDiv(id).removeClass("invis");
+        updateMenuState();
+        // If it's an editor set the focus to it
+        dynamic editor = getEditor(id);
+        if (editor exists) {
+            editor.refresh();
+            if (!isMobile) {
+                editor.focus();
+            }
+        }
+        // If it's a preview check if it needs to be refreshed
+        if (id.startsWith("preview_")) {
+            value editorId = id.spanFrom(8);
+            if (exists e2 = getEditor(editorId), e2.ceylonPreviewUpdate) {
+                updateMarkdownView(editorId);
+            }
+        }
+    }
+}
+
+shared void updateEditorDirtyState(String id) {
+    dynamic {
+        // Setting the tab state resets any classes we might
+        // have added, so we store their states
+        dynamic tab = getEditorTab(id);
+        Boolean hasErr = tab.hasClass("error");
+        Boolean hasWrn = tab.hasClass("warning");
+
+        variable String? caption = getEditor(id).ceylonName;
+        if (selectedGist exists && isEditorRenamed(id)) {
+            caption = "[``caption else NULL``]";
+        }
+        if (isEditorDirty(id)) {
+            caption = "*``caption else NULL``";
+        }
+        w2ui.editortabs.set(id, dynamic[ caption=caption; ]);
+        
+        // We now restore any classes that we found earlier
+        if (hasErr) {
+            tab.addClass("error");
+        }
+        if (hasWrn) {
+            tab.addClass("warning");
+        }
+    }
+}
+
+shared void clearEditorDirtyState(String id) {
+    dynamic {
+        dynamic editor = getEditor(id);
+        editor.ceylonSavedName = editor.ceylonName;
+        editor.ceylonSavedSource = editor.getValue();
+        updateEditorDirtyState(editor.ceylonId);
+    }
+}
+
+shared void clearEditorDirtyStates() {
+    dynamic {
+        jQuery.each(getEditors(), void(Integer index, dynamic editor) {
+            editor.ceylonSavedName = editor.ceylonName;
+            editor.ceylonSavedSource = editor.getValue();
+            updateEditorDirtyState(editor.ceylonId);
+        });
+        updateMenuState();
+        updateAdvancedState();
+        fileDeleted = false;
+    }
+}
+
+shared Boolean isEditorDirty(String id) {
+    dynamic {
+        dynamic editor = getEditor(id);
+        //Must be dynamic because it can be undefined
+        dynamic src = editor.getValue();
+        dynamic oldsrc = editor.ceylonSavedSource;
+        if (exists src) {
+            if (exists oldsrc) {
+                return src != oldsrc;
+            }
+            return true;
+        }
+        return !oldsrc exists;
     }
 }
