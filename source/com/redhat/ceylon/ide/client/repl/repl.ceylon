@@ -472,3 +472,28 @@ shared Boolean isCodeUnwrappable() {
     return canUnwrap && cnt <= 2;
 }
 
+shared String? selectedTabId() {
+    dynamic {
+        // First test is because w2ui keeps returning the previous
+        // active state when all tabs have been deleted
+        return (w2ui["editortabs"].tabs.length > 0) then w2ui["editortabs"].active else null;
+    }
+}
+
+shared variable Callable<Anything,[]>? stopFunction = null;
+
+"A way to stop running scripts (that support it!)"
+shared void stop() {
+    if (exists stopfunc = stopFunction) {
+        try {
+            stopfunc();
+        } catch(Throwable e) {}
+        stopFunction = null;
+        dynamic {
+            buttonEnable("run", true);
+            buttonEnable("stop", false);
+        }
+        scrollOutput();
+    }
+}
+

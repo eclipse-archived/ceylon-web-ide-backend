@@ -234,7 +234,7 @@ function handleToolbarClick(event) {
     if (event.target == "run") {
         performRun();
     } else if (event.target == "stop") {
-        stop();
+        repl.stop();
     } else if (event.target == "reset") {
         repl.doReset();
     } else if (event.target == "share") {
@@ -242,9 +242,9 @@ function handleToolbarClick(event) {
     } else if (event.target == "advanced") {
         handleAdvanced(event);
     } else if (event.target == "dark") {
-        handleDarkClick();
+        repl.darkClick();
     } else if (event.target == "help") {
-        handleHelpClick();
+        repl.openHelpView();
     } else if (event.target == "connect") {
         handleGitHubConnect();
     } else if (event.target == "connected:disconnect") {
@@ -385,7 +385,7 @@ function getToolbarItems() {
 //Can't be moved
 function getMenuItems() {
     var cnt = getEditors().length;
-    var editorSelected = getEditors().length > 0 && repl.getEditor(selectedTabId()) != null;
+    var editorSelected = getEditors().length > 0 && repl.getEditor(repl.selectedTabId()) != null;
     var hasGist = (selectedGist != null);
     return [
         { text: 'New File...', id: 'newfile', icon: 'fa fa-file-o' },
@@ -402,14 +402,6 @@ function getMenuItems() {
 
 function updateMenuState() {
     w2ui["all"].get("main").toolbar.set("menu", { items: getMenuItems() });
-}
-
-function handleDarkClick() {
-    repl.darkClick();
-}
-
-function handleHelpClick() {
-    repl.openHelpView();
 }
 
 function doMaximize() {
@@ -588,7 +580,7 @@ function newModuleFile() {
 }
 
 function handleRenameFile() {
-    var id = selectedTabId();
+    var id = repl.selectedTabId();
     var editor = repl.getEditor(id);
     askFileName("Rename File", editor.ceylonName, false, function(newname) {
         renameFile(id, newname);
@@ -645,10 +637,10 @@ function suggestFileName() {
 // Deletes a Gist from the server (asks the user for confirmation first)
 // Is called when the "Delete" menu item is selected
 function handleDeleteFile() {
-    var editor = repl.getEditor(selectedTabId());
+    var editor = repl.getEditor(repl.selectedTabId());
     w2confirm("Do you really want to delete this file '" + editor.ceylonName + "'?")
         .yes(function() {
-            deleteFile(selectedTabId());
+            deleteFile(repl.selectedTabId());
         });
 }
 
@@ -659,11 +651,11 @@ function deleteFile(id) {
     var div = getEditorDiv(id);
     if (div.length > 0) {
         div.remove();
-        deleteTab(id);
+        repl.deleteTab(id);
         var previewDiv = getPreviewDiv(id);
         if (previewDiv != null && previewDiv.length > 0) {
             previewDiv.remove();
-            deleteTab("preview_" + id);
+            repl.deleteTab("preview_" + id);
         }
     }
 }
@@ -1080,30 +1072,12 @@ function showErrors(errors, print) {
     });
 }
 
-var stopfunc = null;
-
+//This is called from other js files, don't move yet
 function setOnStop(func) {
-	if (!stopfunc) {
-		stopfunc = func;
+	if (!repl.stopFunction()) {
+		repl.setStopFunction(func);
 		buttonEnable("run", false);
 		buttonEnable("stop", true);
-	}
-}
-
-function isRunning() {
-    return stopfunc != null;
-}
-
-// A way to stop running scripts (that support it!)
-function stop() {
-	if (isRunning()) {
-		try {
-			stopfunc();
-		} catch(e) {}
-		stopfunc = null;
-		buttonEnable("run", true);
-		buttonEnable("stop", false);
-		repl.scrollOutput();
 	}
 }
 
@@ -1133,49 +1107,10 @@ function compilerAccepts(name) {
             || name.endsWith(".js");
 }
 
-//Delete a tab (not the content pane! Remove that first)
-function deleteTab(id) {
-    // Remove the tab
-    var index = w2ui["editortabs"].get(id, true);
-    w2ui["editortabs"].remove(id);
-    // Select a new tab
-    var editors = getEditors();
-    var cnt = editors.length;
-    if (cnt > 0) {
-        var newindex = (index < cnt) ? index : cnt - 1;
-        var newid = editors[newindex].ceylonId;
-        repl.selectTab(newid);
-    } else {
-        updateMenuState();
-    }
-    updateAdvancedState();
-}
-
-function canvasId() {
-    return "webide_canvas";
-}
-
-function createCanvas() {
-    var id = canvasId();
-    var elem = repl.createTab(id, "Canvas", 'canvas-template');
-    elem[0].ceylonCanvas = elem.find("canvas")[0];
-    tabCloseable(id, function() {
-        stop();
-        deleteCanvas();
-    });
-    repl.selectTab(id);
-}
-
-function deleteCanvas() {
-    var id = canvasId();
-    $("#" + id).remove();
-    deleteTab(id);
-}
-
 function openCanvasWindow() {
-    var id = canvasId();
+    var id = repl.canvasId();
     if (w2ui["editortabs"].get(id) == null) {
-        createCanvas();
+        repl.createCanvas();
     }
     return $("#" + id)[0];
 }
@@ -1226,12 +1161,6 @@ function markCompiled(files) {
 
 function shouldCompile(files) {
     return JSON.stringify(files) != oldfiles || !transok;
-}
-
-function selectedTabId() {
-    // First test is because w2ui keeps returning the previous
-    // active state when all tabs have been deleted
-    return (w2ui["editortabs"].tabs.length > 0) ? w2ui["editortabs"].active : null;
 }
 
 function isFullScript() {

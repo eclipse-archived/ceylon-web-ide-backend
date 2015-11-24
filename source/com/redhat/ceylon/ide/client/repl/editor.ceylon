@@ -529,3 +529,38 @@ shared Editor createEditor(String name) {
         return editor;
     }
 }
+
+shared String canvasId = "webide_canvas";
+
+shared void createCanvas() {
+    dynamic {
+        dynamic elem = createTab(canvasId, "Canvas", "canvas-template");
+        elem[0].ceylonCanvas = (elem.find("canvas"))[0];
+        tabCloseable(canvasId, void() {
+            stop();
+            jQuery("#``canvasId``").remove();
+            deleteTab(canvasId);
+        });
+    }
+    selectTab(canvasId);
+}
+
+"Delete a tab (not the content pane! Remove that first)"
+shared void deleteTab(String id) {
+    dynamic {
+        // Remove the tab
+        dynamic index = w2ui["editortabs"].get(id, true);
+        w2ui["editortabs"].remove(id);
+        // Select a new tab
+        dynamic editors = getEditors();
+        Integer cnt = editors.length;
+        if (cnt > 0) {
+            Integer newindex = (index < cnt) then index else cnt - 1;
+            String newid = editors[newindex].ceylonId;
+            selectTab(newid);
+        } else {
+            updateMenuState();
+        }
+        updateAdvancedState();
+    }
+}
