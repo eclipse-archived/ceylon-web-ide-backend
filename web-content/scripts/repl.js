@@ -30,7 +30,6 @@ var selectedGist;
 var selectedExample;
 var fileDeleted;
 var spinCount = 0;
-var closePopups = undefined;
 
 var uri = new URI();
 var uriparams = uri.search(true);
@@ -965,24 +964,11 @@ function undoAdvanced() {
     }, 1);
 }
 
-function isCodeUnwrappable() {
-    var canUnwrap = true;
-    var cnt = repl.countCeylonFiles();
-    var editors = getEditors();
-    $.each(editors, function(index, editor) {
-        if (editor.ceylonName.endsWith(".ceylon")
-                && editor.ceylonName != "module.ceylon") {
-            canUnwrap = canUnwrap && isWrapped(editor.getValue(), true);
-        }
-    });
-    return canUnwrap && cnt <= 2;
-}
-
 function updateAdvancedState() {
     var cnt = repl.countCeylonFiles();
-    advanced = (cnt > 1) || (cnt == 1) && isCodeUnwrappable();
+    advanced = (cnt > 1) || (cnt == 1) && repl.isCodeUnwrappable();
     buttonCheck("advanced", advanced);
-    buttonEnable("advanced", !advanced || ((cnt == 1) || (cnt == 2)) && isCodeUnwrappable());
+    buttonEnable("advanced", !advanced || ((cnt == 1) || (cnt == 2)) && repl.isCodeUnwrappable());
 }
 
 function isAdvancedModeActive() {
@@ -1194,62 +1180,6 @@ function openCanvasWindow() {
     return $("#" + id)[0];
 }
 
-function createEditor(name) {
-    var newid = editorId(name);
-    repl.createTab(newid, name, 'editor-template');
-    var div = $("#" + newid)[0];
-    var editor = CodeMirror(div, {
-        mode: repl.editorMode(name),
-        theme: 'ceylon',
-        gutters: ["CodeMirror-error-gutter", "CodeMirror-gutter"],
-        lineNumbers: true,
-        indentUnit: 4,
-        matchBrackets: true,
-        styleActiveLine: true,
-        autoCloseBrackets: true,
-        //highlightSelectionMatches: true,
-        extraKeys: {
-            "Ctrl-S": function(cm) { handleSaveAll(); },
-            "Cmd-S": function(cm) { handleSaveAll(); },
-            "Ctrl-D": function(cm) { repl.fetchDoc(cm); },
-            "Cmd-D": function(cm) { repl.fetchDoc(cm); },
-            //These two keys prevent the whole thing from being ported over to Ceylon
-            "Ctrl-Space": function() { repl.complete(editor); },
-            "Cmd-.": function() { repl.complete(editor); }
-        }
-    });
-    editor.ceylonId = newid;
-    editor.ceylonName = name;
-    editor.on('focus', function() {
-        // Hack to make sure that clicking in the editor correctly
-        // closes all popups and deselects their associated buttons
-        $().w2overlay();
-        buttonCheck("menu", false);
-        buttonCheck("connected", false);
-        if (closePopups) {
-            closePopups();
-        }
-        closePopups = undefined;
-    });
-    editor.on('change', function() {
-        repl.updateEditorDirtyState(editor.ceylonId);
-        updateMenuState();
-        updateAdvancedState();
-        repl.live_tc&&repl.live_tc().postpone();
-        editor.ceylonPreviewUpdate = true;
-    });
-    editor.on('cursorActivity', function() {
-        if (closePopups) {
-            closePopups();
-        }
-        closePopups = undefined;
-    });
-    editor.on('update', function() {
-        updateEditorSize(editor.ceylonId);
-    });
-    return editor;
-}
-
 function getPreviewDiv(id) {
     return $("#preview_" + id);
 }
@@ -1308,11 +1238,6 @@ function isFullScript() {
     return advanced;
 }
 
-function isWrapped(code, allowMissingTag) {
-    return code.startsWith(repl.wrappedTag() + repl.codePrefix())
-        || allowMissingTag && code.startsWith(repl.codePrefix());
-}
-
 // Basic HTML escaping.
 function escapeHtml(html) {
     return (''+html).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -1324,12 +1249,13 @@ function w2prompt(msg, label, value, title, onClose, onValidate) {
         w2ui.promptform.destroy();
     }
     //This is the exact call that breaks because of array enhancement, because of "fields"
+    var campos = [
+            { field: 'value', type: 'text', html: { caption: label, attr: 'size="40"' }, required: true },
+        ];
     $().w2form({
         name: 'promptform',
         style: 'border: 0px; background-color: transparent;',
-        fields: [
-            { field: 'value', type: 'text', html: { caption: label, attr: 'size="40"' }, required: true },
-        ],
+        fields: campos,
         record: { 
             value: value,
         },

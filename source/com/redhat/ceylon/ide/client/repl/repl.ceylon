@@ -76,15 +76,13 @@ shared String wrapCode(String code, Boolean noTag) {
 }
 
 shared String unwrapCode(String code, Boolean allowMissingTag) {
-    dynamic {
-        if (isWrapped(code, allowMissingTag)) {
-            return let (
-                l1=(code.startsWith(wrappedTag)) then wrappedTag.size else 0,
-                l2=(code.spanFrom(l1).startsWith(codePrefix)) then codePrefix.size else 0
-            ) code.span(l1+l2, code.size - codePostfix.size);
-        } else {
-            return code;
-        }
+    if (isWrapped(code, allowMissingTag)) {
+        return let (
+            l1=(code.startsWith(wrappedTag)) then wrappedTag.size else 0,
+            l2=(code.spanFrom(l1).startsWith(codePrefix)) then codePrefix.size else 0
+        ) code.span(l1+l2, code.size - codePostfix.size);
+    } else {
+        return code;
     }
 }
 
@@ -385,7 +383,7 @@ shared dynamic getCompilerFiles() {
     dynamic {
         dynamic files = dynamic[];
         dynamic editors = getEditors();
-        jQuery.each(editors, void(Integer index, dynamic editor) {
+        jQuery.each(editors, void(Integer index, Editor editor) {
             if (compilerAccepts(editor.ceylonName)) {
                 dynamic content = dynamic[
                     content=getEditorCode(editor.ceylonId, false);
@@ -397,16 +395,17 @@ shared dynamic getCompilerFiles() {
     }
 }
 
-shared dynamic newFile(String name) {
+shared Editor newFile(String name) {
+    Editor neweditor;
     dynamic {
-        dynamic neweditor;
         if (!isAdvancedModeActive() && name.endsWith(".ceylon") && countCeylonFiles() >= 1) {
             // We switch to advanced mode
             applyAdvanced();
-            if (name == "module.ceylon") {
+            if (name == "module.ceylon",
+                exists moded = getEditor(editorId("module.ceylon"))) {
                 // The switch to advanced mode will have created
                 // this editor already, we just select it
-                neweditor = getEditor(editorId("module.ceylon"));
+                neweditor = moded;
             } else {
                 // We still need to create the new file
                 neweditor = createEditor(name);
@@ -421,8 +420,8 @@ shared dynamic newFile(String name) {
         updateEditorDirtyState(neweditor.ceylonId);
         updateMenuState();
         updateAdvancedState();
-        return neweditor;
     }
+    return neweditor;
 }
 
 "Creates the proper \"files\" element necessary for creating and
@@ -431,7 +430,7 @@ shared dynamic getGistFiles() {
     dynamic {
         dynamic files = dynamic[];
         dynamic editors = getEditors();
-        jQuery.each(editors, void(Integer index, dynamic editor) {
+        jQuery.each(editors, void(Integer index, Editor editor) {
             dynamic content = dynamic[
                 content=getEditorCode(editor.ceylonId, false);
             ];
@@ -453,3 +452,23 @@ shared dynamic getGistFiles() {
         return files;
     }
 }
+
+shared Boolean isWrapped(String code, Boolean allowMissingTag) =>
+    code.startsWith(wrappedTag + codePrefix)
+            || allowMissingTag && code.startsWith(codePrefix);
+
+shared Boolean isCodeUnwrappable() {
+    variable value canUnwrap = true;
+    value cnt = countCeylonFiles();
+    dynamic {
+        dynamic editors = getEditors();
+        jQuery.each(editors, void(Integer index, Editor editor) {
+            if (editor.ceylonName.endsWith(".ceylon")
+                && editor.ceylonName != "module.ceylon") {
+                canUnwrap = canUnwrap && isWrapped(editor.getValue(), true);
+            }
+        });
+    }
+    return canUnwrap && cnt <= 2;
+}
+

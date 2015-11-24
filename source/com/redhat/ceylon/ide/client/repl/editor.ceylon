@@ -1,8 +1,29 @@
+"Represents an instance of a CodeMirror editor."
+shared dynamic Editor {
+    shared formal variable String ceylonId;
+    shared formal variable String ceylonName;
+    shared formal variable String ceylonSavedName;
+    shared formal variable String ceylonSavedSource;
+    shared formal variable Boolean ceylonPreviewUpdate;
+    shared formal void clearGutter(String name);
+    shared formal void focus();
+    shared formal void setValue(String txt);
+    shared formal String getValue();
+    shared formal void setOption(String opt, dynamic val);
+    shared formal void on(String event, void action());
+    shared formal void markText(dynamic arg1, dynamic arg2, dynamic arg3);
+    shared formal void addLineClass(Integer arg1, String arg2, String arg3);
+    shared formal Integer lineCount();
+    shared formal dynamic getCursor();
+    shared formal dynamic cursorCoords(Boolean flag);
+    shared formal void refresh();
+}
+
 "Clears all error markers and hover docs."
 shared void clearEditMarkers() {
     dynamic {
         dynamic editors = getEditors();
-        jQuery.each(editors, void(Integer index, dynamic editor) {
+        jQuery.each(editors, void(Integer index, Editor editor) {
             editor.clearGutter("CodeMirror-error-gutter");
             dynamic tab = getEditorTab(editor.ceylonId);
             tab.removeClass("warning");
@@ -75,70 +96,76 @@ shared dynamic getEditorTab(dynamic id) {
     }
 }
 
-shared dynamic getEditor(String? id) {
+shared Editor? getEditor(String? id) {
     dynamic {
-        dynamic codemirrordiv = jQuery("#" + (id else "null") + " > div");
+        dynamic codemirrordiv = jQuery("#``id else "null"`` > div");
         if (codemirrordiv.length == 1) {
             dynamic cm0=codemirrordiv[0];
-            return cm0.\iCodeMirror;
+            if (cm0.\iCodeMirror exists) {
+                return cm0.\iCodeMirror;
+            }
         }
-        return null;
     }
+    return null;
 }
 
-shared String getEditorCode(dynamic id, Boolean noWrap) {
+shared String getEditorCode(String id, Boolean noWrap) {
     dynamic {
-        dynamic editor = getEditor(id);
-        String src = editor.getValue();
-        String name = editor.ceylonName;
-        if (name.endsWith(".ceylon") && (name != "module.ceylon") && !noWrap) {
-            return wrapCode(src, false);
-        } else {
-            return src;
+        if (exists editor = getEditor(id)) {
+            value src = editor.getValue();
+            value name = editor.ceylonName;
+            if (name.endsWith(".ceylon") && (name != "module.ceylon") && !noWrap) {
+                return wrapCode(src, false);
+            } else {
+                return src;
+            }
         }
     }
+    return "";
 }
 
-shared void setEditorCode(dynamic id, String src, Boolean noUnwrap) {
+shared void setEditorCode(String id, String src, Boolean noUnwrap) {
     dynamic {
         if (src != getEditorCode(id, false)) {
-            dynamic editor = getEditor(id);
-            dynamic name = editor.ceylonName;
-            variable value s2 = src;
-            if (name.endsWith(".ceylon") && (name != "module.ceylon") && !noUnwrap) {
-                if (isWrapped(src)) {
-                    s2 = unwrapCode(src, false);
+            if (exists editor = getEditor(id)) {
+                value name = editor.ceylonName;
+                variable value s2 = src;
+                if (name.endsWith(".ceylon") && (name != "module.ceylon") && !noUnwrap) {
+                    if (isWrapped(src, false)) {
+                        s2 = unwrapCode(src, false);
+                    }
                 }
-            }
-            editor.setValue(s2);
-            if (!noUnwrap) {
-                editor.ceylonSavedSource = s2;
+                editor.setValue(s2);
+                if (!noUnwrap) {
+                    editor.ceylonSavedSource = s2;
+                }
             }
         }
     }
 }
 
 "Creates a new editor with the given name and source"
-shared dynamic addSourceEditor(String name, String src) {
-    dynamic {
-        dynamic editor = createEditor(name);
-        setEditorCode(editor.ceylonId, src, false);
-        return editor;
-    }
+shared Editor addSourceEditor(String name, String src) {
+    value editor = createEditor(name);
+    setEditorCode(editor.ceylonId, src, false);
+    return editor;
 }
 
 "This will mark the first and final lines of the editor read-only"
-shared void markWrapperReadOnly(dynamic id) {
-    dynamic {
-        dynamic editor = getEditor(id);
-        // First line
-        dynamic opts1 = dynamic [ readOnly=true; inclusiveLeft=true; inclusiveRight=false; atomic=true; ];
-        editor.markText(dynamic[line=0;ch=0;], dynamic[line=1;ch=0;], opts1);
+shared void markWrapperReadOnly(String id) {
+    if (exists editor = getEditor(id)) {
+        dynamic {
+            // First line
+            dynamic opts1 = dynamic [ readOnly=true; inclusiveLeft=true; inclusiveRight=false; atomic=true; ];
+            editor.markText(dynamic[line=0;ch=0;], dynamic[line=1;ch=0;], opts1);
+        }
         editor.addLineClass(0, "background", "cm-locked");
-        // Last line
-        dynamic opts2 = dynamic [ readOnly=true; inclusiveLeft=false; inclusiveRight=true; atomic=true; ];
-        editor.markText(dynamic[line=editor.lineCount() - 1;ch=0;],
-            dynamic[line=editor.lineCount();ch=0;], opts2);
+        dynamic {
+            // Last line
+            dynamic opts2 = dynamic [ readOnly=true; inclusiveLeft=false; inclusiveRight=true; atomic=true; ];
+            editor.markText(dynamic[line=editor.lineCount() - 1;ch=0;],
+                dynamic[line=editor.lineCount();ch=0;], opts2);
+        }
         editor.addLineClass(editor.lineCount() - 1, "background", "cm-locked");
     }
 }
@@ -162,7 +189,7 @@ shared dynamic editorMode(String name) {
 }
 
 "Autocompletion support"
-shared void complete(dynamic editor) {
+shared void complete(Editor editor) {
     dynamic {
         dynamic cursor = editor.getCursor();
         dynamic files = getCompilerFiles();
@@ -195,21 +222,23 @@ shared void complete(dynamic editor) {
     }
 }
 
-shared void createMarkdownView(dynamic editorId) {
-    dynamic {
-        dynamic editor = getEditor(editorId);
-        String name = editor.ceylonName.substring(0, editor.ceylonName.length - 3);
-        createTab("preview_" + editorId, "``name`` <i class='fa fa-eye'></i>", "preview-template");
+shared void createMarkdownView(String editorId) {
+    if (exists editor = getEditor(editorId)) {
+        value name = editor.ceylonName.span(0, editor.ceylonName.size - 3);
+        dynamic {
+            createTab("preview_" + editorId, "``name`` <i class='fa fa-eye'></i>", "preview-template");
+        }
         updateMarkdownView(editorId);
     }
 }
 
-shared void updateMarkdownView(dynamic editorId) {
-    dynamic {
-        dynamic editor = getEditor(editorId);
-        String src = getEditorCode(editorId, true);
-        dynamic mdHtml = marked(src);
-        jQuery("#preview_" + editorId + " > div").html(mdHtml);
+shared void updateMarkdownView(String editorId) {
+    if (exists editor = getEditor(editorId)) {
+        value src = getEditorCode(editorId, true);
+        dynamic {
+            dynamic mdHtml = marked(src);
+            jQuery("#preview_" + editorId + " > div").html(mdHtml);
+        }
         editor.ceylonPreviewUpdate = false;
     }
 }
@@ -227,44 +256,48 @@ shared void fetchDoc(dynamic cm) {
             jQuery("body").unbind("click", close);
             help.parentNode.removeChild(help);
         }
-        dynamic editor = getEditor(selectedTabId());
-        void docHandler(dynamic json, dynamic status, dynamic xhr) {
-            live_tc.ready();
-            if (json && json.name) {
-                if (json.doc) {
-                    dynamic pos = editor.cursorCoords(true);
-                    help = document.createElement("div");
-                    help.className = "help infront";
-                    help.innerHTML = json.doc;
-                    help.style.left = "``pos.left``px";
-                    help.style.top = "``pos.bottom``px";
-                    document.body.appendChild(help);
-                    jQuery("body").keydown(close);
-                    jQuery("body").click(close);
-                    closePopups = close;
-                    help.focus();
+        if (exists editor = getEditor(selectedTabId())) {
+            void docHandler(dynamic json, dynamic status, dynamic xhr) {
+                live_tc.ready();
+                if (json && json.name) {
+                    if (json.doc) {
+                        dynamic pos = editor.cursorCoords(true);
+                        help = document.createElement("div");
+                        help.className = "help infront";
+                        help.innerHTML = json.doc;
+                        help.style.left = "``pos.left``px";
+                        help.style.top = "``pos.bottom``px";
+                        document.body.appendChild(help);
+                        jQuery("body").keydown(close);
+                        jQuery("body").click(close);
+                        closePopups = close;
+                        help.focus();
+                    }
                 }
             }
+            dynamic cursor = editor.getCursor();
+            live_tc.pause();
+            jQuery.ajax("hoverdoc", dynamic[
+                cache=false;
+                type="POST";
+                dataType="json";
+                timeout=20000;
+                beforeSend=startSpinner;
+                complete=stopSpinner;
+                success=docHandler;
+                error=void(dynamic xhr, dynamic status, dynamic err) {
+                    live_tc.ready();
+                    printError("An error occurred while retrieving documentation for your code:");
+                    printError("--- ``err else status``");
+                };
+                contentType="application/json; charset=UTF-8";
+                data=\iJSON.stringify(dynamic[
+                    files=files; f=editor.ceylonName;
+                    r=cursor.line + (isAdvancedModeActive() then 1 else 3);
+                    c=cursor.ch-1;
+                ]);
+            ]);
         }
-        dynamic cursor = editor.getCursor();
-        live_tc.pause();
-        jQuery.ajax("hoverdoc", dynamic[
-            cache=false;
-            type="POST";
-            dataType="json";
-            timeout=20000;
-            beforeSend=startSpinner;
-            complete=stopSpinner;
-            success=docHandler;
-            error=void(dynamic xhr, dynamic status, dynamic err) {
-                live_tc.ready();
-                printError("An error occurred while retrieving documentation for your code:");
-                printError("--- ``err else status``");
-            };
-            contentType="application/json; charset=UTF-8";
-            data=\iJSON.stringify(dynamic[
-                files=files; f=editor.ceylonName; r=cursor.line + (isAdvancedModeActive() then 1 else 3); c=cursor.ch-1;]);
-        ]);
     }
 }
 
@@ -310,13 +343,13 @@ shared void setEditorSourcesFromGist(dynamic files) {
                 }
                 if (index.endsWith(".ceylon")
                     && (index != "module.ceylon")
-                        && isWrapped(item.content)) {
+                        && isWrapped(item.content, false)) {
                     hasWrapped = true;
                 }
                 if (index == "README.md") {
                     readme = index;
                 }
-                dynamic neweditor = addSourceEditor(index, item.content);
+                value neweditor = addSourceEditor(index, item.content);
                 if (index == "module.ceylon") {
                     hasModule = true;
                     if (isWrappedModule(item.content)) {
@@ -356,8 +389,7 @@ shared void selectTab(String id) {
         getEditorDiv(id).removeClass("invis");
         updateMenuState();
         // If it's an editor set the focus to it
-        dynamic editor = getEditor(id);
-        if (editor exists) {
+        if (exists editor = getEditor(id)) {
             editor.refresh();
             if (!isMobile) {
                 editor.focus();
@@ -381,7 +413,7 @@ shared void updateEditorDirtyState(String id) {
         Boolean hasErr = tab.hasClass("error");
         Boolean hasWrn = tab.hasClass("warning");
 
-        variable String? caption = getEditor(id).ceylonName;
+        variable String? caption = getEditor(id)?.ceylonName;
         if (selectedGist exists && isEditorRenamed(id)) {
             caption = "[``caption else NULL``]";
         }
@@ -401,8 +433,7 @@ shared void updateEditorDirtyState(String id) {
 }
 
 shared void clearEditorDirtyState(String id) {
-    dynamic {
-        dynamic editor = getEditor(id);
+    if (exists editor = getEditor(id)) {
         editor.ceylonSavedName = editor.ceylonName;
         editor.ceylonSavedSource = editor.getValue();
         updateEditorDirtyState(editor.ceylonId);
@@ -411,7 +442,7 @@ shared void clearEditorDirtyState(String id) {
 
 shared void clearEditorDirtyStates() {
     dynamic {
-        jQuery.each(getEditors(), void(Integer index, dynamic editor) {
+        jQuery.each(getEditors(), void(Integer index, Editor editor) {
             editor.ceylonSavedName = editor.ceylonName;
             editor.ceylonSavedSource = editor.getValue();
             updateEditorDirtyState(editor.ceylonId);
@@ -423,17 +454,78 @@ shared void clearEditorDirtyStates() {
 }
 
 shared Boolean isEditorDirty(String id) {
-    dynamic {
-        dynamic editor = getEditor(id);
-        //Must be dynamic because it can be undefined
-        dynamic src = editor.getValue();
-        dynamic oldsrc = editor.ceylonSavedSource;
-        if (exists src) {
-            if (exists oldsrc) {
-                return src != oldsrc;
+    if (exists editor = getEditor(id)) {
+        dynamic {
+            //Must be dynamic because it can be undefined
+            dynamic src = editor.getValue();
+            dynamic oldsrc = editor.ceylonSavedSource;
+            if (exists src) {
+                if (exists oldsrc) {
+                    return src != oldsrc;
+                }
+                return true;
             }
-            return true;
+            return !oldsrc exists;
         }
-        return !oldsrc exists;
+    }
+    return false;
+}
+
+variable Callable<Anything,[]>? closePopups = null;
+
+shared Editor createEditor(String name) {
+    dynamic {
+        dynamic newid = editorId(name);
+        createTab(newid, name, "editor-template");
+        dynamic div00 = jQuery("#" + newid);
+        dynamic div = div00[0];
+        Editor editor = \iCodeMirror(div, dynamic[
+            mode=editorMode(name);
+            theme="ceylon";
+            gutters=dynamic["CodeMirror-error-gutter", "CodeMirror-gutter"];
+            lineNumbers=true;
+            indentUnit=4;
+            matchBrackets=true;
+            styleActiveLine=true;
+            autoCloseBrackets=true;
+            //highlightSelectionMatches: true,
+        ]);
+        dynamic extraKeys=dynamic[];
+        setObjectProperty(extraKeys, "Ctrl-S", handleSaveAll);
+        setObjectProperty(extraKeys, "Cmd-S", handleSaveAll);
+        setObjectProperty(extraKeys, "Ctrl-D", void(dynamic cm) => fetchDoc(cm));
+        setObjectProperty(extraKeys, "Cmd-D", void(dynamic cm) => fetchDoc(cm));
+        setObjectProperty(extraKeys, "Ctrl-Space", void() => complete(editor));
+        setObjectProperty(extraKeys, "Cmd-.", void() => complete(editor));
+        editor.setOption("extraKeys", extraKeys);
+        editor.ceylonId = newid;
+        editor.ceylonName = name;
+        editor.on("focus", void() {
+            // Hack to make sure that clicking in the editor correctly
+            // closes all popups and deselects their associated buttons
+            jQuery().w2overlay();
+            buttonCheck("menu", false);
+            buttonCheck("connected", false);
+            if (exists cp=closePopups) {
+                cp();
+            }
+            closePopups = null;
+        });
+        editor.on("change", void() {
+            updateEditorDirtyState(editor.ceylonId);
+            updateMenuState();
+            updateAdvancedState();
+            live_tc.postpone();
+            editor.ceylonPreviewUpdate = true;
+        });
+        editor.on("cursorActivity", void() {
+            if (exists cp=closePopups) {
+                cp();
+            }
+            closePopups = null;
+        });
+        editor.on("update", void() =>
+            updateEditorSize(editor.ceylonId));
+        return editor;
     }
 }
