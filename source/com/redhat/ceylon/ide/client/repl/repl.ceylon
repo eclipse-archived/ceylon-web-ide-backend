@@ -61,30 +61,20 @@ shared void setupLiveTypechecker() {
     }
 }
 
-shared String wrapCode(String code, Boolean noTag) {
-    dynamic {
-        if (isFullScript(code) == false) {
-            if (noTag) {
-                return codePrefix + code + codePostfix;
-            } else {
-                return wrappedTag + codePrefix + code + codePostfix;
-            }
-        } else {
-            return code;
-        }
-    }
-}
+shared String wrapCode(String code, Boolean noTag) =>
+    if (advancedMode)
+    then code
+    else if (noTag)
+    then codePrefix + code + codePostfix
+    else wrappedTag + codePrefix + code + codePostfix;
 
-shared String unwrapCode(String code, Boolean allowMissingTag) {
-    if (isWrapped(code, allowMissingTag)) {
-        return let (
+shared String unwrapCode(String code, Boolean allowMissingTag) =>
+    if (isWrapped(code, allowMissingTag)) then
+        let (
             l1=(code.startsWith(wrappedTag)) then wrappedTag.size else 0,
             l2=(code.spanFrom(l1).startsWith(codePrefix)) then codePrefix.size else 0
-        ) code.span(l1+l2, code.size - codePostfix.size);
-    } else {
-        return code;
-    }
-}
+        ) code.span(l1+l2, code.size - codePostfix.size)
+    else code;
 
 shared Boolean isWrappedModule(String code) =>
     code.startsWith(modulePrefix) && code.endsWith(modulePostfix);
