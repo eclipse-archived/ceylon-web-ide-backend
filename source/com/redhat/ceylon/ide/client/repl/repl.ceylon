@@ -73,7 +73,7 @@ shared String unwrapCode(String code, Boolean allowMissingTag) =>
         let (
             l1=(code.startsWith(wrappedTag)) then wrappedTag.size else 0,
             l2=(code.spanFrom(l1).startsWith(codePrefix)) then codePrefix.size else 0
-        ) code.span(l1+l2, code.size - codePostfix.size)
+        ) code.span(l1+l2, code.size - codePostfix.size - 1)
     else code;
 
 shared Boolean isWrappedModule(String code) =>
