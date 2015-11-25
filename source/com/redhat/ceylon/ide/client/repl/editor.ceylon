@@ -14,9 +14,11 @@ shared dynamic Editor {
     shared formal void markText(dynamic arg1, dynamic arg2, dynamic arg3);
     shared formal void addLineClass(Integer arg1, String arg2, String arg3);
     shared formal Integer lineCount();
+    shared formal void setCursor(Integer cursor);
     shared formal dynamic getCursor();
     shared formal dynamic cursorCoords(Boolean flag);
     shared formal void refresh();
+    shared formal void execCommand(String cmd);
 }
 
 "Clears all error markers and hover docs."
@@ -215,7 +217,7 @@ shared void complete(Editor editor) {
             data=\iJSON.stringify(dynamic[
                 files=files;
                 f=editor.ceylonName;
-                r=cursor.line + (isAdvancedModeActive() then 1 else 3);
+                r=cursor.line + (advancedMode then 1 else 3);
                 c=cursor.ch;
             ]);
         ]);
@@ -292,7 +294,7 @@ shared void fetchDoc() {
                 contentType="application/json; charset=UTF-8";
                 data=\iJSON.stringify(dynamic[
                     files=files; f=editor.ceylonName;
-                    r=cursor.line + (isAdvancedModeActive() then 1 else 3);
+                    r=cursor.line + (advancedMode then 1 else 3);
                     c=cursor.ch-1;
                 ]);
             ]);
@@ -563,3 +565,61 @@ shared void deleteTab(String id) {
         updateAdvancedState();
     }
 }
+
+shared variable Boolean advancedMode = false;
+
+shared void applyAdvanced() {
+    advancedMode = true;
+    dynamic {
+        dynamic editors = getEditors();
+        jQuery.each(editors, void (Integer index, Editor editor) {
+            if (editor.ceylonName.endsWith(".ceylon")) {
+                editor.execCommand("selectAll");
+                editor.execCommand("indentMore");
+                value src = wrapCode(getEditorCode(editor.ceylonId, true), true);
+                setEditorCode(editor.ceylonId, src, true);
+            }
+        });
+    }
+    newModuleFile();
+    live_tc.ready();
+    dynamic {
+        updateMenuState();
+        // Need to put this in a timeout or the update
+        // of the button conflicts with the w2 framework
+        window.setTimeout(updateAdvancedState, 1);
+    }
+}
+
+shared void updateAdvancedState() {
+    value cnt = countCeylonFiles();
+    advancedMode = (cnt > 1) || (cnt == 1) && isCodeUnwrappable();
+    dynamic {
+        buttonCheck("advanced", advancedMode);
+        buttonEnable("advanced", !advancedMode || ((cnt == 1) || (cnt == 2)) && isCodeUnwrappable());
+    }
+}
+
+shared void undoAdvanced() {
+    advancedMode = false;
+    dynamic {
+        dynamic tmp = fileDeleted;
+        deleteFile(editorId("module.ceylon"));
+        fileDeleted = tmp;
+        dynamic editors = getEditors();
+        jQuery.each(editors, void (Integer index, Editor editor) {
+            if (editor.ceylonName.endsWith(".ceylon")) {
+                value src = unwrapCode(getEditorCode(editor.ceylonId, true), true);
+                setEditorCode(editor.ceylonId, src, true);
+                editor.execCommand("selectAll");
+                editor.execCommand("indentLess");
+                editor.setCursor(0);
+            }
+        });
+        updateMenuState();
+        // Need to put this in a timeout or the update
+        // of the button conflicts with the w2 framework
+        window.setTimeout(updateAdvancedState, 1);
+    }
+}
+

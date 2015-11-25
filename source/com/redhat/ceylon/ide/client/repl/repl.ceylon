@@ -236,7 +236,7 @@ shared void doTranslateCode(dynamic files, void onTranslation()) {
     
         void onSuccess(dynamic json, dynamic status, dynamic xhr) {
             live_tc.done();
-            String? translatedcode = json.code;
+            String? translatedcode = json.code exists then json.code else null;
             if (exists translatedcode) {
                 markCompiled(files);
                 try {
@@ -305,9 +305,9 @@ shared void loadModuleAsString(String src, void func()) {
  changes. When affirmative `func()` will be run or 'negative()'
  otherwise. Can have an optional list of editor ids to check
  for dirty state (by default all editors are checked)."
-shared void checkForChangesAndRun(void func(), dynamic negative, dynamic edids) {
+shared void checkForChangesAndRun(void func(), Anything()? negative, dynamic edids) {
     dynamic {
-        if (isRunning()) {
+        if (stopFunction exists) {
             w2alert("Program is running, stop it first before doing anything else", "Program Running", negative);
         } else if (isAnyEditorDirty(edids)) {
             dynamic conf = w2confirm("This will discard any changes! Are you sure you want to continue?");
@@ -494,6 +494,56 @@ shared void stop() {
             buttonEnable("stop", false);
         }
         scrollOutput();
+    }
+}
+
+shared Editor newModuleFile() {
+    value neweditor = addSourceEditor("module.ceylon", defaultImportSrc);
+    markWrapperReadOnly(neweditor.ceylonId);
+    updateEditorDirtyState(neweditor.ceylonId);
+    return neweditor;
+}
+
+"Deletes a file"
+shared void deleteFile(String id) {
+    dynamic {
+        fileDeleted = true;
+        // Remove the editor
+        dynamic div = getEditorDiv(id);
+        if (div.length > 0) {
+            div.remove();
+            deleteTab(id);
+            dynamic previewDiv = getPreviewDiv(id);
+            if (previewDiv != null && previewDiv.length > 0) {
+                previewDiv.remove();
+                deleteTab("preview_``id``");
+            }
+        }
+    }
+}
+
+shared void handleAdvanced(Event event) {
+    if (advancedMode) {
+        void yes() {
+            dynamic {
+                buttonSetIcon("advanced", "fa fa-square-o");
+            }
+            undoAdvanced();
+        }
+        void no() {
+            dynamic {
+                buttonCheck("advanced", true);
+            }
+            advancedMode=true;
+        }
+        dynamic {
+            checkForChangesAndRun(yes, no, ["module.ceylon"]);
+        }
+    } else {
+        dynamic {
+            buttonSetIcon("advanced", "fa fa-check-square-o");
+        }
+        applyAdvanced();
     }
 }
 

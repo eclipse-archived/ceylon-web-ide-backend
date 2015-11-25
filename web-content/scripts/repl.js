@@ -240,7 +240,7 @@ function handleToolbarClick(event) {
     } else if (event.target == "share") {
         repl.shareSource();
     } else if (event.target == "advanced") {
-        handleAdvanced(event);
+        repl.handleAdvanced(event);
     } else if (event.target == "dark") {
         repl.darkClick();
     } else if (event.target == "help") {
@@ -552,7 +552,7 @@ function updateSource() {
 function handleNewFile() {
     var suggestion = suggestFileName();
     askFileName("New File", suggestion, true, function(newname) {
-        if (!isAdvancedModeActive()
+        if (!repl.advancedMode()
                 && repl.countCeylonFiles() == 1
                 && newname.endsWith(".ceylon")) {
             // Creating a second .ceylon file when in "simplified"
@@ -572,13 +572,6 @@ function handleNewFile() {
     });
 }
 
-function newModuleFile() {
-    var neweditor = repl.addSourceEditor("module.ceylon", repl.defaultImportSrc());
-    repl.markWrapperReadOnly(neweditor.ceylonId);
-    repl.updateEditorDirtyState(neweditor.ceylonId);
-    return neweditor;
-}
-
 function handleRenameFile() {
     var id = repl.selectedTabId();
     var editor = repl.getEditor(id);
@@ -594,7 +587,7 @@ function renameFile(id, newname) {
         editor.ceylonName = newname;
         repl.updateEditorDirtyState(id);
         updateMenuState();
-        updateAdvancedState();
+        repl.updateAdvancedState();
     }
 }
 
@@ -640,24 +633,8 @@ function handleDeleteFile() {
     var editor = repl.getEditor(repl.selectedTabId());
     w2confirm("Do you really want to delete this file '" + editor.ceylonName + "'?")
         .yes(function() {
-            deleteFile(repl.selectedTabId());
+            repl.deleteFile(repl.selectedTabId());
         });
-}
-
-// Deletes a file
-function deleteFile(id) {
-    fileDeleted = true;
-    // Remove the editor
-    var div = getEditorDiv(id);
-    if (div.length > 0) {
-        div.remove();
-        repl.deleteTab(id);
-        var previewDiv = getPreviewDiv(id);
-        if (previewDiv != null && previewDiv.length > 0) {
-            previewDiv.remove();
-            repl.deleteTab("preview_" + id);
-        }
-    }
 }
 
 function handleNewProject() {
@@ -895,78 +872,6 @@ function tabCloseable(id, onClose) {
     w2ui["editortabs"].set(id, { closable: onClose != null, onClose: onClose });
 }
 
-var advanced = false;
-
-function handleAdvanced(event) {
-    if (isAdvancedModeActive()) {
-        repl.checkForChangesAndRun(function() {
-            buttonSetIcon("advanced", "fa fa-square-o");
-            undoAdvanced();
-        }, function() {
-            buttonCheck("advanced", true);
-            advanced=true;
-        }, ["module.ceylon"]);
-    } else {
-        buttonSetIcon("advanced", "fa fa-check-square-o");
-        applyAdvanced();
-    }
-}
-
-function applyAdvanced() {
-    advanced = true;
-    var editors = getEditors();
-    $.each(editors, function (index, editor) {
-        if (editor.ceylonName.endsWith(".ceylon")) {
-            editor.execCommand("selectAll");
-            editor.execCommand("indentMore");
-            var src = repl.wrapCode(repl.getEditorCode(editor.ceylonId, true), true);
-            repl.setEditorCode(editor.ceylonId, src, true);
-        }
-    });
-    newModuleFile();
-    repl.live_tc&&repl.live_tc().ready();
-    updateMenuState();
-    // Need to put this in a timeout or the update
-    // of the button conflicts with the w2 framework
-    window.setTimeout(function () {
-        updateAdvancedState();
-    }, 1);
-}
-
-function undoAdvanced() {
-    advanced = false;
-    var tmp = fileDeleted;
-    deleteFile(editorId("module.ceylon"));
-    fileDeleted = tmp;
-    var editors = getEditors();
-    $.each(editors, function (index, editor) {
-        if (editor.ceylonName.endsWith(".ceylon")) {
-            var src = repl.unwrapCode(repl.getEditorCode(editor.ceylonId, true), true);
-            repl.setEditorCode(editor.ceylonId, src, true);
-            editor.execCommand("selectAll");
-            editor.execCommand("indentLess");
-            editor.setCursor(0);
-        }
-    });
-    updateMenuState();
-    // Need to put this in a timeout or the update
-    // of the button conflicts with the w2 framework
-    window.setTimeout(function () {
-        updateAdvancedState();
-    }, 1);
-}
-
-function updateAdvancedState() {
-    var cnt = repl.countCeylonFiles();
-    advanced = (cnt > 1) || (cnt == 1) && repl.isCodeUnwrappable();
-    buttonCheck("advanced", advanced);
-    buttonEnable("advanced", !advanced || ((cnt == 1) || (cnt == 2)) && repl.isCodeUnwrappable());
-}
-
-function isAdvancedModeActive() {
-    return advanced;
-}
-
 // Starts the spinner indicating the system is busy.
 // These can be nested, so if you call this function
 // twice you will also need to call `stopSpinner()`
@@ -1024,7 +929,7 @@ function translateCode(files, onTranslation) {
 function showErrors(errors, print) {
     $.each(errors, function(fileName, fileErrors) {
         $.each(fileErrors, function(index, err) {
-            var linedelta = isAdvancedModeActive() ? 0 : 2;
+            var linedelta = repl.advancedMode() ? 0 : 2;
             var text = 
                 err.msg.substring(0,1).toUpperCase() +
                 err.msg.substring(1)
@@ -1164,7 +1069,7 @@ function shouldCompile(files) {
 }
 
 function isFullScript() {
-    return advanced;
+    return repl.advancedMode();
 }
 
 // Basic HTML escaping.
