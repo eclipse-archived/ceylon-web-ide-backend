@@ -243,18 +243,17 @@ shared void updateMarkdownView(String editorId) {
     }
 }
 
-shared void fetchDoc(dynamic cm) {
+shared void fetchDoc() {
     variable value done = false;
     dynamic {
         dynamic files = getCompilerFiles();
         void close() {
-            if (done)  {
-                return;
+            if (!done) {
+                done = true;
+                jQuery("body").unbind("keydown", close);
+                jQuery("body").unbind("click", close);
+                help.parentNode.removeChild(help);
             }
-            done = true;
-            jQuery("body").unbind("keydown", close);
-            jQuery("body").unbind("click", close);
-            help.parentNode.removeChild(help);
         }
         if (exists editor = getEditor(selectedTabId())) {
             void docHandler(dynamic json, dynamic status, dynamic xhr) {
@@ -493,8 +492,8 @@ shared Editor createEditor(String name) {
         dynamic extraKeys=dynamic[];
         setObjectProperty(extraKeys, "Ctrl-S", handleSaveAll);
         setObjectProperty(extraKeys, "Cmd-S", handleSaveAll);
-        setObjectProperty(extraKeys, "Ctrl-D", void(dynamic cm) => fetchDoc(cm));
-        setObjectProperty(extraKeys, "Cmd-D", void(dynamic cm) => fetchDoc(cm));
+        setObjectProperty(extraKeys, "Ctrl-D", fetchDoc);
+        setObjectProperty(extraKeys, "Cmd-D", fetchDoc);
         setObjectProperty(extraKeys, "Ctrl-Space", void() => complete(editor));
         setObjectProperty(extraKeys, "Cmd-.", void() => complete(editor));
         editor.setOption("extraKeys", extraKeys);

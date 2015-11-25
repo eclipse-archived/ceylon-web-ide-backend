@@ -21,7 +21,7 @@ shared void clearListSelectState() {
 shared Integer countCeylonFiles() {
     variable value cnt = 0;
     dynamic {
-        jQuery.each(getEditors(), void(Integer index, dynamic editor) {
+        jQuery.each(getEditors(), void(Integer index, Editor editor) {
             if (editor.ceylonName.endsWith(".ceylon")) {
                 cnt++;
             }
