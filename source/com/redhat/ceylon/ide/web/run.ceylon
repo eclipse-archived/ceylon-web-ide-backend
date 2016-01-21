@@ -25,7 +25,8 @@ import ceylon.net.http.server {
     isRoot
 }
 import ceylon.net.http.server.endpoints {
-    serveStaticFile
+    serveStaticFile,
+    RepositoryEndpoint
 }
 import ceylon.time {
     now
@@ -88,6 +89,7 @@ shared void run()
             response.writeString(html);
         };
     },
+    RepositoryEndpoint("/modules"),
     AsynchronousEndpoint {
         startsWith("/");
         acceptMethod = { get };

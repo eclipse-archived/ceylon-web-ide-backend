@@ -32,7 +32,7 @@ if (!pagepath.endsWith("/")) {
 }
 
 require.config({
-    baseUrl: "//modules.ceylon-lang.org/repo/1",
+    baseUrl: "modules",
     waitSeconds: 15
 });
 
