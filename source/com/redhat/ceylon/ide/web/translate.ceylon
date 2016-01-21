@@ -68,7 +68,7 @@ void translate(Request request, Response response) {
                             scriptFile of VirtualFile);
                 newJsOutput(Module mod) 
                         => object 
-                        extends JsOutput(mod, "UTF-8", false) {
+                        extends JsOutput(mod, false) {
                     writer => charArrayWriter;
                     writeModelFile() => noop();
                     writeModelRetriever() 
