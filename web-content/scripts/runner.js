@@ -36,7 +36,7 @@ require.config({
     waitSeconds: 15
 });
 
-var ceylonVersion = "1.2.0";
+var ceylonVersion = "1.2.1";
 var ceylonLang = "ceylon/language/" + ceylonVersion + "/ceylon.language-" + ceylonVersion;
 require([ceylonLang],
     function(clang) {
