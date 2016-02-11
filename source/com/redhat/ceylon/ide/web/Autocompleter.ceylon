@@ -96,10 +96,10 @@ class Autocompleter(String file,
                 }
             }
             case (is Tree.BaseMemberOrTypeExpression) {
-                completions = node.scope.getMatchingDeclarations(unit, prefix, 0);
+                completions = node.scope.getMatchingDeclarations(unit, prefix, 0, null);
             }
             case (is Tree.BaseType) {
-                completions = node.scope.getMatchingDeclarations(unit, prefix, 0);
+                completions = node.scope.getMatchingDeclarations(unit, prefix, 0, null);
             }
             case (is Tree.QualifiedType) {
                 if (exists type = node.outerType.typeModel) {
@@ -110,7 +110,7 @@ class Autocompleter(String file,
                 }
             }
             case (is Tree.Variable) {
-                completions = node.scope.getMatchingDeclarations(unit, prefix, 0);
+                completions = node.scope.getMatchingDeclarations(unit, prefix, 0, null);
             }
             else {
                 //TODO!!
