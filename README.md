@@ -46,12 +46,17 @@ Furthermore, this project demonstrates deployment to the
 
 ## Compiling and running
 
-To compile the project, first install the Ceylon [compiler][], 
-then go to the `ceylon-web-ide-backend` directory, and type:
+Simplest with the Ceylon Bootstrap:
+
+    ./ceylonb run --compile com.redhat.ceylon.ide.web
+
+Or if you want you can first install the Ceylon [compiler][]
+and then compile by going into the `ceylon-web-ide-backend`
+directory, and typing:
 
     ceylon compile
 
-To run the server, type:
+Then to run the server, type:
 
     ceylon run com.redhat.ceylon.ide.web
 
