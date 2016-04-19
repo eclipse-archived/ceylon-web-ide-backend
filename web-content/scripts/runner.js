@@ -1,5 +1,8 @@
 //"use strict";
 
+// The Ceylon version to use for the user code we'll be running
+var ceylonVersion = "1.2.2";
+
 if (document.domain != "localhost") {
     document.domain = "ceylon-lang.org";
 }
@@ -36,7 +39,6 @@ require.config({
     waitSeconds: 15
 });
 
-var ceylonVersion = "1.2.1";
 var ceylonLang = "ceylon/language/" + ceylonVersion + "/ceylon.language-" + ceylonVersion;
 require([ceylonLang],
     function(clang) {
