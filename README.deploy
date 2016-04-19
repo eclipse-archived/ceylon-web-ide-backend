@@ -5,11 +5,11 @@ How to deploy to OpenShift
 Right now I have in my .git/config file of this project the following useful entries:
 
     [remote "tryfinal"]
-        fetch = +refs/heads/*:refs/remotes/origin/*
-        url = ssh://af964010ea314db19ff93c989153f648@try-ceylon.rhcloud.com/~/git/try.git/
+        fetch = :
+        url = ssh://57160c2989f5cf07f70000d1@try-ceylon.rhcloud.com/~/git/try.git/
     [remote "trybeta"]
-        fetch = +refs/heads/*:refs/remotes/origin/*
-        url = ssh://41e9f0403d934da4b50794042ecb3835@trybeta-ceylon.rhcloud.com/~/git/trybeta.git/
+        fetch = :
+        url = ssh://5716017b0c1e666fd300001b@trybeta-ceylon.rhcloud.com/~/git/trybeta.git/
 
 Which makes deployment very simple:
 
