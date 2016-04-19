@@ -1,7 +1,7 @@
 import ceylon.interop.java {
     javaString
 }
-import ceylon.io.charset {
+import ceylon.buffer.charset {
     utf8
 }
 import ceylon.json {
