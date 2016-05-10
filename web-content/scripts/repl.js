@@ -6,7 +6,7 @@ if (document.domain != "localhost") {
 
 var loc = window.parent.location;
 var repo = "http://" + loc.host + "/modules";
-var ceylonVersion = "1.2.0";
+var ceylonVersion = "1.2.2";
 var replVersion = "1.0.0";
 var ceylonLang = "ceylon/language/" + ceylonVersion + "/ceylon.language-" + ceylonVersion;
 var repl = "com/redhat/ceylon/ide/client/repl/" + replVersion + "/com.redhat.ceylon.ide.client.repl-" + replVersion;
