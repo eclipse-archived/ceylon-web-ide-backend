@@ -2,8 +2,8 @@
 shared dynamic Editor {
     shared formal variable String ceylonId;
     shared formal variable String ceylonName;
-    shared formal variable String ceylonSavedName;
-    shared formal variable String ceylonSavedSource;
+    shared formal variable String? ceylonSavedName;
+    shared formal variable String? ceylonSavedSource;
     shared formal variable Boolean ceylonPreviewUpdate;
     shared formal void clearGutter(String name);
     shared formal void focus();
@@ -475,12 +475,13 @@ shared Boolean isEditorDirty(String id) {
 variable Callable<Anything,[]>? closePopups = null;
 
 shared Editor createEditor(String name) {
+    value newid = editorId(name);
+    Editor e;
     dynamic {
-        dynamic newid = editorId(name);
         createTab(newid, name, "editor-template");
         dynamic div00 = jQuery("#" + newid);
         dynamic div = div00[0];
-        Editor editor = \iCodeMirror(div, dynamic[
+        dynamic editor = \iCodeMirror(div, dynamic[
             mode=editorMode(name);
             theme="ceylon";
             gutters=dynamic["CodeMirror-error-gutter", "CodeMirror-gutter"];
@@ -527,8 +528,12 @@ shared Editor createEditor(String name) {
         });
         editor.on("update", void() =>
             updateEditorSize(editor.ceylonId));
-        return editor;
+        editor.ceylonSavedName=null;
+        editor.ceylonSavedSource=null;
+        editor.ceylonPreviewUpdate=true;
+        e = editor;
     }
+    return e;
 }
 
 shared String canvasId = "webide_canvas";
@@ -623,3 +628,12 @@ shared void undoAdvanced() {
     }
 }
 
+
+shared String editorId(String name) =>
+        "editor_" + name.replace(".", "_");
+
+shared Boolean editorAccepts(String name) {
+    dynamic {
+        return editorMode(name) exists || name.endsWith(".txt");
+    }
+}

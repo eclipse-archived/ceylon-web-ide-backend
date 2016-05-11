@@ -550,7 +550,7 @@ function updateSource() {
 // Deletes a Gist from the server (asks the user for confirmation first)
 // Is called when the "Delete" menu item is selected
 function handleNewFile() {
-    var suggestion = suggestFileName();
+    var suggestion = repl.suggestFileName();
     askFileName("New File", suggestion, true, function(newname) {
         if (!repl.advancedMode()
                 && repl.countCeylonFiles() == 1
@@ -604,11 +604,11 @@ function askFileName(title, suggestion, nodup, func) {
         function(form) {
             var ok = false;
             var name = form.get("value").el.value;
-            if (!editorAccepts(name)) {
+            if (!repl.editorAccepts(name)) {
                 form.error('The file name has to end in ".ceylon", ".js", ".md" or ".txt"');
             } else if (!/^[-_.a-zA-Z0-9]+$/.test(name)) {
                 form.error('The file name can only contain letters, digits, "_", "-" and "."');
-            } else if (nodup && repl.getEditor(editorId(name)) != null) {
+            } else if (nodup && repl.getEditor(repl.editorId(name)) != null) {
                 form.error('A file with that name already exists');
             } else {
                 ok = true;
@@ -616,15 +616,6 @@ function askFileName(title, suggestion, nodup, func) {
             return ok;
         }
     );
-}
-
-function suggestFileName() {
-    var suggestion;
-    var cnt = 1;
-    do {
-        suggestion = "new" + (cnt++) + ".ceylon";
-    } while (repl.getEditor(editorId(suggestion)) != null);
-    return suggestion;
 }
 
 // Deletes a Gist from the server (asks the user for confirmation first)
@@ -947,7 +938,7 @@ function showErrors(errors, print) {
             var from = err.from.line-linedelta-1;
             var to = err.to.line-linedelta-1;
             if (from >= 0) {
-                var editor = repl.getEditor(editorId(fileName));
+                var editor = repl.getEditor(repl.editorId(fileName));
                 if (editor != null) {
                     //This is to add a marker in the gutter
                     var img = document.createElement('img');
@@ -996,15 +987,6 @@ function handleEditGist(key) {
     repl.checkForChangesAndRun(function() {
         repl.editGist(key);
     });
-}
-
-function editorId(name) {
-    return "editor_" + name.replace(".", "_");
-}
-
-function editorAccepts(name) {
-    return repl.editorMode(name) != null
-            || name.endsWith(".txt");
 }
 
 function compilerAccepts(name) {
@@ -1086,6 +1068,7 @@ function w2prompt(msg, label, value, title, onClose, onValidate) {
     var campos = [
             { field: 'value', type: 'text', html: { caption: label, attr: 'size="40"' }, required: true },
         ];
+//AQUI CABRON
     $().w2form({
         name: 'promptform',
         style: 'border: 0px; background-color: transparent;',
@@ -1125,7 +1108,7 @@ function popupSelectGist(onClose) {
     function acceptGist(gist) {
         var ok = false;
         $.each(gist.data.files, function(index, file) {
-            ok = ok || editorAccepts(index);
+            ok = ok || repl.editorAccepts(index);
         });
         return ok;
     }

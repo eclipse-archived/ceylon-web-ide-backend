@@ -388,6 +388,8 @@ shared dynamic getCompilerFiles() {
 shared Editor newFile(String name) {
     Editor neweditor;
     dynamic {
+        //TODO where the FUCK is isAdvancedModeActive() defined?
+        console.log(isAdvancedModeActive);
         if (!isAdvancedModeActive() && name.endsWith(".ceylon") && countCeylonFiles() >= 1) {
             // We switch to advanced mode
             applyAdvanced();
@@ -434,7 +436,7 @@ shared dynamic getGistFiles() {
         // See if we need to delete any files
         if (selectedGist exists) {
             jQuery.each(selectedGist.data.files, void(Integer index, dynamic item) {
-                if (!getEditor(editorId(index)) exists) {
+                if (!getEditor(editorId(index.string)) exists) {
                     setObjectProperty(files, index, null);
                 }
             });
@@ -537,3 +539,10 @@ shared void handleAdvanced(Event event) {
     }
 }
 
+shared String suggestFileName() {
+    variable value cnt = 0;
+    String suggestion => "new``cnt++``.ceylon";
+    while (getEditor(editorId(suggestion)) exists) {
+    }
+    return suggestion;
+}
