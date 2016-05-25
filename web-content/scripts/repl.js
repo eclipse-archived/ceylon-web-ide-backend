@@ -6,7 +6,7 @@ if (document.domain != "localhost") {
 
 var loc = window.parent.location;
 var repo = "http://" + loc.host + "/modules";
-var ceylonVersion = "1.2.2";
+var ceylonVersion = "1.2.3";
 var replVersion = "1.0.0";
 var ceylonLang = "ceylon/language/" + ceylonVersion + "/ceylon.language-" + ceylonVersion;
 var repl = "com/redhat/ceylon/ide/client/repl/" + replVersion + "/com.redhat.ceylon.ide.client.repl-" + replVersion;
@@ -17,6 +17,7 @@ require.config({
     baseUrl: "",
     paths: {
         com: repo + "/com",
+        "ceylon/language": repo+"/ceylon/language",
         ceylon: "http://modules.ceylon-lang.org/repo/1/ceylon"
     },
     waitSeconds: 15
@@ -104,10 +105,8 @@ for (i=0; i<sheets.length; i++) {
 
 var transok=false;
 var help;
-
-require([ceylonLang, repl],
-    function(clang, rrepl) {
-        console && console.log("ceylon.language module loaded for REPL");
+require([ceylonLang, repl, "github"],
+    function(clang, rrepl, github) {
         repl=rrepl;
         ceylonLang=clang;
         repl.setJQuery($);
