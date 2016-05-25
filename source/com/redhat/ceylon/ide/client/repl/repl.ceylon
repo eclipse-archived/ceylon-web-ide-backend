@@ -388,9 +388,7 @@ shared dynamic getCompilerFiles() {
 shared Editor newFile(String name) {
     Editor neweditor;
     dynamic {
-        //TODO where the FUCK is isAdvancedModeActive() defined?
-        console.log(isAdvancedModeActive);
-        if (!isAdvancedModeActive() && name.endsWith(".ceylon") && countCeylonFiles() >= 1) {
+        if (!advancedMode && name.endsWith(".ceylon") && countCeylonFiles() >= 1) {
             // We switch to advanced mode
             applyAdvanced();
             if (name == "module.ceylon",
