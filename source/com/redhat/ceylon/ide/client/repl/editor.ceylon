@@ -21,6 +21,8 @@ shared dynamic Editor {
     shared formal void execCommand(String cmd);
 }
 
+shared variable dynamic markers=null;
+
 "Clears all error markers and hover docs."
 shared void clearEditMarkers() {
     dynamic {
@@ -31,8 +33,14 @@ shared void clearEditMarkers() {
             tab.removeClass("warning");
             tab.removeClass("error");
         });
-        markers.each((dynamic e)=>e.clear());
-        markers=dynamic[1];
+        if (markers exists) {
+            for (m in markers) {
+                m.clear();
+            }
+        }
+        //This is a bug in the compiler
+        //should be markers=dynamic[1]
+        setMarkers(dynamic[1]);
         markers.shift();
     }
 }
