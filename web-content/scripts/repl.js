@@ -23,8 +23,6 @@ require.config({
     waitSeconds: 15
 });
 
-var markers = [];
-
 var github;
 var selectedSet;
 var selectedGist;
@@ -110,6 +108,7 @@ require([ceylonLang, repl, "github"],
         repl=rrepl;
         ceylonLang=clang;
         repl.setJQuery($);
+        repl.setMarkers([]);
         $(document).ready(function(){
             window.setInterval(repl.setupLiveTypechecker,500);
         });
@@ -958,7 +957,7 @@ function showErrors(errors, print) {
                     repl.getEditorTab(editor.ceylonId).addClass(tabstyle);
                     editor.setGutterMarker(from, 'CodeMirror-error-gutter', img);
                     //This is to modify the style (underline or whatever)
-                    markers.push(editor.markText({line:from,ch:err.from.ch},
+                    repl.markers().push(editor.markText({line:from,ch:err.from.ch},
                                                  {line:to,ch:err.to.ch+1},
                                                  {className:underlineStyle,title:text}));
                 }
