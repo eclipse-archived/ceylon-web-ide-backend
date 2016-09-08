@@ -106,7 +106,7 @@ shared void run()
 }.start {
     SocketAddress {
         address = env(ipVar) else arg("address") 
-                else "127.0.0.1";
+                else "0.0.0.0";
         port = if (exists arg = env(portVar) else arg("port"), 
                    exists port = parseInteger(arg)) 
                 then port 
