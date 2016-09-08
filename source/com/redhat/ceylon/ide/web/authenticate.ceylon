@@ -63,7 +63,7 @@ void authenticate(Request request, Response response) {
             """<html>
                  <body>
                    <script>
-                     if (document.domain != "localhost") {
+                     if (document.domain.endsWith(".ceylon-lang.org")) {
                        document.domain = "ceylon-lang.org";
                      }
                      window.opener.location.reload();

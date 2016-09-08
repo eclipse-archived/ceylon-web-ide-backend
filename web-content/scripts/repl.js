@@ -1,6 +1,6 @@
 //"use strict";
 
-if (document.domain != "localhost") {
+if (document.domain.endsWith(".ceylon-lang.org")) {
     document.domain = "ceylon-lang.org";
 }
 

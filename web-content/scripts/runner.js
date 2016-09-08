@@ -3,7 +3,7 @@
 // The Ceylon version to use for the user code we'll be running
 var ceylonVersion = "1.2.2";
 
-if (document.domain != "localhost") {
+if (document.domain.endsWith(".ceylon-lang.org")) {
     document.domain = "ceylon-lang.org";
 }
 
