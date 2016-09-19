@@ -1,7 +1,7 @@
 //"use strict";
 
 // The Ceylon version to use for the user code we'll be running
-var ceylonVersion = "1.2.2";
+var ceylonVersion = "1.3.0";
 
 if (document.domain.endsWith(".ceylon-lang.org")) {
     document.domain = "ceylon-lang.org";
