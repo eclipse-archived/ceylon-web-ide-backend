@@ -8,4 +8,4 @@ resource=resource
 
 [runtool]
 module=com.redhat.ceylon.ide.web
-
+compile=check
