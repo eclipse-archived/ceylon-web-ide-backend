@@ -3,7 +3,7 @@ import ceylon.json {
     JsonObject=Object,
     JsonArray=Array
 }
-import ceylon.net.http.server {
+import ceylon.http.server {
     Request,
     Response
 }
@@ -34,7 +34,7 @@ void hover(Request request, Response response) {
             }));
     }
     catch (ex) {
-        response.responseStatus = 500;
+        response.status = 500;
         sendJsonResponse(response, 
             JsonArray {
                 "Service error: ``ex.message``"

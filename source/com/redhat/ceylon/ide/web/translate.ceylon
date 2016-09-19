@@ -6,7 +6,7 @@ import ceylon.json {
     JsonObject=Object,
     JsonArray=Array
 }
-import ceylon.net.http.server {
+import ceylon.http.server {
     Request,
     Response
 }
@@ -106,7 +106,7 @@ void translate(Request request, Response response) {
         sendJsonResponse(response, codeOrErrors);
     }
     catch (ex) {
-        response.responseStatus = 500;
+        response.status = 500;
         ex.printStackTrace();
         sendJsonResponse(response, 
             JsonArray {

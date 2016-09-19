@@ -10,18 +10,18 @@ import ceylon.language {
         env=environmentVariableValue
     }
 }
-import ceylon.net.http {
+import ceylon.http.common {
     contentType,
     Header
 }
-import ceylon.net.http.client {
+import ceylon.http.client {
     ClientRequest=Request
 }
-import ceylon.net.http.server {
+import ceylon.http.server {
     Request,
     Response
 }
-import ceylon.net.uri {
+import ceylon.uri {
     parseUri=parse,
     Parameter,
     Uri

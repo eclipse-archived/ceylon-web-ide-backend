@@ -73,7 +73,7 @@ class Autocompleter(String file,
                 if (node.staticMethodReference) {
                     assert (is Tree.StaticMemberOrTypeExpression smte = node.primary);
                     assert (is TypeDeclaration td = smte.declaration);
-                    completions = td.getMatchingMemberDeclarations(unit, scope, prefix, 0);
+                    completions = td.getMatchingMemberDeclarations(unit, scope, prefix, 0, null);
                 }
                 else {
                     Type type;
@@ -88,7 +88,7 @@ class Autocompleter(String file,
                         else {
                             type = t;
                         }
-                        completions = type.declaration.getMatchingMemberDeclarations(unit, scope, prefix, 0);
+                        completions = type.declaration.getMatchingMemberDeclarations(unit, scope, prefix, 0, null);
                     }
                     else {
                         completions = noCompletions;
@@ -103,7 +103,7 @@ class Autocompleter(String file,
             }
             case (is Tree.QualifiedType) {
                 if (exists type = node.outerType.typeModel) {
-                    completions = type.declaration.getMatchingMemberDeclarations(unit, scope, prefix, 0);
+                    completions = type.declaration.getMatchingMemberDeclarations(unit, scope, prefix, 0, null);
                 }
                 else {
                     completions = noCompletions; 

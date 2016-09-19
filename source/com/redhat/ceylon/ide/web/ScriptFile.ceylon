@@ -60,6 +60,17 @@ class ScriptFile satisfies VirtualFile {
         }
     }
     
+    shared actual String? getRelativePath(VirtualFile? ancestor) {
+        if (is ScriptFile ancestor) {
+            if (path == ancestor.path) {
+                return "";
+            } else if (path.startsWith(ancestor.path + "/")) {
+                return path.substring(ancestor.path.size + 1);
+            }
+        }
+        return null;
+    }
+    
     equals(Object obj) 
             => if (is VirtualFile obj) 
             then obj.path==path 
@@ -68,4 +79,5 @@ class ScriptFile satisfies VirtualFile {
     hash => path.hash;
     
     compareTo(VirtualFile o) => -1;
+    
 }

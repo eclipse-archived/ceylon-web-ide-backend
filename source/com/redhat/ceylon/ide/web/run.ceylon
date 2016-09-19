@@ -10,21 +10,21 @@ import ceylon.language {
         arg=namedArgumentValue
     }
 }
-import ceylon.net.http {
+import ceylon.http.common {
     post,
     get,
     contentType,
     contentLength,
     Header
 }
-import ceylon.net.http.server {
+import ceylon.http.server {
     newServer,
     Endpoint,
     startsWith,
     AsynchronousEndpoint,
     isRoot
 }
-import ceylon.net.http.server.endpoints {
+import ceylon.http.server.endpoints {
     serveStaticFile,
     RepositoryEndpoint
 }

@@ -8,11 +8,11 @@ import ceylon.json {
     JsonObject=Object,
     JsonArray=Array
 }
-import ceylon.net.http {
+import ceylon.http.common {
     contentType,
     contentLength
 }
-import ceylon.net.http.server {
+import ceylon.http.server {
     Response
 }
 
