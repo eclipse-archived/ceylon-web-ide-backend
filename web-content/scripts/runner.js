@@ -1,7 +1,22 @@
 //"use strict";
 
 // The Ceylon version to use for the user code we'll be running
-var ceylonVersion = "1.3.0";
+var ceylonVersion = "1.3.1-SNAPSHOT";
+
+var langMod = 'ceylon/language/' + ceylonVersion + '/ceylon.language-' + ceylonVersion;
+
+require.config({
+    baseUrl: "modules",
+    waitSeconds: 15,
+    map: {
+        '*': {
+            'ceylon/language/1.2.0/ceylon.language-1.2.0': langMod,
+            'ceylon/language/1.2.1/ceylon.language-1.2.1': langMod,
+            'ceylon/language/1.2.2/ceylon.language-1.2.2': langMod,
+            'ceylon/language/1.3.0/ceylon.language-1.3.0': langMod
+        }
+    }
+});
 
 if (document.domain.endsWith(".ceylon-lang.org")) {
     document.domain = "ceylon-lang.org";
@@ -33,11 +48,6 @@ if (!pagepath.endsWith("/")) {
     var p = pagepath.lastIndexOf("/");
     pagepath = pagepath.substring(0, p + 1);
 }
-
-require.config({
-    baseUrl: "modules",
-    waitSeconds: 15
-});
 
 var ceylonLang = "ceylon/language/" + ceylonVersion + "/ceylon.language-" + ceylonVersion;
 require([ceylonLang],
