@@ -96,7 +96,8 @@ To deploy the server via the [OpenShift web console][]:
 2. Click __Ceylon__ in the list of cartridge types.
 3. Choose a __Public URL__, `ide`, or whatever you like, enter 
    the __Source Code__ URL
-   <https://github.com/ceylon/ceylon-web-ide-backend.git>,
+   <https://github.com/ceylon/ceylon-web-ide-backend.git>
+   for branch `version-1.3.2-SNAPSHOT`,
    or the URL of your fork of this project.
 4. Click __Create Application__ and wait for the application 
    to be deployed.
