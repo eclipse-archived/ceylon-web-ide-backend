@@ -50,7 +50,11 @@ Simplest with the Ceylon Bootstrap:
 
     ./ceylonb run --compile com.redhat.ceylon.ide.web
 
-Or if you want you can first install the Ceylon [compiler][]
+But the `master` branch most likely uses an unreleased Ceylon distribution
+so compilation/execution might fail with conflicting language version errors.
+
+In that case you can either check out a specific version branch (eg. `version-1.3.2`)
+or if you feel adventurous you can first build the latest version of the Ceylon [compiler][]
 and then compile by going into the `ceylon-web-ide-backend`
 directory, and typing:
 
@@ -68,7 +72,7 @@ To run the server on a different address and port, use:
 
     ceylon run com.redhat.ceylon.ide.web -address=<address> -port=<port>
 
-[compiler]: http://ceylon-lang.org/download
+[compiler]: https://github.com/ceylon/ceylon/blob/master/dist/BUILD.md
 
 ## Running from Ceylon IDE
 
