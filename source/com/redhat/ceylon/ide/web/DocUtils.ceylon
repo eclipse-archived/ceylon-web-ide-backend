@@ -192,7 +192,7 @@ String getSignatureInternal(Declaration declaration) {
         }
     }
     if (is Generic declaration) {
-        value typeParameters = declaration.typeParameters;
+        value typeParameters = (declaration of Generic).typeParameters;
         if (!typeParameters.empty) {
             result.append("&lt;");
             variable value once = true;
