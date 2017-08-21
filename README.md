@@ -53,7 +53,7 @@ Simplest with the Ceylon Bootstrap:
 But the `master` branch most likely uses an unreleased Ceylon distribution
 so compilation/execution might fail with conflicting language version errors.
 
-In that case you can either check out a specific version branch (eg. `version-1.3.2`)
+In that case you can either check out a specific version branch (eg. `version-1.3.3`)
 or if you feel adventurous you can first build the latest version of the Ceylon [compiler][]
 and then compile by going into the `ceylon-web-ide-backend`
 directory, and typing:
@@ -101,7 +101,7 @@ To deploy the server via the [OpenShift web console][]:
 3. Choose a __Public URL__, `ide`, or whatever you like, enter 
    the __Source Code__ URL
    <https://github.com/ceylon/ceylon-web-ide-backend.git>
-   for branch `version-1.3.3-SNAPSHOT`,
+   for branch `version-1.3.3`,
    or the URL of your fork of this project.
 4. Click __Create Application__ and wait for the application 
    to be deployed.

@@ -28,7 +28,7 @@ popd
 set "LIB=%CEYLON_HOME%\lib"
 
 if "%~1" == "--show-home" (
-    echo %CEYLON_HOME%
+    @echo %CEYLON_HOME%
     exit /b 1
 )
 
@@ -54,9 +54,19 @@ if "%ValueValue%" NEQ "" (
     set "JAVA_CURRENT=%KEY_NAME%\%ValueValue%"
 ) else (
     rem Try again for 64bit systems
-    
+
     FOR /F "usebackq skip=2 tokens=3" %%A IN (`REG QUERY "%KEY_NAME2%" /v CurrentVersion 2^>nul`) DO (
         set "JAVA_CURRENT=%KEY_NAME2%\%%A"
+    )
+)
+
+if "%ValueValue%" NEQ "" (
+    set "JAVA_CURRENT=%KEY_NAME%\%ValueValue%"
+) else (
+    rem Try again for 64bit systems from a 32-bit process
+
+    FOR /F "usebackq skip=2 tokens=3" %%A IN (`REG QUERY "%KEY_NAME%" /v CurrentVersion /reg:64 2^>nul`) DO (
+        set "JAVA_CURRENT=%KEY_NAME%\%%A"
     )
 )
 
@@ -69,6 +79,13 @@ if "%JAVA_CURRENT%" == "" (
 :: get the javahome
 FOR /F "usebackq skip=2 tokens=3*" %%A IN (`REG QUERY "%JAVA_CURRENT%" /v JavaHome 2^>nul`) DO (
     set "JAVA_HOME=%%A %%B"
+)
+
+if "%JAVA_HOME%" EQU "" (
+    rem Try again for 64bit systems from a 32-bit process
+    FOR /F "usebackq skip=2 tokens=3*" %%A IN (`REG QUERY "%JAVA_CURRENT%" /v JavaHome /reg:64 2^>nul`) DO (
+        set "JAVA_HOME=%%A %%B"
+    )
 )
 
 :javaend
@@ -87,6 +104,22 @@ if NOT "%PRESERVE_JAVA_OPTS%" == "true" (
     set PREPEND_JAVA_OPTS=%JAVA_DEBUG_OPTS%
     rem Other java opts go here
 )
+
+rem Find any --java options and add their values to JAVA_OPTS
+for %%x in (%*) do (
+    set ARG=%%~x
+    if "!ARG:~0,7!" EQU "--java=" (
+        set OPT=!ARG:~7!
+        set "JAVA_OPTS=!JAVA_OPTS! !OPT!"
+    ) else if "!ARG!" EQU "--java" (
+        @echo Error: use --java options with an equal sign and quotes, eg: "--java=-Xmx500m"
+        exit /b 1
+    ) else if "!ARG:~0,1!" NEQ "-" (
+        goto :breakloop
+    )
+)
+:breakloop
+
 set "JAVA_OPTS=%PREPEND_JAVA_OPTS% %JAVA_OPTS%"
 
 "%JAVA%" ^

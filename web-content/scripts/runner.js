@@ -1,7 +1,7 @@
 //"use strict";
 
 // The Ceylon version to use for the user code we'll be running
-var ceylonVersion = "1.3.3-SNAPSHOT";
+var ceylonVersion = "1.3.3";
 
 var langMod = 'ceylon/language/' + ceylonVersion + '/ceylon.language-' + ceylonVersion;
 
