@@ -1,0 +1,22 @@
+<project name="Ceylon Web IDE" default="update" basedir=".">
+    <property file="build.properties" />
+
+    <property name="overwrite" value="false" />
+
+    <property name="ceylon.dist.dir" value="${basedir}/../ceylon-dist/dist" />
+    <property name="ceylon.lib.dir" value="${ceylon.dist.dir}/lib" />
+    <property name="ceylon.repo.dir" value="${ceylon.dist.dir}/repo" />
+
+    <property name="web.app.dir" value="${basedir}/web-content" />
+    <property name="web.modules.dir" value="${web.app.dir}/scripts/modules" />
+    
+    <target name="update" description="Update the JS files needed for the Web IDE">
+        <copy todir="${web.modules.dir}" overwrite="${overwrite}">
+            <fileset dir="${ceylon.repo.dir}">
+                <include name="ceylon/language/**/*.js" />
+                <include name="ceylon/language/**/*.js.sha1" />
+            </fileset>
+        </copy>
+    </target>
+
+</project>

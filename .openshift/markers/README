@@ -1,0 +1,19 @@
+Markers
+===========
+
+Adding marker files to this directory will have the following effects:
+
+enable_aether - Will add the aether repo to your compilation and run (there is more to it than just adding 
+    `--rep aether`, because we need to tell Maven where to cache stuff so we have to create folders and a
+    `settings.xml` and point to it, so just use this rather than deal with it yourself)
+
+enable_jpda - Will run your application with JPDA enabled on port 8787
+
+force_clean_build - Will remove all previous php pears and start installing
+    required pears from scratch
+
+hot_deploy - Will prevent the apache process from being restarted during
+    build/deployment
+
+disable_auto_scaling - Will prevent scalable applications from scaling up 
+                       or down according to application load.

@@ -1,0 +1,8 @@
+.gradle
+target
+build
+.settings
+.exploded
+modules
+node_modules
+classes

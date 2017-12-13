@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="com.redhat.ceylon.eclipse.ui.launching.ceylonJavaModule">
+<booleanAttribute key="CEYLON_LAUNCH_VERBOSE" value="false"/>
+<stringAttribute key="CEYLON_MODULE" value="com.redhat.ceylon.ide.web/1.0.0"/>
+<stringAttribute key="CEYLON_TOPLEVEL" value="run - default"/>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/web-ide-backend"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="4"/>
+</listAttribute>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="web-ide-backend"/>
+</launchConfiguration>

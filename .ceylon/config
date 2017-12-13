@@ -1,0 +1,11 @@
+
+[defaults]
+encoding=UTF-8
+
+[compiler]
+source=source
+resource=resource
+
+[runtool]
+module=com.redhat.ceylon.ide.web
+compile=check

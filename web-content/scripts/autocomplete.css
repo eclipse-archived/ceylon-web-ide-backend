@@ -1,0 +1,77 @@
+.popup {
+    width: 400px;
+    height: 200px;
+    background: lightyellow;
+    text-shadow: none;
+    overflow: auto;
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-family: Inconsolata, Monaco, Courier, monospace;
+    padding-left:2px;
+    font-size: 14.5px;
+    line-height: 17px;
+    -moz-box-shadow: 0 0 7px grey;
+    -webkit-box-shadow: 0 0 7px grey;
+    box-shadow: 0 0 7px grey;
+}
+
+.help {
+    width: 350px;
+    height: 200px;
+    top: 0px;
+    left: 400px;
+    background: #D0E0FF;
+    text-shadow: none;
+    overflow: auto;
+    color: black;
+    position: absolute;
+    font-family: 'Source Sans Pro', Arial, 'Helvetica Neue', Helvetica, sans-serif;
+    font-size: 13px;
+    padding-left: 2px;
+    resize:both;
+    -moz-box-shadow: 0 0 7px grey;
+    -webkit-box-shadow: 0 0 7px grey;
+    box-shadow: 0 0 7px grey;
+}
+.help p:first-child { 
+    margin-top:0px !important;
+}
+.help pre { 
+    border:none !important; 
+    font-size:100% !important;
+    padding-left:18px;
+}
+.help p code, .help ul code, .help ol code, .help pre code {
+    color: darkblue !important;
+    font-family: Inconsolata, Monaco, Courier, monospace;
+}
+.help pre code.cm-s-ceylon {
+    color:black !important;
+    font-family: Inconsolata, Monaco, Courier, monospace;
+}
+
+.popup > div {
+    white-space: pre;
+}
+.popup > .selected {
+    background: red;
+    color: white;
+}
+.popup > .selected span {
+    color: white;
+}
+.infront {
+    z-index: 200;
+}
+
+.popupWithHelp {
+    overflow: visible;
+    position: absolute;
+    width: 750px;
+    height: 200px;
+}
+.popupWithHelp > input {
+    position: absolute;
+}
